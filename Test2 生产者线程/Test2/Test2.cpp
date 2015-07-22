@@ -37,10 +37,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	double t = (double)cv::getTickCount(); 
 	producer();
+	
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-
-
-
 	cout << vc.WIDTH << "x" << vc.bufferLength << "£º" << t << endl;
 
 	cv::imwrite("result.jpg", s.NowBuffer);

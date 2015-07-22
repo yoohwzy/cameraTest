@@ -52,8 +52,30 @@ int main()
 	double t = (double)cv::getTickCount();
 	// ====================================================
 	// MAIN LOOP
+	//frameindex_t lastPicNr = 0;
+	//while ((lastPicNr = Fg_getLastPicNumberBlockingEx(fg, lastPicNr + 1, mdi.nCamPort, 10, pMem0)) < mdi.MaxPics) {
+	//	if (lastPicNr < 0){
+	//		status = ErrorMessageWait(fg);
+	//		Fg_stopAcquireEx(fg, mdi.nCamPort, pMem0, 0);
+	//		Fg_FreeMemEx(fg, pMem0);
+	//		Fg_FreeGrabber(fg);
+	//		CloseDisplay(nId);
+	//		return status;
+	//	}
+	//	//::DrawBuffer(nId, Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0), (int)lastPicNr, "");
+	//	unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0);
+
+	//	cv::Mat OriginalImage;
+	//	if (mdi.colorType == mdi.GRAY)
+	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
+	//	else
+	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
+	//	s.AddFrame(OriginalImage);
+	//}
 	frameindex_t lastPicNr = 0;
-	while ((lastPicNr = Fg_getLastPicNumberBlockingEx(fg, lastPicNr + 1, mdi.nCamPort, 10, pMem0)) < mdi.MaxPics) {
+	cv::Mat OriginalImage;
+	do{
+		lastPicNr = Fg_getLastPicNumberBlockingEx(fg, lastPicNr + 1, mdi.nCamPort, 10, pMem0);
 		if (lastPicNr < 0){
 			status = ErrorMessageWait(fg);
 			Fg_stopAcquireEx(fg, mdi.nCamPort, pMem0, 0);
@@ -62,29 +84,27 @@ int main()
 			CloseDisplay(nId);
 			return status;
 		}
-		::DrawBuffer(nId, Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0), (int)lastPicNr, "");
 		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0);
 
-		//cv::Mat OriginalImage;
-		//if (mdi.colorType == mdi.GRAY)
-		//	OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
-		//else
-		//	OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
-		//s.AddFrame(OriginalImage, lastPicNr);
-	}
-	// ====================================================
-	// Freeing the grabber resource
-
-	for (size_t i = 0; i < mdi.MaxPics; i++)
-	{
-		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, i, 0, pMem0);
-		cv::Mat OriginalImage;
 		if (mdi.colorType == mdi.GRAY)
 			OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
 		else
 			OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
-		s.AddFrame(OriginalImage, lastPicNr);
-	}
+		s.AddFrame(OriginalImage);
+	} while (!s.AddFrame(OriginalImage));
+	// ====================================================
+	// Freeing the grabber resource
+
+	//for (size_t i = 0; i < mdi.MaxPics; i++)
+	//{
+	//	unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, i, 0, pMem0);
+	//	cv::Mat OriginalImage;
+	//	if (mdi.colorType == mdi.GRAY)
+	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
+	//	else
+	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
+	//	s.AddFrame(OriginalImage, lastPicNr);
+	//}
 
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
