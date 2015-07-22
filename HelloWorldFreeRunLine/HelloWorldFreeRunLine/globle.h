@@ -17,6 +17,8 @@
 #include <string>
 using namespace std;
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
 
 #endif
 
@@ -24,6 +26,7 @@ using namespace std;
 // 则在控制台输出调试信息
 // 函数位于 global.h
 static void OutPutDebugInfo(string info){
+#ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
 		string l = "--------------------------------\n" + info + "\n--------------------------------\n";
@@ -34,4 +37,5 @@ static void OutPutDebugInfo(string info){
 
 		OutputDebugString(lpsz);
 	}
+#endif
 }

@@ -4,29 +4,36 @@
 
 #define CONFIG_FILENAME "anOriginalConfigFileName.mcf"
 
+// 相机参数初始化类，存储相机设定参数，并初始化采集卡与相机
 class MicroDisplayInit
 {
 private:
-
+	static int getNrOfBoards();
+	static int getBoardInfo();
 public:
-	//const char *dllName = "DualLineGray16.dll";
-	const char *dllName = "DualLineRGB30.dll";
+	const char *dllNameGRAY = "DualLineGray16.dll";
+	const char *dllNameRGB = "DualLineRGB30.dll";
 
-	const int nr_of_buffer = 8;			// Number of memory buffer
-	const int nBoard = 0;			// Board Number
-	const int nCamPort = PORT_A;		// Port (PORT_A / PORT_B / PORT_C / PORT_D)
-	const int MaxPics = 10000;		// Number of images to grab
-	int status = 0;
-
+	int nr_of_buffer = 8;			// Number of memory buffer
+	int nBoard = 0;			// Board Number
+	int nCamPort = PORT_A;		// Port (PORT_A / PORT_B / PORT_C / PORT_D)
+	int MaxPics = 10000;		// Number of images to grab
+	int colorType = 0;
+	enum ColorType
+	{
+		GRAY = 0,
+		RGB = 1
+	};
 	// Setting the image size
-	const int width = 4096;
-	const int height = 100;
+	int width = 4096;
+	int height = 1;
 
 
-	static int Init(Fg_Struct **fg, dma_mem **pMem0);
-	static int InitLoad(Fg_Struct **fg, dma_mem **pMem0);//加载配置文件初始化
-	static int InitParameter(Fg_Struct **fg, dma_mem **pMem0);//参数初始化
-	static int CreateDiplay(Fg_Struct **fg, dma_mem **pMem0);//参数初始化
+
+	static int Init(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0);
+	static int InitLoad(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0);//加载配置文件初始化
+	static int InitParameter(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0);//参数初始化
+	static int CreateDiplay(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0);//参数初始化
 
 
 	static int getNoOfBitsFromImageFormat(const int format);
