@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+/HelloWorldFreeRunLine/HelloWorldFreeRunLine.sdf
+/HelloWorldFreeRunLine/Debug
+*.sdf
+/HelloWorldFreeRunLine/Debug/*.exe
+/HelloWorldFreeRunLine/Debug/*.ilk
+/HelloWorldFreeRunLine/Debug/*.pdb
+/HelloWorldFreeRunLine/HelloWorldFreeRunLine/Debug
