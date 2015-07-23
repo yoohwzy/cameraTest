@@ -3,11 +3,7 @@
 #define INCLUDE_ONCE
 #pragma once
 
-//是否输出调试信息
-#define OUTPUT_DEBUG_INFO 1
-#include <Windows.h>
-
-
+//头文件
 #include <fgrab_struct.h>
 #include <fgrab_prototyp.h>
 #include <fgrab_define.h>
@@ -22,9 +18,14 @@ using namespace std;
 
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
+//头文件END
 
-#endif
 
+
+//调试相关
+//是否输出调试信息
+#define OUTPUT_DEBUG_INFO 1
+#include <Windows.h>
 // 若宏定义配置为输出
 // 则在控制台输出调试信息
 // 函数位于 global.h
@@ -42,3 +43,32 @@ static void OutPutDebugInfo(string info){
 	}
 #endif
 }
+
+
+
+
+//全局函数
+static int ErrorMessage(Fg_Struct *fg)
+{
+	int error = Fg_getLastErrorNumber(fg);
+	const char*	err_str = Fg_getLastErrorDescription(fg);
+	fprintf(stderr, "Error: %d : %s\n", error, err_str);
+	return error;
+}
+static int ErrorMessageWait(Fg_Struct *fg)
+{
+	int error = ErrorMessage(fg);
+	printf(" ... press ENTER to continue\n");
+	getchar();
+	return error;
+}
+
+
+
+
+
+
+
+
+
+#endif

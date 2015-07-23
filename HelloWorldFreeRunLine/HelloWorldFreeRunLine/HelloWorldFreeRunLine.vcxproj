@@ -85,19 +85,21 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Class\BufferStorage.h" />
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h" />
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h" />
+    <ClInclude Include="Class\VirtualCamera.h" />
     <ClInclude Include="globle.h" />
-    <ClInclude Include="MicroDisplayInit.h" />
-    <ClInclude Include="MicroDisplayStorage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="VirtualCamera.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Class\BufferStorage.cpp" />
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp" />
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />
+    <ClCompile Include="Class\VirtualCamera.cpp" />
     <ClCompile Include="HelloWorldFreeRunLine.cpp" />
-    <ClCompile Include="MicroDisplayInit.cpp" />
-    <ClCompile Include="MicroDisplayStorage.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="VirtualCamera.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
