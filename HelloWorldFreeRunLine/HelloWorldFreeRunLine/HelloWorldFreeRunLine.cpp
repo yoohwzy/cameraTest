@@ -3,66 +3,19 @@
 
 #include "stdafx.h"
 #include "globle.h"
-#include "MicroDisplayInit.h"
-#include "MicroDisplayStorage.h"
+#include "Class\MicroDisplay\MicroDisplayInit.h"
+#include "Class\MicroDisplay\MicroDisplayControler.h"
+#include "Class\BufferStorage.h"
+#include "Class\VirtualCamera.h"
 #include <thread>
 
 
-MicroDisplayStorage s;
+BufferStorage s;
 int status = 0;
-
-Fg_Struct *fg = 0;
-dma_mem *pMem0 = 0;
 MicroDisplayInit mdi;
+VirtualCamera vc;
 
-
-int ErrorMessage(Fg_Struct *fg)
-{
-	int error = Fg_getLastErrorNumber(fg);
-	const char*	err_str = Fg_getLastErrorDescription(fg);
-	fprintf(stderr, "Error: %d : %s\n", error, err_str);
-	return error;
-}
-int ErrorMessageWait(Fg_Struct *fg)
-{
-	int error = ErrorMessage(fg);
-	printf(" ... press ENTER to continue\n");
-	getchar();
-	return error;
-}
-
-//生产者
-void producer()
-{
-	//MicroDisplayInit::CreateBufferWithDiplay(mdi, &fg, &pMem0);
-	//frameindex_t lastPicNr = 0;
-	//cv::Mat OriginalImage;
-	//do{
-	//	lastPicNr = Fg_getLastPicNumberBlockingEx(fg, lastPicNr + 1, mdi.nCamPort, 10, pMem0);
-	//	if (lastPicNr < 0){
-	//		status = ErrorMessageWait(fg);
-	//		Fg_stopAcquireEx(fg, mdi.nCamPort, pMem0, 0);
-	//		Fg_FreeMemEx(fg, pMem0);
-	//		Fg_FreeGrabber(fg);
-	//		CloseDisplay(nId);
-	//		return;
-	//	}
-	//	unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0);
-
-	//	if (mdi.colorType == mdi.GRAY)
-	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
-	//	else
-	//		OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
-	//} while (!s.AddFrame(OriginalImage));
-	//Fg_stopAcquireEx(fg, mdi.nCamPort, pMem0, 0);
-	//Fg_FreeMemEx(fg, pMem0);
-	//Fg_FreeGrabber(fg);
-	//CloseDisplay(nId);
-}
-
-
-
-
+const bool USING_VIRTUAL_CAMERA = false;//是否使用虚拟摄像头 1使用 0用E2V
 
 int main()
 {
@@ -70,23 +23,36 @@ int main()
 	mdi.width = 4096;
 	mdi.height = 1;
 	mdi.MaxPics = 10000;//采集多少帧图像
-	
-	s = MicroDisplayStorage(mdi.width, mdi.MaxPics);
-	//初始化采集卡
-	status = MicroDisplayInit::InitParameter(mdi, &fg, &pMem0);
-	if (status < 0)
+	s = BufferStorage(mdi.width, mdi.MaxPics);
+
+	if (!USING_VIRTUAL_CAMERA)
 	{
-		ErrorMessageWait(fg);
-		return -1;
+		//初始化采集卡
+		status = MicroDisplayInit::InitParameter(mdi);
+		if (status < 0)
+		{
+			ErrorMessageWait(mdi.fg);
+			return -1;
+		}
+		//MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+		MicroDisplayInit::CreateBufferWithDiplay(mdi);
 	}
-	MicroDisplayInit::CreateBufferWithOutDiplay(mdi, &fg, &pMem0);
-	//MicroDisplayInit::CreateBufferWithDiplay(mdi, &fg, &pMem0);
+	else
+	{
+		//初始化虚拟相机
+		vc = VirtualCamera(mdi);
+	}
+
+
+
 
 	int grabbingIndex = 0;
 	//主循环
 	while (true)
 	{
 		grabbingIndex += 1;
+		if (grabbingIndex > 1000) grabbingIndex = 1;
+
 		char input;
 		std::cout << "输入1开始采图，q退出：";
 		do{
@@ -100,41 +66,32 @@ int main()
 
 		//初始化缓存
 		s.Start();
-		if (MicroDisplayInit::StartGrabbing(mdi, &fg, &pMem0) < 0)
-		{
-			ErrorMessageWait(fg);
-			return -1;
-		}
 
 
 		double t = (double)cv::getTickCount();
 
-		frameindex_t lastPicNr = 0;
-		cv::Mat OriginalImage;
-		do{
-			lastPicNr = Fg_getLastPicNumberBlockingEx(fg, lastPicNr + 1, mdi.nCamPort, 100, pMem0);
-			if (lastPicNr < 0){
-				status = ErrorMessageWait(fg);
-				Fg_stopAcquireEx(fg, mdi.nCamPort, pMem0, 0);
-				Fg_FreeMemEx(fg, pMem0);
-				Fg_FreeGrabber(fg);
-				CloseDisplay(mdi.nId);
-				return 0;
+		if (!USING_VIRTUAL_CAMERA)
+		{
+			if (MicroDisplayControler::FreeRunning(mdi, s) < 0)
+			{
+				ErrorMessageWait(mdi.fg);
+				return -1;
 			}
-			unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0);
-			if (mdi.nId != -1)
-				::DrawBuffer(mdi.nId, Fg_getImagePtrEx(fg, lastPicNr, 0, pMem0), (int)lastPicNr, "");
-			if (mdi.colorType == mdi.GRAY)
-				OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8U, bytePtr);
-			else
-				OriginalImage = cv::Mat(mdi.height, mdi.width, CV_8UC3, bytePtr);
-		} while (!s.AddFrame(OriginalImage));
-		MicroDisplayInit::EndGrabbing(mdi, &fg, &pMem0);
-
-
-
+		}
+		else
+		{
+			vc.FreeRunning(mdi, s);
+		}
+		//采样计时
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
+		//重新开始计时
+		t = (double)cv::getTickCount();
+
+		//处理算法
+
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		cout << "处理用时：" << t << endl;
 
 		string p1;
 		stringstream ss1;
@@ -148,9 +105,7 @@ int main()
 		//cv::imwrite("result1.jpg", s.NowBufferGray);
 		cv::imwrite(p2, s.NowBufferImg);
 	}
-	Fg_FreeMemEx(fg, pMem0);
-	Fg_FreeGrabber(fg);
-	CloseDisplay(mdi.nId);
+	MicroDisplayInit::Release(mdi);
 	return 0;
 }
 

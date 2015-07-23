@@ -9,9 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Class">
+      <UniqueIdentifier>{55734919-3e7a-4bca-93c6-09deca286e0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\MicroDisplay">
+      <UniqueIdentifier>{28ee091e-008b-4e59-891b-4747e32cd4b8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,17 +26,20 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MicroDisplayInit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="globle.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MicroDisplayStorage.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h">
+      <Filter>Class\MicroDisplay</Filter>
     </ClInclude>
-    <ClInclude Include="VirtualCamera.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\VirtualCamera.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\BufferStorage.h">
+      <Filter>Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -44,14 +49,17 @@
     <ClCompile Include="HelloWorldFreeRunLine.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MicroDisplayInit.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp">
+      <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
-    <ClCompile Include="MicroDisplayStorage.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp">
+      <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
-    <ClCompile Include="VirtualCamera.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Class\VirtualCamera.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BufferStorage.cpp">
+      <Filter>Class</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
