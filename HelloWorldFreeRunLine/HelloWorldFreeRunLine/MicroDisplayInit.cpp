@@ -106,14 +106,9 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi, Fg_Struct **fg, dma_m
 	return status;
 }
 
-// Creating a display window for image output
-int MicroDisplayInit::CreateDiplay(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0)
+void MicroDisplayInit::CreateBufferWithDiplay(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0)
 {
-	int status = 0;
-
 	char debugInfo[256];
-
-
 
 	int format = 0;
 	Fg_getParameter((*fg), FG_FORMAT, &format, mdi.nCamPort);
@@ -129,14 +124,43 @@ int MicroDisplayInit::CreateDiplay(MicroDisplayInit& mdi, Fg_Struct **fg, dma_me
 	// Creating a display window for image output
 	int Bits = getNoOfBitsFromImageFormat(format);
 
-	int nId = ::CreateDisplay(Bits, mdi.width, mdi.height);
-	SetBufferWidth(nId, mdi.width, mdi.height);
+	mdi.nId = ::CreateDisplay(Bits, mdi.width, mdi.height);
+	SetBufferWidth(mdi.nId, mdi.width, mdi.height);
+}
+void MicroDisplayInit::CreateBufferWithOutDiplay(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0)
+{
+	MicroDisplayInit::CreateBufferWithDiplay(mdi, fg, pMem0);
+	CloseDisplay(mdi.nId);
+	mdi.nId = -1;
+}
 
+
+
+
+int MicroDisplayInit::StartGrabbing(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0)
+{
+	int status = 0;
 	if ((Fg_AcquireEx((*fg), mdi.nCamPort, GRAB_INFINITE, ACQ_STANDARD, (*pMem0))) < 0){
 		return status;
 	}
-	return status;
+	return 0;
 }
+void MicroDisplayInit::EndGrabbing(MicroDisplayInit& mdi, Fg_Struct **fg, dma_mem **pMem0)
+{
+	Fg_stopAcquireEx((*fg), mdi.nCamPort, (*pMem0), 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 // returns the bit with according to the selected image format
 int MicroDisplayInit::getNoOfBitsFromImageFormat(const int format)

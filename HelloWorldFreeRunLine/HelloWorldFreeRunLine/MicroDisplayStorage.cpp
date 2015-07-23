@@ -18,7 +18,8 @@ MicroDisplayStorage::~MicroDisplayStorage()
 }
 void MicroDisplayStorage::Start()
 {
-	EndFlag = false;
+	EndReadFlag = false;
+	EndWriteFlag = false;
 	BufferWriteIndex = 0;
 	BufferReadIndex = 0;
 	if (bufferIndex % 2 == 0)
@@ -40,12 +41,12 @@ void MicroDisplayStorage::Start()
 		Buffer1Gray.release();
 		Buffer1Gray = cv::Mat(LENGTH, WIDTH, CV_8U, cv::Scalar(0));
 		Buffer1Img.release();
-		Buffer1Img = cv::Mat(LENGTH, WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
+		Buffer1Img = cv::Mat(LENGTH + 10, WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
 		NowBuffer = Buffer1;
 		NowBufferGray = Buffer1Gray;
 		NowBufferImg = Buffer1Img;
 	}
-	++bufferIndex;
+	bufferIndex  = 1 + bufferIndex;
 }
 bool MicroDisplayStorage::AddFrame(cv::Mat& frame)
 {
@@ -64,6 +65,15 @@ bool MicroDisplayStorage::AddFrame(cv::Mat& frame)
 	oneFrame = NowBufferGray(cv::Rect(0, BufferWriteIndex, WIDTH, 1));
 	oneFrame += frameGray;
 
+	//double speed = 0.68;
+	//int temp = int(speed*(BufferWriteIndex - 1) + 0.5);
+	//int BufferWriteIndex2 = int(speed*BufferWriteIndex + 0.5);
+	//if (BufferWriteIndex2 != temp)
+	//{
+	//	oneFrame = NowBufferImg(cv::Rect(0, BufferWriteIndex2, WIDTH, 1));
+	//	oneFrame += frame;
+	//}
+
 	oneFrame = NowBufferImg(cv::Rect(0, BufferWriteIndex, WIDTH, 1));
 	oneFrame += frame;
 	oneFrame = NowBufferImg(cv::Rect(0, BufferWriteIndex + 1, WIDTH, 1));
@@ -75,7 +85,10 @@ bool MicroDisplayStorage::AddFrame(cv::Mat& frame)
 	//指向下一条缓冲
 	++BufferWriteIndex;
 	if (BufferWriteIndex >= LENGTH)
+	{
+		EndWriteFlag = true;
 		return true;
+	}
 	return false;
 }
 bool MicroDisplayStorage::AddFrame(cv::Mat& frame,int i)
@@ -106,7 +119,10 @@ bool MicroDisplayStorage::AddFrame(cv::Mat& frame,int i)
 	//指向下一条缓冲
 	++i;
 	if (i >= LENGTH)
+	{
+		EndWriteFlag = true;
 		return true;
+	}
 	return false;
 }
 
@@ -118,7 +134,7 @@ int MicroDisplayStorage::GetFrame(cv::Mat& frame)
 
 	if (BufferReadIndex >= LENGTH)
 	{
-		EndFlag = true;
+		EndReadFlag = true;
 		return 0;
 	}
 
@@ -126,7 +142,7 @@ int MicroDisplayStorage::GetFrame(cv::Mat& frame)
 
 	if (BufferReadIndex >= LENGTH)
 	{
-		EndFlag = true;
+		EndReadFlag = true;
 		return 0;
 	}
 

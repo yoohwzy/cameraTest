@@ -15,6 +15,9 @@
 
 
 #include <string>
+#include <iostream>
+#include <fstream>
+
 using namespace std;
 
 #include <opencv2/opencv.hpp>
