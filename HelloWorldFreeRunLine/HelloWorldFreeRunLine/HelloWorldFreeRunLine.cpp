@@ -15,7 +15,7 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
+const bool USING_VIRTUAL_CAMERA = false;//是否使用虚拟摄像头 1使用 0用E2V
 
 int main()
 {
