@@ -15,11 +15,7 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-<<<<<<< HEAD
-const bool USING_VIRTUAL_CAMERA = false;//是否使用虚拟摄像头 1使用 0用E2V
-=======
-const int USING_VIRTUAL_CAMERA = 1;//是否使用虚拟摄像头
->>>>>>> bf7d178fc64e70f6838b90186d71fbcb666d6cc4
+const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
 
 int main()
 {
@@ -30,7 +26,6 @@ int main()
 	s = BufferStorage(mdi.width, mdi.MaxPics);
 
 	if (!USING_VIRTUAL_CAMERA)
-<<<<<<< HEAD
 	{
 		//初始化采集卡
 		status = MicroDisplayInit::InitParameter(mdi);
@@ -47,24 +42,6 @@ int main()
 		//初始化虚拟相机
 		vc = VirtualCamera(mdi);
 	}
-=======
-	{
-		//初始化采集卡
-		status = MicroDisplayInit::InitParameter(mdi);
-		if (status < 0)
-		{
-			ErrorMessageWait(mdi.fg);
-			return -1;
-		}
-		//MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
-		MicroDisplayInit::CreateBufferWithDiplay(mdi);
-	}
-	else
-	{
-		//初始化虚拟相机
-		vc = VirtualCamera(mdi);
-	}
->>>>>>> bf7d178fc64e70f6838b90186d71fbcb666d6cc4
 
 
 
@@ -105,14 +82,11 @@ int main()
 		{
 			vc.FreeRunning(mdi, s);
 		}
-<<<<<<< HEAD
 		//采样计时
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
 		//重新开始计时
 		t = (double)cv::getTickCount();
-=======
->>>>>>> bf7d178fc64e70f6838b90186d71fbcb666d6cc4
 
 		//处理算法
 
