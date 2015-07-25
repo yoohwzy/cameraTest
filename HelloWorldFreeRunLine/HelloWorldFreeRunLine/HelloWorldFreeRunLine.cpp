@@ -15,7 +15,100 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-const bool USING_VIRTUAL_CAMERA = false;//是否使用虚拟摄像头 1使用 0用E2V
+const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
+
+bool producerEndFlag = false, customerEndFlag = false;
+//生产者
+void producer()
+{
+	double t = (double)cv::getTickCount();
+
+	if (!USING_VIRTUAL_CAMERA)
+	{
+		if (MicroDisplayControler::FreeRunning(mdi, s) < 0)
+		{
+			ErrorMessageWait(mdi.fg);
+			return;
+		}
+	}
+	else
+	{
+		vc.FreeRunning(mdi, s);
+	}
+	//采样计时
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
+
+	//标记生产者工作结束
+	producerEndFlag = true;
+}
+//消费者
+void customer()
+{
+	//开始计时
+	double t = (double)cv::getTickCount();
+
+	//处理算法
+
+	//到了第几行
+	int i = 0;
+	//状态标记0表示结束，-1表示需要等待下一帧写入
+	int flag = 0;
+	do{
+		cv::Mat oneLine;
+		flag = s.GetFrame(oneLine);
+		if (flag == -1)
+		{
+			Sleep(1);
+			continue;
+		}
+		if (flag == 0)
+			break;
+
+		//检测算法
+		cv::Mat oneLineGray;
+		cv::cvtColor(oneLine, oneLineGray, CV_BGR2GRAY);
+
+		int elementCount = mdi.width;//每行元素数
+		uchar* linehead = oneLineGray.ptr<uchar>(0);//每行的起始地址
+		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+		int left = -1;//左边瓷砖
+		if (linehead[0] > 180)left = 0;
+		for (int j = 20; j < 700; j++)
+		{
+			int leftsum = 0;
+			for (size_t ii = j; ii > j - 20; ii--)
+			{
+				leftsum += linehead[ii];
+			}
+			int rightsum = 0;
+			for (size_t ii = j + 1; ii <= j + 20; ii++)
+			{
+				rightsum += linehead[ii];
+			}
+			if ((rightsum - leftsum) > 20 * 5)
+			{
+				left = j;
+			}
+		}
+		if (left >= 0)
+		{
+			lineheadRGB[left * 3 + 0] = 0;
+			lineheadRGB[left * 3 + 1] = 255;
+			lineheadRGB[left * 3 + 2] = 0;
+		}
+		i++;
+	} while (flag != 0);
+
+
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "处理用时：" << t << endl;
+
+
+	//标记消费者工作结束
+	customerEndFlag = true;
+}
 
 int main()
 {
@@ -23,7 +116,7 @@ int main()
 	mdi.width = 4096;
 	mdi.height = 1;
 	mdi.MaxPics = 10000;//采集多少帧图像
-	s = BufferStorage(mdi.width, mdi.MaxPics);
+	s = BufferStorage(mdi);
 
 	if (!USING_VIRTUAL_CAMERA)
 	{
@@ -40,7 +133,7 @@ int main()
 	else
 	{
 		//初始化虚拟相机
-		vc = VirtualCamera(mdi);
+		vc = VirtualCamera(mdi, "样品2_o.jpg");
 	}
 
 
@@ -48,64 +141,89 @@ int main()
 
 	int grabbingIndex = 0;
 	//主循环
-	while (true)
-	{
-		grabbingIndex += 1;
-		if (grabbingIndex > 1000) grabbingIndex = 1;
-
-		char input;
-		std::cout << "输入1开始采图，q退出：";
-		do{
-			input = getchar();
-			if (input == 'q')
-				return 0;
-			Sleep(10);
-		} while (input != '1');
-
-		//触发
-
-		//初始化缓存
-		s.Start();
-
-
-		double t = (double)cv::getTickCount();
-
-		if (!USING_VIRTUAL_CAMERA)
+	string input;
+	do{
+		std::cout << "输入1开始采图，2拍摄光照矫正样张，q退出：";
+		std::cin >> input;
+		
+		if (input == "1")
 		{
-			if (MicroDisplayControler::FreeRunning(mdi, s) < 0)
+			grabbingIndex += 1;
+			if (grabbingIndex > 1000) grabbingIndex = 1;
+
+			//触发
+
+			//初始化缓存
+			s.Start();
+
+			std::thread t1(producer);
+			t1.join();
+
+			std::thread t2(customer);
+			t2.join();
+
+			//等待两个线程处理完毕
+			while (!customerEndFlag || !producerEndFlag)
 			{
-				ErrorMessageWait(mdi.fg);
-				return -1;
+				Sleep(10);
 			}
+
+			string p1;
+			stringstream ss1;
+			ss1 << "samples/result" << grabbingIndex << "_o.jpg";
+			ss1 >> p1;
+			string p2;
+			stringstream ss2;
+			ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
+			ss2 >> p2;
+			cv::imwrite(p1, s.NowBuffer);
+			//cv::imwrite("result1.jpg", s.NowBufferGray);
+			cv::imwrite(p2, s.NowBufferImg);
+		}
+		if (input == "2")
+		{
+			//采样矫正图像
+			MicroDisplayInit mditmp;
+			mditmp.MaxPics = 10;
+			mditmp.colorType = mdi.colorType;
+			mditmp.width = mdi.width;
+			mditmp.height = mdi.height;
+			VirtualCamera vctmp = VirtualCamera(mditmp, "光照校正_o.jpg");
+			BufferStorage stmp = BufferStorage(mditmp);
+			stmp.Start();
+			if (!USING_VIRTUAL_CAMERA)
+			{
+				if (MicroDisplayControler::FreeRunning(mditmp, stmp) < 0)
+				{
+					ErrorMessageWait(mditmp.fg);
+					return 0;
+				}
+			}
+			else
+			{
+				vctmp.FreeRunning(mditmp, stmp);
+			}
+			//cv::Mat img = stmp.NowBufferImg;
+
+			//X - 样本，矫正时直接相加即可
+			cv::Mat SamplesRGBTMP = stmp.NowBufferImg(cv::Rect(0, 2, mditmp.width, 1)).clone() / 3;
+			cv::imwrite("samples/光照校正样本.jpg", SamplesRGBTMP);
+			//RGB
+			cv::Mat SamplesRGB = cv::Mat(mditmp.height, mditmp.width, CV_8UC3, cv::Scalar(50, 50, 50));
+			SamplesRGB = SamplesRGB - SamplesRGBTMP;
+			SamplesRGB.copyTo(mdi.SamplesRGB);
+			//Gray
+			cv::cvtColor(SamplesRGB, mdi.SamplesGray, CV_BGR2GRAY);
+			cv::Mat SamplesGray = mdi.SamplesGray;
+			std::cout << "OK\r\n";
+
+			//重新初始化缓存
+			s = BufferStorage(mdi);
 		}
 		else
-		{
-			vc.FreeRunning(mdi, s);
-		}
-		//采样计时
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
-		//重新开始计时
-		t = (double)cv::getTickCount();
+			Sleep(10);
+	} while (input != "q");
 
-		//处理算法
-
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		cout << "处理用时：" << t << endl;
-
-		string p1;
-		stringstream ss1;
-		ss1 << "samples/result" << grabbingIndex << "_o.jpg";
-		ss1 >> p1;
-		string p2;
-		stringstream ss2;
-		ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
-		ss2 >> p2;
-		cv::imwrite(p1, s.NowBuffer);
-		//cv::imwrite("result1.jpg", s.NowBufferGray);
-		cv::imwrite(p2, s.NowBufferImg);
-	}
 	MicroDisplayInit::Release(mdi);
 	return 0;
 }
-

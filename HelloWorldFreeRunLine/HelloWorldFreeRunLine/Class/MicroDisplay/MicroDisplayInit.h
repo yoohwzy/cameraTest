@@ -35,9 +35,10 @@ public:
 	};
 	// Setting the image size
 	int width = 4096;
-	int height = 1;
+	int height = 10;
 
-
+	cv::Mat SamplesGray;
+	cv::Mat SamplesRGB;
 
 	static int Init(MicroDisplayInit& mdi);
 	//加载配置文件初始化

@@ -2,8 +2,8 @@
 
 int MicroDisplayControler::StartGrabbing(MicroDisplayInit& mdi)
 {
-	int status = 0;
-	if ((Fg_AcquireEx(mdi.fg, mdi.nCamPort, GRAB_INFINITE, ACQ_STANDARD, mdi.pMem0)) < 0){
+	int status = Fg_AcquireEx(mdi.fg, mdi.nCamPort, GRAB_INFINITE, ACQ_STANDARD, mdi.pMem0);
+	if (status < 0){
 		return status;
 	}
 	return 0;
