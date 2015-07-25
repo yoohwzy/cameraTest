@@ -41,3 +41,7 @@
 /HelloWorldFreeRunLine/HelloWorldFreeRunLine/Release
 /HelloWorldFreeRunLine/dbghelp.pdb
 /HelloWorldFreeRunLine/*.opensdf
+/Test2 生产者线程/Test2/Release
+/Test2 生产者线程/Test2/Debug
+/Test1 生产者&消费者双线程/Test1/Release
+/Test1 生产者&消费者双线程/Test1/Debug
