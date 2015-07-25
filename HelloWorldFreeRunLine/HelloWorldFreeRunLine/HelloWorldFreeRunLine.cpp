@@ -55,8 +55,8 @@ void customer()
 	//状态标记0表示结束，-1表示需要等待下一帧写入
 	int flag = 0;
 	do{
-		cv::Mat oneLine;
-		flag = s.GetFrame(oneLine);
+		cv::Mat f;
+		flag = s.GetFrame(f);
 		if (flag == -1)
 		{
 			Sleep(1);
@@ -66,6 +66,7 @@ void customer()
 			break;
 
 		//检测算法
+		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
 		cv::Mat oneLineGray;
 		cv::cvtColor(oneLine, oneLineGray, CV_BGR2GRAY);
 
@@ -74,6 +75,7 @@ void customer()
 		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
 		int left = -1;//左边瓷砖
 		if (linehead[0] > 180)left = 0;
+		int leftdiffer = 0;
 		for (int j = 20; j < 700; j++)
 		{
 			int leftsum = 0;
@@ -86,17 +88,49 @@ void customer()
 			{
 				rightsum += linehead[ii];
 			}
-			if ((rightsum - leftsum) > 20 * 5)
+
+			if ((rightsum - leftsum) > 20 * 10 && (rightsum - leftsum) > leftdiffer)
 			{
+				leftdiffer = (rightsum - leftsum);
 				left = j;
 			}
 		}
 		if (left >= 0)
 		{
 			lineheadRGB[left * 3 + 0] = 0;
-			lineheadRGB[left * 3 + 1] = 255;
-			lineheadRGB[left * 3 + 2] = 0;
+			lineheadRGB[left * 3 + 1] = 0;
+			lineheadRGB[left * 3 + 2] = 255;
 		}
+
+		int right = -1;//右边瓷砖
+		if (linehead[elementCount - 1] > 180)right = 0;
+		int rightdiffer = 0;
+		for (int j = elementCount - 20; j > elementCount - 720; j--)
+		{
+			int leftsum = 0;
+			for (size_t ii = j; ii > j - 20; ii--)
+			{
+				leftsum += linehead[ii];
+			}
+			int rightsum = 0;
+			for (size_t ii = j + 1; ii <= j + 20; ii++)
+			{
+				rightsum += linehead[ii];
+			}
+
+			if ((leftsum - rightsum) > 20 * 5 && (leftsum - rightsum) > rightdiffer)
+			{
+				rightdiffer = (leftsum - rightsum);
+				right = j;
+			}
+		}
+		if (right >= 0)
+		{
+			lineheadRGB[right * 3 + 0] = 0;
+			lineheadRGB[right * 3 + 1] = 255;
+			lineheadRGB[right * 3 + 2] = 0;
+		}
+
 		i++;
 	} while (flag != 0);
 
