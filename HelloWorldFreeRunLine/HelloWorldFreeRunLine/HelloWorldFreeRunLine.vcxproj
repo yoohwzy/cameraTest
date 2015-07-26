@@ -87,6 +87,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
     <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h" />
     <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h" />
@@ -96,6 +97,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />

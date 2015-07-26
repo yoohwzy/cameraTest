@@ -35,6 +35,7 @@ public:
 	cv::Mat NowBufferImg;
 
 	bool EndReadFlag = false;
+	//为true时表示拍摄完成
 	bool EndWriteFlag = false;
 
 	//开始新一轮采集，设置Read/Write Index = 0;

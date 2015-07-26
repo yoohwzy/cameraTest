@@ -7,6 +7,7 @@
 #include "Class\MicroDisplay\MicroDisplayControler.h"
 #include "Class\BufferStorage.h"
 #include "Class\VirtualCamera.h"
+#include "Class\BlocksDetector.h"
 #include <thread>
 
 
@@ -18,6 +19,8 @@ VirtualCamera vc;
 const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
 
 bool producerEndFlag = false, customerEndFlag = false;
+
+
 //生产者
 void producer()
 {
@@ -42,6 +45,119 @@ void producer()
 	//标记生产者工作结束
 	producerEndFlag = true;
 }
+void customerWork1()
+{
+
+	double t = (double)cv::getTickCount();
+
+	vector<int> leftEdgeX;
+	map<int, int> leftEdgeY;
+	vector<int> rightEdgeX;
+	map<int, int> rightEdgeY;
+	const int linespan = 200;
+
+	for (size_t i = 0; i < mdi.MaxPics; i += linespan)
+	{
+		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
+		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
+		if (x1 >= 0 || x2 >= 0)
+		{
+			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+			if (x1 >= 0)
+			{
+				lineheadRGB[x1 * 3 + 0] = 0;
+				lineheadRGB[x1 * 3 + 1] = 0;
+				lineheadRGB[x1 * 3 + 2] = 255;
+				leftEdgeX.push_back(i);
+				leftEdgeY.insert({ i, x1 });
+			}
+			if (x2 >= 0)
+			{
+				lineheadRGB[x2 * 3 + 0] = 255;
+				lineheadRGB[x2 * 3 + 1] = 0;
+				lineheadRGB[x2 * 3 + 2] = 0;
+				rightEdgeX.push_back(i);
+				rightEdgeY.insert({ i, x2 });
+			}
+		}
+	}
+	int leftfirst = leftEdgeX[0], leftlast = leftEdgeX[leftEdgeX.size() - 1];
+	//左边找头
+	for (size_t i = (leftfirst > linespan) ? (leftfirst - linespan) : 0; i < leftfirst; i++)
+	{
+		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
+		if (x1 >= 0)
+		{
+			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+			lineheadRGB[x1 * 3 + 0] = 0;
+			lineheadRGB[x1 * 3 + 1] = 0;
+			lineheadRGB[x1 * 3 + 2] = 255;
+			leftEdgeX.push_back(i);
+			leftEdgeY.insert({ i, x1 });
+		}
+	}
+	//左边找尾
+	int tmp = (leftlast + linespan) > mdi.MaxPics ? (mdi.MaxPics - 1) : (leftlast + linespan);
+	for (size_t i = leftlast + 1; i < tmp; i++)
+	{
+		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
+		if (x1 >= 0)
+		{
+			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
+			lineheadRGB[x1 * 3 + 0] = 0;
+			lineheadRGB[x1 * 3 + 1] = 0;
+			lineheadRGB[x1 * 3 + 2] = 255;
+			leftEdgeX.push_back(i);
+			leftEdgeY.insert({ i, x1 });
+		}
+	}
+
+
+	int rightfirst = rightEdgeX[0], rightlast = rightEdgeX[rightEdgeX.size() - 1];
+	//右边找头
+	for (size_t i = (rightfirst > linespan) ? (rightfirst - linespan) : 0; i < rightfirst; i++)
+	{
+		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
+		if (x2 >= 0)
+		{
+			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+			lineheadRGB[x2 * 3 + 0] = 255;
+			lineheadRGB[x2 * 3 + 1] = 0;
+			lineheadRGB[x2 * 3 + 2] = 0;
+			rightEdgeX.push_back(i);
+			rightEdgeY.insert({ i, x2 });
+		}
+	}
+	//右边找尾
+	int tmp2 = (rightlast + linespan) > mdi.MaxPics ? (mdi.MaxPics - 1) : (rightlast + linespan);
+	for (size_t i = rightlast + 1; i < tmp2; i++)
+	{
+		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
+		if (x2 >= 0)
+		{
+			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
+			lineheadRGB[x2 * 3 + 0] = 255;
+			lineheadRGB[x2 * 3 + 1] = 0;
+			lineheadRGB[x2 * 3 + 2] = 0;
+			rightEdgeX.push_back(i);
+			rightEdgeY.insert({ i, x2 });
+		}
+	}
+
+	sort(leftEdgeX.begin(), leftEdgeX.end());
+	sort(rightEdgeX.begin(), rightEdgeX.end());
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "非并行处理用时：" << t << endl;
+
+}
 //消费者
 void customer()
 {
@@ -55,6 +171,8 @@ void customer()
 	//状态标记0表示结束，-1表示需要等待下一帧写入
 	int flag = 0;
 	do{
+		if (s.EndWriteFlag)
+			break;
 		cv::Mat f;
 		flag = s.GetFrame(f);
 		if (flag == -1)
@@ -67,78 +185,32 @@ void customer()
 
 		//检测算法
 		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-		cv::Mat oneLineGray;
-		cv::cvtColor(oneLine, oneLineGray, CV_BGR2GRAY);
-
 		int elementCount = mdi.width;//每行元素数
-		uchar* linehead = oneLineGray.ptr<uchar>(0);//每行的起始地址
 		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-		int left = -1;//左边瓷砖
-		if (linehead[0] > 180)left = 0;
-		int leftdiffer = 0;
-		for (int j = 20; j < 700; j++)
-		{
-			int leftsum = 0;
-			for (size_t ii = j; ii > j - 20; ii--)
-			{
-				leftsum += linehead[ii];
-			}
-			int rightsum = 0;
-			for (size_t ii = j + 1; ii <= j + 20; ii++)
-			{
-				rightsum += linehead[ii];
-			}
 
-			if ((rightsum - leftsum) > 20 * 10 && (rightsum - leftsum) > leftdiffer)
-			{
-				leftdiffer = (rightsum - leftsum);
-				left = j;
-			}
-		}
-		if (left >= 0)
+		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
+		if (x1 >= 0)
 		{
-			lineheadRGB[left * 3 + 0] = 0;
-			lineheadRGB[left * 3 + 1] = 0;
-			lineheadRGB[left * 3 + 2] = 255;
+			lineheadRGB[x1 * 3 + 0] = 0;
+			lineheadRGB[x1 * 3 + 1] = 0;
+			lineheadRGB[x1 * 3 + 2] = 255;
 		}
-
-		int right = -1;//右边瓷砖
-		if (linehead[elementCount - 1] > 180)right = 0;
-		int rightdiffer = 0;
-		for (int j = elementCount - 20; j > elementCount - 720; j--)
+		int x2 = BlocksDetector::GetEdgeRight(i, elementCount - 400, s);
+		if (x2 >= 0)
 		{
-			int leftsum = 0;
-			for (size_t ii = j; ii > j - 20; ii--)
-			{
-				leftsum += linehead[ii];
-			}
-			int rightsum = 0;
-			for (size_t ii = j + 1; ii <= j + 20; ii++)
-			{
-				rightsum += linehead[ii];
-			}
-
-			if ((leftsum - rightsum) > 20 * 5 && (leftsum - rightsum) > rightdiffer)
-			{
-				rightdiffer = (leftsum - rightsum);
-				right = j;
-			}
+			lineheadRGB[x2 * 3 + 0] = 255;
+			lineheadRGB[x2 * 3 + 1] = 0;
+			lineheadRGB[x2 * 3 + 2] = 0;
 		}
-		if (right >= 0)
-		{
-			lineheadRGB[right * 3 + 0] = 0;
-			lineheadRGB[right * 3 + 1] = 255;
-			lineheadRGB[right * 3 + 2] = 0;
-		}
-
 		i++;
 	} while (flag != 0);
-
-
-
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "处理用时：" << t << endl;
+	cout << "并行处理用时：" << t << endl;
 
+
+
+
+	customerWork1();
 
 	//标记消费者工作结束
 	customerEndFlag = true;

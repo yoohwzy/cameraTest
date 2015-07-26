@@ -41,6 +41,9 @@
     <ClInclude Include="Class\BufferStorage.h">
       <Filter>Class</Filter>
     </ClInclude>
+    <ClInclude Include="Class\BlocksDetector.h">
+      <Filter>Class</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -56,6 +59,9 @@
       <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
     <ClCompile Include="Class\VirtualCamera.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BlocksDetector.cpp">
       <Filter>Class</Filter>
     </ClCompile>
     <ClCompile Include="Class\BufferStorage.cpp">
