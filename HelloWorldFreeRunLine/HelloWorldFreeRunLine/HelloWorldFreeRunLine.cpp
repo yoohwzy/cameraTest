@@ -40,177 +40,74 @@ void producer()
 	}
 	//采样计时
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
+	std::cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
 
 	//标记生产者工作结束
 	producerEndFlag = true;
 }
-void customerWork1()
-{
-
-	double t = (double)cv::getTickCount();
-
-	vector<int> leftEdgeX;
-	map<int, int> leftEdgeY;
-	vector<int> rightEdgeX;
-	map<int, int> rightEdgeY;
-	const int linespan = 200;
-
-	for (size_t i = 0; i < mdi.MaxPics; i += linespan)
-	{
-		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
-		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
-		if (x1 >= 0 || x2 >= 0)
-		{
-			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-			if (x1 >= 0)
-			{
-				lineheadRGB[x1 * 3 + 0] = 0;
-				lineheadRGB[x1 * 3 + 1] = 0;
-				lineheadRGB[x1 * 3 + 2] = 255;
-				leftEdgeX.push_back(i);
-				leftEdgeY.insert({ i, x1 });
-			}
-			if (x2 >= 0)
-			{
-				lineheadRGB[x2 * 3 + 0] = 255;
-				lineheadRGB[x2 * 3 + 1] = 0;
-				lineheadRGB[x2 * 3 + 2] = 0;
-				rightEdgeX.push_back(i);
-				rightEdgeY.insert({ i, x2 });
-			}
-		}
-	}
-	int leftfirst = leftEdgeX[0], leftlast = leftEdgeX[leftEdgeX.size() - 1];
-	//左边找头
-	for (size_t i = (leftfirst > linespan) ? (leftfirst - linespan) : 0; i < leftfirst; i++)
-	{
-		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
-		if (x1 >= 0)
-		{
-			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-			lineheadRGB[x1 * 3 + 0] = 0;
-			lineheadRGB[x1 * 3 + 1] = 0;
-			lineheadRGB[x1 * 3 + 2] = 255;
-			leftEdgeX.push_back(i);
-			leftEdgeY.insert({ i, x1 });
-		}
-	}
-	//左边找尾
-	int tmp = (leftlast + linespan) > mdi.MaxPics ? (mdi.MaxPics - 1) : (leftlast + linespan);
-	for (size_t i = leftlast + 1; i < tmp; i++)
-	{
-		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
-		if (x1 >= 0)
-		{
-			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-			lineheadRGB[x1 * 3 + 0] = 0;
-			lineheadRGB[x1 * 3 + 1] = 0;
-			lineheadRGB[x1 * 3 + 2] = 255;
-			leftEdgeX.push_back(i);
-			leftEdgeY.insert({ i, x1 });
-		}
-	}
-
-
-	int rightfirst = rightEdgeX[0], rightlast = rightEdgeX[rightEdgeX.size() - 1];
-	//右边找头
-	for (size_t i = (rightfirst > linespan) ? (rightfirst - linespan) : 0; i < rightfirst; i++)
-	{
-		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
-		if (x2 >= 0)
-		{
-			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-			lineheadRGB[x2 * 3 + 0] = 255;
-			lineheadRGB[x2 * 3 + 1] = 0;
-			lineheadRGB[x2 * 3 + 2] = 0;
-			rightEdgeX.push_back(i);
-			rightEdgeY.insert({ i, x2 });
-		}
-	}
-	//右边找尾
-	int tmp2 = (rightlast + linespan) > mdi.MaxPics ? (mdi.MaxPics - 1) : (rightlast + linespan);
-	for (size_t i = rightlast + 1; i < tmp2; i++)
-	{
-		int x2 = BlocksDetector::GetEdgeRight(i, mdi.width - 400, s);
-		if (x2 >= 0)
-		{
-			cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-			uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-			lineheadRGB[x2 * 3 + 0] = 255;
-			lineheadRGB[x2 * 3 + 1] = 0;
-			lineheadRGB[x2 * 3 + 2] = 0;
-			rightEdgeX.push_back(i);
-			rightEdgeY.insert({ i, x2 });
-		}
-	}
-
-	sort(leftEdgeX.begin(), leftEdgeX.end());
-	sort(rightEdgeX.begin(), rightEdgeX.end());
-
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "非并行处理用时：" << t << endl;
-
-}
 //消费者
 void customer()
 {
-	//开始计时
+	////开始计时
+	//double t = (double)cv::getTickCount();
+
+	////处理算法
+
+	////到了第几行
+	//int i = 0;
+	////状态标记0表示结束，-1表示需要等待下一帧写入
+	//int flag = 0;
+	//do{
+	//	if (s.EndWriteFlag)
+	//		break;
+	//	cv::Mat f;
+	//	flag = s.GetFrame(f);
+	//	if (flag == -1)
+	//	{
+	//		Sleep(1);
+	//		continue;
+	//	}
+	//	if (flag == 0)
+	//		break;
+
+	//	//检测算法
+	//	cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+	//	int elementCount = mdi.width;//每行元素数
+	//	uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
+	//	int x1 = bd.GetEdgeLeft(i, 400);
+	//	if (x1 >= 0)
+	//	{
+	//		lineheadRGB[x1 * 3 + 0] = 0;
+	//		lineheadRGB[x1 * 3 + 1] = 0;
+	//		lineheadRGB[x1 * 3 + 2] = 255;
+	//	}
+	//	int x2 = bd.GetEdgeRight(i, elementCount - 400);
+	//	if (x2 >= 0)
+	//	{
+	//		lineheadRGB[x2 * 3 + 0] = 255;
+	//		lineheadRGB[x2 * 3 + 1] = 0;
+	//		lineheadRGB[x2 * 3 + 2] = 0;
+	//	}
+	//	i++;
+	//} while (flag != 0);
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//std::cout << "并行处理用时：" << t << endl;
+
+	while (!s.EndWriteFlag)
+	{
+		Sleep(10);
+	}
+
+
 	double t = (double)cv::getTickCount();
-
-	//处理算法
-
-	//到了第几行
-	int i = 0;
-	//状态标记0表示结束，-1表示需要等待下一帧写入
-	int flag = 0;
-	do{
-		if (s.EndWriteFlag)
-			break;
-		cv::Mat f;
-		flag = s.GetFrame(f);
-		if (flag == -1)
-		{
-			Sleep(1);
-			continue;
-		}
-		if (flag == 0)
-			break;
-
-		//检测算法
-		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-		int elementCount = mdi.width;//每行元素数
-		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-		int x1 = BlocksDetector::GetEdgeLeft(i, 400, s);
-		if (x1 >= 0)
-		{
-			lineheadRGB[x1 * 3 + 0] = 0;
-			lineheadRGB[x1 * 3 + 1] = 0;
-			lineheadRGB[x1 * 3 + 2] = 255;
-		}
-		int x2 = BlocksDetector::GetEdgeRight(i, elementCount - 400, s);
-		if (x2 >= 0)
-		{
-			lineheadRGB[x2 * 3 + 0] = 255;
-			lineheadRGB[x2 * 3 + 1] = 0;
-			lineheadRGB[x2 * 3 + 2] = 0;
-		}
-		i++;
-	} while (flag != 0);
+	BlocksDetector bd = BlocksDetector(&s, &mdi);
+	bd.Start();
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "并行处理用时：" << t << endl;
+	std::cout << "非并行处理用时：" << t << endl;
 
 
-
-
-	customerWork1();
+	cv::imwrite("samples/drow.jpg", bd.drow);
 
 	//标记消费者工作结束
 	customerEndFlag = true;
@@ -282,7 +179,7 @@ int main()
 			stringstream ss2;
 			ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
 			ss2 >> p2;
-			cv::imwrite(p1, s.NowBuffer);
+			//cv::imwrite(p1, s.NowBuffer);
 			//cv::imwrite("result1.jpg", s.NowBufferGray);
 			cv::imwrite(p2, s.NowBufferImg);
 		}
