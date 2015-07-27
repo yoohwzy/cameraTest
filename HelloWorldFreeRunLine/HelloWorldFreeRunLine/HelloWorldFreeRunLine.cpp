@@ -106,9 +106,13 @@ void customer()
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;
 
-
-	cv::imwrite("samples/drow.jpg", bd.drow);
-
+#ifdef OUTPUT_DEBUG_INFO
+	if (OUTPUT_DEBUG_INFO)
+	{
+		cv::imwrite("samples/drowDebugDetect.jpg", bd.drowDebugDetect);
+		cv::imwrite("samples/drowDebugResult.jpg", bd.drowDebugResult);
+	}
+#endif
 	//标记消费者工作结束
 	customerEndFlag = true;
 }
@@ -186,33 +190,30 @@ int main()
 		if (input == "2")
 		{
 			//采样矫正图像
-			MicroDisplayInit mditmp;
-			mditmp.MaxPics = 10;
-			mditmp.colorType = mdi.colorType;
-			mditmp.width = mdi.width;
-			mditmp.height = mdi.height;
-			VirtualCamera vctmp = VirtualCamera(mditmp, "光照校正_o.jpg");
-			BufferStorage stmp = BufferStorage(mditmp);
+			int MaxPics = mdi.MaxPics;
+			mdi.MaxPics = 10;
+			BufferStorage stmp = BufferStorage(mdi);
 			stmp.Start();
 			if (!USING_VIRTUAL_CAMERA)
 			{
-				if (MicroDisplayControler::FreeRunning(mditmp, stmp) < 0)
+				if (MicroDisplayControler::FreeRunning(mdi, stmp) < 0)
 				{
-					ErrorMessageWait(mditmp.fg);
+					ErrorMessageWait(mdi.fg);
 					return 0;
 				}
 			}
 			else
 			{
-				vctmp.FreeRunning(mditmp, stmp);
+				VirtualCamera vctmp = VirtualCamera(mdi, "光照校正_o.jpg");
+				vctmp.FreeRunning(mdi, stmp);
 			}
 			//cv::Mat img = stmp.NowBufferImg;
 
 			//X - 样本，矫正时直接相加即可
-			cv::Mat SamplesRGBTMP = stmp.NowBufferImg(cv::Rect(0, 2, mditmp.width, 1)).clone() / 3;
+			cv::Mat SamplesRGBTMP = stmp.NowBufferImg(cv::Rect(0, 2, mdi.width, 1)).clone() / 3;
 			cv::imwrite("samples/光照校正样本.jpg", SamplesRGBTMP);
 			//RGB
-			cv::Mat SamplesRGB = cv::Mat(mditmp.height, mditmp.width, CV_8UC3, cv::Scalar(50, 50, 50));
+			cv::Mat SamplesRGB = cv::Mat(mdi.height, mdi.width, CV_8UC3, cv::Scalar(50, 50, 50));
 			SamplesRGB = SamplesRGB - SamplesRGBTMP;
 			SamplesRGB.copyTo(mdi.SamplesRGB);
 			//Gray

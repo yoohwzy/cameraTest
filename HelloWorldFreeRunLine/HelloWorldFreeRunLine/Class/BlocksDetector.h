@@ -11,7 +11,14 @@ public:
 
 	void Start();
 
-	cv::Mat drow;
+	//检测过程中的图片
+	cv::Mat drowDebugDetect;
+	cv::Mat drowDebugResult;
+
+	cv::Point A;
+	cv::Point B;
+	cv::Point C;
+	cv::Point D;
 private:
 	BufferStorage *s;
 	MicroDisplayInit *mdi;
@@ -31,7 +38,8 @@ private:
 	//vector<int> rightEdgeLine;//y坐标，第几行
 	//map<int, int> rightEdgeX;
 	const int linespan = 100;
-
+	const int margin = 300;
+	const int orange = 400;
 
 	static bool comp(cv::Point i, cv::Point j) { return i.y < j.y; }
 };
