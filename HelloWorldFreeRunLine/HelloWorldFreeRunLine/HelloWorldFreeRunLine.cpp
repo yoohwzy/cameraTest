@@ -222,6 +222,7 @@ int main()
 			std::cout << "OK\r\n";
 
 			//重新初始化缓存
+			mdi.MaxPics = MaxPics;
 			s = BufferStorage(mdi);
 		}
 		else
