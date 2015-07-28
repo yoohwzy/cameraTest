@@ -28,7 +28,7 @@ public:
 	int nId = -1;
 	// 采图颜色模式
 	int colorType = 0;
-	enum ColorType
+	enum ColorType 
 	{
 		GRAY = 0,
 		RGB = 1

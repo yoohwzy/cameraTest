@@ -10,14 +10,12 @@
 #include "Class\BlocksDetector.h"
 #include <thread>
 
-
 BufferStorage s;
 int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
 const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
-
 bool producerEndFlag = false, customerEndFlag = false;
 
 
@@ -48,51 +46,40 @@ void producer()
 //消费者
 void customer()
 {
-	////开始计时
-	//double t = (double)cv::getTickCount();
+	BlocksDetector bd = BlocksDetector(&s, &mdi);
 
-	////处理算法
+	//开始计时
+	double t1 = (double)cv::getTickCount();
 
-	////到了第几行
-	//int i = 0;
-	////状态标记0表示结束，-1表示需要等待下一帧写入
-	//int flag = 0;
-	//do{
-	//	if (s.EndWriteFlag)
-	//		break;
-	//	cv::Mat f;
-	//	flag = s.GetFrame(f);
-	//	if (flag == -1)
-	//	{
-	//		Sleep(1);
-	//		continue;
-	//	}
-	//	if (flag == 0)
-	//		break;
+	//处理算法
 
-	//	//检测算法
-	//	cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-	//	int elementCount = mdi.width;//每行元素数
-	//	uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+	//到了第几行
+	int i = 0;
+	//状态标记0表示结束，-1表示需要等待下一帧写入
+	int flag = 0;
+	do{
+		if (s.EndWriteFlag)
+			break;
+		cv::Mat f;
+		flag = s.GetFrame(f);
+		if (flag == -1)
+		{
+			Sleep(1);
+			continue;
+		}
+		if (flag == 0)
+			break;
 
-	//	int x1 = bd.GetEdgeLeft(i, 400);
-	//	if (x1 >= 0)
-	//	{
-	//		lineheadRGB[x1 * 3 + 0] = 0;
-	//		lineheadRGB[x1 * 3 + 1] = 0;
-	//		lineheadRGB[x1 * 3 + 2] = 255;
-	//	}
-	//	int x2 = bd.GetEdgeRight(i, elementCount - 400);
-	//	if (x2 >= 0)
-	//	{
-	//		lineheadRGB[x2 * 3 + 0] = 255;
-	//		lineheadRGB[x2 * 3 + 1] = 0;
-	//		lineheadRGB[x2 * 3 + 2] = 0;
-	//	}
-	//	i++;
-	//} while (flag != 0);
-	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	//std::cout << "并行处理用时：" << t << endl;
+		//检测算法
+		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
+		int elementCount = mdi.width;//每行元素数
+		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
+
+		i++;
+	} while (flag != 0);
+	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
+	std::cout << "并行处理用时：" << t1 << endl;
 
 	while (!s.EndWriteFlag)
 	{
@@ -101,7 +88,6 @@ void customer()
 
 
 	double t = (double)cv::getTickCount();
-	BlocksDetector bd = BlocksDetector(&s, &mdi);
 	bd.Start();
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;

@@ -44,6 +44,7 @@ int VirtualCamera::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 	BufferIndex = 0;
 	cv::Mat OriginalImage;
 	do{
+		Sleep(0.1);
 	} while (!s.AddFrame(GetNext()));
 	return 0;
 }

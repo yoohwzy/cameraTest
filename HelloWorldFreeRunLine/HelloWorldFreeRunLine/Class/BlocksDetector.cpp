@@ -23,12 +23,12 @@ void BlocksDetector::Start()
 	//vector<int> leftEdgeXTmp;
 	if (1 == 1)//使用IF隔绝局部变量
 	{
-		int range = orange;
-		int leftX = margin;
-		int lastFoundLine = 0;//上一次找到边缘是在第几行，用于界定上方与下方的判断
+		int range = ORANGE_RANGE_ROW;
+		int leftX = ORANGE_MARGIN_ROW;
+		int lastFoundLine = 0;//上一次找到边缘是在第几行
 		int noneCount = 0;//连续没有找到边缘的数量。
 		bool needReFind = false;//对该行是否需要扩大range重新搜索
-		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += linespan)
+		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += ROW_SPAN)
 		{
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
@@ -52,17 +52,17 @@ void BlocksDetector::Start()
 				}
 #endif
 
-				leftBorder.push_back(cv::Point(x1, i));
+				LeftBorder.push_back(cv::Point(x1, i));
 
 				noneCount = 0;
 				lastFoundLine = i;
 				needReFind = true;
 
 				//匀速模型预测下一个点的x坐标
-				if (leftBorder.size() > 2)
+				if (LeftBorder.size() > 2)
 				{
-					int last_1 = leftBorder[leftBorder.size() - 1].x;
-					int last_2 = leftBorder[leftBorder.size() - 2].x;
+					int last_1 = LeftBorder[LeftBorder.size() - 1].x;
+					int last_2 = LeftBorder[LeftBorder.size() - 2].x;
 					leftX = last_1 + last_1 - last_2;
 				}
 				else
@@ -77,8 +77,8 @@ void BlocksDetector::Start()
 					break;
 				if (needReFind)//是否要重新扫描改行
 				{
-					range = orange;
-					i -= linespan;
+					range = ORANGE_RANGE_ROW;
+					i -= ROW_SPAN;
 					needReFind = false;
 				}
 			}
@@ -87,12 +87,12 @@ void BlocksDetector::Start()
 	//vector<int> rightEdgeXTmp;
 	if (1 == 1)//使用IF隔绝局部变量
 	{
-		int range = orange;
-		int rightX = (*mdi).width - margin;
-		int lastFoundLine = 0;//上一次找到边缘是在第几行，用于界定上方与下方的判断
+		int range = ORANGE_RANGE_ROW;
+		int rightX = (*mdi).width - ORANGE_MARGIN_ROW;
+		int lastFoundLine = 0;//上一次找到边缘是在第几行
 		int noneCount = 0;//连续没有找到边缘的数量。
 		bool needReFind = false;//对该行是否需要扩大range重新搜索
-		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += linespan)
+		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += ROW_SPAN)
 		{
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
@@ -117,17 +117,17 @@ void BlocksDetector::Start()
 				}
 #endif
 
-				rightBorder.push_back(cv::Point(x1, i));
+				RightBorder.push_back(cv::Point(x1, i));
 
 				noneCount = 0;
 				lastFoundLine = i;
 				needReFind = true;
 
 				//匀速模型预测下一个点的x坐标
-				if (rightBorder.size() > 2)
+				if (RightBorder.size() > 2)
 				{
-					int last_1 = rightBorder[rightBorder.size() - 1].x;
-					int last_2 = rightBorder[rightBorder.size() - 2].x;
+					int last_1 = RightBorder[RightBorder.size() - 1].x;
+					int last_2 = RightBorder[RightBorder.size() - 2].x;
 					rightX = last_1 + last_1 - last_2;
 				}
 				else
@@ -142,33 +142,93 @@ void BlocksDetector::Start()
 					break;
 				if (needReFind)//是否要重新扫描改行
 				{
-					range = orange;
-					i -= linespan;
+					range = ORANGE_RANGE_ROW;
+					i -= ROW_SPAN;
 					needReFind = false;
 				}
 			}
 		}
 	}
-	if (leftBorder.size() == 0 || rightBorder.size() == 0)
+	//若没有找到边缘，停止程序。
+	if (LeftBorder.size() == 0 || RightBorder.size() == 0)
 		return;
 
-	int leftFirstLine = leftBorder[0].y, leftFirstX = leftBorder[0].x;
-	int leftLastLine = leftBorder[leftBorder.size() - 1].y, leftLastX = leftBorder[leftBorder.size() - 1].x;
-	GetEdgeLeftApproach(cv::Point(-1, (leftFirstLine > linespan) ? (leftFirstLine - linespan) : 0), cv::Point(leftFirstX, leftFirstLine));
-	GetEdgeLeftApproach(cv::Point(leftLastX, leftLastLine), cv::Point(-1, (leftLastLine + linespan) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (leftLastLine + linespan)));
+	int leftFirstLine = LeftBorder[0].y, leftFirstX = LeftBorder[0].x;
+	int leftLastLine = LeftBorder[LeftBorder.size() - 1].y, leftLastX = LeftBorder[LeftBorder.size() - 1].x;
+	GetEdgeLeftApproach(cv::Point(-1, (leftFirstLine > ROW_SPAN) ? (leftFirstLine - ROW_SPAN) : 0), cv::Point(leftFirstX, leftFirstLine));
+	GetEdgeLeftApproach(cv::Point(leftLastX, leftLastLine), cv::Point(-1, (leftLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (leftLastLine + ROW_SPAN)));
 
-	int rightFirstLine = rightBorder[0].y, rightFirstX = rightBorder[0].x;
-	int rightLastLine = rightBorder[rightBorder.size() - 1].y, rightLastX = rightBorder[rightBorder.size() - 1].x;
-	GetEdgeRightApproach(cv::Point(-1, (rightFirstLine > linespan) ? (rightFirstLine - linespan) : 0), cv::Point(rightFirstX, rightFirstLine));
-	GetEdgeRightApproach(cv::Point(rightLastX, rightLastLine), cv::Point(-1, (rightLastLine + linespan) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (rightLastLine + linespan)));
+	int rightFirstLine = RightBorder[0].y, rightFirstX = RightBorder[0].x;
+	int rightLastLine = RightBorder[RightBorder.size() - 1].y, rightLastX = RightBorder[RightBorder.size() - 1].x;
+	GetEdgeRightApproach(cv::Point(-1, (rightFirstLine > ROW_SPAN) ? (rightFirstLine - ROW_SPAN) : 0), cv::Point(rightFirstX, rightFirstLine));
+	GetEdgeRightApproach(cv::Point(rightLastX, rightLastLine), cv::Point(-1, (rightLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (rightLastLine + ROW_SPAN)));
 
-	std::sort(leftBorder.begin(), leftBorder.end(), comp);
-	std::sort(rightBorder.begin(), rightBorder.end(), comp);
+	std::sort(LeftBorder.begin(), LeftBorder.end(), ORDER_BY_Y_ASC);
+	std::sort(RightBorder.begin(), RightBorder.end(), ORDER_BY_Y_ASC);
 
-	A = leftBorder[0];
-	B = rightBorder[0];
-	C = rightBorder[rightBorder.size() - 1];
-	D = leftBorder[leftBorder.size() - 1];
+
+
+	//查找上边缘
+	if (LeftBorder[0].y != 0 && RightBorder[0].y != 0)
+	{
+		int range = ORANGE_RANGE_COL;
+		//截取ROI
+		//ROI的起点y值，同时也是计算最终y坐标的OFFSET
+		int offsetY = LeftBorder[0].y - ORANGE_RANGE_COL;
+		if (offsetY < 0) offsetY = 0;
+		int height = LeftBorder[0].y + ORANGE_RANGE_COL - offsetY;
+		//ROI中边界查找的起点行高
+		int centerY = LeftBorder[0].y - offsetY;
+
+		int lastFoundRow = 0;//上一次找到边缘是在第几列
+		int noneCount = 0;//连续没有找到边缘的数量。
+		bool needReFind = false;//对该行是否需要扩大range重新搜索
+
+
+		cv::Mat upROI;
+		cv::cvtColor((*s).NowBufferImg(cv::Rect(0, offsetY, (*mdi).width, height)), upROI, CV_RGB2GRAY);
+		cv::Mat img = (*s).NowBufferImg;
+		for (size_t x = 0; x < (*mdi).width; x += COL_SPAN)
+		{
+#ifdef OUTPUT_DEBUG_INFO
+			if (OUTPUT_DEBUG_INFO)
+			{
+				cv::circle(drowDebugDetect, cv::Point(x, offsetY + centerY), 5, cv::Scalar(0, 255, 255), 3);
+			}
+#endif
+			//相对于整幅图像的Y值
+			int absoy1 = GetEdgeUP(upROI, offsetY, cv::Point(x, centerY), range);
+			if (absoy1 >= 0)
+			{
+				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, absoy1, (*mdi).width, 1));
+				uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
+				lineheadRGB[x * 3 + 0] = 0;
+				lineheadRGB[x * 3 + 1] = 0;
+				lineheadRGB[x * 3 + 2] = 255;
+			}
+		}
+	}
+
+	//查找下边缘
+	if (LeftBorder[LeftBorder.size() - 1].y != 0 && RightBorder[RightBorder.size() - 1].y != 0)
+	{
+
+	}
+
+
+
+
+
+
+
+
+
+
+	A = LeftBorder[0];
+	B = RightBorder[0];
+	C = RightBorder[RightBorder.size() - 1];
+	D = LeftBorder[LeftBorder.size() - 1];
 
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
@@ -212,7 +272,7 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 		x1 = GetEdgeLeftx3(cv::Point(end.x, middleLine), range);
 		if (x1 > 0)
 		{
-			leftBorder.push_back(cv::Point(x1, middleLine));
+			LeftBorder.push_back(cv::Point(x1, middleLine));
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
@@ -241,7 +301,7 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 		x1 = GetEdgeLeftx3(cv::Point(start.x, middleLine), range);
 		if (x1 > 0)
 		{
-			leftBorder.push_back(cv::Point(x1, middleLine));
+			LeftBorder.push_back(cv::Point(x1, middleLine));
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
@@ -269,7 +329,7 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 // 在:Point start坐标附近，查找是否有边缘，返回坐标，没有则返回-1
 int BlocksDetector::GetEdgeLeft(cv::Point start, int range)
 {
-	const int sumcount = 20;
+	const int sumcount = SUM_COUNT;
 	//检测算法
 	cv::Mat oneLineGray;
 	int xstart = start.x - range;
@@ -283,7 +343,7 @@ int BlocksDetector::GetEdgeLeft(cv::Point start, int range)
 	int elementCount = oneLineGray.cols;//每行元素数
 	uchar* linehead = oneLineGray.ptr<uchar>(0);//每行的起始地址
 	int ret = -1;
-	int diff = sumcount * 5;
+	int diff = SUM_THRESHOD;
 	uchar* lineheadO;
 
 
@@ -297,12 +357,12 @@ int BlocksDetector::GetEdgeLeft(cv::Point start, int range)
 	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
 	{
 		int leftsum = 0;
-		for (size_t ii = i; ii > i - 20; ii--)
+		for (size_t ii = i; ii > i - sumcount; ii--)
 		{
 			leftsum += linehead[ii];
 		}
 		int rightsum = 0;
-		for (size_t ii = i + 1; ii <= i + 20; ii++)
+		for (size_t ii = i + 1; ii <= i + sumcount; ii++)
 		{
 			rightsum += linehead[ii];
 		}
@@ -368,8 +428,7 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 		x1 = GetEdgeRightx3(cv::Point(end.x, middleLine), range);
 		if (x1 > 0)
 		{
-			rightBorder.push_back(cv::Point(x1, middleLine));
-
+			RightBorder.push_back(cv::Point(x1, middleLine));
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
@@ -385,7 +444,6 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 				}
 			}
 #endif
-
 			x1 = GetEdgeRightApproach(start, cv::Point(x1, middleLine));
 		}
 		else
@@ -398,8 +456,7 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 		x1 = GetEdgeRightx3(cv::Point(start.x, middleLine), range);
 		if (x1 > 0)
 		{
-			rightBorder.push_back(cv::Point(x1, middleLine));
-
+			RightBorder.push_back(cv::Point(x1, middleLine));
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
@@ -415,7 +472,6 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 				}
 			}
 #endif
-
 			x1 = GetEdgeRightApproach(cv::Point(x1, middleLine), end);
 		}
 		else
@@ -425,7 +481,7 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 }
 int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 {
-	const int sumcount = 20;
+	const int sumcount = SUM_COUNT;
 	//检测算法
 	cv::Mat oneLineGray;
 	int xstart = start.x - range;
@@ -439,7 +495,7 @@ int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 	int elementCount = oneLineGray.cols;//每行元素数
 	uchar* linehead = oneLineGray.ptr<uchar>(0);//每行的起始地址
 	int ret = -1;
-	int diff = sumcount * 5;
+	int diff = SUM_THRESHOD;
 
 	uchar* lineheadO;
 #ifdef OUTPUT_DEBUG_INFO
@@ -451,12 +507,12 @@ int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
 	{
 		int leftsum = 0;
-		for (size_t ii = i; ii > i - 20; ii--)
+		for (size_t ii = i; ii > i - sumcount; ii--)
 		{
 			leftsum += linehead[ii];
 		}
 		int rightsum = 0;
-		for (size_t ii = i + 1; ii <= i + 20; ii++)
+		for (size_t ii = i + 1; ii <= i + sumcount; ii++)
 		{
 			rightsum += linehead[ii];
 		}
@@ -491,31 +547,45 @@ int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 		ret += xstart;
 	}
 	return ret;
+}
 
-	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
+
+
+/*******************上边缘查找开始********************/
+
+int BlocksDetector::GetEdgeUP(cv::Mat& ROI, int offsetY, cv::Point start, int range)
+{
+	const int sumcount = SUM_COUNT;
+	int ystart = start.y - range;
+	if (ystart < 0)
+		ystart = 0;
+	int height = range + range;
+	if ((height + ystart) > ROI.rows)
+		height = ROI.rows - 1 - ystart;
+	int ret = -1;
+	int diff = SUM_THRESHOD;
+	for (size_t y = ystart + sumcount; y < ystart + height - sumcount; y++)
 	{
-		int leftsum = 0;
-		for (size_t ii = i; ii > i - 20; ii--)
+		int upsum = 0;
+		for (size_t yy = y; yy > y - sumcount; yy--)
 		{
-			leftsum += linehead[ii];
+			upsum += ROI.ptr<uchar>(yy)[start.x];
 		}
-		int rightsum = 0;
-		for (size_t ii = i + 1; ii <= i + 20; ii++)
+		int downsum = 0;
+		for (size_t yy = y + 1; yy <= y + sumcount; yy++)
 		{
-			rightsum += linehead[ii];
+			downsum += ROI.ptr<uchar>(yy)[start.x];
 		}
-		int c = (rightsum - leftsum);
+		int c = (upsum - downsum);
 		if (c > diff)
 		{
 			diff = c;
-			ret = i;
-			lineheadO[i * 3] = 255;//填充蓝色
+			ret = y;
 		}
-		lineheadO[i * 3 + 1] = 255;//填充绿色
 	}
 	if (ret >= 0)
 	{
-		lineheadO[ret * 3 + 2] = 255;//填充红色
-		ret += xstart;
+		ret += offsetY;
 	}
+	return ret;
 }
