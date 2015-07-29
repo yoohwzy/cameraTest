@@ -95,7 +95,8 @@ void customer()
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		cv::imwrite("samples/drowDebugDetect.jpg", bd.drowDebugDetect);
+		cv::imwrite("samples/drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+		cv::imwrite("samples/drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
 		cv::imwrite("samples/drowDebugResult.jpg", bd.drowDebugResult);
 	}
 #endif
@@ -126,7 +127,7 @@ int main()
 	else
 	{
 		//初始化虚拟相机
-		vc = VirtualCamera(mdi, "样品2_o.jpg");
+		vc = VirtualCamera(mdi, "崩角缺陷_o.jpg");
 	}
 
 

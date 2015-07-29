@@ -35,16 +35,20 @@ private:
 
 	//逼近法求出左上角，已知endline的x列为边界
 	int GetEdgeLeftx3(cv::Point start, int range = 200);
-	int GetEdgeLeftApproach(cv::Point start, cv::Point end, int range = 200);
+	int GetEdgeLeftApproach(cv::Point start, cv::Point end, int range = 50);
 	int GetEdgeLeft(cv::Point start, int range = 200);
 
 	int GetEdgeRightx3(cv::Point start, int range = 200);
-	int GetEdgeRightApproach(cv::Point start, cv::Point end, int range = 200);
+	int GetEdgeRightApproach(cv::Point start, cv::Point end,  int range = 50);
 	int GetEdgeRight(cv::Point start, int range = 200);
 
-	int GetEdgeUpx3(cv::Mat& ROI, int offsetY, cv::Point start, int range = 200);
-	int GetEdgeUpApproach(cv::Point start, cv::Point end, int range = 200);
-	int GetEdgeUp(cv::Mat& ROI, int offsetY, cv::Point start, int range = 200);
+	int GetEdgeUpx3(cv::Point start, int range = 200);
+	int GetEdgeUpApproach(cv::Point start, cv::Point end, int range = 50);
+	int GetEdgeUp(cv::Point start, int range = 200);
+
+	int GetEdgeDownx3(cv::Point start, int range = 200);
+	int GetEdgeDownApproach(cv::Point start, cv::Point end, int range = 50);
+	int GetEdgeDown(cv::Point start, int range = 200);
 
 
 	//检测边缘时，累加多少个
