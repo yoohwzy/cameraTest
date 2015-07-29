@@ -68,7 +68,8 @@ void BlocksDetector::Start()
 				}
 				else
 					leftX = x1;
-				if (range > 50) range -= 50;
+				if (range > RANGE_MINI) range -= RANGE_REDUCE_BY;
+				if (range < RANGE_MINI) range = RANGE_MINI;
 			}
 			else
 			{
@@ -90,8 +91,8 @@ void BlocksDetector::Start()
 			return;
 		int leftFirstLine = LeftBorder[0].y, leftFirstX = LeftBorder[0].x;
 		int leftLastLine = LeftBorder[LeftBorder.size() - 1].y, leftLastX = LeftBorder[LeftBorder.size() - 1].x;
-		GetEdgeLeftApproach(cv::Point(-1, (leftFirstLine > ROW_SPAN) ? (leftFirstLine - ROW_SPAN) : 0), cv::Point(leftFirstX, leftFirstLine));
-		GetEdgeLeftApproach(cv::Point(leftLastX, leftLastLine), cv::Point(-1, (leftLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (leftLastLine + ROW_SPAN)));
+		GetEdgeLeftApproach(cv::Point(-1, (leftFirstLine > ROW_SPAN) ? (leftFirstLine - ROW_SPAN) : 0), cv::Point(leftFirstX, leftFirstLine), RANGE_MINI);
+		GetEdgeLeftApproach(cv::Point(leftLastX, leftLastLine), cv::Point(-1, (leftLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (leftLastLine + ROW_SPAN)), RANGE_MINI);
 
 	}
 	//vector<int> rightEdgeXTmp;
@@ -140,7 +141,8 @@ void BlocksDetector::Start()
 				}
 				else
 					rightX = x1;
-				if (range > 50) range -= 50;
+				if (range > RANGE_MINI) range -= RANGE_REDUCE_BY;
+				if (range < RANGE_MINI) range = RANGE_MINI;
 			}
 			else
 			{
@@ -161,8 +163,8 @@ void BlocksDetector::Start()
 			return;
 		int rightFirstLine = RightBorder[0].y, rightFirstX = RightBorder[0].x;
 		int rightLastLine = RightBorder[RightBorder.size() - 1].y, rightLastX = RightBorder[RightBorder.size() - 1].x;
-		GetEdgeRightApproach(cv::Point(-1, (rightFirstLine > ROW_SPAN) ? (rightFirstLine - ROW_SPAN) : 0), cv::Point(rightFirstX, rightFirstLine));
-		GetEdgeRightApproach(cv::Point(rightLastX, rightLastLine), cv::Point(-1, (rightLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (rightLastLine + ROW_SPAN)));
+		GetEdgeRightApproach(cv::Point(-1, (rightFirstLine > ROW_SPAN) ? (rightFirstLine - ROW_SPAN) : 0), cv::Point(rightFirstX, rightFirstLine), RANGE_MINI);
+		GetEdgeRightApproach(cv::Point(rightLastX, rightLastLine), cv::Point(-1, (rightLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (rightLastLine + ROW_SPAN)), RANGE_MINI);
 	}
 
 
@@ -220,7 +222,8 @@ void BlocksDetector::Start()
 				}
 				else
 					centerY = y1;
-				if (range > 50) range -= 50;
+				if (range > RANGE_MINI) range -= RANGE_REDUCE_BY;
+				if (range < RANGE_MINI) range = RANGE_MINI;
 			}
 			else
 			{
@@ -237,13 +240,13 @@ void BlocksDetector::Start()
 		{
 			int upFirstCol = UpBorder[0].x, upFirstRow = UpBorder[0].y;
 			int upLastCol = UpBorder[UpBorder.size() - 1].x, upLastRow = UpBorder[UpBorder.size() - 1].y;
-			GetEdgeUpApproach(cv::Point((upFirstCol > COL_SPAN) ? (upFirstCol - COL_SPAN) : 0, -1), cv::Point(upFirstCol, upFirstRow));
-			GetEdgeUpApproach(cv::Point(upLastCol, upLastRow), cv::Point((upLastCol + COL_SPAN) > (*mdi).width ? ((*mdi).width - 1) : (upLastCol + COL_SPAN), -1));
+			GetEdgeUpApproach(cv::Point((upFirstCol > COL_SPAN) ? (upFirstCol - COL_SPAN) : 0, -1), cv::Point(upFirstCol, upFirstRow), RANGE_MINI);
+			GetEdgeUpApproach(cv::Point(upLastCol, upLastRow), cv::Point((upLastCol + COL_SPAN) > (*mdi).width ? ((*mdi).width - 1) : (upLastCol + COL_SPAN), -1), RANGE_MINI);
 		}
 	}
 
 	//²éÕÒÏÂ±ßÔµ
-	if (LeftBorder[LeftBorder.size() - 1].y > 0 && LeftBorder[LeftBorder.size() - 1].y < (*s).NowBufferImg.rows && RightBorder[RightBorder.size() - 1].y>0 && RightBorder[RightBorder.size() - 1].y < (*s).NowBufferImg.rows)
+	if (LeftBorder[LeftBorder.size() - 1].y > 0 && LeftBorder[LeftBorder.size() - 1].y < ((*mdi).MaxPics - SUM_COUNT) && RightBorder[RightBorder.size() - 1].y>0 && RightBorder[RightBorder.size() - 1].y < ((*mdi).MaxPics - SUM_COUNT))
 	{
 		int range = ORANGE_RANGE_COL;
 		//½ØÈ¡ROI
@@ -291,7 +294,8 @@ void BlocksDetector::Start()
 				}
 				else
 					centerY = y1;
-				if (range > 50) range -= 50;
+				if (range > RANGE_MINI) range -= RANGE_REDUCE_BY;
+				if (range < RANGE_MINI) range = RANGE_MINI;
 			}
 			else
 			{
@@ -308,13 +312,14 @@ void BlocksDetector::Start()
 		{
 			int upFirstCol = DownBorder[0].x, upFirstRow = DownBorder[0].y;
 			int upLastCol = DownBorder[DownBorder.size() - 1].x, upLastRow = DownBorder[DownBorder.size() - 1].y;
-			GetEdgeDownApproach(cv::Point((upFirstCol > COL_SPAN) ? (upFirstCol - COL_SPAN) : 0, -1), cv::Point(upFirstCol, upFirstRow));
-			GetEdgeDownApproach(cv::Point(upLastCol, upLastRow), cv::Point((upLastCol + COL_SPAN) > (*mdi).width ? ((*mdi).width - 1) : (upLastCol + COL_SPAN), -1));
+			GetEdgeDownApproach(cv::Point((upFirstCol > COL_SPAN) ? (upFirstCol - COL_SPAN) : 0, -1), cv::Point(upFirstCol, upFirstRow), RANGE_MINI);
+			GetEdgeDownApproach(cv::Point(upLastCol, upLastRow), cv::Point((upLastCol + COL_SPAN) > (*mdi).width ? ((*mdi).width - 1) : (upLastCol + COL_SPAN), -1), RANGE_MINI);
 		}
 	}
 
 
-
+	std::sort(UpBorder.begin(), UpBorder.end(), ORDER_BY_X_ASC);
+	std::sort(DownBorder.begin(), DownBorder.end(), ORDER_BY_X_ASC);
 
 
 
@@ -388,10 +393,10 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 				}
 			}
 #endif
-			x1 = GetEdgeLeftApproach(start, cv::Point(x1, middleLine));
+			x1 = GetEdgeLeftApproach(start, cv::Point(x1, middleLine), range);
 		}
 		else
-			x1 = GetEdgeLeftApproach(cv::Point(x1, middleLine), end);
+			x1 = GetEdgeLeftApproach(cv::Point(x1, middleLine), end, range);
 	}
 	else
 	{
@@ -417,10 +422,10 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 				}
 			}
 #endif
-			x1 = GetEdgeLeftApproach(cv::Point(x1, middleLine), end);
+			x1 = GetEdgeLeftApproach(cv::Point(x1, middleLine), end, range);
 		}
 		else
-			x1 = GetEdgeLeftApproach(start, cv::Point(-1, middleLine));
+			x1 = GetEdgeLeftApproach(start, cv::Point(-1, middleLine), range);
 	}
 	return x1;
 }
@@ -546,10 +551,10 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 				}
 			}
 #endif
-			x1 = GetEdgeRightApproach(start, cv::Point(x1, middleLine));
+			x1 = GetEdgeRightApproach(start, cv::Point(x1, middleLine), range);
 		}
 		else
-			x1 = GetEdgeRightApproach(cv::Point(x1, middleLine), end);
+			x1 = GetEdgeRightApproach(cv::Point(x1, middleLine), end, range);
 	}
 	else
 	{
@@ -574,10 +579,10 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 				}
 			}
 #endif
-			x1 = GetEdgeRightApproach(cv::Point(x1, middleLine), end);
+			x1 = GetEdgeRightApproach(cv::Point(x1, middleLine), end, range);
 		}
 		else
-			x1 = GetEdgeRightApproach(start, cv::Point(-1, middleLine));
+			x1 = GetEdgeRightApproach(start, cv::Point(-1, middleLine), range);
 	}
 	return x1;
 }

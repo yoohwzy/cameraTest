@@ -127,7 +127,9 @@ int main()
 	else
 	{
 		//初始化虚拟相机
-		vc = VirtualCamera(mdi, "崩角缺陷_o.jpg");
+		//vc = VirtualCamera(mdi, "样品2_o.jpg");
+		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
+		vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
 
 
