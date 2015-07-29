@@ -9,7 +9,8 @@ BlocksDetector::BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii)
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		drowDebugDetect = (*s).NowBufferImg.clone();
+		drowDebugDetectLR = (*s).NowBufferImg.clone();
+		drowDebugDetectUD = (*s).NowBufferImg.clone();
 		drowDebugResult = (*s).NowBufferImg.clone();
 	}
 #endif
@@ -28,18 +29,18 @@ void BlocksDetector::Start()
 		int lastFoundLine = 0;//上一次找到边缘是在第几行
 		int noneCount = 0;//连续没有找到边缘的数量。
 		bool needReFind = false;//对该行是否需要扩大range重新搜索
-		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += ROW_SPAN)
+		for (size_t y = 0; (y + 3) < (*mdi).MaxPics; y += ROW_SPAN)
 		{
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
-				cv::circle(drowDebugDetect, cv::Point(leftX, i), 5, cv::Scalar(0, 255, 255), 3);
+				cv::circle(drowDebugDetectLR, cv::Point(leftX, y), 5, cv::Scalar(0, 255, 255), 3);
 			}
 #endif
-			int x1 = GetEdgeLeftx3(cv::Point(leftX, i), range);
+			int x1 = GetEdgeLeftx3(cv::Point(leftX, y), range);
 			if (x1 >= 0)
 			{
-				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, i, (*mdi).width, 1));
+				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, y, (*mdi).width, 1));
 				uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
 
 				lineheadRGB[x1 * 3 + 0] = 0;
@@ -48,14 +49,14 @@ void BlocksDetector::Start()
 #ifdef OUTPUT_DEBUG_INFO
 				if (OUTPUT_DEBUG_INFO)
 				{
-					cv::circle(drowDebugResult, cv::Point(x1, i), 5, cv::Scalar(0, 0, 255), 2);
+					cv::circle(drowDebugResult, cv::Point(x1, y), 5, cv::Scalar(0, 0, 255), 2);
 				}
 #endif
 
-				LeftBorder.push_back(cv::Point(x1, i));
+				LeftBorder.push_back(cv::Point(x1, y));
 
 				noneCount = 0;
-				lastFoundLine = i;
+				lastFoundLine = y;
 				needReFind = true;
 
 				//匀速模型预测下一个点的x坐标
@@ -75,10 +76,10 @@ void BlocksDetector::Start()
 					noneCount++;
 				if (noneCount > 3)//连续N个点没有找到边界后，跳出
 					break;
-				if (needReFind)//是否要重新扫描改行
+				if (needReFind)//是否要重新扫描该行
 				{
 					range = ORANGE_RANGE_ROW;
-					i -= ROW_SPAN;
+					y -= ROW_SPAN;
 					needReFind = false;
 				}
 			}
@@ -92,35 +93,33 @@ void BlocksDetector::Start()
 		int lastFoundLine = 0;//上一次找到边缘是在第几行
 		int noneCount = 0;//连续没有找到边缘的数量。
 		bool needReFind = false;//对该行是否需要扩大range重新搜索
-		for (size_t i = 0; (i + 3) < (*mdi).MaxPics; i += ROW_SPAN)
+		for (size_t y = 0; (y + 3) < (*mdi).MaxPics; y += ROW_SPAN)
 		{
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
-				cv::circle(drowDebugDetect, cv::Point(rightX, i), 5, cv::Scalar(0, 255, 255), 3);
+				cv::circle(drowDebugDetectLR, cv::Point(rightX, y), 5, cv::Scalar(0, 255, 255), 3);
 			}
 #endif
-			int x1 = GetEdgeRightx3(cv::Point(rightX, i), range);
+			int x1 = GetEdgeRightx3(cv::Point(rightX, y), range);
 			if (x1 >= 0)
 			{
-				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, i, (*mdi).width, 1));
+				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, y, (*mdi).width, 1));
 				uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
 
 				lineheadRGB[x1 * 3 + 0] = 0;
 				lineheadRGB[x1 * 3 + 1] = 0;
 				lineheadRGB[x1 * 3 + 2] = 255;
-
 #ifdef OUTPUT_DEBUG_INFO
 				if (OUTPUT_DEBUG_INFO)
 				{
-					cv::circle(drowDebugResult, cv::Point(x1, i), 5, cv::Scalar(0, 0, 255), 2);
+					cv::circle(drowDebugResult, cv::Point(x1, y), 5, cv::Scalar(0, 0, 255), 2);
 				}
 #endif
-
-				RightBorder.push_back(cv::Point(x1, i));
+				RightBorder.push_back(cv::Point(x1, y));
 
 				noneCount = 0;
-				lastFoundLine = i;
+				lastFoundLine = y;
 				needReFind = true;
 
 				//匀速模型预测下一个点的x坐标
@@ -143,7 +142,7 @@ void BlocksDetector::Start()
 				if (needReFind)//是否要重新扫描改行
 				{
 					range = ORANGE_RANGE_ROW;
-					i -= ROW_SPAN;
+					y -= ROW_SPAN;
 					needReFind = false;
 				}
 			}
@@ -180,32 +179,59 @@ void BlocksDetector::Start()
 		//ROI中边界查找的起点行高
 		int centerY = LeftBorder[0].y - offsetY;
 
-		int lastFoundRow = 0;//上一次找到边缘是在第几列
-		int noneCount = 0;//连续没有找到边缘的数量。
 		bool needReFind = false;//对该行是否需要扩大range重新搜索
 
 
 		cv::Mat upROI;
 		cv::cvtColor((*s).NowBufferImg(cv::Rect(0, offsetY, (*mdi).width, height)), upROI, CV_RGB2GRAY);
 		cv::Mat img = (*s).NowBufferImg;
-		for (size_t x = 0; x < (*mdi).width; x += COL_SPAN)
+		for (size_t x = 0; (x + 3) < (*mdi).width; x += COL_SPAN)
 		{
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
-				cv::circle(drowDebugDetect, cv::Point(x, offsetY + centerY), 5, cv::Scalar(0, 255, 255), 3);
+				cv::circle(drowDebugDetectUD, cv::Point(x, offsetY + centerY), 5, cv::Scalar(0, 255, 255), 3);
 			}
 #endif
 			//相对于整幅图像的Y值
-			int absoy1 = GetEdgeUP(upROI, offsetY, cv::Point(x, centerY), range);
+			int absoy1 = GetEdgeUpx3(upROI, offsetY, cv::Point(x, centerY), range);
 			if (absoy1 >= 0)
 			{
-				cv::Mat oneLine = (*s).NowBufferImg(cv::Rect(0, absoy1, (*mdi).width, 1));
-				uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+				uchar* lineheadRGB = (*s).NowBufferImg.ptr<uchar>(absoy1);//每行的起始地址
 
 				lineheadRGB[x * 3 + 0] = 0;
 				lineheadRGB[x * 3 + 1] = 0;
 				lineheadRGB[x * 3 + 2] = 255;
+
+#ifdef OUTPUT_DEBUG_INFO
+				if (OUTPUT_DEBUG_INFO)
+				{
+					cv::circle(drowDebugResult, cv::Point(x, absoy1), 5, cv::Scalar(0, 255, 255), 1);
+					cv::circle(drowDebugResult, cv::Point(x, absoy1), 1, cv::Scalar(255, 255, 0), -1);
+				}
+#endif
+
+				UpBorder.push_back(cv::Point(x, absoy1));
+				needReFind = true;
+				//匀速模型预测下一个点的y坐标
+				if (UpBorder.size() > 2)
+				{
+					int last_1 = UpBorder[UpBorder.size() - 1].y;
+					int last_2 = UpBorder[UpBorder.size() - 2].y;
+					centerY = last_1 + last_1 - last_2 - offsetY;
+				}
+				else
+					centerY = absoy1 - offsetY;
+				if (range > 50) range -= 50;
+			}
+			else
+			{
+				if (needReFind)//是否要重新扫描改行
+				{
+					range = ORANGE_RANGE_ROW;
+					x -= COL_SPAN;
+					needReFind = false;
+				}
 			}
 		}
 	}
@@ -241,6 +267,8 @@ void BlocksDetector::Start()
 #endif
 }
 
+#pragma region 左边缘查找
+
 int BlocksDetector::GetEdgeLeftx3(cv::Point start, int range)
 {
 	int a = BlocksDetector::GetEdgeLeft(start, range);
@@ -262,7 +290,7 @@ int BlocksDetector::GetEdgeLeftApproach(cv::Point start, cv::Point end, int rang
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		cv::circle(drowDebugDetect, cv::Point(end.x, middleLine), 3, cv::Scalar(255, 0, 0), 2);
+		cv::circle(drowDebugDetectLR, cv::Point(end.x, middleLine), 3, cv::Scalar(255, 0, 0), 2);
 	}
 #endif
 	if (start.x == -1)
@@ -350,7 +378,7 @@ int BlocksDetector::GetEdgeLeft(cv::Point start, int range)
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		lineheadO = drowDebugDetect(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0);//每行的起始地址
+		lineheadO = drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0);//每行的起始地址
 	}
 #endif
 
@@ -397,11 +425,14 @@ int BlocksDetector::GetEdgeLeft(cv::Point start, int range)
 	}
 	return ret;
 }
+#pragma endregion
+
+#pragma region 右边缘查找
 int BlocksDetector::GetEdgeRightx3(cv::Point start, int range)
 {
-	int a = BlocksDetector::GetEdgeRight(start, range);
-	int b = BlocksDetector::GetEdgeRight(cv::Point(start.x, start.y + 1), range);
-	int c = BlocksDetector::GetEdgeRight(cv::Point(start.x, start.y + 1), range);
+	int a = GetEdgeRight(start, range);
+	int b = GetEdgeRight(cv::Point(start.x, start.y + 1), range);
+	int c = GetEdgeRight(cv::Point(start.x, start.y + 1), range);
 	if ((a + b + c) > 0 && abs((a + c - b - b)) < 5)
 		return ((a + b + c) / 3);
 	return -1;
@@ -417,7 +448,7 @@ int BlocksDetector::GetEdgeRightApproach(cv::Point start, cv::Point end, int ran
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		cv::circle(drowDebugDetect, cv::Point(end.x, middleLine), 3, cv::Scalar(255, 0, 0), 2);
+		cv::circle(drowDebugDetectLR, cv::Point(end.x, middleLine), 3, cv::Scalar(255, 0, 0), 2);
 	}
 #endif
 
@@ -501,7 +532,7 @@ int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		lineheadO = drowDebugDetect(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0);//每行的起始地址
+		lineheadO = drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0);//每行的起始地址
 	}
 #endif
 	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
@@ -548,13 +579,27 @@ int BlocksDetector::GetEdgeRight(cv::Point start, int range)
 	}
 	return ret;
 }
+#pragma endregion
 
-
-
+#pragma region 上边缘查找
 /*******************上边缘查找开始********************/
-
-int BlocksDetector::GetEdgeUP(cv::Mat& ROI, int offsetY, cv::Point start, int range)
+int BlocksDetector::GetEdgeUpx3(cv::Mat& ROI, int offsetY, cv::Point start, int range)
 {
+	int a = GetEdgeUp(ROI, offsetY, start, range);
+	int b = GetEdgeUp(ROI, offsetY, cv::Point(start.x + 1, start.y), range);
+	int c = GetEdgeUp(ROI, offsetY, cv::Point(start.x + 1, start.y), range);
+	if ((a + b + c) > 0 && abs((a + c - b - b)) < 5)
+		return ((a + b + c) / 3);
+	return -1;
+}
+int BlocksDetector::GetEdgeUp(cv::Mat& ROI, int offsetY, cv::Point start, int range)
+{
+#ifdef OUTPUT_DEBUG_INFO
+	if (OUTPUT_DEBUG_INFO)
+	{
+		cv::Mat drow = drowDebugDetectUD;
+	}
+#endif
 	const int sumcount = SUM_COUNT;
 	int ystart = start.y - range;
 	if (ystart < 0)
@@ -576,12 +621,18 @@ int BlocksDetector::GetEdgeUP(cv::Mat& ROI, int offsetY, cv::Point start, int ra
 		{
 			downsum += ROI.ptr<uchar>(yy)[start.x];
 		}
-		int c = (upsum - downsum);
+		int c = (downsum - upsum);
 		if (c > diff)
 		{
 			diff = c;
 			ret = y;
 		}
+#ifdef OUTPUT_DEBUG_INFO
+		if (OUTPUT_DEBUG_INFO)
+		{
+			drowDebugDetectUD.ptr<uchar>(offsetY + y)[start.x * 3 +1] = 255;//填充绿色
+		}
+#endif
 	}
 	if (ret >= 0)
 	{
@@ -589,3 +640,9 @@ int BlocksDetector::GetEdgeUP(cv::Mat& ROI, int offsetY, cv::Point start, int ra
 	}
 	return ret;
 }
+#pragma endregion
+
+#pragma region 下边缘查找
+
+
+#pragma endregion

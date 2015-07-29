@@ -11,9 +11,12 @@ public:
 
 	void Start();
 
+#ifdef OUTPUT_DEBUG_INFO
 	//检测过程中的图片
-	cv::Mat drowDebugDetect;
+	cv::Mat drowDebugDetectLR;
+	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
+#endif
 
 	cv::Point A;
 	cv::Point B;
@@ -39,9 +42,9 @@ private:
 	int GetEdgeRightApproach(cv::Point start, cv::Point end, int range = 200);
 	int GetEdgeRight(cv::Point start, int range = 200);
 
-	int GetEdgeUpx3(cv::Point start, int range = 200);
+	int GetEdgeUpx3(cv::Mat& ROI, int offsetY, cv::Point start, int range = 200);
 	int GetEdgeUpApproach(cv::Point start, cv::Point end, int range = 200);
-	int GetEdgeUP(cv::Mat& ROI, int offsetY, cv::Point start, int range = 200);
+	int GetEdgeUp(cv::Mat& ROI, int offsetY, cv::Point start, int range = 200);
 
 
 	//检测边缘时，累加多少个
@@ -60,7 +63,7 @@ private:
 
 
 	//隔几列采样一次
-	const int COL_SPAN = 100;
+	const int COL_SPAN = 78;
 	//默认的，对一个上下多少范围内进行扫描
 	const int ORANGE_RANGE_COL = 400;
 
