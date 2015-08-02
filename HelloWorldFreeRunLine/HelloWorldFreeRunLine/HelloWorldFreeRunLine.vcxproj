@@ -14,6 +14,7 @@
     <ProjectGuid>{A7512FAD-048C-40FF-8012-B24647BDD787}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>HelloWorldFreeRunLine</RootNamespace>
+    <ProjectName>TileDetector</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -102,8 +103,8 @@
     <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />
     <ClCompile Include="Class\VirtualCamera.cpp" />
-    <ClCompile Include="HelloWorldFreeRunLine.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TileDetector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
