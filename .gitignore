@@ -53,3 +53,9 @@
 /TileDetector/HelloWorldFreeRunLine/VirtualCameras/*.jpg
 /TileDetector/Debug
 /TileDetector/Release
+/TileDetector/TileDetector/VirtualCameras/*.jpg
+/TileDetector/TileDetector/Samples/*.jpg
+/TileDetector/Debug
+/TileDetector/TileDetector/Release
+/TileDetector/TileDetector/Debug
+/TileDetector/*.sdf
