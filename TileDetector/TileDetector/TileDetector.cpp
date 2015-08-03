@@ -69,13 +69,10 @@ void customer()
 		}
 		if (flag == 0)
 			break;
-
 		//检测算法
 		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
 		int elementCount = mdi.width;//每行元素数
 		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-
 		i++;
 	} while (flag != 0);
 	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
@@ -85,7 +82,6 @@ void customer()
 	{
 		Sleep(10);
 	}
-
 
 	double t = (double)cv::getTickCount();
 	bd.Start();
@@ -127,9 +123,10 @@ int main()
 	else
 	{
 		//初始化虚拟相机
+		vc = VirtualCamera(mdi, "瓷砖崩边上边.jpg");
 		//vc = VirtualCamera(mdi, "样品2_o.jpg");
 		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
-		vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
+		//vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
 
 

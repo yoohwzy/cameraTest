@@ -35,11 +35,9 @@ private:
 
 	//逼近法求出左上角，已知endline的x列为边界
 	int GetEdgeLeftx3(cv::Point start, int range = 200);
-	int GetEdgeLeftApproach(cv::Point start, cv::Point end, int range);
 	int GetEdgeLeft(cv::Point start, int range = 200);
 
 	int GetEdgeRightx3(cv::Point start, int range = 200);
-	int GetEdgeRightApproach(cv::Point start, cv::Point end,  int range);
 	int GetEdgeRight(cv::Point start, int range = 200);
 
 	int GetEdgeUpx3(cv::Point start, int range = 200);
@@ -49,8 +47,8 @@ private:
 	int GetEdgeDownx3(cv::Point start, int range = 200);
 	int GetEdgeDownApproach(cv::Point start, cv::Point end, int range);
 	int GetEdgeDown(cv::Point start, int range = 200);
-
-
+	//逼近真正的边缘
+	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, bool isLeft, cv::Point Target);
 	//检测边缘时，累加多少个
 	const int SUM_COUNT = 20;
 	//平均每个点之间要差SUM_AVG_THRESHOD才算作是边界，真正的阈值为SUM_COUNT*SUM_AVG_THRESHOD;
@@ -61,9 +59,9 @@ private:
 	//隔几行采样一次
 	const int ROW_SPAN = 111;
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
-	const int ORANGE_MARGIN_ROW = 300;
+	const int ORANGE_MARGIN_ROW = 200;
 	//默认的，对一个左右多少范围内进行扫描
-	const int ORANGE_RANGE_ROW = 200;
+	const int ORANGE_RANGE_ROW = 150;
 
 
 	//隔几列采样一次
