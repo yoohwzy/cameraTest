@@ -75,7 +75,6 @@ void customer()
 		int elementCount = mdi.width;//每行元素数
 		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
 
-
 		i++;
 	} while (flag != 0);
 	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
