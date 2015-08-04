@@ -10,6 +10,10 @@ public:
 	~BlocksDetector();
 
 	void Start();
+	//检测某一行的左侧边缘，返回边缘的x坐标，-1表示未找到
+	//传入参数为在第几行检测，不传入参数则检测leftY行
+	int DetectOneLineLeft(int y = -1);
+	int DetectOneLineRight(int y = -1);
 
 #ifdef OUTPUT_DEBUG_INFO
 	//检测过程中的图片
@@ -28,28 +32,50 @@ public:
 	vector < cv::Point > UpBorder;
 	vector < cv::Point > DownBorder;
 
+	//存储边界点，临时存放，最后要进行分类
+	vector < cv::Point > LeftUp;
+	vector < cv::Point > LeftDown;
+	vector < cv::Point > RightUp;
+	vector < cv::Point > RightDown;
 
 private:
 	BufferStorage *s;
 	MicroDisplayInit *mdi;
 
-	//逼近法求出左上角，已知endline的x列为边界
-	int GetEdgeLeftx3(cv::Point start, int range = 200);
-	int GetEdgeLeft(cv::Point start, int range = 200);
+	vector<cv::Point> tmpLeftList;
+	vector<cv::Point> allLeftList;//记录所有找到的点，预测用
+	vector<cv::Point> tmpRightList;
+	vector<cv::Point> allRightList;
 
+	int leftY;//在第几行检测
+	int leftX;//检测的中点
+	int leftRnage;//在中点周围多少像素内检测
+	int leftNoneCount = 0;//连续没有找到边缘的数量。
+	bool leftNeedReFind = false;//对该行是否需要扩大range重新搜索
+
+	int rightY;
+	int rightX;
+	int rightRnage;
+	int rightNoneCount = 0;//连续没有找到边缘的数量。
+	bool rightNeedReFind = false;//对该行是否需要扩大range重新搜索
+
+
+
+
+	int GetEdgeLeftx3(cv::Point start, int range = 200);
 	int GetEdgeRightx3(cv::Point start, int range = 200);
-	int GetEdgeRight(cv::Point start, int range = 200);
 
 	int GetEdgeUpx3(cv::Point start, int range = 200);
-	int GetEdgeUpApproach(cv::Point start, cv::Point end, int range);
-	int GetEdgeUp(cv::Point start, int range = 200);
 
 	int GetEdgeDownx3(cv::Point start, int range = 200);
-	int GetEdgeDownApproach(cv::Point start, cv::Point end, int range);
-	int GetEdgeDown(cv::Point start, int range = 200);
-	//逼近真正的边缘
-	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, bool isLeft, cv::Point Target);
-	//检测边缘时，累加多少个
+	//逼近真正的竖直边缘顶点
+	//isUp true：逼近上顶点  false：逼近下顶点
+	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, bool isUp, cv::Point Target);
+	int GetEdgeVertical(cv::Point start, int range, bool isLeft);
+	//isLeft true：逼近左顶点，false：逼近右顶点
+	int GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, bool isLeft, cv::Point Target);
+	int GetEdgeHorizontal(cv::Point start, int range, bool isUp);
+	//检测边缘时，累加多少个像素点
 	const int SUM_COUNT = 20;
 	//平均每个点之间要差SUM_AVG_THRESHOD才算作是边界，真正的阈值为SUM_COUNT*SUM_AVG_THRESHOD;
 	const int SUM_AVG_THRESHOD = 5;
@@ -61,8 +87,7 @@ private:
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
 	const int ORANGE_MARGIN_ROW = 200;
 	//默认的，对一个左右多少范围内进行扫描
-	const int ORANGE_RANGE_ROW = 150;
-
+	const int ORANGE_RANGE_ROW = 200;
 
 	//隔几列采样一次
 	const int COL_SPAN = 88;
@@ -70,11 +95,12 @@ private:
 	const int ORANGE_RANGE_COL = 200;
 
 	//每次搜索的正负范围
-	const int RANGE_MINI = 40;		//参考值50
+	const int RANGE_MINI = 35;		//参考值50
 	//每次范围减少多少
 	const int RANGE_REDUCE_BY = 50;
-	//对LIST<POINT>排序
 
+
+	//对LIST<POINT>排序
 	static bool ORDER_BY_Y_ASC(cv::Point i, cv::Point j) { return i.y < j.y; }
 	static bool ORDER_BY_Y_DESC(cv::Point i, cv::Point j) { return i.y > j.y; }
 	static bool ORDER_BY_X_ASC(cv::Point i, cv::Point j) { return i.x < j.x; }

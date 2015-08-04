@@ -123,10 +123,10 @@ int main()
 	else
 	{
 		//³õÊ¼»¯ÐéÄâÏà»ú
-		vc = VirtualCamera(mdi, "´É×©±À±ßÉÏ±ß.jpg");
+		//vc = VirtualCamera(mdi, "´É×©±À±ßÉÏ±ß.jpg");
 		//vc = VirtualCamera(mdi, "ÑùÆ·2_o.jpg");
 		//vc = VirtualCamera(mdi, "´É×©È±ÏÝ2_o.jpg");
-		//vc = VirtualCamera(mdi, "´É×©±À±ß1_o.jpg");
+		vc = VirtualCamera(mdi, "´É×©±À±ß1_o.jpg");
 	}
 
 
@@ -171,7 +171,7 @@ int main()
 			ss2 >> p2;
 			//cv::imwrite(p1, s.NowBuffer);
 			//cv::imwrite("result1.jpg", s.NowBufferGray);
-			cv::imwrite(p2, s.NowBufferImg);
+			//cv::imwrite(p2, s.NowBufferImg);
 		}
 		if (input == "2")
 		{
