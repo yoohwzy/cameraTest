@@ -8,8 +8,18 @@ class BlocksDetector
 public:
 	BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
 	~BlocksDetector();
+	enum BorderType{
+		Left,
+		Up,
+		Right,
+		Down
+	};
+
 
 	void Start();
+	// 寻找上下边缘
+	void StartUP_DOWN(BorderType bt);
+
 	//检测某一行的左侧边缘，返回边缘的x坐标，-1表示未找到
 	//传入参数为在第几行检测，不传入参数则检测leftY行
 	int DetectOneLineLeft(int y = -1);
@@ -32,12 +42,16 @@ public:
 	vector < cv::Point > UpBorder;
 	vector < cv::Point > DownBorder;
 
-	//存储边界点，临时存放，最后要进行分类
+	//存储边界顶点，临时存放，最后要进行分类
 	vector < cv::Point > LeftUp;
 	vector < cv::Point > LeftDown;
 	vector < cv::Point > RightUp;
 	vector < cv::Point > RightDown;
 
+	vector < cv::Point > UpLeft;
+	vector < cv::Point > DownLeft;
+	vector < cv::Point > UpRight;
+	vector < cv::Point > DownRight;
 private:
 	BufferStorage *s;
 	MicroDisplayInit *mdi;
@@ -46,6 +60,12 @@ private:
 	vector<cv::Point> allLeftList;//记录所有找到的点，预测用
 	vector<cv::Point> tmpRightList;
 	vector<cv::Point> allRightList;
+
+	vector<cv::Point> tmpUpList;
+	vector<cv::Point> allUpList;
+	vector<cv::Point> tmpDownList;
+	vector<cv::Point> allDownList;
+
 
 	int leftY;//在第几行检测
 	int leftX;//检测的中点
@@ -61,19 +81,13 @@ private:
 
 
 
-
-	int GetEdgeLeftx3(cv::Point start, int range = 200);
-	int GetEdgeRightx3(cv::Point start, int range = 200);
-
-	int GetEdgeUpx3(cv::Point start, int range = 200);
-
-	int GetEdgeDownx3(cv::Point start, int range = 200);
+	int GetEdgeX3(cv::Point start, int range, BorderType bt);
 	//逼近真正的竖直边缘顶点
 	//isUp true：逼近上顶点  false：逼近下顶点
-	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, bool isUp, cv::Point Target);
+	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target);
 	int GetEdgeVertical(cv::Point start, int range, bool isLeft);
 	//isLeft true：逼近左顶点，false：逼近右顶点
-	int GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, bool isLeft, cv::Point Target);
+	int GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target);
 	int GetEdgeHorizontal(cv::Point start, int range, bool isUp);
 	//检测边缘时，累加多少个像素点
 	const int SUM_COUNT = 20;
@@ -85,12 +99,12 @@ private:
 	//隔几行采样一次
 	const int ROW_SPAN = 111;
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
-	const int ORANGE_MARGIN_ROW = 200;
+	const int ORANGE_MARGIN_ROW = 300;
 	//默认的，对一个左右多少范围内进行扫描
 	const int ORANGE_RANGE_ROW = 200;
 
 	//隔几列采样一次
-	const int COL_SPAN = 88;
+	const int COL_SPAN = 100;
 	//默认的，对一个上下多少范围内进行扫描
 	const int ORANGE_RANGE_COL = 200;
 

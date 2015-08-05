@@ -85,6 +85,8 @@ void customer()
 
 	double t = (double)cv::getTickCount();
 	bd.Start();
+	bd.StartUP_DOWN(bd.Up);
+	bd.StartUP_DOWN(bd.Down);
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;
 
@@ -124,9 +126,9 @@ int main()
 	{
 		//初始化虚拟相机
 		//vc = VirtualCamera(mdi, "瓷砖崩边上边.jpg");
-		//vc = VirtualCamera(mdi, "样品2_o.jpg");
+		vc = VirtualCamera(mdi, "样品2_o.jpg");
 		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
-		vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
+		//vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
 
 
