@@ -52,6 +52,30 @@ void BlocksDetector::Start()
 		//若没有找到边缘，停止程序。
 		if (LeftBorder.size() == 0)
 			return;
+
+		//拟合直线，判断可疑点
+		cv::Vec4f leftLine;
+		cv::fitLine(cv::Mat(LeftBorder), leftLine, CV_DIST_L2, 0, 0.01, 0.01);
+		if (3 == 3)
+		{
+			int x0 = leftLine[2];
+			int y0 = leftLine[3];
+			double dx = leftLine[0];
+			double dy = leftLine[1];
+			double k = dy / dx;
+			for (size_t i = 0; i < tmpLeftList.size(); i++)
+			{
+				int x = tmpLeftList[i].x;
+				int y = tmpLeftList[i].y;
+				if (abs((y - y0) / k + x0 - x) < 10)
+				{
+					LeftBorder.push_back(tmpLeftList[i]);
+				}
+			}
+			std::sort(LeftBorder.begin(), LeftBorder.end(), ORDER_BY_Y_ASC);
+		}
+
+
 		//逼近顶点
 		int leftFirstLine = LeftBorder[0].y, leftFirstX = LeftBorder[0].x;
 		int leftLastLine = LeftBorder[LeftBorder.size() - 1].y, leftLastX = LeftBorder[LeftBorder.size() - 1].x;
@@ -61,7 +85,6 @@ void BlocksDetector::Start()
 		cv::Point downstart = cv::Point(leftLastX, leftLastLine);
 		cv::Point downend = cv::Point(-1, (leftLastLine + ROW_SPAN) > (*mdi).MaxPics ? ((*mdi).MaxPics - 1) : (leftLastLine + ROW_SPAN));
 		GetEdgeVerticalApproach(downstart, downend, RANGE_MINI, BorderType::Left, downend);
-
 
 #ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
@@ -75,8 +98,26 @@ void BlocksDetector::Start()
 				cv::circle(drowDebugResult, LeftUp[i], 1, cv::Scalar(0, 255, 0), 1);
 			for (size_t i = 0; i < LeftDown.size(); i++)
 				cv::circle(drowDebugResult, LeftDown[i], 1, cv::Scalar(0, 255, 0), 1);
+
+			//y = (x0 + d*dx - y0)dy
+			// k = dy/dx
+			// y = k(x-x1) + y1
+			// x = (y - y1)/k + x1
+
+			int x0 = leftLine[2];
+			int y0 = leftLine[3];
+			double dx = leftLine[0];
+			double dy = leftLine[1];
+			double k = dy / dx;
+
+			cv::line(drowDebugResult, cv::Point(((*mdi).MaxPics - y0) / k + x0, (*mdi).MaxPics), cv::Point((0 - y0) / k + x0, 0), cv::Scalar(255, 255, 255), 1);
+			//cv::line(drowDebugResult, cv::Point(x0, y0), cv::Point(leftLine[2] + 2000 * leftLine[0], leftLine[3] + 2000 * leftLine[1]), cv::Scalar(255, 255, 255), 3);
+
 		}
 #endif
+
+
+
 		LeftBorder.insert(LeftBorder.end(), LeftUp.begin(), LeftUp.end());
 		LeftBorder.insert(LeftBorder.end(), LeftDown.begin(), LeftDown.end());
 
@@ -125,7 +166,6 @@ void BlocksDetector::Start()
 		RightBorder.insert(RightBorder.end(), RightDown.begin(), RightDown.end());
 	}
 
-	std::sort(LeftBorder.begin(), LeftBorder.end(), ORDER_BY_Y_ASC);
 	std::sort(RightBorder.begin(), RightBorder.end(), ORDER_BY_Y_ASC);
 
 	std::sort(allLeftList.begin(), allLeftList.end(), ORDER_BY_Y_ASC);
@@ -276,21 +316,15 @@ int BlocksDetector::DetectOneLineLeft(int y)
 	int x1 = GetEdgeX3(cv::Point(leftX, y), leftRnage, BlocksDetector::Left);
 	if (x1 >= 0)
 	{
+		allLeftList.push_back(cv::Point(x1, y));
 		//如果在预测范围之内找到了边界，就认为找到了真正的点，否则认为存疑。
 		if (leftRnage == RANGE_MINI)
 		{
-			if (LeftBorder.size() == 0)
-			{
-				LeftBorder.insert(LeftBorder.end(), tmpLeftList.begin(), tmpLeftList.end());
-				tmpLeftList.clear();
-			}
 			LeftBorder.push_back(cv::Point(x1, y));
-			allLeftList.push_back(cv::Point(x1, y));
 		}
 		else
 		{
 			tmpLeftList.push_back(cv::Point(x1, y));
-			allLeftList.push_back(cv::Point(x1, y));
 		}
 		leftNoneCount = 0;
 		leftNeedReFind = true;
