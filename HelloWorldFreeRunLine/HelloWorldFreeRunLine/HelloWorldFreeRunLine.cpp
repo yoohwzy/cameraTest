@@ -104,8 +104,7 @@ void customer()
 	//标记消费者工作结束
 	customerEndFlag = true;
 }
-
-int main()
+int init()
 {
 	mdi.colorType = mdi.GRAY;
 	mdi.width = 4096;
@@ -116,8 +115,8 @@ int main()
 	if (!USING_VIRTUAL_CAMERA)
 	{
 		//初始化采集卡
-		//status = MicroDisplayInit::InitParameter(mdi);
-		status = MicroDisplayInit::InitLoad(mdi,"4096gray1lineGainX2.mcf");
+		status = MicroDisplayInit::InitParameter(mdi);
+		//status = MicroDisplayInit::InitLoad(mdi, "4096gray1lineGainX2.mcf");
 		if (status < 0)
 		{
 			ErrorMessageWait(mdi.fg);
@@ -133,9 +132,11 @@ int main()
 		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
 		vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
+}
+int main()
+{
 
-
-
+	init();
 
 	int grabbingIndex = 0;
 	//主循环
@@ -178,7 +179,7 @@ int main()
 			//cv::imwrite("result1.jpg", s.NowBufferGray);
 			cv::imwrite(p2, s.NowBufferImg);
 		}
-		if (input == "2")
+		else if (input == "2")
 		{
 			//采样矫正图像
 			int MaxPics = mdi.MaxPics;
@@ -215,6 +216,21 @@ int main()
 			//重新初始化缓存
 			mdi.MaxPics = MaxPics;
 			s = BufferStorage(mdi);
+		}
+		else if (input == "3")
+		{
+			MicroDisplayInit::Release(mdi);
+			mdi.height = 200;
+			status = MicroDisplayInit::InitParameter(mdi);
+			if (status < 0)
+			{
+				return -1;
+			}
+			MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+			//MicroDisplayInit::CreateBufferWithDiplay(mdi);
+			MicroDisplayControler::FreeRunningFocusing(mdi);
+			MicroDisplayInit::Release(mdi);
+			init();
 		}
 		else
 			Sleep(10);
