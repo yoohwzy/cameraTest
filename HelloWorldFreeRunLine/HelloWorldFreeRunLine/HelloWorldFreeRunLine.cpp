@@ -15,7 +15,9 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
+const bool USING_VIRTUAL_CAMERA = false;//是否使用虚拟摄像头 1使用 0用E2V
+
+
 bool producerEndFlag = false, customerEndFlag = false;
 
 
@@ -114,7 +116,8 @@ int main()
 	if (!USING_VIRTUAL_CAMERA)
 	{
 		//初始化采集卡
-		status = MicroDisplayInit::InitParameter(mdi);
+		//status = MicroDisplayInit::InitParameter(mdi);
+		status = MicroDisplayInit::InitLoad(mdi,"4096gray1lineGainX2.mcf");
 		if (status < 0)
 		{
 			ErrorMessageWait(mdi.fg);

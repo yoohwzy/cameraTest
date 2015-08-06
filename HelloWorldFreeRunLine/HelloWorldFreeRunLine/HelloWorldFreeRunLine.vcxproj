@@ -104,7 +104,7 @@
     <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />
     <ClCompile Include="Class\VirtualCamera.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="TileDetector.cpp" />
+    <ClCompile Include="HelloWorldFreeRunLine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
