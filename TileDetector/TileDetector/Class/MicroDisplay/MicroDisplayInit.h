@@ -2,14 +2,14 @@
 #include "../../globle.h"
 
 
-#define CONFIG_FILENAME "anOriginalConfigFileName.mcf"
-
 // 相机参数初始化类，存储相机设定参数，并初始化采集卡与相机
 class MicroDisplayInit
 {
 private:
 	static int getNrOfBoards();
 	static int getBoardInfo();
+	static int memoryAllocation(MicroDisplayInit& mdi);
+	static int initFG(MicroDisplayInit& mdi);
 public:
 	const char *dllNameGRAY = "DualLineGray16.dll";
 	const char *dllNameRGB = "DualLineRGB30.dll";
@@ -40,9 +40,8 @@ public:
 	cv::Mat SamplesGray;
 	cv::Mat SamplesRGB;
 
-	static int Init(MicroDisplayInit& mdi);
 	//加载配置文件初始化
-	static int InitLoad(MicroDisplayInit& mdi);
+	static int InitLoad(MicroDisplayInit& mdi, char * mcfName = "4096grayline.mcf");
 	//参数初始化
 	static int InitParameter(MicroDisplayInit& mdi);
 	//创建内存  不弄窗口

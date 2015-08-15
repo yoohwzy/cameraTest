@@ -5,9 +5,18 @@
 #include "MicroDisplay\MicroDisplayInit.h";
 class BlocksDetector
 {
+
 public:
 	BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
 	~BlocksDetector();
+	struct Line
+	{
+		int x0;
+		int y0;
+		double k;
+		double dx;
+		double dy;
+	};
 	enum BorderType{
 		Left,
 		Up,
@@ -38,9 +47,13 @@ public:
 	cv::Point D;
 
 	vector < cv::Point > LeftBorder;
+	Line LeftLine;
 	vector < cv::Point > RightBorder;
+	Line RightLine;
 	vector < cv::Point > UpBorder;
+	Line UpLine;
 	vector < cv::Point > DownBorder;
+	Line DownLine;
 
 	//存储边界顶点，临时存放，最后要进行分类
 	vector < cv::Point > LeftUp;
@@ -89,6 +102,24 @@ private:
 	//isLeft true：逼近左顶点，false：逼近右顶点
 	int GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target);
 	int GetEdgeHorizontal(cv::Point start, int range, bool isUp);
+	//判断某点是否在某条线上。
+	bool IsPointNearline(Line line, cv::Point point);
+
+
+
+
+
+
+
+
+
+	 
+
+
+
+
+	 
+
 	//检测边缘时，累加多少个像素点
 	const int SUM_COUNT = 20;
 	//平均每个点之间要差SUM_AVG_THRESHOD才算作是边界，真正的阈值为SUM_COUNT*SUM_AVG_THRESHOD;

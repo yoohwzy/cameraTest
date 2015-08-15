@@ -1,25 +1,24 @@
 #include "MicroDisplayInit.h"
 
 // 初始化采集卡与摄像机
-// 首先尝试读取mcf初始化，失败后手动配置参数初始化
+// 读取mcf初始化
 // 返回Status;
-int MicroDisplayInit::Init(MicroDisplayInit& mdi)
+int MicroDisplayInit::InitLoad(MicroDisplayInit& mdi, char * mcfName)
 {
-	int status = 0;
-
-
-
-	return status;
-}
-// 初始化采集卡与摄像机
-// 读取mcf初始化，参数文件定义在头文件 CONFIG_FILENAME
-// 返回Status;
-int MicroDisplayInit::InitLoad(MicroDisplayInit& mdi)
-{
-	int status = 0;
-
-
-
+#ifdef OUTPUT_DEBUG_INFO
+	if (OUTPUT_DEBUG_INFO)
+	{
+		getBoardInfo();
+	}
+#endif
+	//初始化fg
+	int status = MicroDisplayInit::initFG(mdi);
+	if ((status = Fg_loadConfig(mdi.fg, mcfName)) < 0) {
+		status = ErrorMessageWait(mdi.fg);
+		return status;
+	}
+	OutPutDebugInfo("Load Config File ok\n");
+	return MicroDisplayInit::memoryAllocation(mdi);
 	return status;
 }
 // 初始化采集卡与摄像机
@@ -34,35 +33,10 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	}
 #endif
 
-
-	int status = 0;
+	//初始化fg
+	int status = MicroDisplayInit::initFG(mdi);
 	char debugInfo[256];
 
-
-	// Initialization of the microEnable frame grabber
-	if (mdi.colorType == GRAY)
-	{
-		if ((mdi.fg = Fg_Init(mdi.dllNameGRAY, mdi.nBoard)) == NULL) {
-			return status;
-		}
-		//设置传输模式，设置后才为4k
-		int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
-		if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
-			return status;
-		}
-	}
-	else
-	{
-		if ((mdi.fg = Fg_Init(mdi.dllNameRGB, mdi.nBoard)) == NULL) {
-			return status;
-		}
-		//TODO:添加传输模式的调整
-		//int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
-		//if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
-		//	return status;
-		//}
-	}
-	OutPutDebugInfo("Init Grabber ok");
 
 	//设置参数
 	int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
@@ -79,31 +53,15 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	if (Fg_setParameter(mdi.fg, FG_BITALIGNMENT, &bitAlignment, mdi.nCamPort) < 0) {
 		return status;
 	}
+	//Gain值
+	//int _FG_KNEE_LUT_SCALE = 10;
+	//if (Fg_setParameter(mdi.fg, FG_KNEE_LUT_SCALE, &_FG_KNEE_LUT_SCALE, mdi.nCamPort) < 0) {
+	//	return status;
+	//}
 	sprintf(debugInfo, "Set Image Size on port %d (w: %d,h: %d) ok", mdi.nCamPort, mdi.width, mdi.height);
 	OutPutDebugInfo(debugInfo);
 
-
-	// Memory allocation
-	int format = 0;
-	Fg_getParameter(mdi.fg, FG_FORMAT, &format, mdi.nCamPort);
-	size_t bytesPerPixel = 1;
-	switch (format){
-	case FG_GRAY:	bytesPerPixel = 1; break;
-	case FG_GRAY16:	bytesPerPixel = 2; break;
-	case FG_COL24:	bytesPerPixel = 3; break;
-	case FG_COL32:	bytesPerPixel = 4; break;
-	case FG_COL30:	bytesPerPixel = 5; break;
-	case FG_COL48:	bytesPerPixel = 6; break;
-	}
-	size_t totalBufSize = mdi.width*mdi.height*mdi.nr_of_buffer*bytesPerPixel;
-	if ((mdi.pMem0 = Fg_AllocMemEx(mdi.fg, totalBufSize, mdi.nr_of_buffer)) == NULL){
-		return status;
-	}
-	else {
-		sprintf(debugInfo, "%d framebuffer allocated for port %d ok", mdi.nr_of_buffer, mdi.nCamPort);
-		OutPutDebugInfo(debugInfo);
-	}
-	return status;
+	return MicroDisplayInit::memoryAllocation(mdi);
 }
 
 void MicroDisplayInit::CreateBufferWithDiplay(MicroDisplayInit& mdi)
@@ -146,6 +104,63 @@ void MicroDisplayInit::Release(MicroDisplayInit& mdi)
 
 
 
+/*****************PRIVATE****************/
+int MicroDisplayInit::initFG(MicroDisplayInit& mdi)
+{
+	int status = 0;
+	// Initialization of the microEnable frame grabber
+	if (mdi.colorType == GRAY)
+	{
+		if ((mdi.fg = Fg_Init(mdi.dllNameGRAY, mdi.nBoard)) == NULL) {
+			return status;
+		}
+		//设置传输模式，设置后才为4k
+		int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
+		if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
+			return status;
+		}
+	}
+	else
+	{
+		if ((mdi.fg = Fg_Init(mdi.dllNameRGB, mdi.nBoard)) == NULL) {
+			return status;
+		}
+		//TODO:添加传输模式的调整
+		//int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
+		//if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
+		//	return status;
+		//}
+	}
+	OutPutDebugInfo("Init FG ok");
+	return status;
+}
+int MicroDisplayInit::memoryAllocation(MicroDisplayInit& mdi)
+{
+	int status = 0;
+	char debugInfo[256];
+
+	// Memory allocation
+	int format = 0;
+	Fg_getParameter(mdi.fg, FG_FORMAT, &format, mdi.nCamPort);
+	size_t bytesPerPixel = 1;
+	switch (format){
+	case FG_GRAY:	bytesPerPixel = 1; break;
+	case FG_GRAY16:	bytesPerPixel = 2; break;
+	case FG_COL24:	bytesPerPixel = 3; break;
+	case FG_COL32:	bytesPerPixel = 4; break;
+	case FG_COL30:	bytesPerPixel = 5; break;
+	case FG_COL48:	bytesPerPixel = 6; break;
+	}
+	size_t totalBufSize = mdi.width*mdi.height*mdi.nr_of_buffer*bytesPerPixel;
+	if ((mdi.pMem0 = Fg_AllocMemEx(mdi.fg, totalBufSize, mdi.nr_of_buffer)) == NULL){
+		return status;
+	}
+	else {
+		sprintf(debugInfo, "%d framebuffer allocated for port %d ok", mdi.nr_of_buffer, mdi.nCamPort);
+		OutPutDebugInfo(debugInfo);
+	}
+	return status;
+}
 
 // returns the bit with according to the selected image format
 int MicroDisplayInit::getNoOfBitsFromImageFormat(const int format)
@@ -180,13 +195,7 @@ int MicroDisplayInit::getNoOfBitsFromImageFormat(const int format)
 
 
 
-
-
-
-
-
-
-
+#pragma region 调试用函数
 /***************调试用函数**************/
 // 在控制台显示出采集卡信息
 int MicroDisplayInit::getNrOfBoards()
@@ -280,3 +289,4 @@ int MicroDisplayInit::getBoardInfo()
 	}
 	return iPortCount;
 }
+#pragma endregion

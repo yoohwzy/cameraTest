@@ -16,6 +16,8 @@ MicroDisplayInit mdi;
 VirtualCamera vc;
 
 const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
+
+
 bool producerEndFlag = false, customerEndFlag = false;
 
 
@@ -69,10 +71,12 @@ void customer()
 		}
 		if (flag == 0)
 			break;
+
 		//检测算法
 		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
 		int elementCount = mdi.width;//每行元素数
 		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
+
 		i++;
 	} while (flag != 0);
 	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
@@ -83,26 +87,26 @@ void customer()
 		Sleep(10);
 	}
 
+
 	double t = (double)cv::getTickCount();
 	bd.Start();
-	bd.StartUP_DOWN(bd.Up);
-	bd.StartUP_DOWN(bd.Down);
+	bd.StartUP_DOWN(BlocksDetector::Up);
+	bd.StartUP_DOWN(BlocksDetector::Down);
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;
 
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
 	{
-		cv::imwrite("samples/drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
-		cv::imwrite("samples/drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
-		cv::imwrite("samples/drowDebugResult.jpg", bd.drowDebugResult);
+		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
+		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
 	}
 #endif
 	//标记消费者工作结束
 	customerEndFlag = true;
 }
-
-int main()
+int init()
 {
 	mdi.colorType = mdi.GRAY;
 	mdi.width = 4096;
@@ -114,6 +118,7 @@ int main()
 	{
 		//初始化采集卡
 		status = MicroDisplayInit::InitParameter(mdi);
+		//status = MicroDisplayInit::InitLoad(mdi, "4096gray1lineGainX2.mcf");
 		if (status < 0)
 		{
 			ErrorMessageWait(mdi.fg);
@@ -130,15 +135,17 @@ int main()
 		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
 		//vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
+}
+int main()
+{
 
-
-
+	init();
 
 	int grabbingIndex = 0;
 	//主循环
 	string input;
 	do{
-		std::cout << "输入1开始采图，2拍摄光照矫正样张，q退出：";
+		std::cout << "输入1开始采图，2拍摄光照矫正样张，3对焦，q退出：";
 		std::cin >> input;
 		
 		if (input == "1")
@@ -175,7 +182,7 @@ int main()
 			//cv::imwrite("result1.jpg", s.NowBufferGray);
 			//cv::imwrite(p2, s.NowBufferImg);
 		}
-		if (input == "2")
+		else if (input == "2")
 		{
 			//采样矫正图像
 			int MaxPics = mdi.MaxPics;
@@ -212,6 +219,21 @@ int main()
 			//重新初始化缓存
 			mdi.MaxPics = MaxPics;
 			s = BufferStorage(mdi);
+		}
+		else if (input == "3")
+		{
+			MicroDisplayInit::Release(mdi);
+			mdi.height = 200;
+			status = MicroDisplayInit::InitParameter(mdi);
+			if (status < 0)
+			{
+				return -1;
+			}
+			MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+			//MicroDisplayInit::CreateBufferWithDiplay(mdi);
+			MicroDisplayControler::FreeRunningFocusing(mdi);
+			MicroDisplayInit::Release(mdi);
+			init();
 		}
 		else
 			Sleep(10);
