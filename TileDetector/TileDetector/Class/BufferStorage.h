@@ -9,6 +9,8 @@ public:
 	BufferStorage(MicroDisplayInit& mditmp);
 	~BufferStorage();
 
+	//几行合成一行？
+	int NinOne = 3;
 	int BufferWriteIndex = 0;
 	int BufferReadIndex = 0;
 
@@ -44,10 +46,10 @@ public:
 	bool AddFrame(cv::Mat& frame);
 	//从缓存读出一帧，赋值给frame,返回 0 到底,1 继续,-1下一帧尚未写入完成
 	int GetFrame(cv::Mat& frame);
+	//将三行叠加一行。
+	void ThreeInOne(int lineIndex);
 private:
 	MicroDisplayInit mdi;
 	int bufferIndex = 0;//判断当前正在使用哪一个buffer，每执行一次Start()更换一个Buffer
-	int WIDTH = 4096;//线阵相机分辨率
-	int LENGTH = 1000;//缓存采集长度
 };
 

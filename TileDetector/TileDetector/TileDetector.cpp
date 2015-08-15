@@ -48,47 +48,27 @@ void producer()
 //消费者
 void customer()
 {
-	BlocksDetector bd = BlocksDetector(&s, &mdi);
 
 	//开始计时
-	double t1 = (double)cv::getTickCount();
+	double t = (double)cv::getTickCount();
 
-	//处理算法
-
-	//到了第几行
-	int i = 0;
-	//状态标记0表示结束，-1表示需要等待下一帧写入
-	int flag = 0;
-	do{
-		if (s.EndWriteFlag)
-			break;
-		cv::Mat f;
-		flag = s.GetFrame(f);
-		if (flag == -1)
+	//同步进行光照矫正与叠加
+	for (s.BufferReadIndex = 0; s.BufferReadIndex < mdi.MaxPics; s.BufferReadIndex++)
+	{
+		//尚未写入缓存，等待
+		while (s.BufferReadIndex + s.NinOne >= s.BufferWriteIndex && s.BufferWriteIndex != mdi.MaxPics)
 		{
 			Sleep(1);
-			continue;
 		}
-		if (flag == 0)
-			break;
-
-		//检测算法
-		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-		int elementCount = mdi.width;//每行元素数
-		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-		i++;
-	} while (flag != 0);
-	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
-	std::cout << "并行处理用时：" << t1 << endl;
-
-	while (!s.EndWriteFlag)
-	{
-		Sleep(10);
+		s.ThreeInOne(s.BufferReadIndex);
 	}
 
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "并行处理用时：" << t << endl;
 
-	double t = (double)cv::getTickCount();
+	//瓷砖边缘检测
+	BlocksDetector bd = BlocksDetector(&s, &mdi);
+	t = (double)cv::getTickCount();
 	bd.Start();
 	bd.StartUP_DOWN(BlocksDetector::Up);
 	bd.StartUP_DOWN(BlocksDetector::Down);
