@@ -48,60 +48,6 @@ void producer()
 //消费者
 void customer()
 {
-	BlocksDetector bd = BlocksDetector(&s, &mdi);
-
-	//开始计时
-	double t1 = (double)cv::getTickCount();
-
-	//处理算法
-
-	//到了第几行
-	int i = 0;
-	//状态标记0表示结束，-1表示需要等待下一帧写入
-	int flag = 0;
-	do{
-		if (s.EndWriteFlag)
-			break;
-		cv::Mat f;
-		flag = s.GetFrame(f);
-		if (flag == -1)
-		{
-			Sleep(1);
-			continue;
-		}
-		if (flag == 0)
-			break;
-
-		//检测算法
-		cv::Mat oneLine = s.NowBufferImg(cv::Rect(0, i, mdi.width, 1));
-		int elementCount = mdi.width;//每行元素数
-		uchar* lineheadRGB = oneLine.ptr<uchar>(0);//每行的起始地址
-
-		i++;
-	} while (flag != 0);
-	t1 = ((double)cv::getTickCount() - t1) / cv::getTickFrequency();
-	std::cout << "并行处理用时：" << t1 << endl;
-
-	while (!s.EndWriteFlag)
-	{
-		Sleep(10);
-	}
-
-
-	double t = (double)cv::getTickCount();
-	bd.Start();
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "非并行处理用时：" << t << endl;
-
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
-	{
-		cv::imwrite("samples/drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
-		cv::imwrite("samples/drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
-		cv::imwrite("samples/drowDebugResult.jpg", bd.drowDebugResult);
-	}
-#endif
-	//标记消费者工作结束
 	customerEndFlag = true;
 }
 int init()
@@ -122,8 +68,8 @@ int init()
 			ErrorMessageWait(mdi.fg);
 			return -1;
 		}
-		//MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
-		MicroDisplayInit::CreateBufferWithDiplay(mdi);
+		MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+		//MicroDisplayInit::CreateBufferWithDiplay(mdi);
 	}
 	else
 	{

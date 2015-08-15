@@ -71,7 +71,7 @@ void customer()
 	t = (double)cv::getTickCount();
 	bd.Start();
 	bd.StartUP_DOWN(BlocksDetector::Up);
-	//bd.StartUP_DOWN(BlocksDetector::Down);
+	bd.StartUP_DOWN(BlocksDetector::Down);
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;
 
@@ -104,8 +104,8 @@ int init()
 			ErrorMessageWait(mdi.fg);
 			return -1;
 		}
-		//MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
-		MicroDisplayInit::CreateBufferWithDiplay(mdi);
+		MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+		//MicroDisplayInit::CreateBufferWithDiplay(mdi);//使用彩色相机时，运行速度会很慢
 	}
 	else
 	{
@@ -152,14 +152,13 @@ int main()
 
 			string p1;
 			stringstream ss1;
-			ss1 << "samples/result" << grabbingIndex << "_o.jpg";
+			ss1 << "samples/result" << grabbingIndex << "_o原图.jpg";
 			ss1 >> p1;
 			string p2;
 			stringstream ss2;
 			ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
 			ss2 >> p2;
-			//cv::imwrite(p1, s.NowBuffer);
-			//cv::imwrite("result1.jpg", s.NowBufferGray);
+			cv::imwrite(p1, s.NowBuffer);
 			//cv::imwrite(p2, s.NowBufferImg);
 		}
 		else if (input == "2")
