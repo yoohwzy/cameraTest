@@ -235,12 +235,12 @@ void BlocksDetector::Start()
 void BlocksDetector::StartUP_DOWN(BorderType bt)
 {
 	int centerY = 0;
-
+	if (allLeftList.size() == 0 || allRightList.size() == 0)
+		return;
 	if (bt == BlocksDetector::Up && allLeftList[0].y == 0 && allRightList[0].y == 0)
 		return;
 	else if (bt == BlocksDetector::Down && !(allLeftList[allLeftList.size() - 1].y > 0 && allLeftList[allLeftList.size() - 1].y < ((*mdi).MaxPics - SUM_COUNT) && allRightList[allRightList.size() - 1].y>0 && allRightList[allRightList.size() - 1].y < ((*mdi).MaxPics - SUM_COUNT)))
 		return;
-
 	vector<cv::Point> *targetBorder;
 	vector<cv::Point> *tmptargetList;
 	vector<cv::Point> *alltargetList;

@@ -15,7 +15,7 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-const bool USING_VIRTUAL_CAMERA = true;//是否使用虚拟摄像头 1使用 0用E2V
+const bool USING_VIRTUAL_CAMERA = 0;//是否使用虚拟摄像头 1使用 0用E2V
 
 
 bool producerEndFlag = false, customerEndFlag = false;
@@ -71,7 +71,7 @@ void customer()
 	t = (double)cv::getTickCount();
 	bd.Start();
 	bd.StartUP_DOWN(BlocksDetector::Up);
-	bd.StartUP_DOWN(BlocksDetector::Down);
+	//bd.StartUP_DOWN(BlocksDetector::Down);
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "非并行处理用时：" << t << endl;
 
