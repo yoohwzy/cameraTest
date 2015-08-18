@@ -48,6 +48,9 @@ void producer()
 //消费者
 void customer()
 {
+	customerEndFlag = true;
+	return;
+
 
 	//开始计时
 	double t = (double)cv::getTickCount();
@@ -88,10 +91,10 @@ void customer()
 }
 int init()
 {
-	mdi.colorType = mdi.GRAY;
+	mdi.colorType = mdi.RGB;
 	mdi.width = 4096;
 	mdi.height = 1;
-	mdi.MaxPics = 10000;//采集多少帧图像
+	mdi.MaxPics = 15000;//采集多少帧图像
 	s = BufferStorage(mdi);
 
 	if (!USING_VIRTUAL_CAMERA)
@@ -105,6 +108,7 @@ int init()
 			return -1;
 		}
 		MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+		Fg_saveConfig(mdi.fg, "save.mcf");
 		//MicroDisplayInit::CreateBufferWithDiplay(mdi);//使用彩色相机时，运行速度会很慢
 	}
 	else
