@@ -36,13 +36,6 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	//初始化fg
 	int status = MicroDisplayInit::initFG(mdi);
 	char debugInfo[256];
-
-
-	//设置参数
-	int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
-	if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
-		return status;
-	}
 	if (Fg_setParameter(mdi.fg, FG_WIDTH, &mdi.width, mdi.nCamPort) < 0) {
 		return status;
 	}
@@ -125,11 +118,11 @@ int MicroDisplayInit::initFG(MicroDisplayInit& mdi)
 		if ((mdi.fg = Fg_Init(mdi.dllNameRGB, mdi.nBoard)) == NULL) {
 			return status;
 		}
-		//TODO:添加传输模式的调整
-		//int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
-		//if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
-		//	return status;
-		//}
+		//传输模式的调整
+		int _FG_CAMERA_LINK_CAMTYP = FG_CL_RGB;
+		if (Fg_setParameter(mdi.fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, mdi.nCamPort) < 0) {
+			return status;
+		}
 	}
 	OutPutDebugInfo("Init FG ok");
 	return status;
