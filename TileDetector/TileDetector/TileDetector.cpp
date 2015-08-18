@@ -98,7 +98,7 @@ int init()
 	{
 		//初始化采集卡
 		status = MicroDisplayInit::InitParameter(mdi);
-		//status = MicroDisplayInit::InitLoad(mdi, "4096gray1lineGainX2.mcf");
+		//status = MicroDisplayInit::InitLoad(mdi, "4096RGB1LineX1.mcf");
 		if (status < 0)
 		{
 			ErrorMessageWait(mdi.fg);
