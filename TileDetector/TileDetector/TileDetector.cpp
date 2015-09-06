@@ -132,9 +132,10 @@ void watcher()
 {
 	do{
 		// 读取PA0引脚的电平为低,且程序并未在采图时
-		if (mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1 && grabbingFlag == false)
+		if (grabbingFlag == false && mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1)
 		{
 			startFlag = true;
+			std::cout << "触发器触发" << endl;
 			Sleep(10);
 		}
 		else
@@ -150,6 +151,7 @@ void runner()
 		// 读取PA0引脚的电平为低,且程序并未在采图时
 		if (startFlag == true && grabbingFlag == false)
 		{
+			std::cout << "开始采图" << endl;
 			grabbingFlag = true;
 			startFlag = false;
 
@@ -178,7 +180,7 @@ void runner()
 			ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
 			ss2 >> p2;
 			cv::imwrite(p1, s.NowBuffer);
-			//cv::imwrite(p2, s.NowBufferImg);
+			cv::imwrite(p2, s.NowBufferImg);
 
 			grabbingFlag = false;
 		}
