@@ -9,6 +9,7 @@
 #include "Class\VirtualCamera.h"
 #include "Class\BlocksDetector.h"
 #include <thread>
+#include "mc100.h"
 
 BufferStorage s;
 int status = 0;
@@ -17,13 +18,21 @@ VirtualCamera vc;
 
 const bool USING_VIRTUAL_CAMERA = 0;//是否使用虚拟摄像头 1使用 0用E2V
 
+//采集到第几张
+int grabbingIndex = 0;
 
+//开始采集，采集中标志
+bool startFlag = false, grabbingFlag = false;
+//生产者完成标志，消费者完成标志
 bool producerEndFlag = false, customerEndFlag = false;
 
+bool exitFlag = false;
 
 //生产者
 void producer()
 {
+	producerEndFlag = false;
+
 	double t = (double)cv::getTickCount();
 
 	if (!USING_VIRTUAL_CAMERA)
@@ -48,9 +57,7 @@ void producer()
 //消费者
 void customer()
 {
-	customerEndFlag = true;
-	return;
-
+	customerEndFlag = false;
 
 	//开始计时
 	double t = (double)cv::getTickCount();
@@ -120,36 +127,44 @@ int init()
 		//vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
 	}
 }
-int main()
+//监听采集卡状态
+void watcher()
 {
-
-	init();
-
-	int grabbingIndex = 0;
-	//主循环
-	string input;
 	do{
-		std::cout << "输入1开始采图，2拍摄光照矫正样张，3对焦，q退出：";
-		std::cin >> input;
-		
-		if (input == "1")
+		// 读取PA0引脚的电平为低,且程序并未在采图时
+		if (mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1 && grabbingFlag == false)
 		{
+			startFlag = true;
+			Sleep(10);
+		}
+		else
+		{
+			Sleep(10);
+		}
+	} while (!exitFlag);
+}
+//采图进程启动者
+void runner()
+{
+	do{
+		// 读取PA0引脚的电平为低,且程序并未在采图时
+		if (startFlag == true && grabbingFlag == false)
+		{
+			grabbingFlag = true;
+			startFlag = false;
+
+
 			grabbingIndex += 1;
 			if (grabbingIndex > 1000) grabbingIndex = 1;
-
-			//触发
 
 			//初始化缓存
 			s.Start();
 
 			std::thread t1(producer);
-			t1.join();
+			t1.detach();
 
-			std::thread t2(customer);
-			t2.join();
-
-			//等待两个线程处理完毕
-			while (!customerEndFlag || !producerEndFlag)
+			//等待采集处理完毕
+			while (!producerEndFlag)
 			{
 				Sleep(10);
 			}
@@ -164,8 +179,63 @@ int main()
 			ss2 >> p2;
 			cv::imwrite(p1, s.NowBuffer);
 			//cv::imwrite(p2, s.NowBufferImg);
+
+			grabbingFlag = false;
 		}
+		else
+		{
+			Sleep(10);
+		}
+	} while (!exitFlag);
+}
+int main()
+{
+	init();
+	if (mc100_open(0) >= 0)
+	{
+		printf("打开采集卡0成功！\r\n");
+
+		//开始监听采集卡
+		std::thread t_watcher(watcher);
+		t_watcher.detach();
+	}
+	else
+	{
+		printf("打开采集卡0失败！\r\n");
+	}
+
+	std::thread t_runner(runner);
+	t_runner.detach();
+
+	//主循环
+	string input;
+	mc100_write_port(0, MC100_PORTA, 0x00);
+	do{
+		std::cout << "输入1开始采图，2执行消费者程序，3对焦，4拍摄光照矫正样张，q退出：";
+		std::cin >> input;
+		if (input == "1")
+		{
+			startFlag = true;
+			Sleep(10);
+
+			while (grabbingFlag == true)
+			{
+				Sleep(10);
+			}
+		}
+
 		else if (input == "2")
+		{
+			std::thread t2(customer);
+			t2.detach();
+			Sleep(10);
+
+			while (!customerEndFlag)
+			{
+				Sleep(10);
+			}
+		}
+		else if (input == "4")
 		{
 			//采样矫正图像
 			int MaxPics = mdi.MaxPics;
@@ -221,7 +291,8 @@ int main()
 		else
 			Sleep(10);
 	} while (input != "q");
-
+	exitFlag = true;
 	MicroDisplayInit::Release(mdi);
+	Sleep(500);
 	return 0;
 }

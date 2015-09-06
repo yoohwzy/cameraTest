@@ -48,6 +48,9 @@
     <ClInclude Include="globle.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="mc100.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -71,5 +74,10 @@
     <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp">
       <Filter>class\MicroDisplay</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\Debug\mc100.lib">
+      <Filter>资源文件</Filter>
+    </Library>
   </ItemGroup>
 </Project>
