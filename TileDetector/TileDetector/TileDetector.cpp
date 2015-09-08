@@ -50,6 +50,17 @@ void producer()
 	//采样计时
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
+	
+	//同步进行光照矫正与叠加
+	for (s.BufferReadIndex = 0; s.BufferReadIndex < mdi.MaxPics; s.BufferReadIndex++)
+	{
+		//尚未写入缓存，等待
+		while (s.BufferReadIndex + s.NinOne >= s.BufferWriteIndex && s.BufferWriteIndex != mdi.MaxPics)
+		{
+			Sleep(1);
+		}
+		s.ThreeInOne(s.BufferReadIndex);
+	}
 
 	//标记生产者工作结束
 	producerEndFlag = true;
@@ -101,7 +112,7 @@ int init()
 	mdi.colorType = mdi.RGB;
 	mdi.width = 4096;
 	mdi.height = 1;
-	mdi.MaxPics = 15000;//采集多少帧图像
+	mdi.MaxPics = 11000;//采集多少帧图像
 	s = BufferStorage(mdi);
 
 	if (!USING_VIRTUAL_CAMERA)
@@ -137,10 +148,15 @@ void watcher()
 			startFlag = true;
 			std::cout << "触发器触发" << endl;
 			Sleep(10);
+			//等待采集处理完毕
+			while (!producerEndFlag)
+			{
+				Sleep(10);
+			}
 		}
 		else
 		{
-			Sleep(10);
+			Sleep(1);
 		}
 	} while (!exitFlag);
 }
@@ -155,6 +171,7 @@ void runner()
 			grabbingFlag = true;
 			startFlag = false;
 
+			Sleep(410);
 
 			grabbingIndex += 1;
 			if (grabbingIndex > 1000) grabbingIndex = 1;
