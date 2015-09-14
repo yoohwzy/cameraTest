@@ -210,6 +210,7 @@ void runner()
 int main()
 {
 	init();
+	printf("init end！\r\n");
 	if (mc100_open(0) >= 0)
 	{
 		printf("打开采集卡0成功！\r\n");
