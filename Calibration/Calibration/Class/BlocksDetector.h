@@ -7,7 +7,8 @@ class BlocksDetector
 {
 
 public:
-	BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
+	//BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
+	BlocksDetector(BufferStorage *ss);
 	~BlocksDetector();
 	struct Line
 	{

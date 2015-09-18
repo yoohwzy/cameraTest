@@ -25,21 +25,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	mdi.colorType = mdi.RGB;
 	mdi.width = 4096;
 	mdi.height = 1;
-	mdi.MaxPics = 10000;//采集多少帧图像
+	mdi.MaxPics = 11000;//采集多少帧图像
 	s_Standard = BufferStorage(mdi);
 
 
 	int tileCalibrationWidth = 300;
 	int tileCalibrationHeight = 600;
 	cv::Mat pincushionCalibrationImg = cv::imread("PincushionDistortion.png");
-	cv::Mat tileThreshold = cv::imread("E14杂质二值化_x3.jpg");
-	s_Standard.NowBufferImg = tileThreshold;
-	s.NowBufferImg = cv::imread("E9 A_x3二值化.jpg");
 
+	//s_Standard.NowBufferImg = cv::imread("E14杂质二值化_x3.jpg");
+	//s.NowBufferImg = cv::imread("E9 A_x3二值化.jpg");
+
+	s_Standard.NowBufferImg = cv::imread("A9划痕凹点_x3二值化.jpg");
+	s.NowBufferImg = cv::imread("A14杂质_x3二值化.jpg");
 
 	double t = 0;
 	//瓷砖边缘检测
-	BlocksDetector bd_Standard = BlocksDetector(&s_Standard, &mdi);
+	BlocksDetector bd_Standard = BlocksDetector(&s_Standard);
 	t = (double)cv::getTickCount();
 	bd_Standard.Start();
 	bd_Standard.StartUP_DOWN(BlocksDetector::Up);
@@ -72,23 +74,31 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "初始化Measurer时间：" << t << endl;
+	std::cout << "标准砖标定完成" << t << endl;
 	t = (double)cv::getTickCount();
 
-	//s.NowBufferImg = cv::imread("E31崩角_x3二值化.jpg");
-	BlocksDetector bd2 = BlocksDetector(&s, &mdi);
+	BlocksDetector bd2 = BlocksDetector(&s);
 	bd2.Start();
 	bd2.StartUP_DOWN(BlocksDetector::Up);
 	bd2.StartUP_DOWN(BlocksDetector::Down);
 	bd2.ABCD();
+	//#ifdef OUTPUT_DEBUG_INFO
+	//	if (OUTPUT_DEBUG_INFO)
+	//	{
+	//		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd2.drowDebugDetectLR);
+	//		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd2.drowDebugDetectUD);
+	//		cv::imwrite("samples/02drowDebugResult.jpg", bd2.drowDebugResult);
+	//	}
+	//#endif
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "测量砖检测时间：" << t << endl;
+	std::cout << "待测量砖边缘检测时间：" << t << endl;
 	t = (double)cv::getTickCount();
 
 	m.CaculteSize(&bd2);
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "尺寸测量时间：" << t << endl << endl << endl;
+	std::cout << "待测量砖尺寸测量时间：" << t << endl << endl << endl;
 
 
 	printf("瓷砖AB边长：%fpix，合计%f mm\r\n", m.AB_Len, m.AB_mm);
