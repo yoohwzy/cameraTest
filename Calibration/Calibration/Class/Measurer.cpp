@@ -229,19 +229,20 @@ void Measurer::ObserveCalibration()
 	C_Standard.y = C_Standard.y - RowAdjust[C_Standard.x];
 	D_Standard.y = D_Standard.y - RowAdjust[D_Standard.x];
 	//计算出四条边的长度
-	tileStandardWidthUp_pix = sqrt((A_Standard.x - B_Standard.x)*(A_Standard.x - B_Standard.x) + (A_Standard.y - B_Standard.y)*(A_Standard.y - B_Standard.y));
-	tileStandardWidthDown_pix = sqrt((C_Standard.x - D_Standard.x)*(C_Standard.x - D_Standard.x) + (C_Standard.y - D_Standard.y)*(C_Standard.y - D_Standard.y));
+	tileStandardWidth_AB_pix = sqrt((A_Standard.x - B_Standard.x)*(A_Standard.x - B_Standard.x) + (A_Standard.y - B_Standard.y)*(A_Standard.y - B_Standard.y));
+	tileStandardWidth_CD_pix = sqrt((C_Standard.x - D_Standard.x)*(C_Standard.x - D_Standard.x) + (C_Standard.y - D_Standard.y)*(C_Standard.y - D_Standard.y));
 
-	tileStandardHeightLeft_pix = sqrt((A_Standard.x - D_Standard.x)*(A_Standard.x - D_Standard.x) + (A_Standard.y - D_Standard.y)*(A_Standard.y - D_Standard.y));
-	tileStandardHeightRight_pix = sqrt((B_Standard.x - C_Standard.x)*(B_Standard.x - C_Standard.x) + (B_Standard.y - C_Standard.y)*(B_Standard.y - C_Standard.y));
+	tileStandardWidth_AD_pix = sqrt((A_Standard.x - D_Standard.x)*(A_Standard.x - D_Standard.x) + (A_Standard.y - D_Standard.y)*(A_Standard.y - D_Standard.y));
+	tileStandardWidth_BC_pix = sqrt((B_Standard.x - C_Standard.x)*(B_Standard.x - C_Standard.x) + (B_Standard.y - C_Standard.y)*(B_Standard.y - C_Standard.y));
 
 	//对角线（pix）
 	tileStandardDiagonalAC_pix = sqrt((A_Standard.x - C_Standard.x)*(A_Standard.x - C_Standard.x) + (A_Standard.y - C_Standard.y)*(A_Standard.y - C_Standard.y));
 	tileStandardDiagonalBD_pix = sqrt((B_Standard.x - D_Standard.x)*(B_Standard.x - D_Standard.x) + (B_Standard.y - D_Standard.y)*(B_Standard.y - D_Standard.y));
 
 	//计算一个像素表示多少长度（mm）
-	MilliMeterPerPix_Width = tileStandardWidth_mm * 2 / (tileStandardWidthUp_pix + tileStandardWidthDown_pix);
-	MilliMeterPerPix_Height = tileStandardHeight_mm * 2 / (tileStandardHeightLeft_pix + tileStandardHeightRight_pix);
+	MilliMeterPerPix_Width = tileStandardWidth_mm * 2 / (tileStandardWidth_AB_pix + tileStandardWidth_CD_pix);
+	MilliMeterPerPix_Height = tileStandardHeight_mm * 2 / (tileStandardWidth_AD_pix + tileStandardWidth_BC_pix);
+	MilliMeterPerPix_Diagonal = sqrt(tileStandardWidth_mm*tileStandardWidth_mm + tileStandardHeight_mm*tileStandardHeight_mm) * 2 / (tileStandardDiagonalAC_pix + tileStandardDiagonalBD_pix);
 }
 void Measurer::ObserveImgAdjust(cv::Mat& Img)
 {
@@ -283,18 +284,43 @@ void Measurer::CaculteSize(BlocksDetector *bd)
 
 
 	//上下边长（pix）
-	double upLen = sqrt((AA.x - BB.x)*(AA.x - BB.x) + (AA.y - BB.y)*(AA.y - BB.y));
-	double downLen = sqrt((CC.x - DD.x)*(CC.x - DD.x) + (CC.y - DD.y)*(CC.y - DD.y));
+	int AB_Len_Square = (AA.x - BB.x)*(AA.x - BB.x) + (AA.y - BB.y)*(AA.y - BB.y);
+	AB_Len = sqrt(AB_Len_Square);
+	//double& BA_Len = AB_Len;
+
+	int CD_Len_Square = (CC.x - DD.x)*(CC.x - DD.x) + (CC.y - DD.y)*(CC.y - DD.y);
+	CD_Len = sqrt(CD_Len_Square);
+	//double& DC_Len = CD_Len;
+
 	//左右边长（pix）
-	double leftLen = sqrt((AA.x - DD.x)*(AA.x - DD.x) + (AA.y - DD.y)*(AA.y - DD.y));
-	double rightLen = sqrt((BB.x - CC.x)*(BB.x - CC.x) + (BB.y - CC.y)*(BB.y - CC.y));
+	int AD_Len_Square = (AA.x - DD.x)*(AA.x - DD.x) + (AA.y - DD.y)*(AA.y - DD.y);
+	AD_Len = sqrt(AD_Len_Square);
+	//double& DA_Len = AD_Len;
+	int BC_Len_Square = (BB.x - CC.x)*(BB.x - CC.x) + (BB.y - CC.y)*(BB.y - CC.y);
+	BC_Len = sqrt(BC_Len_Square);
+	//double& CB_Len = BC_Len;
+
 	//对角线（pix）
-	double diagonal1 = sqrt((AA.x - CC.x)*(AA.x - CC.x) + (AA.y - CC.y)*(AA.y - CC.y));
-	double diagonal2 = sqrt((BB.x - DD.x)*(BB.x - DD.x) + (BB.y - DD.y)*(BB.y - DD.y));
+	int AC_Len_Square = (AA.x - CC.x)*(AA.x - CC.x) + (AA.y - CC.y)*(AA.y - CC.y);
+	AC_Len = sqrt(AC_Len_Square);
+	//double& CA_Len = AC_Len;
+	int BD_Len_Square = (BB.x - DD.x)*(BB.x - DD.x) + (BB.y - DD.y)*(BB.y - DD.y);
+	BD_Len = sqrt(BD_Len_Square);
+	//double& DB_Len = BD_Len;
 
-	double up_mm = upLen*MilliMeterPerPix_Width;
-	double down_mm = downLen*MilliMeterPerPix_Width;
-	double left_mm = leftLen*MilliMeterPerPix_Height;
-	double right_mm = rightLen*MilliMeterPerPix_Height;
+	AB_mm = AB_Len*MilliMeterPerPix_Width;
+	CD_mm = CD_Len*MilliMeterPerPix_Width;
+	AD_mm = AD_Len*MilliMeterPerPix_Height;
+	BC_mm = BC_Len*MilliMeterPerPix_Height;
 
-}
+	
+
+	//余弦定理
+	//	cosa＝（b ^ 2 + c ^ 2 - a ^ 2) / 2bc
+	//	cosb＝（a ^ 2 + c ^ 2 - b ^ 2) / 2ac
+	//	cosc＝（a ^ 2 + b ^ 2 - c ^ 2) / 2ab
+	angleA = ANGLE(acos((AB_Len_Square + AD_Len_Square - BD_Len_Square) / (2 * AB_Len*AD_Len)));
+	angleB = ANGLE(acos((AB_Len_Square + BC_Len_Square - AC_Len_Square) / (2 * AB_Len*BC_Len)));
+	angleC = ANGLE(acos((CD_Len_Square + BC_Len_Square - BD_Len_Square) / (2 * CD_Len*CB_Len)));
+	angleD = ANGLE(acos((CD_Len_Square + AD_Len_Square - AC_Len_Square) / (2 * CD_Len*AD_Len)));
+} 

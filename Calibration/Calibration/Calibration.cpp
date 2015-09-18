@@ -34,6 +34,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	cv::Mat pincushionCalibrationImg = cv::imread("PincushionDistortion.png");
 	cv::Mat tileThreshold = cv::imread("E14杂质二值化_x3.jpg");
 	s_Standard.NowBufferImg = tileThreshold;
+	s.NowBufferImg = cv::imread("E9 A_x3二值化.jpg");
+
 
 	double t = 0;
 	//瓷砖边缘检测
@@ -46,7 +48,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	bd_Standard.ABCD();
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "边缘检测时间：" << t << endl;
+	std::cout << "标准砖边缘检测时间：" << t << endl;
 
 
 //#ifdef OUTPUT_DEBUG_INFO
@@ -59,6 +61,7 @@ int _tmain(int argc, _TCHAR* argv[])
 //#endif
 
 
+	t = (double)cv::getTickCount();
 
 	Measurer m = Measurer(&bd_Standard, &mdi, tileCalibrationWidth, tileCalibrationHeight);
 	//pincushionCalibrationImg = cv::imread("PincushionDistortion实拍.jpg");
@@ -67,14 +70,37 @@ int _tmain(int argc, _TCHAR* argv[])
 	//m.PincushionImgAdjust(img2);
 	m.ObserveCalibration();
 
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "初始化Measurer时间：" << t << endl;
+	t = (double)cv::getTickCount();
 
-	s.NowBufferImg = cv::imread("E31崩角_x3二值化.jpg");
+	//s.NowBufferImg = cv::imread("E31崩角_x3二值化.jpg");
 	BlocksDetector bd2 = BlocksDetector(&s, &mdi);
 	bd2.Start();
 	bd2.StartUP_DOWN(BlocksDetector::Up);
 	bd2.StartUP_DOWN(BlocksDetector::Down);
 	bd2.ABCD();
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "测量砖检测时间：" << t << endl;
+	t = (double)cv::getTickCount();
+
 	m.CaculteSize(&bd2);
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "尺寸测量时间：" << t << endl << endl << endl;
+
+
+	printf("瓷砖AB边长：%fpix，合计%f mm\r\n", m.AB_Len, m.AB_mm);
+	printf("瓷砖BC边长：%fpix，合计%f mm\r\n", m.BC_Len, m.BC_mm);
+	printf("瓷砖CD边长：%fpix，合计%f mm\r\n", m.CD_Len, m.CD_mm);
+	printf("瓷砖DA边长：%fpix，合计%f mm\r\n \r\n", m.DA_Len, m.DA_mm);
+
+	printf("瓷砖对角线AC：%fpix\r\n", m.AC_Len);
+	printf("瓷砖对角线BD：%fpix\r\n\r\n", m.BD_Len);
+
+	printf("∠A=%f°,∠B=%f°,∠C=%f°,∠D=%f°；\r\n\r\n", m.angleA, m.angleB, m.angleC, m.angleD);
+
 	return 0;
 }
 
