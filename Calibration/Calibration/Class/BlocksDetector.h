@@ -25,7 +25,7 @@ public:
 		Down
 	};
 
-
+	// 寻找左右边界，该程序需要
 	void Start();
 	// 寻找上下边缘
 	void StartUP_DOWN(BorderType bt);
@@ -45,11 +45,16 @@ public:
 	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
 #endif
-
+	//拟合直线求出的焦点ABCD
 	cv::Point A;
 	cv::Point B;
 	cv::Point C;
 	cv::Point D;
+	//检测出的ABCD点
+	cv::Point DetectedA;
+	cv::Point DetectedB;
+	cv::Point DetectedC;
+	cv::Point DetectedD;
 
 	vector < cv::Point > LeftBorder;
 	Line LeftLine;

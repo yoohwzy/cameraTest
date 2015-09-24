@@ -323,4 +323,4 @@ void Measurer::CaculteSize(BlocksDetector *bd)
 	angleB = ANGLE(acos((AB_Len_Square + BC_Len_Square - AC_Len_Square) / (2 * AB_Len*BC_Len)));
 	angleC = ANGLE(acos((CD_Len_Square + BC_Len_Square - BD_Len_Square) / (2 * CD_Len*CB_Len)));
 	angleD = ANGLE(acos((CD_Len_Square + AD_Len_Square - AC_Len_Square) / (2 * CD_Len*AD_Len)));
-} 
+}

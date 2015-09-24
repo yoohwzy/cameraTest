@@ -31,7 +31,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	int tileCalibrationWidth = 300;
 	int tileCalibrationHeight = 600;
-	cv::Mat pincushionCalibrationImg = cv::imread("PincushionDistortion.png");
+	//cv::Mat pincushionCalibrationImg = cv::imread("PincushionDistortion.png");
 
 	//s_Standard.NowBufferImg = cv::imread("E14杂质二值化_x3.jpg");
 	//s.NowBufferImg = cv::imread("E9 A_x3二值化.jpg");
@@ -82,14 +82,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	bd2.StartUP_DOWN(BlocksDetector::Up);
 	bd2.StartUP_DOWN(BlocksDetector::Down);
 	bd2.ABCD();
-	//#ifdef OUTPUT_DEBUG_INFO
-	//	if (OUTPUT_DEBUG_INFO)
-	//	{
-	//		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd2.drowDebugDetectLR);
-	//		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd2.drowDebugDetectUD);
-	//		cv::imwrite("samples/02drowDebugResult.jpg", bd2.drowDebugResult);
-	//	}
-	//#endif
+	#ifdef OUTPUT_DEBUG_INFO
+		if (OUTPUT_DEBUG_INFO)
+		{
+			cv::imwrite("samples/00drowDebugDetectLR.jpg", bd2.drowDebugDetectLR);
+			cv::imwrite("samples/01drowDebugDetectUD.jpg", bd2.drowDebugDetectUD);
+			cv::imwrite("samples/02drowDebugResult.jpg", bd2.drowDebugResult);
+		}
+	#endif
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "待测量砖边缘检测时间：" << t << endl;
