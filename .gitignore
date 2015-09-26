@@ -92,3 +92,5 @@ Debug
 *.log
 *.idb
 *.pdb
+/FeatureFinder/FeatureFinder/samples
+/FeatureFinder/FeatureFinder/特征样本库
