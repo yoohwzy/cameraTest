@@ -3,6 +3,21 @@
 
 #include "stdafx.h"
 #include "globle.h"
+<<<<<<< HEAD
+#include "Class\FeatureMaker.h"
+
+
+int main()
+{
+	const int sampleTypeCount = 2;				//共有几种字体
+	const int sampleCount = 40;					//每种字体的样本数
+	const int sampleAllCount = sampleCount*sampleTypeCount;
+	const int featureCount = 256 + 2;				//特征维数 histSize + 2
+
+	// 设定bin数目，也就是灰度级别，这里选择的是0-histSize灰度
+	const int histSize = 255;
+
+=======
 
 
 #include <direct.h>
@@ -45,25 +60,41 @@ int main()
 	const int sampleCount = 50;					//每种字体的样本数
 	const int sampleAllCount = sampleCount*sampleTypeCount;
 	const int featureCount = 256;				//特征维数
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 	CvANN_MLP bp;// = CvANN_MLP(layerSizes,CvANN_MLP::SIGMOID_SYM,1,1);
 
 
 	string str_dir[sampleTypeCount];
 	str_dir[0] = "A水滴渍";
+<<<<<<< HEAD
+	//str_dir[1] = "B水纹";
+	//str_dir[2] = "C指纹";
+	//str_dir[3] = "D釉面凹凸";
+	str_dir[1] = "X凹点";
+	//str_dir[5] = "Y杂质";
+	//str_dir[6] = "Z划痕";
+=======
 	str_dir[1] = "B水纹";
 	str_dir[2] = "C指纹";
 	str_dir[3] = "D釉面凹凸";
 	str_dir[4] = "X凹点";
 	str_dir[5] = "Y杂质";
 	str_dir[6] = "Z划痕";
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 
 	float trainingData[sampleAllCount][featureCount] = { 0 };
 	float outputData[sampleAllCount][sampleTypeCount] = { 0 };
 
 	int itemIndex = 0;
+<<<<<<< HEAD
+	for (int index = 0; index < sampleTypeCount; index++)
+	{
+		for (int i = 1; i <= sampleCount; i++)
+=======
 	for (int index = 0; index < 7; index++)
 	{
 		for (int i = 1; i <= 50; i++)
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 		{
 			outputData[itemIndex][index] = 1;
 
@@ -76,6 +107,10 @@ int main()
 			ss >> path;
 			//读取灰度图像以便计算灰度直方图
 			cv::Mat f = cv::imread(path, 0);
+<<<<<<< HEAD
+			cv::Mat grayHist;
+
+=======
 
 
 			cv::Mat grayHist;
@@ -84,10 +119,23 @@ int main()
 			int histSize = 63;
 
 
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 			//cv::equalizeHist(f, f);
 			cv::normalize(f, f, histSize, 0, cv::NORM_MINMAX);
 			//cv::bitwise_xor(f, cv::Scalar(255), f);//反相
 
+<<<<<<< HEAD
+			FeatureMaker::GetGrayHist(f, grayHist, histSize);
+			for (int j = 0; j < histSize; j++)
+			{
+				trainingData[itemIndex][j] = grayHist.ptr<float>(j)[0];
+			}
+			double avg = 0, stdDev = 0;
+			FeatureMaker::GetGrayAvgStdDev(f, avg, stdDev);
+			trainingData[itemIndex][featureCount - 2] = avg;
+			trainingData[itemIndex][featureCount - 1] = avg;
+			itemIndex++;
+=======
 
 			// 设定取值范围，设定每级灰度的范围。
 			float range[] = { 0, 255 };
@@ -147,10 +195,21 @@ int main()
 			//cv::imshow("calcHist Demo", histImage);
 			//cv::waitKey(0);
 			*/
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 		}
 	}
 
 	//创建一个网络
+<<<<<<< HEAD
+	cv::Mat layerSizes = (cv::Mat_<int>(1, 4) << featureCount, 40,50, sampleTypeCount);//创建一个featureCount输入  IDC_EDIT_YinCangCount隐藏  sampleTypeCount输出的三层网络
+
+
+	CvANN_MLP_TrainParams param;
+	param.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 50000, 0.002);
+	param.train_method = CvANN_MLP_TrainParams::BACKPROP;
+	param.bp_dw_scale = 0.01;//权值更新率
+	param.bp_moment_scale = 0.03;//权值更新冲量
+=======
 	cv::Mat layerSizes = (cv::Mat_<int>(1, 3) << featureCount, 25, sampleTypeCount);//创建一个featureCount输入  IDC_EDIT_YinCangCount隐藏  sampleTypeCount输出的三层网络
 
 
@@ -159,6 +218,7 @@ int main()
 	param.train_method = CvANN_MLP_TrainParams::BACKPROP;
 	param.bp_dw_scale = 0.2;
 	param.bp_moment_scale = 0.1;
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 
 	cv::Mat inputs(sampleAllCount, featureCount, CV_32FC1, trainingData);//样品总数，特征维数，储存的数据类型
 	cv::Mat outputs(sampleAllCount, sampleTypeCount, CV_32FC1, outputData);
@@ -168,11 +228,48 @@ int main()
 	bp.save("ANN_mlp.xml");
 
 	itemIndex = 0;
+<<<<<<< HEAD
+
+	int zhengque = 0;
+	for (int index = 0; index < sampleTypeCount; index++)
+	{
+		for (int i = 40; i <= 50; i++)
+		{
+			float sampleData[featureCount] = { 0 };
+
+			stringstream ss;
+			char num[4];
+			sprintf(num, "%03d", i);
+			ss << "特征样本库\\" << str_dir[index] << "\\" << num << ".jpg";
+			string path;
+			ss >> path;
+			//读取灰度图像以便计算灰度直方图
+			cv::Mat f = cv::imread(path, 0);
+			cv::Mat grayHist;
+
+			//cv::equalizeHist(f, f);
+			cv::normalize(f, f, histSize, 0, cv::NORM_MINMAX);
+			//cv::bitwise_xor(f, cv::Scalar(255), f);//反相
+
+			FeatureMaker::GetGrayHist(f, grayHist, histSize);
+			for (int j = 0; j < histSize; j++)
+			{
+				sampleData[j] = grayHist.ptr<float>(j)[0];
+			}
+			double avg = 0, stdDev = 0;
+			FeatureMaker::GetGrayAvgStdDev(f, avg, stdDev);
+			sampleData[featureCount - 2] = avg;
+			sampleData[featureCount - 1] = avg;
+
+
+			cv::Mat sampleMat(1, featureCount, CV_32FC1, sampleData);//样品总数，特征维数，储存的数据类型
+=======
 	for (int index = 0; index < 7; index++)
 	{
 		for (int i = 1; i <= 50; i++)
 		{
 			cv::Mat sampleMat(1, featureCount, CV_32FC1, trainingData[itemIndex]);//样品总数，特征维数，储存的数据类型
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 			cv::Mat nearest(1, sampleTypeCount, CV_32FC1, cv::Scalar(0));
 			bp.predict(sampleMat, nearest);
 			float possibility = -1;
@@ -184,12 +281,22 @@ int main()
 					outindex = i;
 				}
 			}
+<<<<<<< HEAD
+			if (outindex == index)
+				zhengque++;
+			cout << str_dir[index] << "_" << i << "：" << outindex << "->" << possibility << "->" << str_dir[outindex] << endl;
+			itemIndex++;
+		}
+	}
+	cout << "正确率" << ((double)zhengque / (double)itemIndex);
+=======
 			cout << str_dir[index] << "_" << i << "：" << outindex << "->" << possibility << "->" << str_dir[outindex] << endl;
 			itemIndex++;
 
 		}
 	}
 
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
 	return 0;
 }
 

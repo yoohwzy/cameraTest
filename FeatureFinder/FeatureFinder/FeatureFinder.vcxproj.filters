@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+<<<<<<< HEAD
+    <Filter Include="class">
+      <UniqueIdentifier>{62bb74ee-2638-460d-a2cb-c2ee1f6cbfca}</UniqueIdentifier>
+    </Filter>
+=======
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -27,11 +33,23 @@
     <ClInclude Include="globle.h">
       <Filter>头文件</Filter>
     </ClInclude>
+<<<<<<< HEAD
+    <ClInclude Include="Class\FeatureMaker.h">
+      <Filter>class</Filter>
+    </ClInclude>
+=======
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+<<<<<<< HEAD
+    <ClCompile Include="Class\FeatureMaker.cpp">
+      <Filter>class</Filter>
+    </ClCompile>
+=======
+>>>>>>> 59f70f38b725ef6302e1c042cda95869edc56f42
     <ClCompile Include="FeatureFinder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
