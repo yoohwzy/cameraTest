@@ -7,7 +7,8 @@ class BlocksDetector
 {
 
 public:
-	BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
+	//BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
+	BlocksDetector(BufferStorage *ss);
 	~BlocksDetector();
 	struct Line
 	{
@@ -24,7 +25,7 @@ public:
 		Down
 	};
 
-
+	// 寻找左右边界，该程序需要
 	void Start();
 	// 寻找上下边缘
 	void StartUP_DOWN(BorderType bt);
@@ -34,17 +35,26 @@ public:
 	int DetectOneLineLeft(int y = -1);
 	int DetectOneLineRight(int y = -1);
 
+	//计算出四个顶点(图像上的四个顶点)
+	void ABCD();
+
+
 #ifdef OUTPUT_DEBUG_INFO
 	//检测过程中的图片
 	cv::Mat drowDebugDetectLR;
 	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
 #endif
-
+	//拟合直线求出的焦点ABCD
 	cv::Point A;
 	cv::Point B;
 	cv::Point C;
 	cv::Point D;
+	//检测出的ABCD点
+	cv::Point DetectedA;
+	cv::Point DetectedB;
+	cv::Point DetectedC;
+	cv::Point DetectedD;
 
 	vector < cv::Point > LeftBorder;
 	Line LeftLine;
@@ -96,7 +106,7 @@ private:
 
 	int GetEdgeX3(cv::Point start, int range, BorderType bt);
 	//逼近真正的竖直边缘顶点
-	//isUp true：逼近上顶点  false：逼近下顶点
+	//start：开始点  end：结束点 range：搜索范围  bt：边缘类型  Target：到哪个点结束（递归用）
 	int GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target);
 	int GetEdgeVertical(cv::Point start, int range, bool isLeft);
 	//isLeft true：逼近左顶点，false：逼近右顶点
