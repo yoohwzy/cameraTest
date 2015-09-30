@@ -34,6 +34,7 @@ static void OutPutDebugInfo(string info){
 	if (OUTPUT_DEBUG_INFO)
 	{
 		string l = "--------------------------------\n" + info + "\n--------------------------------\n";
+		cout << info << endl;
 		int dwLen = strlen(l.c_str()) + 1;
 		int nwLen = MultiByteToWideChar(CP_ACP, 0, l.c_str(), dwLen, NULL, 0);//算出合适的长度
 		LPWSTR lpsz = new WCHAR[dwLen];
@@ -44,23 +45,22 @@ static void OutPutDebugInfo(string info){
 #endif
 }
 
+//当发生不可逆转的错误时，调用本程序报错，退出。
+static void ExitWithError(string errorInfo,int errorCode = 1){
+	cout << errorInfo << endl;
+	exit(errorCode);
+	//AfxMessageBox(errorInfo);//mfc
+}
 
 
-
-//全局函数
-static int ErrorMessage(Fg_Struct *fg)
+//检测MD采集卡是否有错误
+//报错->退出
+static void MD_ErrorMessageWait(Fg_Struct *fg)
 {
 	int error = Fg_getLastErrorNumber(fg);
 	const char*	err_str = Fg_getLastErrorDescription(fg);
 	fprintf(stderr, "Error: %d : %s\n", error, err_str);
-	return error;
-}
-static int ErrorMessageWait(Fg_Struct *fg)
-{
-	int error = ErrorMessage(fg);
-	printf(" ... press ENTER to continue\n");
-	getchar();
-	return error;
+	ExitWithError("Exit");
 }
 
 

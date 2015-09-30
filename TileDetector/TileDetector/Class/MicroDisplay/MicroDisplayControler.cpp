@@ -17,7 +17,7 @@ int MicroDisplayControler::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 	//采集mdi.MaxPics行图像到缓存
 	if (MicroDisplayControler::StartGrabbing(mdi) < 0)
 	{
-		ErrorMessageWait(mdi.fg);
+		MD_ErrorMessageWait(mdi.fg);
 		return -1;
 	}
 	frameindex_t lastPicNr = 0;
@@ -26,7 +26,7 @@ int MicroDisplayControler::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 		lastPicNr = Fg_getLastPicNumberBlockingEx(mdi.fg, lastPicNr + 1, mdi.nCamPort, 100, mdi.pMem0);
 		if (lastPicNr < 0){
 			int status = 0;
-			status = ErrorMessageWait(mdi.fg);
+			MD_ErrorMessageWait(mdi.fg);
 			Fg_stopAcquireEx(mdi.fg, mdi.nCamPort, mdi.pMem0, 0);
 			Fg_FreeMemEx(mdi.fg, mdi.pMem0);
 			Fg_FreeGrabber(mdi.fg);
@@ -51,7 +51,7 @@ int MicroDisplayControler::FreeRunningFocusing(MicroDisplayInit& mdi)
 	//采集mdi.MaxPics行图像到缓存
 	if (MicroDisplayControler::StartGrabbing(mdi) < 0)
 	{
-		ErrorMessageWait(mdi.fg);
+		MD_ErrorMessageWait(mdi.fg);
 		return -1;
 	}
 	cv::Mat OriginalImage;
@@ -66,7 +66,7 @@ int MicroDisplayControler::FreeRunningFocusing(MicroDisplayInit& mdi)
 		lastPicNr = Fg_getLastPicNumberBlockingEx(mdi.fg, lastPicNr + 1, mdi.nCamPort, 100, mdi.pMem0);
 		if (lastPicNr < 0){
 			int status = 0;
-			status = ErrorMessageWait(mdi.fg);
+			MD_ErrorMessageWait(mdi.fg);
 			Fg_stopAcquireEx(mdi.fg, mdi.nCamPort, mdi.pMem0, 0);
 			Fg_FreeMemEx(mdi.fg, mdi.pMem0);
 			Fg_FreeGrabber(mdi.fg);

@@ -8,6 +8,9 @@
 #include "Class\BufferStorage.h"
 #include "Class\VirtualCamera.h"
 #include "Class\BlocksDetector.h"
+#include "Class\Processor.h"
+
+
 #include <thread>
 #include "mc100.h"
 
@@ -16,7 +19,7 @@ int status = 0;
 MicroDisplayInit mdi;
 VirtualCamera vc;
 
-const bool USING_VIRTUAL_CAMERA = 0;//是否使用虚拟摄像头 1使用 0用E2V
+const bool USING_VIRTUAL_CAMERA = 1;//是否使用虚拟摄像头 1使用 0用E2V
 
 //采集到第几张
 int grabbingIndex = 0;
@@ -39,7 +42,7 @@ void producer()
 	{
 		if (MicroDisplayControler::FreeRunning(mdi, s) < 0)
 		{
-			ErrorMessageWait(mdi.fg);
+			MD_ErrorMessageWait(mdi.fg);
 			return;
 		}
 	}
@@ -51,6 +54,8 @@ void producer()
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << mdi.width << "x" << mdi.MaxPics << "：" << t << endl;
 	
+
+	t = (double)cv::getTickCount();
 	//同步进行光照矫正与叠加
 	for (s.BufferReadIndex = 0; s.BufferReadIndex < mdi.MaxPics; s.BufferReadIndex++)
 	{
@@ -61,7 +66,8 @@ void producer()
 		}
 		s.ThreeInOne(s.BufferReadIndex);
 	}
-
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "ThreeInOne：" << t << endl;
 	//标记生产者工作结束
 	producerEndFlag = true;
 }
@@ -73,28 +79,31 @@ void customer()
 	//开始计时
 	double t = (double)cv::getTickCount();
 
-	//同步进行光照矫正与叠加
-	for (s.BufferReadIndex = 0; s.BufferReadIndex < mdi.MaxPics; s.BufferReadIndex++)
-	{
-		//尚未写入缓存，等待
-		while (s.BufferReadIndex + s.NinOne >= s.BufferWriteIndex && s.BufferWriteIndex != mdi.MaxPics)
-		{
-			Sleep(1);
-		}
-		s.ThreeInOne(s.BufferReadIndex);
-	}
+	cv::Mat DetectedImg = s.NowBufferImg.clone();
+	if (DetectedImg.channels() > 0)
+		cv::cvtColor(DetectedImg, DetectedImg, CV_BGR2GRAY);
+	//获取二值化图像
+	Processor::Binaryzation(DetectedImg);
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "并行处理用时：" << t << endl;
+	std::cout << "Binaryzation：" << t << endl;
+	t = (double)cv::getTickCount();
+
+	Processor::Gaussian_Blur(DetectedImg);
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "Gaussian_Blur：" << t << endl;
+	t = (double)cv::getTickCount();
+
 
 	//瓷砖边缘检测
-	BlocksDetector bd = BlocksDetector(&s, &mdi);
+	BlocksDetector bd = BlocksDetector(DetectedImg);
 	t = (double)cv::getTickCount();
 	bd.Start();
 	bd.StartUP_DOWN(BlocksDetector::Up);
 	bd.StartUP_DOWN(BlocksDetector::Down);
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "非并行处理用时：" << t << endl;
+	std::cout << "BlocksDetector：" << t << endl;
 
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
@@ -109,7 +118,7 @@ void customer()
 }
 int init()
 {
-	mdi.colorType = mdi.RGB;
+	mdi.colorType = MicroDisplayInit::RGB;
 	mdi.width = 4096;
 	mdi.height = 1;
 	mdi.MaxPics = 11000;//采集多少帧图像
@@ -122,7 +131,7 @@ int init()
 		//status = MicroDisplayInit::InitLoad(mdi, "4096RGB1LineX1.mcf");
 		if (status < 0)
 		{
-			ErrorMessageWait(mdi.fg);
+			MD_ErrorMessageWait(mdi.fg);
 			return -1;
 		}
 		MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
@@ -132,10 +141,7 @@ int init()
 	else
 	{
 		//初始化虚拟相机
-		//vc = VirtualCamera(mdi, "瓷砖崩边上边.jpg");
-		vc = VirtualCamera(mdi, "样品2_o.jpg");
-		//vc = VirtualCamera(mdi, "瓷砖缺陷2_o.jpg");
-		//vc = VirtualCamera(mdi, "瓷砖崩边1_o.jpg");
+		vc = VirtualCamera(mdi, "D31崩角_o原图.jpg");
 	}
 }
 //监听采集卡状态
@@ -188,16 +194,21 @@ void runner()
 				Sleep(10);
 			}
 
-			string p1;
-			stringstream ss1;
-			ss1 << "samples/result" << grabbingIndex << "_o原图.jpg";
-			ss1 >> p1;
-			string p2;
-			stringstream ss2;
-			ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
-			ss2 >> p2;
-			cv::imwrite(p1, s.NowBuffer);
-			cv::imwrite(p2, s.NowBufferImg);
+#ifdef OUTPUT_DEBUG_INFO
+			if (OUTPUT_DEBUG_INFO)
+			{
+				//string p1;
+				//stringstream ss1;
+				//ss1 << "samples/result" << grabbingIndex << "_o原图.jpg";
+				//ss1 >> p1;
+				//string p2;
+				//stringstream ss2;
+				//ss2 << "samples/result" << grabbingIndex << "_x3.jpg";
+				//ss2 >> p2;
+				//cv::imwrite(p1, s.NowBuffer);
+				//cv::imwrite(p2, s.NowBufferImg);
+			}
+#endif
 
 			grabbingFlag = false;
 		}
@@ -209,19 +220,20 @@ void runner()
 }
 int main()
 {
+	ExitWithError("123");
 	init();
 	printf("init end！\r\n");
+
 	if (mc100_open(0) >= 0)
 	{
-		printf("打开采集卡0成功！\r\n");
-
+		cout << "打开采集卡0成功！" << endl;
 		//开始监听采集卡
 		std::thread t_watcher(watcher);
 		t_watcher.detach();
 	}
 	else
 	{
-		printf("打开采集卡0失败！\r\n");
+		cout << "打开采集卡0失败！" << endl;
 	}
 
 	std::thread t_runner(runner);
@@ -266,7 +278,7 @@ int main()
 			{
 				if (MicroDisplayControler::FreeRunning(mdi, stmp) < 0)
 				{
-					ErrorMessageWait(mdi.fg);
+					MD_ErrorMessageWait(mdi.fg);
 					return 0;
 				}
 			}

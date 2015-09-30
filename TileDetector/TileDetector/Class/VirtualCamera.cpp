@@ -15,6 +15,11 @@ VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 		buffer = cv::imread(imgname, 0);
 	else
 		buffer = cv::imread(imgname, 1);
+	if (buffer.cols == 0 || buffer.rows == 0)
+	{
+		ss << "：虚拟相机底片不存在！";
+		ExitWithError(ss.str());
+	}
 	if (buffer.cols != WIDTH || buffer.rows < BufferLength)
 	{
 		cv::resize(buffer, buffer, cv::Size(WIDTH, BufferLength));

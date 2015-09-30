@@ -14,8 +14,8 @@ int MicroDisplayInit::InitLoad(MicroDisplayInit& mdi, char * mcfName)
 	//≥ı ºªØfg
 	int status = MicroDisplayInit::initFG(mdi);
 	if ((status = Fg_loadConfig(mdi.fg, mcfName)) < 0) {
-		status = ErrorMessageWait(mdi.fg);
-		return status;
+		MD_ErrorMessageWait(mdi.fg);
+		return -1;
 	}
 	OutPutDebugInfo("Load Config File ok\n");
 	return MicroDisplayInit::memoryAllocation(mdi);

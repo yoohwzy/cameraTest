@@ -1,14 +1,18 @@
 #pragma once
 
 #include "../globle.h"
-#include "BufferStorage.h";
 #include "MicroDisplay\MicroDisplayInit.h";
+
+
+//@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
+//@author VShawn
+//@last modify date 2015-9-29 22:39:36 By VShawn
 class BlocksDetector
 {
 
 public:
 	//BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
-	BlocksDetector(BufferStorage *ss);
+	BlocksDetector(cv::Mat& Img);
 	~BlocksDetector();
 	struct Line
 	{
@@ -76,8 +80,7 @@ public:
 	vector < cv::Point > UpRight;
 	vector < cv::Point > DownRight;
 private:
-	BufferStorage *s;
-	MicroDisplayInit *mdi;
+	cv::Mat img;
 
 	vector<cv::Point> tmpLeftList;
 	vector<cv::Point> allLeftList;//记录所有找到的点，预测用
@@ -140,19 +143,20 @@ private:
 	//隔几行采样一次
 	const int ROW_SPAN = 111;
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
-	const int ORANGE_MARGIN_ROW = 300;
-	//默认的，对一个左右多少范围内进行扫描
-	const int ORANGE_RANGE_ROW = 200;
+	const int ORANGE_MARGIN_ROW = 400;
+	//默认的，对一个左右多少范围内进行扫描，宽度为ORANGE_RANGE_ROW+ORANGE_RANGE_ROW
+	const int ORANGE_RANGE_ROW = 300;
 
 	//隔几列采样一次
 	const int COL_SPAN = 100;
 	//默认的，对一个上下多少范围内进行扫描
 	const int ORANGE_RANGE_COL = 200;
 
-	//每次搜索的正负范围
-	const int RANGE_MINI = 35;		//参考值50
+	//每次搜索的正负范围最小值，即Rang - RANGE_REDUCE_BY_COL 要 > RANGE_MINI
+	const int RANGE_MINI = 31;		//参考值50
 	//每次范围减少多少
-	const int RANGE_REDUCE_BY = 50;
+	const int RANGE_REDUCE_BY_COL = 80;
+	const int RANGE_REDUCE_BY_ROW = 150;
 
 
 	//对LIST<POINT>排序

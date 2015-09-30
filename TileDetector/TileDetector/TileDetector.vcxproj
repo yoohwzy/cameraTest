@@ -89,9 +89,13 @@
   <ItemGroup>
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
+    <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h" />
     <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h" />
+    <ClInclude Include="Class\Processor.h" />
     <ClInclude Include="Class\VirtualCamera.h" />
+    <ClInclude Include="Controller\Contoller.h" />
+    <ClInclude Include="Controller\StateMachine.h" />
     <ClInclude Include="globle.h" />
     <ClInclude Include="mc100.h" />
     <ClInclude Include="stdafx.h" />
@@ -100,14 +104,21 @@
   <ItemGroup>
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
+    <ClCompile Include="Class\Measurer.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />
+    <ClCompile Include="Class\Processor.cpp" />
     <ClCompile Include="Class\VirtualCamera.cpp" />
+    <ClCompile Include="Controller\Contoller.cpp" />
+    <ClCompile Include="Controller\StateMachine.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TileDetector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Debug\mc100.lib" />
+    <None Include="mc100.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="mc100.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
