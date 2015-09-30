@@ -31,7 +31,7 @@ int MicroDisplayControler::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 			Fg_FreeMemEx(mdi.fg, mdi.pMem0);
 			Fg_FreeGrabber(mdi.fg);
 			CloseDisplay(mdi.nId);
-			return 0;
+			return -1;
 		}
 		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(mdi.fg, lastPicNr, 0, mdi.pMem0);
 		if (mdi.nId != -1)

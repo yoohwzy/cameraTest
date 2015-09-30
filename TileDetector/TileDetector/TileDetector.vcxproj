@@ -110,7 +110,6 @@
     <ClCompile Include="Class\Processor.cpp" />
     <ClCompile Include="Class\VirtualCamera.cpp" />
     <ClCompile Include="Controller\Contoller.cpp" />
-    <ClCompile Include="Controller\StateMachine.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TileDetector.cpp" />
   </ItemGroup>

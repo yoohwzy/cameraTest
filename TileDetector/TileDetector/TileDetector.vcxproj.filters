@@ -98,9 +98,6 @@
     <ClCompile Include="Controller\Contoller.cpp">
       <Filter>controller</Filter>
     </ClCompile>
-    <ClCompile Include="Controller\StateMachine.cpp">
-      <Filter>controller</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="mc100.dll">

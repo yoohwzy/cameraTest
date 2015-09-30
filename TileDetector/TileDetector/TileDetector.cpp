@@ -143,6 +143,7 @@ int init()
 		//初始化虚拟相机
 		vc = VirtualCamera(mdi, "D31崩角_o原图.jpg");
 	}
+	return 0;
 }
 //监听采集卡状态
 void watcher()
