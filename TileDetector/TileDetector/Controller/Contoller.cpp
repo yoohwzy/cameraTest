@@ -1,9 +1,9 @@
 #include "Contoller.h"
 
 
-Contoller::Contoller()
+Contoller::Contoller(string virtualImg)
 {
-	sofeState.SetState(StateMachine::SofeState::SS_BEFORE_INIT);
+	sofeState = SofeState::SS_BEFORE_INIT;
 	//配置参数
 	mdi.colorType = MicroDisplayInit::RGB;
 	mdi.width = 4096;
@@ -11,24 +11,35 @@ Contoller::Contoller()
 	mdi.MaxPics = 11000;//采集多少帧图像
 	s = BufferStorage(mdi);
 
-	if (!USING_VIRTUAL_CAMERA)
-	{
-		//初始化采集卡
-		status = MicroDisplayInit::InitParameter(mdi);
-		//status = MicroDisplayInit::InitLoad(mdi, "4096RGB1LineX1.mcf");
-		if (status < 0)
-		{
-			MD_ErrorMessageWait(mdi.fg);
-			return;
-		}
-		MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
-		//MicroDisplayInit::CreateBufferWithDiplay(mdi);
-		Fg_saveConfig(mdi.fg, "save.mcf");
-	}
+	if (virtualImg == "")
+		initForE2V();
 	else
+		initForVC(virtualImg);
+
+	//启动  启动器  进程
+	std::thread t_runner(std::mem_fn(&Contoller::RunnerThread), this);
+	t_runner.detach();
+
+
+
+	sofeState = SofeState::SS_INITED;
+}
+void Contoller::initForE2V()
+{
+	USING_VIRTUAL_CAMERA = 0;//是否使用虚拟摄像头 1使用 0用E2V
+
+	//初始化采集卡
+	status = MicroDisplayInit::InitParameter(mdi);
+	//status = MicroDisplayInit::InitLoad(mdi, "4096RGB1LineX1.mcf");
+	if (status < 0)
 	{
-		vc = new VirtualCamera(mdi, "D31崩角_o原图.jpg");//初始化虚拟相机
+		MD_ErrorMessageWait(mdi.fg);
+		return;
 	}
+	MicroDisplayInit::CreateBufferWithOutDiplay(mdi);
+	//MicroDisplayInit::CreateBufferWithDiplay(mdi);
+	Fg_saveConfig(mdi.fg, "save.mcf");
+	//没有报错说明初始化完成，有错会自动报错并退出。
 	OutPutDebugInfo("相机&采集卡初始化完成！");
 
 
@@ -37,37 +48,49 @@ Contoller::Contoller()
 	{
 		OutPutDebugInfo("打开采集卡0成功！");
 		//开始监听采集卡
-		//std::thread t_watcher(watcher);
-		//t_watcher.detach();
+		std::thread t_watcher(std::mem_fn(&Contoller::IoCardWatcherThread), this);
+		t_watcher.detach();
 		mc100_write_port(0, MC100_PORTA, 0x00);
+		IoCardOK = 1;
 	}
 	else
 	{
 		OutPutDebugInfo("打开采集卡0失败！");
 	}
-	/*
-	std::thread t_runner(runner);
-	t_runner.detach();
-	*/
-
-	sofeState.SetState(StateMachine::SofeState::SS_INITED);
 }
+void Contoller::initForVC(string virtualImg)
+{
+	USING_VIRTUAL_CAMERA = 1;
+	vc = VirtualCamera(mdi, virtualImg);//初始化虚拟相机
+	OutPutDebugInfo("相机&采集卡初始化完成！");
+}
+
+
+
+
+
+
+
+
+
+
+/******************************进程方法**********************************/
 
 //监听采集卡状态进程
 void Contoller::IoCardWatcherThread()
 {
-	sofeState.SetState(StateMachine::SofeState::SS_WATCHING);
+	sofeState = SofeState::SS_WATCHING;
 	do{
-		if (sofeState.GetState == StateMachine::SofeState::SS_WATCHING &&
-			producerState.GetState != StateMachine::ProducerState::PS_GRABBING &&
+		if (sofeState == SofeState::SS_WATCHING &&
+			producerState != ProducerState::PS_GRABBING &&
 			mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1)
 		{
-			sofeState.SetState(StateMachine::SofeState::SS_ACTIVATED);
-			//producerState.GetState != StateMachine::ProducerState::GRABBING
+			sofeState = SofeState::SS_ACTIVATED;
+			//producerState != ProducerState::GRABBING
 			OutPutDebugInfo("触发器触发");
 			Sleep(10);
 			//等待采集处理完毕
-			while (producerState.GetState == StateMachine::ProducerState::PS_GRABBING)
+			while (producerState == ProducerState::PS_GRABBING)
 			{
 				Sleep(10);
 			}
@@ -76,7 +99,7 @@ void Contoller::IoCardWatcherThread()
 		{
 			Sleep(1);
 		}
-	} while (sofeState.GetState != StateMachine::SofeState::SS_EXIT);
+	} while (sofeState != SofeState::SS_EXIT);
 }
 
 void Contoller::RunnerThread()
@@ -84,11 +107,11 @@ void Contoller::RunnerThread()
 	int grabbingIndex = 0;
 	do{
 		//触发器触发未响应，且程序并未在采图
-		if (sofeState.GetState == StateMachine::SofeState::SS_ACTIVATED &&
-			producerState.GetState != StateMachine::ProducerState::PS_GRABBING)
+		if (sofeState == SofeState::SS_ACTIVATED &&
+			producerState != ProducerState::PS_GRABBING)
 		{
 			//设置程序状态回到WATCHING，表示触发信号已响应
-			sofeState.SetState(StateMachine::SofeState::SS_WATCHING);
+			sofeState = SofeState::SS_WATCHING;
 
 			OutPutDebugInfo("开始采图");
 			Sleep(DelayTime);
@@ -98,18 +121,18 @@ void Contoller::RunnerThread()
 
 			//初始化缓存
 			s.Start();
-			producerState.SetState(StateMachine::ProducerState::PS_GRABBING);
-			std::thread t1(std::mem_fn(Contoller::producerThread));
+			producerState = ProducerState::PS_GRABBING;
+			std::thread t1(std::mem_fn(&Contoller::producerThread), this);
 			t1.detach();
 
 			//等待采集处理完毕
-			while (producerState.GetState == StateMachine::ProducerState::PS_GRABBING)
+			while (producerState == ProducerState::PS_GRABBING)
 			{
 				Sleep(10);
 			}
 
 			//若采图完成时，消费者正在运行算法，表示上一轮的处理尚未完成，算法速度不够。
-			if (customerState.GetState == StateMachine::CustomerState::CS_PROCESSING)
+			if (customerState == CustomerState::CS_PROCESSING)
 				ExitWithError("算法速度过慢！上一轮处理尚未完成！");
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
@@ -131,10 +154,8 @@ void Contoller::RunnerThread()
 		{
 			Sleep(10);
 		}
-	} while (sofeState.GetState != StateMachine::SofeState::SS_EXIT);
+	} while (sofeState != SofeState::SS_EXIT);
 }
-
-
 
 
 
@@ -149,7 +170,7 @@ void Contoller::producerThread()
 	}
 	else
 	{
-		vc->FreeRunning(mdi, s);
+		vc.FreeRunning(mdi, s);
 	}
 	//采样计时
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -170,5 +191,50 @@ void Contoller::producerThread()
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "ThreeInOne：" << t << endl;
 	//标记生产者工作结束
-	producerState.SetState(StateMachine::ProducerState::PS_GRABBING_END);
+	producerState = ProducerState::PS_GRABBING_END;
+}
+//消费者
+void Contoller::customerThread()
+{
+	customerState = CustomerState::CS_PROCESSING;
+
+	//开始计时
+	double t = (double)cv::getTickCount();
+
+	cv::Mat DetectedImg = s.NowBufferImg.clone();
+	if (DetectedImg.channels() > 0)
+		cv::cvtColor(DetectedImg, DetectedImg, CV_BGR2GRAY);
+	//获取二值化图像
+	Processor::Binaryzation(DetectedImg);
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "Binaryzation：" << t << endl;
+	t = (double)cv::getTickCount();
+
+	Processor::Gaussian_Blur(DetectedImg);
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "Gaussian_Blur：" << t << endl;
+	t = (double)cv::getTickCount();
+
+
+	//瓷砖边缘检测
+	BlocksDetector bd = BlocksDetector(DetectedImg);
+	t = (double)cv::getTickCount();
+	bd.Start();
+	bd.StartUP_DOWN(BlocksDetector::Up);
+	bd.StartUP_DOWN(BlocksDetector::Down);
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "BlocksDetector：" << t << endl;
+
+#ifdef OUTPUT_DEBUG_INFO
+	if (OUTPUT_DEBUG_INFO)
+	{
+		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
+		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
+	}
+#endif
+	//标记消费者工作结束
+	customerState = CustomerState::CS_WAITING;
 }

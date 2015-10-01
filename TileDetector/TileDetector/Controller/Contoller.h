@@ -23,19 +23,15 @@
 class Contoller
 {
 private:
+	bool USING_VIRTUAL_CAMERA = 1;//是否使用虚拟摄像头 1使用 0用E2V
+	bool IoCardOK = 0;//采集卡是否初始化成功
 	int DelayTime = 410;//触发后延时(ms)
 
-
-
-
-	StateMachine sofeState;
-	StateMachine producerState;//生产者状态
-	StateMachine customerState;//消费者状态
 
 	BufferStorage s;
 	int status = 0;
 	MicroDisplayInit mdi;
-	VirtualCamera *vc;
+	VirtualCamera vc;
 
 	/*********两个并行进程*********/
 	//监听采集卡状态进程
@@ -46,13 +42,22 @@ private:
 	void producerThread();
 	void customerThread();
 
-
 	/***********Runner的两个并行子进程**************/
+
+	//使用真实相机初始化
+	void initForE2V();
+	//使用虚拟相机初始化
+	void initForVC(string virtualImg);
+
 public:
-	const bool USING_VIRTUAL_CAMERA = 1;//是否使用虚拟摄像头 1使用 0用E2V
+
+	SofeState sofeState;//程序状态
+	ProducerState producerState;//生产者状态
+	CustomerState customerState;//消费者状态
+
 	//初始化
-	Contoller();
-	~Contoller(){ delete(vc); };
+	Contoller(string virtualImg = "");
+	~Contoller(){ };
 
 };
 
