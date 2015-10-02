@@ -40,6 +40,7 @@ private:
 	void RunnerThread();
 
 	void producerThread();
+	void threeInOne();
 	void customerThread();
 
 	/***********Runner的两个并行子进程**************/
@@ -50,7 +51,6 @@ private:
 	void initForVC(string virtualImg);
 
 public:
-
 	SofeState sofeState;//程序状态
 	ProducerState producerState;//生产者状态
 	CustomerState customerState;//消费者状态
@@ -58,6 +58,5 @@ public:
 	//初始化
 	Contoller(string virtualImg = "");
 	~Contoller(){ };
-
 };
 
