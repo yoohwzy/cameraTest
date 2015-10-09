@@ -1,6 +1,6 @@
 #include "EdgeDetector.h"
 
-#include"Processor.h"
+#include "Processor.h"
 
 
 
@@ -109,7 +109,7 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 	//	Mat Contours(src_gray.size(), src_gray.type(), Scalar(0, 0, 0));
 
 
-	Point ptemp;
+	
 
 	xleft = (*bd).A.x - abs((*bd).A.x - (*bd).B.x) - 100, yleft = (*bd).A.y - 100, left_height = (*bd).B.y - (*bd).A.y + 200, left_width = 2 * abs((*bd).A.x - (*bd).B.x) + 200;
 	xright = (*bd).C.x - abs((*bd).C.x - (*bd).D.x) - 100, yright = (*bd).C.y - 100, right_height = (*bd).D.y - (*bd).C.y + 200, right_width = 2 * abs((*bd).C.x - (*bd).D.x) + 200;
@@ -506,9 +506,9 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 	Vector<Point>Point_of_Intersection;
 	PointOfIntersection(Fitline, Point_of_Intersection);
 	(*bd).A = Point_of_Intersection[3];
-	(*bd).B = Point_of_Intersection[0];
+	(*bd).B = Point_of_Intersection[2];
 	(*bd).C = Point_of_Intersection[1];
-	(*bd).D = Point_of_Intersection[2];
+	(*bd).D = Point_of_Intersection[0];
 	
 
 	// ±À±ßÅÐ¶¨
@@ -683,10 +683,10 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 			}
 			Defects.push_back(tt);
 		}
-
-
-
 	}
 //
-	
+	for (int i = 0; i < Defects.size(); i++)
+	{
+		circle(src, Point(Defects[i].x, Defects[i].y), Defects[i].z, CV_RGB(255, 0, 0), 1);
+	}
 }

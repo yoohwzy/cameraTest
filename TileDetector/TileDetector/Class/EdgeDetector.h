@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\globle.h"
+#include "../globle.h"
 #include "BlocksDetector.h"
 
 
