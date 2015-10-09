@@ -1,17 +1,18 @@
 #pragma once
 
-#include "..\globle.h"
-#include "..\Class\MicroDisplay\MicroDisplayInit.h"
-#include "..\Class\MicroDisplay\MicroDisplayControler.h"
-#include "..\Class\BufferStorage.h"
-#include "..\Class\VirtualCamera.h"
-#include "..\Class\BlocksDetector.h"
-#include "..\Class\Processor.h"
+#include "../globle.h"
+#include "../Class/MicroDisplay/MicroDisplayInit.h"
+#include "../Class/MicroDisplay/MicroDisplayControler.h"
+#include "../Class/BufferStorage.h"
+#include "../Class/VirtualCamera.h"
+#include "../Class/BlocksDetector.h"
+#include "../Class/EdgeDetector.h"
+#include "../Class/Processor.h"
 
 #include "StateMachine.h"
 
 #include <thread>
-#include "..\mc100.h"
+#include "../mc100.h"
 
 
 

@@ -66,6 +66,9 @@
     <ClInclude Include="Controller\StateMachine.h">
       <Filter>controller</Filter>
     </ClInclude>
+    <ClInclude Include="Class\EdgeDetector.h">
+      <Filter>class</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="Controller\Contoller.cpp">
       <Filter>controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\EdgeDetector.cpp">
+      <Filter>class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

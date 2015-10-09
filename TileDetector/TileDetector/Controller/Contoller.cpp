@@ -221,19 +221,24 @@ void Contoller::customerThread()
 
 	cv::Mat DetectedImg = s.NowBufferImg.clone();
 	if (DetectedImg.channels() > 0)
+	{
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		cv::cvtColor(DetectedImg, DetectedImg, CV_BGR2GRAY);
-	//获取二值化图像
-	Processor::Binaryzation(DetectedImg);
+		std::cout << "cvtColor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
+	}
+	////获取二值化图像
+	//Processor::Binaryzation(DetectedImg);
 
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "Binaryzation：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	t = (double)cv::getTickCount();
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//std::cout << "Binaryzation：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	//t = (double)cv::getTickCount();
 
-	Processor::Gaussian_Blur(DetectedImg);
+	//Processor::Gaussian_Blur(DetectedImg);
 
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "Gaussian_Blur：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	t = (double)cv::getTickCount();
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//std::cout << "Gaussian_Blur：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	//t = (double)cv::getTickCount();
 
 
 	//瓷砖边缘检测
@@ -253,6 +258,14 @@ void Contoller::customerThread()
 		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
 	}
 #endif
+
+	//瓷砖边缘缺陷检测
+	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
+	if (ed.Defects.size() > 0)
+	{
+		std::cout << "边缘有缺陷" << endl;
+	}
+
 	//标记消费者工作结束
 	customerState = CustomerState::CS_WAITING;
 
