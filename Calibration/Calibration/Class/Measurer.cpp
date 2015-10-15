@@ -1,14 +1,28 @@
 #include "Measurer.h"
 
 
-Measurer::Measurer(BlocksDetector *b, MicroDisplayInit *mdii, int TileStandardWidth, int TileStandardHeight)
+Measurer::Measurer(BlocksDetector *b, MicroDisplayInit *mdii, double TileStandardWidth, double TileStandardHeight)
 {
 	bd_Standard = b;
 	mdi = mdii;
 	tileStandardWidth_mm = TileStandardWidth;
 	tileStandardHeight_mm = TileStandardHeight;
+	ObserveCalibration();
 }
+Measurer::Measurer()
+{
+	ifstream fin("MeasurerData.txt");
+	if (!fin)
+	{
+		ExitWithError("MeasurerData.txt不能打开");
+		return;
+	}
+	//MilliMeterPerPix_Width = tileStandardWidth_mm * 2 / (tileStandardWidth_AB_pix + tileStandardWidth_CD_pix);
+	//MilliMeterPerPix_Height = tileStandardHeight_mm * 2 / (tileStandardWidth_AD_pix + tileStandardWidth_BC_pix);
+	//MilliMeterPerPix_Diagonal = sqrt(tileStandardWidth_mm*tileStandardWidth_mm + tileStandardHeight_mm*tileStandardHeight_mm) * 2 / (tileStandardDiagonalAC_pix + tileStandardDiagonalBD_pix);
 
+	fin >> MilliMeterPerPix_Width >> MilliMeterPerPix_Height >> MilliMeterPerPix_Diagonal;
+}
 
 Measurer::~Measurer()
 {
@@ -243,6 +257,9 @@ void Measurer::ObserveCalibration()
 	MilliMeterPerPix_Width = tileStandardWidth_mm * 2 / (tileStandardWidth_AB_pix + tileStandardWidth_CD_pix);
 	MilliMeterPerPix_Height = tileStandardHeight_mm * 2 / (tileStandardWidth_AD_pix + tileStandardWidth_BC_pix);
 	MilliMeterPerPix_Diagonal = sqrt(tileStandardWidth_mm*tileStandardWidth_mm + tileStandardHeight_mm*tileStandardHeight_mm) * 2 / (tileStandardDiagonalAC_pix + tileStandardDiagonalBD_pix);
+
+	ofstream fout("MeasurerData.txt");
+	fout << setprecision(24) << MilliMeterPerPix_Width << " " << MilliMeterPerPix_Height << " " << MilliMeterPerPix_Diagonal << endl;
 }
 void Measurer::ObserveImgAdjust(cv::Mat& Img)
 {

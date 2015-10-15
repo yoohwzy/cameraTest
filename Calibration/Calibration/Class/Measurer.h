@@ -4,6 +4,9 @@
 #include "BlocksDetector.h"
 #define RADIAN(a)  (a*CV_PI/180.0) //根据角度获得弧度
 #define ANGLE(r)	(180.0*r/CV_PI)//根据弧度获得角度
+#include <iostream>
+#include <iomanip>
+
 
 class Measurer
 {
@@ -61,9 +64,11 @@ public:
 
 
 	//计算初始化 瓷砖宽度单位为mm
-	Measurer(BlocksDetector *b, MicroDisplayInit *mdii, int TileStandardWidthmm, int TileStandardHeightmm);
+	//Measurer(BlocksDetector *b, MicroDisplayInit *mdii, int TileStandardWidthmm, int TileStandardHeightmm);
 	//读取数据初始化 后两参数表示一个像素表示多少毫米
 	Measurer(BlocksDetector *b, MicroDisplayInit *mdii, double MilliMeterPerPix_Width, double MilliMeterPerPix_Height);
+	//读取参
+	Measurer();
 	~Measurer();
 
 

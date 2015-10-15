@@ -8,6 +8,7 @@
 #include "../Class/BlocksDetector.h"
 #include "../Class/EdgeDetector.h"
 #include "../Class/Processor.h"
+#include "../Class/Measurer.h"
 
 #include "StateMachine.h"
 
@@ -33,6 +34,7 @@ private:
 	int status = 0;
 	MicroDisplayInit mdi;
 	VirtualCamera vc;
+
 
 	/*********两个并行进程*********/
 	//监听采集卡状态进程

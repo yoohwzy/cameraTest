@@ -103,18 +103,13 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 	
 	Processor ps;
 	bd = _bd;
-	if (src.channels()==3)
-		cvtColor(src, src, CV_BGR2GRAY);
-
+	
 	//	Mat Contours(src_gray.size(), src_gray.type(), Scalar(0, 0, 0));
 
-
-	
-
-	xleft = (*bd).A.x - abs((*bd).A.x - (*bd).B.x) - 100, yleft = (*bd).A.y - 100, left_height = (*bd).B.y - (*bd).A.y + 200, left_width = 2 * abs((*bd).A.x - (*bd).B.x) + 200;
-	xright = (*bd).C.x - abs((*bd).C.x - (*bd).D.x) - 100, yright = (*bd).C.y - 100, right_height = (*bd).D.y - (*bd).C.y + 200, right_width = 2 * abs((*bd).C.x - (*bd).D.x) + 200;
-	xup = xleft + left_width - 6, yup = (*bd).A.y - abs((*bd).A.y - (*bd).C.y) - 100, up_width = xright - xleft - left_width + 12, up_height = 2 * abs((*bd).A.y - (*bd).C.y) + 200;
-	xdown = xleft + left_width - 6, ydown = (*bd).B.y - abs((*bd).B.y - (*bd).D.y) - 100, down_width = xright - xleft - left_width + 12, down_height = 2 * abs((*bd).B.y - (*bd).D.y) + 200;
+	xleft = (*bd).A.x - abs((*bd).A.x - (*bd).D.x) - 100, yleft = (*bd).A.y - 100, left_height = (*bd).D.y - (*bd).A.y + 200, left_width = 2 * abs((*bd).A.x - (*bd).D.x) + 200;
+	xright = (*bd).B.x - abs((*bd).B.x - (*bd).C.x) - 100, yright = (*bd).B.y - 100, right_height = (*bd).C.y - (*bd).B.y + 200, right_width = 2 * abs((*bd).B.x - (*bd).C.x) + 200;
+	xup = xleft + left_width - 6, yup = (*bd).A.y - abs((*bd).A.y - (*bd).B.y) - 100, up_width = xright - xleft - left_width + 12, up_height = 2 * abs((*bd).A.y - (*bd).B.y) + 200;
+	xdown = xleft + left_width - 6, ydown = (*bd).D.y - abs((*bd).D.y - (*bd).C.y) - 100, down_width = xright - xleft - left_width + 12, down_height = 2 * abs((*bd).D.y - (*bd).C.y) + 200;
 
 	src(Rect(xleft, yleft, left_width, left_height)).copyTo(leftROI);
 	src(Rect(xright, yright, right_width, right_height)).copyTo(rightROI);
@@ -126,6 +121,10 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 	ROI.push_back(downROI);
 	ROI.push_back(rightROI);
 	ROI.push_back(upROI);
+
+	if (src.channels() == 3)
+	for (int i = 0; i < ROI.size(); i++)
+		cvtColor(ROI[i], ROI[i], CV_BGR2GRAY);
 
 	// ROI¶þÖµ»¯
 	for (int i = 0; i < ROI.size(); i++)

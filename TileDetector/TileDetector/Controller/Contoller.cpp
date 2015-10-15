@@ -11,6 +11,16 @@ Contoller::Contoller(string virtualImg)
 	mdi.MaxPics = 11000;//采集多少帧图像
 	s = BufferStorage(mdi);
 
+	/*读取定标图片 定标*/
+	//BlocksDetector bd_Standard = BlocksDetector(cv::imread("A9划痕凹点_x3二值化.jpg"));
+	//bd_Standard.Start();
+	//bd_Standard.StartUP_DOWN(BlocksDetector::Up);
+	//bd_Standard.StartUP_DOWN(BlocksDetector::Down);
+	//bd_Standard.ABCD();
+	//Measurer m = Measurer(&bd_Standard, &mdi, 300, 600);		 //定标图片初始化
+	//cout << "定标完成" << endl;
+
+
 	if (virtualImg == "")
 		initForE2V();
 	else
@@ -247,6 +257,7 @@ void Contoller::customerThread()
 	bd.Start();
 	bd.StartUP_DOWN(BlocksDetector::Up);
 	bd.StartUP_DOWN(BlocksDetector::Down);
+	bd.ABCD();
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 
@@ -264,6 +275,11 @@ void Contoller::customerThread()
 	if (ed.Defects.size() > 0)
 	{
 		std::cout << "边缘有缺陷" << endl;
+	}
+	else
+	{
+		Measurer m = Measurer();
+		m.CaculteSize(&bd);
 	}
 
 	//标记消费者工作结束
