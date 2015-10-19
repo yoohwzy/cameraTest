@@ -1,6 +1,6 @@
 #include "Processor.h"
 
-Mat Processor::Binaryzation(Mat &image)
+cv::Mat Processor::Binaryzation(cv::Mat &image)
 {
 	int histSize[1];
 	float hranges[2];
@@ -11,11 +11,11 @@ Mat Processor::Binaryzation(Mat &image)
 	hranges[1] = 255.0;
 	ranges[0] = hranges;
 	channels[0] = 0;
-// 峰谷法自适应阈值ThresNum
-	MatND histo;
-	calcHist(&image, 1, channels, Mat(), histo, 1, histSize, ranges);
-	vector<Point> num;
-	Point histopoint;
+	// 峰谷法自适应阈值ThresNum
+	cv::MatND histo;
+	calcHist(&image, 1, channels, cv::Mat(), histo, 1, histSize, ranges);
+	vector<cv::Point> num;
+	cv::Point histopoint;
 	int ThresNum = 0;
 	for (int i = 1; i < 256; i++)
 	{
@@ -30,14 +30,14 @@ Mat Processor::Binaryzation(Mat &image)
 	for (int i = 1; i < num.size(); i++)
 	{
 		if (num[i].x < num[i - 1].x)
-		if (num[i].x < num[i + 1].x)
-		{
-			ThresNum = num[i].y;
-			break;
-		}
+			if (num[i].x < num[i + 1].x)
+			{
+				ThresNum = num[i].y;
+				break;
+			}
 	}
 	// 二值化
-	threshold(image, image, ThresNum, 255, THRESH_BINARY);
+	cv::threshold(image, image, ThresNum, 255, cv::THRESH_BINARY);
 	return image;
 }
 
