@@ -9,13 +9,13 @@
 #include <thread>
 #include "mc100.h"
 
-
+#include "Class\Processor.h"
 int main()
 {
 	////真实相机
 	//Contoller c = Contoller();
 	//虚拟相机
-	Contoller *c = new Contoller("D31崩角_o原图.jpg");
+	Contoller *c = new Contoller("result11_o原图.jpg");
 	//主循环
 	string input;
 	do{
@@ -38,6 +38,22 @@ int main()
 		}
 		else if (input == "3")
 		{
+			Processor p;
+			cv::Mat DetectedImg = cv::imread("result1_x3.jpg");
+			double t = (double)cv::getTickCount();
+
+			//获取二值化图像
+			Processor::Binaryzation(DetectedImg);
+
+			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+			std::cout << "Binaryzation：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+			t = (double)cv::getTickCount();
+
+			Processor::Gaussian_Blur(DetectedImg);
+
+			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+			std::cout << "Gaussian_Blur：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+			t = (double)cv::getTickCount();
 		}
 		else
 			Sleep(10);

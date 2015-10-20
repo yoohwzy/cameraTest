@@ -1,6 +1,5 @@
 #include "Contoller.h"
 
-
 Contoller::Contoller(string virtualImg)
 {
 	sofeState = SofeState::SS_BEFORE_INIT;
@@ -111,7 +110,6 @@ void Contoller::IoCardWatcherThread()
 		}
 	} while (sofeState != SofeState::SS_EXIT);
 }
-
 void Contoller::RunnerThread()
 {
 	int grabbingIndex = 0;
@@ -283,9 +281,8 @@ void Contoller::customerThread()
 	}
 
 	//标记消费者工作结束
-	customerState = CustomerState::CS_WAITING;
-
 	std::cout << "customer：End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	customerState = CustomerState::CS_WAITING;
 }
 //图片合成
 void Contoller::threeInOne()

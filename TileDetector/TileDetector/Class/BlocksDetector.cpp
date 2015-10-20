@@ -884,12 +884,12 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 		int upsum = 0;
 		for (size_t yy = y; yy > y - sumcount; yy--)
 		{
-			upsum += oneLineGray.ptr<uchar>(yy)[0];
+			upsum += oneLineGray.ptr<uchar>(yy)[0] > 5 ? 255 : 0;//TODO:确定要这么干嘛？
 		}
 		int downsum = 0;
 		for (size_t yy = y + 1; yy <= y + sumcount; yy++)
 		{
-			downsum += oneLineGray.ptr<uchar>(yy)[0];
+			downsum += oneLineGray.ptr<uchar>(yy)[0] > 5 ? 255 : 0;
 		}
 		int c = 0;
 		if (isUp)
