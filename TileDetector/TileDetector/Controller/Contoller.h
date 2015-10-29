@@ -10,6 +10,9 @@
 #include "../Class/Processor.h"
 #include "../Class/Measurer.h"
 
+
+#include "../Class/BlockHoughDetector.h"
+
 #include "StateMachine.h"
 
 #include <thread>

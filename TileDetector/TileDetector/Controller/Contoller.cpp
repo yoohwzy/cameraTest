@@ -250,35 +250,36 @@ void Contoller::customerThread()
 
 
 	//´É×©±ßÔµ¼ì²â
-	BlocksDetector bd = BlocksDetector(DetectedImg);
-	t = (double)cv::getTickCount();
-	bd.Start();
-	bd.StartUP_DOWN(BlocksDetector::Up);
-	bd.StartUP_DOWN(BlocksDetector::Down);
-	bd.ABCD();
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	std::cout << "BlocksDetector£º" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
-	{
-		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
-		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
-		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
-	}
-#endif
-
-	//´É×©±ßÔµÈ±ÏÝ¼ì²â
-	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
-	if (ed.Defects.size() > 0)
-	{
-		std::cout << "±ßÔµÓÐÈ±ÏÝ" << endl;
-	}
-	else
-	{
-		Measurer m = Measurer();
-		m.CaculteSize(&bd);
-	}
+//	BlocksDetector bd = BlocksDetector(DetectedImg);
+//	t = (double)cv::getTickCount();
+//	bd.Start();
+//	bd.StartUP_DOWN(BlocksDetector::Up);
+//	bd.StartUP_DOWN(BlocksDetector::Down);
+//	bd.ABCD();
+//	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+//	std::cout << "BlocksDetector£º" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+//
+//#ifdef OUTPUT_DEBUG_INFO
+//	if (OUTPUT_DEBUG_INFO)
+//	{
+//		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+//		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
+//		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
+//	}
+//#endif
+//
+//	//´É×©±ßÔµÈ±ÏÝ¼ì²â
+//	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
+//	if (ed.Defects.size() > 0)
+//	{
+//		std::cout << "±ßÔµÓÐÈ±ÏÝ" << endl;
+//	}
+//	else
+//	{
+//		Measurer m = Measurer();
+//		m.CaculteSize(&bd);
+//	}
+	BlockHoughDetector bhd = BlockHoughDetector(s.NowBufferImg);
 
 	//±ê¼ÇÏû·ÑÕß¹¤×÷½áÊø
 	std::cout << "customer£ºEnd at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;

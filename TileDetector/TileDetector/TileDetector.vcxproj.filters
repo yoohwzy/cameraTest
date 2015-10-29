@@ -69,6 +69,9 @@
     <ClInclude Include="Class\EdgeDetector.h">
       <Filter>class</Filter>
     </ClInclude>
+    <ClInclude Include="Class\BlockHoughDetector.h">
+      <Filter>class</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -102,6 +105,9 @@
       <Filter>controller</Filter>
     </ClCompile>
     <ClCompile Include="Class\EdgeDetector.cpp">
+      <Filter>class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BlockHoughDetector.cpp">
       <Filter>class</Filter>
     </ClCompile>
   </ItemGroup>

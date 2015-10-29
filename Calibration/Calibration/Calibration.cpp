@@ -36,12 +36,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	//s_Standard.NowBufferImg = cv::imread("E14杂质二值化_x3.jpg");
 	//s.NowBufferImg = cv::imread("E9 A_x3二值化.jpg");
 
-	s_Standard.NowBufferImg = cv::imread("A9划痕凹点_x3二值化.jpg");
-	s.NowBufferImg = cv::imread("A14杂质_x3二值化.jpg");
+	s_Standard.NowBufferImg = cv::imread("result7_x3标准.jpg");
+	s.NowBufferImg = cv::imread("result1_x3.jpg");
 
 	double t = 0;
 	//瓷砖边缘检测
-	BlocksDetector bd_Standard = BlocksDetector(&s_Standard);
+	BlocksDetector bd_Standard = BlocksDetector(s_Standard.NowBufferImg);
 	t = (double)cv::getTickCount();
 	bd_Standard.Start();
 	bd_Standard.StartUP_DOWN(BlocksDetector::Up);
@@ -53,14 +53,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << "标准砖边缘检测时间：" << t << endl;
 
 
-//#ifdef OUTPUT_DEBUG_INFO
-//	if (OUTPUT_DEBUG_INFO)
-//	{
-//		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd_Standard.drowDebugDetectLR);
-//		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd_Standard.drowDebugDetectUD);
-//		cv::imwrite("samples/02drowDebugResult.jpg", bd_Standard.drowDebugResult);
-//	}
-//#endif
+#ifdef OUTPUT_DEBUG_INFO
+	if (OUTPUT_DEBUG_INFO)
+	{
+		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd_Standard.drowDebugDetectLR);
+		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd_Standard.drowDebugDetectUD);
+		cv::imwrite("samples/02drowDebugResult.jpg", bd_Standard.drowDebugResult);
+	}
+#endif
 
 
 	t = (double)cv::getTickCount();
@@ -71,13 +71,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	//cv::Mat img2 = pincushionCalibrationImg.clone();
 	//m.PincushionImgAdjust(img2);
 	m.ObserveCalibration();
-
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "初始化Measurer时间：" << t << endl;
 	std::cout << "标准砖标定完成" << t << endl;
 	t = (double)cv::getTickCount();
 
-	BlocksDetector bd2 = BlocksDetector(&s);
+	BlocksDetector bd2 = BlocksDetector(s.NowBufferImg);
 	bd2.Start();
 	bd2.StartUP_DOWN(BlocksDetector::Up);
 	bd2.StartUP_DOWN(BlocksDetector::Down);
@@ -96,6 +95,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	t = (double)cv::getTickCount();
 
 	m.CaculteSize(&bd2);
+	m.ObserveImgAdjust(s.NowBufferImg);
+	cv::imwrite("samples/ObserveImgAdjust.jpg", s.NowBufferImg);
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "待测量砖尺寸测量时间：" << t << endl << endl << endl;
