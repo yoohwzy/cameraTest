@@ -5,6 +5,7 @@ C:\SDK\lib;C:\SDK\bin;$(ReferencePath)
 ¿âÄ¿Â¼
 C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;$(LibraryPath)
 
+
 Á´½ÓÆ÷ÊäÈë debug
 fglib5.lib
 display_lib.lib
