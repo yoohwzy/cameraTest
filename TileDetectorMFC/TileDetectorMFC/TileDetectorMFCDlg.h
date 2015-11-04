@@ -13,6 +13,7 @@
 #include "Controller/Consumer.h"
 
 
+#define WM_MSG_POSTMSG (WM_USER + 99)
 #define WM_MSG_GRABBING_END (WM_USER + 100)
 #define WM_MSG_PROCESSING_END (WM_USER + 101)
 
@@ -52,6 +53,7 @@ public:
 	afx_msg void BtnScan_OnBnClicked();
 	afx_msg LRESULT OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnMsgPostMsg(WPARAM wParam, LPARAM lParam);
 private:
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
 public:
@@ -70,5 +72,5 @@ public:
 	CString set_grabRGBType;
 	// 触发后等待时机
 	int set_TiggerWaitTimeMS;
-	afx_msg void OnBnClickedCbOpenconsole();
+	CString m_Info;
 };

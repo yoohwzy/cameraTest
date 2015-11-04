@@ -51,7 +51,7 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	//if (Fg_setParameter(mdi.fg, FG_KNEE_LUT_SCALE, &_FG_KNEE_LUT_SCALE, mdi.nCamPort) < 0) {
 	//	return status;
 	//}
-	sprintf(debugInfo, "Set Image Size on port %d (w: %d,h: %d) ok\r\n", mdi.nCamPort, mdi.width, mdi.height);
+	sprintf(debugInfo, "Set Image Size on port %d (w: %d,h: %d) ok\n", mdi.nCamPort, mdi.width, mdi.height);
 	printf_globle(debugInfo);
 
 	return MicroDisplayInit::memoryAllocation(mdi);
@@ -124,7 +124,7 @@ int MicroDisplayInit::initFG(MicroDisplayInit& mdi)
 			return status;
 		}
 	}
-	printf_globle("Init FG ok\r\n");
+	printf_globle("Init FG ok\n");
 	return status;
 }
 int MicroDisplayInit::memoryAllocation(MicroDisplayInit& mdi)
@@ -149,7 +149,7 @@ int MicroDisplayInit::memoryAllocation(MicroDisplayInit& mdi)
 		return status;
 	}
 	else {
-		sprintf(debugInfo, "%d framebuffer allocated for port %d ok\r\n", mdi.nr_of_buffer, mdi.nCamPort);
+		sprintf(debugInfo, "%d framebuffer allocated for port %d ok\n", mdi.nr_of_buffer, mdi.nCamPort);
 		printf_globle(debugInfo);
 	}
 	return status;
@@ -265,11 +265,11 @@ int MicroDisplayInit::getBoardInfo()
 
 			if (iPortNrOnBoard > 0){
 				if (i == 0)
-					printf_globle("Following serial ports are available:\r\n");
+					printf_globle("Following serial ports are available:\n");
 				for (int j = 0; j < iPortNrOnBoard; j++){
 					iPortCount++;
 					char debugInfo[256];
-					sprintf(debugInfo, "%d. Board_%u %s (%x) Port_%d\r\n", iPortCount - 1, i, boardName, boardType, j);
+					sprintf(debugInfo, "%d. Board_%u %s (%x) Port_%d\n", iPortCount - 1, i, boardName, boardType, j);
 					printf_globle(debugInfo);
 				}
 			}

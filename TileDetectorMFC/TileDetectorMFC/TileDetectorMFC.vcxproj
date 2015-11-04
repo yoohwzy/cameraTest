@@ -119,8 +119,6 @@
     <ClInclude Include="Class\Setting.h" />
     <ClInclude Include="Class\VirtualCamera.h" />
     <ClInclude Include="Controller\Consumer.h" />
-    <ClInclude Include="Controller\Contoller.h" />
-    <ClInclude Include="Controller\StateMachine.h" />
     <ClInclude Include="Controller\TiggerWatcherAndGrabber.h" />
     <ClInclude Include="CvvImage.h" />
     <ClInclude Include="globle_head.h" />
@@ -145,7 +143,6 @@
     <ClCompile Include="Class\Setting.cpp" />
     <ClCompile Include="Class\VirtualCamera.cpp" />
     <ClCompile Include="Controller\Consumer.cpp" />
-    <ClCompile Include="Controller\Contoller.cpp" />
     <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp" />
     <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="globle_var.cpp" />

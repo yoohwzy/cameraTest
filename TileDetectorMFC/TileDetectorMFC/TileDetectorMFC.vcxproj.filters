@@ -75,12 +75,6 @@
     <ClInclude Include="Class\VirtualCamera.h">
       <Filter>Class</Filter>
     </ClInclude>
-    <ClInclude Include="Controller\StateMachine.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="Controller\Contoller.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
     <ClInclude Include="globle_debug.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -139,9 +133,6 @@
     </ClCompile>
     <ClCompile Include="Class\VirtualCamera.cpp">
       <Filter>Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\Contoller.cpp">
-      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp">
       <Filter>Controller</Filter>

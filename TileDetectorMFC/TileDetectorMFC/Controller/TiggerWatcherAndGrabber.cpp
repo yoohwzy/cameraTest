@@ -17,17 +17,17 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	//bd_Standard.StartUP_DOWN(BlocksDetector::Down);
 	//bd_Standard.ABCD();
 	//Measurer m = Measurer(&bd_Standard, &globle_var::mdi, 300, 600);		 //定标图片初始化
-	//printf_globle("定标完成\r\n");
+	//printf_globle("定标完成\n");
 
 
 	if (virtualImg == "")
 	{
-		printf_globle("TiggerWatcherAndGrabber load! 当前模式为真实相机。\r\n");
+		printf_globle("TiggerWatcherAndGrabber load! 当前模式为真实相机。\n");
 		initForE2V();
 	}
 	else
 	{
-		printf_globle("TiggerWatcherAndGrabber load! 当前模式为虚拟相机。\r\n");
+		printf_globle("TiggerWatcherAndGrabber load! 当前模式为虚拟相机。\n");
 		initForVC(virtualImg);
 	}
 }
@@ -47,31 +47,31 @@ void TiggerWatcherAndGrabber::initForE2V()
 	//MicroDisplayInit::CreateBufferWithDiplay(globle_var::mdi);
 	Fg_saveConfig(globle_var::mdi.fg, "save.mcf");
 	//没有报错说明初始化完成，有错会自动报错并退出。
-	printf_globle("相机&采集卡初始化完成！\r\n");
+	printf_globle("相机&采集卡初始化完成！\n");
 
 
 	/**********************初始化采集卡***********************/
 	if (mc100_open(0) >= 0)
 	{
-		printf_globle("打开采集卡0成功！\r\n");
+		printf_globle("打开采集卡0成功！\n");
 		mc100_write_port(0, MC100_PORTA, 0x00);
 	}
 	else
 	{
-		printf_globle("打开采集卡0失败！\r\n");
+		printf_globle("打开采集卡0失败！\n");
 	}
 }
 void TiggerWatcherAndGrabber::initForVC(string virtualImg)
 {
 	USING_VIRTUAL_CAMERA = 1;
 	vc = VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
-	printf_globle("虚拟相机初始化完成！\r\n");
+	printf_globle("虚拟相机初始化完成！\n");
 }
 
 
 TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
 {
-	printf_globle("TiggerWatcherAndGrabber unload!\r\n");
+	printf_globle("TiggerWatcherAndGrabber unload!\n");
 }
 
 
@@ -82,11 +82,11 @@ void TiggerWatcherAndGrabber::StartWatch()
 	IsWatching = true;
 	std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
 	t_watcher.detach();
-	printf_globle("开始监控触发信号\r\n");
+	printf_globle("开始监控触发信号\n");
 }
 void TiggerWatcherAndGrabber::StopWatch()
 {
-	printf_globle("停止监控触发信号\r\n");
+	printf_globle("停止监控触发信号\n");
 	IsWatching = false;
 }
 bool TiggerWatcherAndGrabber::ManualTigger()
@@ -104,11 +104,11 @@ void TiggerWatcherAndGrabber::watcherThread()
 		{
 			if (BeManualTiggered)
 			{
-				printf_globle("手动触发\r\n");
+				printf_globle("手动触发\n");
 				BeManualTiggered = false;
 			}
 			else
-				printf_globle("触发器触发\r\n");
+				printf_globle("触发器触发\n");
 
 			GrabbingIndex += 1;
 			if (GrabbingIndex > 10000000) GrabbingIndex = 1;
@@ -152,7 +152,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 			while (globle_var::s.BufferReadIndex + globle_var::s.NinOne < globle_var::mdi.MaxPics)
 			{
 				Sleep(1);
-				//printf_globle("Sleep(1)\r\n");
+				//printf_globle("Sleep(1)\n");
 			};
 			//threeInOne();
 

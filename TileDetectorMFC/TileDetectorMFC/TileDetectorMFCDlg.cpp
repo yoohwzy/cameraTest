@@ -62,15 +62,20 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , set_grabWidth(0)
 , set_grabRGBType(_T(""))
 , set_TiggerWaitTimeMS(0)
+, m_Info(_T(""))
 {
-	AllocConsole();
-	string title = "debug info";
-	size_t size = title.length();
-	wchar_t *buffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, title.c_str(), size, buffer, size * sizeof(wchar_t));
-	buffer[size] = 0;  // 确保以 '\0' 结尾 
-	SetConsoleTitle(buffer);
-	delete buffer;
+	printf_globle("");
+	if (FILE_LOG)
+		ofstream of(FILE_NAME);
+
+	//AllocConsole();
+	//string title = "debug info";
+	//size_t size = title.length();
+	//wchar_t *buffer = new wchar_t[size + 1];
+	//MultiByteToWideChar(CP_ACP, 0, title.c_str(), size, buffer, size * sizeof(wchar_t));
+	//buffer[size] = 0;  // 确保以 '\0' 结尾 
+	//SetConsoleTitle(buffer);
+	//delete buffer;
 }
 
 
@@ -85,6 +90,7 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, set_grabWidth, 0, 4096);
 	DDX_CBString(pDX, IDC_COMBO1, set_grabRGBType);
 	DDX_Text(pDX, IDC_TB_TiggerWaitMS, set_TiggerWaitTimeMS);
+	DDX_Text(pDX, IDC_TB_INFO, m_Info);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -98,7 +104,6 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_GRAB_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_SAVE, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerSave)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad)
-	ON_BN_CLICKED(IDC_CB_OpenConsole, &CTileDetectorMFCDlg::OnBnClickedCbOpenconsole)
 END_MESSAGE_MAP()
 
 
@@ -264,11 +269,17 @@ void CTileDetectorMFCDlg::BtnScan_OnBnClicked()
 	if (!twag->ManualTigger())
 	{
 		//MessageBox(L"当前无法触发！");
-		printf_globle("当前无法触发！\r\n");
+		printf_globle("当前无法触发！\n");
+	}
+	else
+	{
+		m_Info = _T("");
+		UpdateData(false);
 	}
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
+
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 	if (!consumer->StartNewProces(globle_var::s.NowBufferImg))
 	{
@@ -278,12 +289,16 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	cv::Mat a;
 	cv::resize(globle_var::s.NowBufferImg, a, cv::Size(400, 1100));
 	DrawPicToHDC(a, IDC_PIC_Sample);
-	//MessageBox(_T("采图完成！"));
+
+
+	m_Info += _T("采图完成！\r\n");
+	UpdateData(false);
 	return 1;
 }
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 {
-	MessageBox(_T("完成！"));
+	m_Info += _T("处理完成！\r\n");
+	UpdateData(false);
 	return 1;
 }
 
@@ -391,31 +406,4 @@ void CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad()
 	UpdateData(false);
 
 
-}
-
-void CTileDetectorMFCDlg::OnBnClickedCbOpenconsole()
-{
-	if (IsDlgButtonChecked(IDC_CB_OpenConsole) == BST_CHECKED)
-	{
-		CONSOLE_OPEN = true;
-		//AllocConsole();
-		//freopen("CON", "r", stdin);
-		//freopen("CON", "w", stdout);
-		//freopen("CON", "w", stderr);
-
-		//AllocConsole();
-		//string title = "debug info";
-		//size_t size = title.length();
-		//wchar_t *buffer = new wchar_t[size + 1];
-		//MultiByteToWideChar(CP_ACP, 0, title.c_str(), size, buffer, size * sizeof(wchar_t));
-		//buffer[size] = 0;  // 确保以 '\0' 结尾 
-		//SetConsoleTitle(buffer);
-		//delete buffer;
-
-	}
-	else
-	{
-		CONSOLE_OPEN = false;
-		FreeConsole();
-	}
 }

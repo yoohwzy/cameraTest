@@ -47,7 +47,7 @@ int MicroDisplayControler::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 }
 int MicroDisplayControler::FreeRunningFocusing(MicroDisplayInit& mdi)
 {
-	printf_globle("开始对焦，按1放大，按2缩小，按3退出。\r\n");
+	printf_globle("开始对焦，按1放大，按2缩小，按3退出。\n");
 	//采集mdi.MaxPics行图像到缓存
 	if (MicroDisplayControler::StartGrabbing(mdi) < 0)
 	{
