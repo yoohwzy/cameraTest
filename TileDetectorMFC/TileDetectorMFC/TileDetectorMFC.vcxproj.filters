@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Class">
+      <UniqueIdentifier>{b2a1ea6b-06f3-4305-b0a2-84c8ba16ad08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{14cb1352-af02-45d3-a4df-019e4263193c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\MicroDisplay">
+      <UniqueIdentifier>{3ebff08c-8ab6-4489-8c80-8ddb75da742c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TileDetectorMFC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TileDetectorMFCDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CvvImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mc100.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\BufferStorage.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\BlockHoughDetector.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\BlocksDetector.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\EdgeDetector.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Measurer.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Processor.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\VirtualCamera.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\StateMachine.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\Contoller.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="globle_debug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="globle_head.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="globle_var.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\TiggerWatcherAndGrabber.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\Consumer.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Setting.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TileDetectorMFC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TileDetectorMFCDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CvvImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BufferStorage.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BlockHoughDetector.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\BlocksDetector.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\EdgeDetector.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Measurer.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Processor.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\VirtualCamera.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\Contoller.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\Consumer.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Setting.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="globle_var.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TileDetectorMFC.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\TileDetectorMFC.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="mc100.dll">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\TileDetectorMFC.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="mc100.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
