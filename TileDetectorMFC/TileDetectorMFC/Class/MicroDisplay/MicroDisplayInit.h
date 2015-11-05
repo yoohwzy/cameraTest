@@ -25,7 +25,7 @@ public:
 	// Port (PORT_A / PORT_B / PORT_C / PORT_D)
 	int nCamPort = PORT_A;
 	// Number of images to grab
-	int MaxPics = 10000;
+	int MaxPics = 10002;
 	// 看图窗口ID
 	int nId = -1;
 	// 采图颜色模式

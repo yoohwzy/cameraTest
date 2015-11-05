@@ -52,6 +52,28 @@ void Consumer::processingThread()
 	ss << GrabbingIndex << " " << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
+	t = (double)cv::getTickCount();
+
+	//TODO:BlocksDetector加入判断是否检测到完整瓷砖
+
+
+
+
+	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
+	ed.start();
+
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	printf_globle(ss.str());
+	ss.str("");
+	t = (double)cv::getTickCount();
+	if (ed.Defects.size() > 0)
+	{
+		ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << ed.Defects.size() << endl;
+		printf_globle(ss.str());
+		ss.str("");
+	}
+
 
 	//#ifdef OUTPUT_DEBUG_INFO
 	//	if (OUTPUT_DEBUG_INFO)
@@ -77,7 +99,6 @@ void Consumer::processingThread()
 	//	}
 	//	BlockHoughDetector bhd = BlockHoughDetector(globle_var::s.NowBufferImg);
 
-	Sleep(500);
 
 	ss << GrabbingIndex << " " << "customer：End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());

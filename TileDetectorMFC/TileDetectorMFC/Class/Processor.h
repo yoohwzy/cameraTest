@@ -1,6 +1,4 @@
 #pragma once
-
-#include "../stdafx.h"
 #include <opencv.hpp>
 using namespace cv;
 
@@ -12,6 +10,10 @@ class Processor
 {
 public:
 	static Mat Binaryzation(Mat &img);
+	static Mat Binaryzation_otsu(Mat &img);
 	static Mat Gaussian_Blur(Mat &img);
+private:	
+	static int otsuThreshold(Mat img);   // ¥ÛΩÚ„–÷µ∑®
+	static int peak_valleyThreshold(Mat img);
 };
 

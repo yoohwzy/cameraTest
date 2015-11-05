@@ -64,11 +64,11 @@ static void printf_globle(stringstream ss)
 
 
 
+#define OUTPUT_DEBUG_INFO 1
 
 /*
 //调试相关
 //是否输出调试信息
-#define OUTPUT_DEBUG_INFO 1
 #include <Windows.h>
 // 若宏定义配置为输出
 // 则在控制台输出调试信息

@@ -26,19 +26,5 @@ public:
 
 	static MicroDisplayInit mdi;
 	static BufferStorage s;
-	//初始化采集卡配置
-	static void initMDI(int maxPics = 10000)	
-	{
-		//配置参数
-		mdi.colorType = MicroDisplayInit::RGB;
-		mdi.width = 4096;
-		mdi.height = 1;
-		mdi.MaxPics = maxPics;//采集多少帧图像
-	}
-	//初始化缓存空间
-	static void initBufferStorage()	
-	{
-		s = BufferStorage(mdi.MaxPics,mdi.width);
-	}
 };
 

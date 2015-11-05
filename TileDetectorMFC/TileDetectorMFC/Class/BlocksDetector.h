@@ -57,10 +57,10 @@ public:
 	cv::Point C;
 	cv::Point D;
 	//¼ì²â³öµÄABCDµã
-	cv::Point DetectedA;
-	cv::Point DetectedB;
-	cv::Point DetectedC;
-	cv::Point DetectedD;
+	//cv::Point DetectedA;
+	//cv::Point DetectedB;
+	//cv::Point DetectedC;
+	//cv::Point DetectedD;
 
 	vector < cv::Point > LeftBorder;
 	Line LeftLine;

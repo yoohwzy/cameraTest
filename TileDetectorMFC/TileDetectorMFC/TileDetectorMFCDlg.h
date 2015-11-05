@@ -73,4 +73,6 @@ public:
 	// 触发后等待时机
 	int set_TiggerWaitTimeMS;
 	CString m_Info;
+	CString m_VirtualCamera;
+	afx_msg void OnEnChangeTbVirtualcamera();
 };

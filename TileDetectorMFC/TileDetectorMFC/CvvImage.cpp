@@ -90,7 +90,7 @@ CvvImage::~CvvImage()
 }
 bool  CvvImage::Create( int w, int h, int bpp, int origin )
 {
-   const unsigned max_img_size = 10000;
+   const unsigned max_img_size = 12000;
 
    if( (bpp != 8 && bpp != 24 && bpp != 32) ||
       (unsigned)w >=  max_img_size || (unsigned)h >= max_img_size ||

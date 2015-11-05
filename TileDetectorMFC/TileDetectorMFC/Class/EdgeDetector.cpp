@@ -1,9 +1,5 @@
 #include "EdgeDetector.h"
-
 #include "Processor.h"
-
-
-
 
 
 void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B)
@@ -41,7 +37,6 @@ void EdgeDetector::DistanceDetector(Vector<Point> Boundary_Point_temp, Vec4f Fit
 
 
 
-
 void EdgeDetector::PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Point> &Point_of_Intersection)
 {
 	for (int FitLine_Aggregate_Index = 0; FitLine_Aggregate_Index < FitLine_Aggregate.size(); FitLine_Aggregate_Index++)
@@ -71,7 +66,6 @@ void EdgeDetector::PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Po
 }
 
 
-
 int EdgeDetector::Distamce_MaxTabel(Vector<float> Distance)
 {
 	float Temp = 0;
@@ -86,61 +80,252 @@ int EdgeDetector::Distamce_MaxTabel(Vector<float> Distance)
 	return Tabel;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
+void  EdgeDetector::Defect_Detector(vector < vector<Point> >contours_, vector<Vec4f> line_, vector<Point3f> &defects)
 {
-	
-	Processor ps;
+	vector < vector<Point> >SingularPoints;
+	vector<Point>SingularPoints_temp;
+	for (int i = 0; i < contours_.size(); i++)
+	{
+		SingularPoints_temp.clear();
+		int  ttt = 0;
+		for (int j = 0; j < contours_[i].size(); j++)
+		{
+			ttt = (abs((contours_[i][j].x - line_[i][2])*line_[i][1] / line_[i][0] + line_[i][3] - contours_[i][j].y))
+				/ (sqrt(1 + (line_[i][1] / line_[i][0])*(line_[i][1] / line_[i][0])));
+			if (ttt>5)
+			{
+				SingularPoints_temp.push_back(contours_[i][j]);
+				//					circle(image1, contours_[i][j], 3, CV_RGB(255, 0, 0), -1, 8);
+			}
+		}
+		SingularPoints.push_back(SingularPoints_temp);
+	}
+
+	int flag = 1;
+
+	int tolerate = 0;
+	Vector<float> Distance;
+	Vector<int> R;
+	Vector<Point> Center;
+	for (int j = 0; j < SingularPoints.size(); j++)
+	{
+		int label = 0;
+		flag = 1;
+		for (int i = 0; i < SingularPoints[j].size(); i++)
+		{
+			if (i == SingularPoints[j].size() - 1)
+				break;
+			float temp = 0;
+			temp = abs((SingularPoints[j][i + 1].x - SingularPoints[j][i].x)) + abs((SingularPoints[j][i + 1].y - SingularPoints[j][i].y));	// 计算相邻异常点的距离
+			if (temp<3) // 距离小于3则认为是连续的异常点
+			{
+				flag++; // 距离小于3则认为是连续的异常点，标志位加1
+				label = i;
+				if ((flag > Edge_threld) && (i == SingularPoints[j].size() - 2)) // 异常点算完且标志位大于判定崩边阈值
+				{
+					//
+					//					circle(src, SingularPoints[j][label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
+					Center.push_back(SingularPoints[j][label - flag / 2]);
+					R.push_back(flag / 2 + 10);
+				}
+
+			}
+			else	// 距离大于3
+			{
+				if (temp<100) // 若距离小于一个阈值，认为在该处出现了一个例外，允许其继续叠加后续异常点数量
+				{
+					tolerate++; // 容忍度加1
+					if (tolerate > tolerate_threld) // 当容忍度大于阈值时，认为不再连续
+					{
+						tolerate = 0;
+						if (flag > Edge_threld)
+						{
+							if (flag > 200)
+							{
+								int m = 0;
+								int book = 0;
+								for (int n = 0; n < Distance.size(); n++)
+								{
+									if (m < Distance.size())
+									{
+										book = i;
+									}
+									//
+									//									circle(src, SingularPoints[j][book], 200, CV_RGB(255, 0, 0), 1);
+									Center.push_back(SingularPoints[j][book]);
+									R.push_back(flag / 2);
+								}
+							}
+							//
+							else
+							{
+								//
+								//								circle(src, SingularPoints[j][label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
+								flag += temp;
+								Center.push_back(SingularPoints[j][label - flag / 2]);
+								R.push_back(flag / 2);
+							}
+							flag = 1;
+						}
+					}
+				}
+				else // 距离太大，异常点不再连续
+				{
+					if (flag > Edge_threld)
+					{
+						tolerate = 0;
+						//
+						//						circle(src, SingularPoints[j][label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
+						Center.push_back(SingularPoints[j][label - flag / 2]);
+						R.push_back(flag / 2 + 15);
+						flag = 1;
+					}
+				}
+			}
+		}
+	}
+
+	//Point3f ttt;
+	//for (int i = 0; i < Center.size(); i++)
+	//{
+	//	ttt.x = Center[i].x;
+	//	ttt.y = Center[i].y;
+	//	ttt.z = R[i];
+	//	Defects.push_back(ttt);
+	//}
+
+
+	/*double t = (double)cv::getTickCount();*/
+	if (Center.size() > 0)
+	{
+		Vector<int>w;
+		for (int i = 0; i < Center.size(); i++)
+		{
+			int h = 1;
+			// 判定崩边位置是否已经合并
+			for (int p = 0; p < w.size(); p++)
+			{
+				if (i == w[p])
+				{
+					h = 0;
+					break;
+				}
+
+			}
+			if (h)
+			{
+				// 没有合并的位置
+				w.clear();
+				float d = 0;
+				Vector<Point> Center1;
+				Center1.push_back(Center[i]);
+				int g = R[i];
+				for (int j = i + 1; j < Center.size(); j++)
+				{
+					d = abs(Center[i].x - Center[j].x) + abs(Center[i].y - Center[j].y);
+					if (d <= (abs(R[i] + R[j])))
+					{
+						Center1.push_back(Center[i]);
+						w.push_back(j);
+					}
+				}
+				Point3f tt;
+				if (Center1.size()>1)
+				{
+					int m = 0, n = 0;
+					for (int q = 0; q < Center1.size(); q++)
+					{
+						m += Center1[q].x;
+						n += Center1[q].y;
+					}
+					for (int q = 0; q < w.size(); q++)
+						g += R[w[q]];
+					tt.x = m / Center1.size();
+					tt.y = n / Center1.size();
+					tt.z = g + 20;
+
+				}
+				else
+				{
+					tt.x = Center1[0].x;
+					tt.y = Center1[0].y;
+					tt.z = R[i];
+				}
+				Defects.push_back(tt);
+			}
+		}
+	}
+}
+
+EdgeDetector::EdgeDetector(Mat img, BlocksDetector *_bd)
+{
 	bd = _bd;
+	src = img;
+
 	
-	//	Mat Contours(src_gray.size(), src_gray.type(), Scalar(0, 0, 0));
+	A = bd->A;
+	B = bd->B;
+	C = bd->C;
+	D = bd->D;
 
-	xleft = (*bd).A.x - abs((*bd).A.x - (*bd).D.x) - 100, yleft = (*bd).A.y - 100, left_height = (*bd).D.y - (*bd).A.y + 200, left_width = 2 * abs((*bd).A.x - (*bd).D.x) + 200;
-	xright = (*bd).B.x - abs((*bd).B.x - (*bd).C.x) - 100, yright = (*bd).B.y - 100, right_height = (*bd).C.y - (*bd).B.y + 200, right_width = 2 * abs((*bd).B.x - (*bd).C.x) + 200;
-	xup = xleft + left_width - 6, yup = (*bd).A.y - abs((*bd).A.y - (*bd).B.y) - 100, up_width = xright - xleft - left_width + 12, up_height = 2 * abs((*bd).A.y - (*bd).B.y) + 200;
-	xdown = xleft + left_width - 6, ydown = (*bd).D.y - abs((*bd).D.y - (*bd).C.y) - 100, down_width = xright - xleft - left_width + 12, down_height = 2 * abs((*bd).D.y - (*bd).C.y) + 200;
+	xleft = A.x - abs(A.x - D.x) - 100, yleft = A.y - 100, left_height = D.y - A.y + 200, left_width = 2 * abs(A.x - D.x) + 200;
+	xright = B.x - abs(B.x - C.x) - 100, yright = B.y - 100, right_height = C.y - B.y + 200, right_width = 2 * abs(B.x - C.x) + 200;
+	xup = xleft + left_width - 6, yup = A.y - abs(A.y - B.y) - 100, up_width = xright - xleft - left_width + 12, up_height = 2 * abs(A.y - B.y) + 200;
+	xdown = xleft + left_width - 6, ydown = D.y - abs(D.y - C.y) - 100, down_width = xright - xleft - left_width + 12, down_height = 2 * abs(D.y - C.y) + 200;
 
-	src(Rect(xleft, yleft, left_width, left_height)).copyTo(leftROI);
-	src(Rect(xright, yright, right_width, right_height)).copyTo(rightROI);
-	src(Rect(xup, yup, up_width, up_height)).copyTo(upROI);
-	src(Rect(xdown, ydown, down_width, down_height)).copyTo(downROI);
+	src(Rect(xleft, yleft, left_width, left_height)).copyTo(leftROI);  
+	src(Rect(xright, yright, right_width, right_height)).copyTo(rightROI); 
+	src(Rect(xup, yup, up_width, up_height)).copyTo(upROI); 
+	src(Rect(xdown, ydown, down_width, down_height)).copyTo(downROI); 
+	
+	//imwrite("C:\\Users\\John\\Desktop\\leftroi.jpg", leftROI);
+	//imwrite("C:\\Users\\John\\Desktop\\rightroi.jpg", rightROI);
+	//imwrite("C:\\Users\\John\\Desktop\\uproi.jpg", upROI);
+	//imwrite("C:\\Users\\John\\Desktop\\downroi.jpg", downROI);
 
-	vector<Mat> ROI;
 	ROI.push_back(leftROI);
 	ROI.push_back(downROI);
 	ROI.push_back(rightROI);
 	ROI.push_back(upROI);
 
+}
+
+EdgeDetector::~EdgeDetector()
+{
+
+}
+
+void EdgeDetector::start()
+{
+	
+	Processor ps;
+		
+	//double t = (double)cv::getTickCount();
 	if (src.channels() == 3)
 	for (int i = 0; i < ROI.size(); i++)
 		cvtColor(ROI[i], ROI[i], CV_BGR2GRAY);
+
 
 	// ROI二值化
 	for (int i = 0; i < ROI.size(); i++)
 	{
 		ps.Binaryzation(ROI[i]);
+		//Canny(ROI[i], ROI[i], 40, 80);
 	}
+
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//std::cout << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+
 
 	vector<Point> p, p1;
 	Vector<Point> Center;
 	vector<vector<Point>> contourstemp; // 保存各个边界的最大轮廓边界点
 	vector<vector<Point>> temp;			// 保存一个边界的所有轮廓点集合
 	vector<vector<Point>> contours, fitcontours;		// 保存每个边界的有效边界点
-
 	// 搜索ROI边界轮廓
 	for (int roi_index = 0; roi_index < ROI.size(); roi_index++)
 	{
+
 		findContours(ROI[roi_index], temp, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 		int maxtemp = 0, maxt = 0;
 		for (int i = 0; i < temp.size(); i++)
@@ -154,6 +339,8 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 		}
 		contourstemp.push_back(temp[maxtemp]);
 	}
+
+
 
 	// 得到每个边界轮廓的有效边界
 	for (int i = 0; i < contourstemp.size(); i++)
@@ -193,499 +380,298 @@ EdgeDetector::EdgeDetector(Mat src, BlocksDetector *_bd)
 		p1.clear();
 	}
 
-	vector<vector<Point>> contours1;
-
-
-	// 所有边界排列
-	int startval = 0;
-	for (int i = 0; i < contours.size(); i++)
-	{
-
-		switch (i % 2)
-		{
-		case 0:
-		{
-				  int a, b;
-				  for (int j = 0; j < contours[i].size() - 1; j++)
-				  {
-					  a = contours[i][j].y;
-					  b = contours[i][j + 1].y;
-					  if ((abs(a - b))>100)
-					  {
-						  startval = j + 1;
-
-						  /*  for (int k = startval - 5; k < startval + 5;k++)
-						  cout << contours[i][k] << "\n";*/
-
-						  break;
-					  }
-					  else startval = 0;
-				  }
-				  for (int q = startval; q < contours[i].size(); q++)
-				  {
-					  Point ptemp;
-					  ptemp.x = contours[i][q].x;
-					  ptemp.y = contours[i][q].y;
-					  p.push_back(ptemp);
-				  }
-				  for (int q = 0; q < startval; q++)
-				  {
-					  Point ptemp;
-					  ptemp.x = contours[i][q].x;
-					  ptemp.y = contours[i][q].y;
-					  p.push_back(ptemp);
-				  }
-				  contours1.push_back(p);
-				  p.clear();
-				  break;
-		}
-		case 1:
-		{
-				  if (abs(contours[i][0].x - contours[i][contours[i].size() - 1].x) < 2)
-				  {
-					  for (int j = 0; j < contours[i].size() - 1; j++)
-					  {
-						  if (abs(contours[i][j].x - contours[i][j + 1].x)>100)
-						  {
-							  startval = j + 1;
-							  break;
-						  }
-					  }
-				  }
-				  else startval = 0;
-
-				  for (int q = startval; q < contours[i].size(); q++)
-				  {
-					  Point ptemp;
-					  ptemp.x = contours[i][q].x;
-					  ptemp.y = contours[i][q].y;
-					  p.push_back(ptemp);
-				  }
-				  for (int q = 0; q < startval; q++)
-				  {
-					  Point ptemp;
-					  ptemp.x = contours[i][q].x;
-					  ptemp.y = contours[i][q].y;
-					  p.push_back(ptemp);
-				  }
-				  contours1.push_back(p);
-				  p.clear();
-				  break;
-		}
-
-		}
-	}
-
-	int lstart = 0, lend = contours1[0].size() - 1;
-	int rstart = 0, rend = contours1[2].size() - 1;
-	int flag = 1, tolerate = 0;
-
-	// 左边边界点获取分割
-	for (int i = 0; i < contours1[0].size() - 1; i++)
-	{
-		if (contours1[0][i + 1].y - contours1[0][i].y == 1)
-		{
-			lstart = i + 1;
-			for (int q = lstart; q < lstart + 50; q++)
-			{
-				if (contours1[0][q + 1].y - contours1[0][q].y == 1)
-				{
-					flag++;
-					if (flag>30)
-						break;
-				}
-				else
-				{
-					i = q + 1;
-					break;
-				}
-
-			}
-		}
-		if (flag > 30)
-			break;
-	}
-	for (int i = contours1[0].size() - 1; i > 1; i--)
-	{
-		tolerate = 0;
-		flag = 1;
-		if (contours1[0][i].y - contours1[0][i - 1].y == 1)
-		{
-			lend = i - 1;
-			for (int q = lend; q > lend - 50; q--)
-			{
-				if (contours1[0][q].y - contours1[0][q - 1].y == 1)
-				{
-					flag++;
-					if (flag >30)
-						break;
-				}
-				else
-				{
-					i = q + 1;
-					break;
-				}
-
-			}
-		}
-		if (flag > 30)
-			break;
-	}
-
-	// 右边边界点获取分割
-	for (int i = 0; i < contours1[2].size() - 1; i++)
-	{
-		tolerate = 0;
-		flag = 1;
-		if (contours1[2][i].y - contours1[2][i + 1].y == 1)
-		{
-			rstart = i + 1;
-			for (int q = rstart; q < rstart + 50; q++)
-			{
-				if (contours1[2][q].y - contours1[2][q + 1].y == 1)
-				{
-					flag++;
-					if (flag>30)
-						break;
-				}
-				else
-				{
-					i = q + 1;
-					break;
-
-				}
-			}
-		}
-		if (flag > 30)
-			break;
-	}
-
-	for (int i = contours1[2].size() - 1; i > 1; i--)
-	{
-		tolerate = 0;
-		flag = 1;
-		if (contours1[2][i - 1].y - contours1[2][i].y == 1)
-		{
-			rend = i - 1;
-			for (int q = rend; q > rend - 50; q--)
-			{
-				if (contours1[2][q - 1].y - contours1[2][q].y == 1)
-				{
-					flag++;
-					if (flag > 30)
-						break;
-				}
-				else
-				{
-					i = q + 1;
-					break;
-				}
-
-			}
-		}
-		if (flag > 30)
-			break;
-	}
-
-	// 各个边界完整边界点获取
-	vector<Point> nn;
-	contours.clear();
-	// 左
-	for (int j = lstart; j < lend; j++)
-	{
-		Point s;
-		s.x = contours1[0][j].x;
-		s.y = contours1[0][j].y;
-		nn.push_back(s);
-	}
-	contours.push_back(nn);
-	nn.clear();
-	// 下
-	for (int j = lend; j < contours1[0].size(); j++)
-	{
-		Point s;
-		s.x = contours1[0][j].x;
-		s.y = contours1[0][j].y;
-		nn.push_back(s);
-	}
-	for (int j = 0; j < contours1[1].size(); j++)
-	{
-		Point s;
-		s.x = contours1[1][j].x;
-		s.y = contours1[1][j].y;
-		nn.push_back(s);
-	}
-	for (int j = 0; j < rstart; j++)
-	{
-		Point s;
-		s.x = contours1[2][j].x;
-		s.y = contours1[2][j].y;
-		nn.push_back(s);
-	}
-	contours.push_back(nn);
-	nn.clear();
-	// 右
-	for (int j = rstart; j < rend; j++)
-	{
-		Point s;
-		s.x = contours1[2][j].x;
-		s.y = contours1[2][j].y;
-		nn.push_back(s);
-	}
-	contours.push_back(nn);
-	nn.clear();
-	// 上
-	for (int j = rend; j < contours1[2].size(); j++)
-	{
-		Point s;
-		s.x = contours1[2][j].x;
-		s.y = contours1[2][j].y;
-		nn.push_back(s);
-	}
-	for (int j = 0; j < contours1[3].size(); j++)
-	{
-		Point s;
-		s.x = contours1[3][j].x;
-		s.y = contours1[3][j].y;
-		nn.push_back(s);
-	}
-	for (int j = 0; j < lstart; j++)
-	{
-		Point s;
-		s.x = contours1[0][j].x;
-		s.y = contours1[0][j].y;
-		nn.push_back(s);
-	}
-	contours.push_back(nn);
-	nn.clear();
-
-	// 各个完整边界点抽样保存在fitcontours中
-	vector<Point> mm;
-	for (int m = 0; m < contours.size(); m++)
-	{
-		mm.clear();
-		for (int h = 0; h < contours[m].size(); h = h + 100)
-		{
-			mm.push_back(contours[m][h]);
-		}
-		fitcontours.push_back(mm);
-
-	}
-
-	// 各边界抽样点拟合直线
-	Vec4f _Fitline;
-	vector<Vec4f> Fitline;
-	Vector<float> Distance1;
-	for (int i = 0; i < fitcontours.size(); i++)
-	{
-		// 样点过于特殊剔除
-		for (int j = 0; j<10; j++)
-		{
-			Distance1.clear();
-			fitLine(Mat(fitcontours[i]), _Fitline, CV_DIST_L2, 0, 1, 1);
-			DistanceDetector(fitcontours[i], _Fitline, Distance1);
-
-			int Tabel = Distamce_MaxTabel(Distance1);
-			if (Distance1[Tabel]>5)
-			{
-				//
-				//				circle(src_contours, fitcontours[i][Tabel], 20, CV_RGB(160, 0, 50 + i * 50), 1);
-				fitcontours[i].erase(fitcontours[i].begin() + Tabel); // 擦除奇异点
-
-			}
-			else
-				break;
-		}
-		//
-		//		ed.DrawLine(i, src_contours, _Fitline, 0, 200, 100);
-		Fitline.push_back(_Fitline);
-	}
-
-	//  拟合直线交点
-	Vector<Point>Point_of_Intersection;
-	PointOfIntersection(Fitline, Point_of_Intersection);
-	(*bd).A = Point_of_Intersection[3];
-	(*bd).B = Point_of_Intersection[2];
-	(*bd).C = Point_of_Intersection[1];
-	(*bd).D = Point_of_Intersection[0];
 	
 
-	// 崩边判定
+	// 每边取样点用于拟合
+	vector<vector<Point>> Fit_contours;
 
-	Vector<Point> Singalar;
-	Vector<float> Distance;
-	Vector<int> R;
-
-	for (int k = 0; k < contours.size(); k++)
+	for (int i = 0; i < contours.size(); i++)
 	{
-		Singalar.clear();
-		Distance.clear();
-		for (int i = 0; i < contours[k].size(); i++)
+		vector<Point> tm;
+		for (int j = 0; j < contours[i].size(); j = j + 100)
 		{
-			// 计算每个点到拟合直线的距离
-			float distance = 0;
-
-			distance = (abs((contours[k][i].x - Fitline[k][2])*Fitline[k][1] / Fitline[k][0] + Fitline[k][3] - contours[k][i].y))
-				/ (sqrt(1 + (Fitline[k][1] / Fitline[k][0])*(Fitline[k][1] / Fitline[k][0])));
-
-			if (distance > distance_threld)
-			{
-				// 如果距离大于阈值则计入异常点
-				Distance.push_back(distance);
-				Singalar.push_back(contours[k][i]);
-			}
-
+			tm.push_back(contours[i][j]);
 		}
+		Fit_contours.push_back(tm);
+	}
 
-		int flag = 1;
-		int label = 0;
-		int tolerate = 0;
-		for (int i = 0; i < Singalar.size(); i++)
+//	
+	/*Mat image(src.size(), src.type(), Scalar(0));
+	for (int i = 0; i < contours.size(); i++)
+	{
+		for (int j = 0; j < contours[i].size(); j++)
 		{
-			if (i == Singalar.size() - 1)
-				break;
-			float temp = 0;
-			temp = abs((Singalar[i + 1].x - Singalar[i].x)) + abs((Singalar[i + 1].y - Singalar[i].y));	// 计算相邻异常点的距离
-			if (temp<3) // 距离小于3则认为是连续的异常点
+			image.at<Vec3b>(contours[i][j])[0] = 50*i;
+			image.at<Vec3b>(contours[i][j])[1] = 60*i-40;
+			image.at<Vec3b>(contours[i][j])[2] = 30*i;
+		}
+	}*/
+
+
+
+
+	// 拟合直线
+	vector<Vec4f> line_;
+	Vec4f Fit_Line;
+	for (int i = 0; i < Fit_contours.size(); i++)
+	{
+		if (!Fit_contours[i].empty())
+		{
+			for (int j = 0; j < 10; j++)
 			{
-				flag++; // 距离小于3则认为是连续的异常点，标志位加1
-				label = i;
-				if ((flag > Edge_threld) && (i == Singalar.size() - 2)) // 异常点算完且标志位大于判定崩边阈值
+				Vector<float> Distance;
+				fitLine(Mat(Fit_contours[i]), Fit_Line, CV_DIST_L2, 0, 1, 1);
+				//
+				//	ed.DrawLine(i, image, Fit_Line, 0, 200, 100 + j * 30);
+				DistanceDetector(Fit_contours[i], Fit_Line, Distance);
+				int Tabel = Distamce_MaxTabel(Distance);
+				if (Distance[Tabel]>5)
 				{
 					//
-					//					circle(src, Singalar[label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
-					Center.push_back(Singalar[label - flag / 2]);
-					R.push_back(flag / 2);
+					//					circle(image, Fit_contours[i][Tabel], 20, CV_RGB(160, 0, 50 + i * 50), 1);
+					Fit_contours[i].erase(Fit_contours[i].begin() + Tabel); // 擦除奇异点
 				}
-
+				else
+					break;
 			}
-			else	// 距离大于3
-			{
-				if (temp<100) // 若距离小于一个阈值，认为在该处出现了一个例外，允许其继续叠加后续异常点数量
-				{
-					tolerate++; // 容忍度加1
-					if (tolerate > tolerate_threld) // 当容忍度大于阈值时，认为不再连续
-					{
-						tolerate = 0;
-						if (flag > Edge_threld)
-						{
-							if (flag > 200)
-							{
-								int m = 0;
-								int book = 0;
-								for (int n = 0; n < Distance.size(); n++)
-								{
-									if (m < Distance.size())
-									{
-										book = i;
-									}
-									//
-									//									circle(src, Singalar[book], 200, CV_RGB(255, 0, 0), 1);
-									Center.push_back(Singalar[book]);
-									R.push_back(flag / 2);
-								}
-							}
-							//
-							else
-							{
-								//
-								//								circle(src, Singalar[label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
-								Center.push_back(Singalar[label - flag / 2]);
-								R.push_back(flag / 2);
-							}
-
-							flag = 1;
-						}
-						
-						
-					}
-				}
-
-				else // 距离太大，异常点不再连续
-				{
-					if (flag > Edge_threld)
-					{
-						tolerate = 0;
-						//
-						//						circle(src, Singalar[label - flag / 2], flag, CV_RGB(255, 0, 0), 1);
-						Center.push_back(Singalar[label - flag / 2]);
-						R.push_back(flag / 2);
-						flag = 1;
-					}
-				}
-			}
-
-
+			line_.push_back(Fit_Line);
 		}
 	}
 
-	/*for (int j = 0; j < Center.size(); j++)
-	cout << Center[j] << "\n";*/
+	// 求出四个交点A\B\C\D
+	Vector<Point> Point_of_Intersection;
+	PointOfIntersection(line_, Point_of_Intersection);
+	bd->A = Point_of_Intersection[3];
+	bd->B = Point_of_Intersection[2];
+	bd->C = Point_of_Intersection[1];
+	bd->D = Point_of_Intersection[0];
+	//for (int i = 0; i < Point_of_Intersection.size(); i++)
+	//	cout << Point_of_Intersection[i] << "\n";
 
+	// 左右边界分类
+	vector<Point> D_start, U_end, U_start, D_end;
+	float Distance_0, Distance_1;
+	vector<Point>  left_, right_;
+	vector<int> label;
+	int tp1 = abs(Point_of_Intersection[3].x - Point_of_Intersection[0].x);
+	int tp2 = abs(Point_of_Intersection[2].x - Point_of_Intersection[1].x);
+	int tp3 = abs(Point_of_Intersection[3].y - Point_of_Intersection[2].y);
+	int tp4 = abs(Point_of_Intersection[0].y - Point_of_Intersection[1].y);
 
-
-	//  检测崩边位置，若有崩边的中心距离很近，合并崩边
-	Vector<int>w;
-
-	for (int i = 0; i < Center.size(); i++)
+	// 左边界
+	for (int i = 0; i < contours[0].size(); i++)
 	{
-		int h = 1;
-		// 判定崩边位置是否已经合并
-		for (int p = 0; p < w.size(); p++)
+
+		int ttt = (abs((contours[0][i].x - line_[0][2])*line_[0][1] / line_[0][0] + line_[0][3] - contours[0][i].y))
+			/ (sqrt(1 + (line_[0][1] / line_[0][0])*(line_[0][1] / line_[0][0])));
+		
+		if (ttt>5)
 		{
-			if (i == w[p])
+			
+
+			// 到上边距离
+			if (abs(Point_of_Intersection[3].y - contours[0][i].y)< tp3+50)
 			{
-				h = 0;
-				break;
+				U_end.push_back(contours[0][i]);
+				label.push_back(i);
 			}
 
-		}
-
-		if (h)
-		{
-			// 没有合并的位置
-			w.clear();
-			float d = 0;
-			Vector<Point> Center1;
-			Center1.push_back(Center[i]);
-			for (int j = i + 1; j < Center.size(); j++)
-			{
-				d = (Center[i].x - Center[j].x)*(Center[i].x - Center[j].x) + (Center[i].y - Center[j].y)*(Center[i].y - Center[j].y);
-				if ((d<=R[i] * R[i]) || (d<=R[j] * R[j]))
-				{
-					Center1.push_back(Center[i]);
-					w.push_back(j);
-				}
-
-			}
-			Point3f tt;
-			if (Center1.size()>1)
-			{
-				int m = 0, n = 0, g = 0;
-				for (int q = 0; q < Center1.size(); q++)
-				{
-					m += Center1[q].x;
-					n += Center1[q].y;
-				}
-				for (int q = 0; q < w.size(); q++)
-					g += R[w[q]];
-				tt.x = m / Center1.size();
-				tt.y = n / Center1.size();
-				tt.z = g;
-
-			}
 			else
+			// 到下边距离
+			if (abs(Point_of_Intersection[0].y - contours[0][i].y)< tp4+50)
 			{
-				tt.x = Center1[0].x;
-				tt.y = Center1[0].y;
-				tt.z = R[i];
+				D_start.push_back(contours[0][i]);
+				label.push_back(i);
 			}
-			Defects.push_back(tt);
+		}
+
+	}
+
+
+
+	for (int i = 0; i < U_end.size() - 2; i++)
+	{
+		int t = abs(U_end[i].x - U_end[i + 1].x);
+		if (t>1000)
+		{
+			vector<Point> U_end_t(U_end);
+			U_end.clear();
+			for (int j = i + 1; j < U_end_t.size(); j++)
+				U_end.push_back(U_end_t[j]);
+			for (int j = 0; j < i + 1; j++)
+				U_end.push_back(U_end_t[j]);
+			break;
 		}
 	}
-//
-	for (int i = 0; i < Defects.size(); i++)
+
+	for (int i = 0; i < D_start.size() - 2; i++)
 	{
-		circle(src, Point(Defects[i].x, Defects[i].y), Defects[i].z, CV_RGB(255, 0, 0), 1);
+		int t = abs(D_start[i].x - D_start[i + 1].x);
+		if (t>1000)
+		{
+			vector<Point> D_start_t(D_start);
+			D_start.clear();
+			for (int j = i + 1; j < D_start_t.size(); j++)
+				D_start.push_back(D_start_t[j]);
+			for (int j = 0; j < i + 1; j++)
+				D_start.push_back(D_start_t[j]);
+			break;
+		}
 	}
+
+	int b = 0, e = 0;
+	sort(label.begin(), label.end());
+	for (int i = 0; i < label.size() - 1; i++)
+	{
+		int j = i + 1;
+		if (label[j] - label[i]>100)
+		{
+			b = label[i] + 1;
+			e = label[j];
+			break;
+		}
+	}
+
+	if (b == 0 && e == 0)
+	{
+		b = label[label.size()] + 1;
+		e = contours[0].size();
+	}
+
+	label.clear();
+	for (int i = b; i < e; i++)
+		left_.push_back(contours[0][i]);
+
+	// 右边界
+	for (int i = 0; i < contours[2].size(); i++)
+	{
+		int ttt = (abs((contours[2][i].x - line_[2][2])*line_[2][1] / line_[2][0] + line_[2][3] - contours[2][i].y))
+			/ (sqrt(1 + (line_[2][1] / line_[2][0])*(line_[2][1] / line_[2][0])));
+
+		if (ttt>5)
+		{
+			if (abs(Point_of_Intersection[3].y - contours[2][i].y)< tp3 + 50)
+			{
+				U_start.push_back(contours[2][i]);
+				label.push_back(i);
+			}
+		
+			else
+			if (abs(Point_of_Intersection[0].y - contours[2][i].y)< tp4 + 50)
+			{
+				D_end.push_back(contours[2][i]);
+				label.push_back(i);
+			}
+		}
+		
+		
+	}
+
+	for (int i = 0; i < U_start.size() - 2; i++)
+	{
+		int t = abs(U_start[i].x - U_start[i + 1].x);
+		if (t>1000)
+		{
+			vector<Point> U_start_t(U_start);
+			U_start.clear();
+			for (int j = i + 1; j < U_start_t.size(); j++)
+				U_start.push_back(U_start_t[j]);
+			for (int j = 0; j < i + 1; j++)
+				U_start.push_back(U_start_t[j]);
+		}
+	}
+
+	for (int i = 0; i < D_end.size() - 2; i++)
+	{
+		int t = abs(D_end[i].x - D_end[i + 1].x);
+		if (t>1000)
+		{
+			vector<Point> D_end_t(D_end);
+			D_end.clear();
+			for (int j = i + 1; j < D_end_t.size(); j++)
+				D_end.push_back(D_end_t[j]);
+			for (int j = 0; j < i + 1; j++)
+				D_end.push_back(D_end_t[j]);
+		}
+	}
+	b = 0, e = 0;
+	sort(label.begin(), label.end());
+	for (int i = 0; i < label.size() - 2; i++)
+	{
+		int j = i + 1;
+		if (label[j] - label[i]>100)
+		{
+			b = label[i] + 1;
+			e = label[j];
+		}
+	}
+	if (b == 0 && e == 0)
+	{
+		b = label[label.size()-1] + 1;
+		e = contours[2].size();
+	}
+	label.clear();
+	for (int i = b; i < e; i++)
+		right_.push_back(contours[2][i]);
+
+
+	// 合并上下边界
+	vector<Point>  down_, up_;
+	vector<vector<Point>> contours_;
+	// 下
+	for (int i = 0; i < D_start.size(); i++)
+	{
+		down_.push_back(D_start[i]);
+	}
+	for (int i = 0; i < contours[1].size(); i++)
+	{
+		down_.push_back(contours[1][i]);
+	}
+	for (int i = 0; i < D_end.size(); i++)
+	{
+		down_.push_back(D_end[i]);
+	}
+
+	// 上
+	for (int i = 0; i < U_start.size(); i++)
+	{
+		up_.push_back(U_start[i]);
+	}
+	for (int i = 0; i < contours[3].size(); i++)
+	{
+		up_.push_back(contours[3][i]);
+	}
+	for (int i = 0; i < U_end.size(); i++)
+	{
+		up_.push_back(U_end[i]);
+	}
+
+	contours_.push_back(left_);
+	contours_.push_back(down_);
+	contours_.push_back(right_);
+	contours_.push_back(up_);
+
+	//
+	//Mat image1(src.size(), src.type(), Scalar(0));
+	//for (int i = 0; i < contours_.size(); i++)
+	//{
+	//	int m = 0,n=0,k=0,m1=0;
+	//	if (i == 0)  m = 1;
+	//	if (i == 1) n = 1;
+	//	if (i == 2) k = 1;
+	//	if (i == 3) m1 = 200;
+	//	//DrawLine(i, image1, line_[i], 0, 200, 100 + i * 30);
+	//	for (int j = 0; j < contours_[i].size(); j++)
+	//	{
+	//		image1.at<Vec3b>(contours_[i][j])[0] = 200*m+m1;
+	//		image1.at<Vec3b>(contours_[i][j])[1] = 200 * n+m1 ;
+	//		image1.at<Vec3b>(contours_[i][j])[2] = 200 * k+m1;
+	//	}
+	//}
+
+	// 检测崩边
+	Defect_Detector(contours_, line_, Defects);
+
+	for (int i = 0; i < Defects.size(); i++)
+		circle(src, Point(Defects[i].x, Defects[i].y), Defects[i].z, CV_RGB(0, 255, 255));
 }

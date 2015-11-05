@@ -63,6 +63,7 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , set_grabRGBType(_T(""))
 , set_TiggerWaitTimeMS(0)
 , m_Info(_T(""))
+, m_VirtualCamera(_T(""))
 {
 	printf_globle("");
 	if (FILE_LOG)
@@ -91,6 +92,7 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_CBString(pDX, IDC_COMBO1, set_grabRGBType);
 	DDX_Text(pDX, IDC_TB_TiggerWaitMS, set_TiggerWaitTimeMS);
 	DDX_Text(pDX, IDC_TB_INFO, m_Info);
+	DDX_Text(pDX, IDC_TB_VirtualCamera, m_VirtualCamera);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -104,6 +106,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_GRAB_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_SAVE, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerSave)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad)
+	ON_EN_CHANGE(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera)
 END_MESSAGE_MAP()
 
 
@@ -145,7 +148,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 
 
-	globle_var::VirtualCameraFileName = "result11_o原图.jpg";
+	globle_var::VirtualCameraFileName = "result6_o原图.jpg";
 	//初始化设定数据
 	if (true)//判断配置文件是否存在
 	{
@@ -173,10 +176,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 		}
 	}
 
-	globle_var::mdi.colorType = set_grabRGBType == "RGB" ? globle_var::mdi.RGB : globle_var::mdi.GRAY;
-	globle_var::mdi.MaxPics = set_grabMaxPics;
-	globle_var::mdi.width = set_grabWidth;
-
+	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
 	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
 
 
@@ -406,4 +406,14 @@ void CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad()
 	UpdateData(false);
 
 
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera()
+{
+	UpdateData(true);
+	if (m_VirtualCamera == "")
+	{
+
+	}
 }

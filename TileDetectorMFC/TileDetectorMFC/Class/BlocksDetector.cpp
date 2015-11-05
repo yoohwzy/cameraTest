@@ -44,6 +44,8 @@ BlocksDetector::~BlocksDetector()
 
 void BlocksDetector::Start()
 {
+	A = B = C = D = cv::Point(0, 0);
+
 	if (1 == 1)//用IF隔离局部代码
 	{
 		for (; (leftY + 3) < img.rows; leftY += ROW_SPAN)

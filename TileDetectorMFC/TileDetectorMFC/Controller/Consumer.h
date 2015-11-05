@@ -10,7 +10,7 @@
 #include "../Class/EdgeDetector.h"
 #include "../Class/Processor.h"
 #include "../Class/Measurer.h"
-
+#include "../Class/EdgeDetector.h"
 class Consumer
 {
 public:

@@ -6,9 +6,6 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 
 	hwnd = _hwnd;
 
-	//配置参数
-	globle_var::initMDI();
-	globle_var::initBufferStorage();
 
 	/*读取定标图片 定标*/
 	//BlocksDetector bd_Standard = BlocksDetector(cv::imread("A9划痕凹点_x3二值化.jpg"));
