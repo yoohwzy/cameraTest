@@ -20,13 +20,13 @@ VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 		stringstream sss;
 		sss << "virtualcameras/" << imgname << "   do not exist!" << endl;
 		printf_globle(sss.str());
-		ExitWithError(sss.str());
+		//ExitWithError(sss.str());
 	}
-	if (buffer.cols != WIDTH || buffer.rows < BufferLength)
+	else if (buffer.cols != WIDTH || buffer.rows < BufferLength)
 	{
 		cv::resize(buffer, buffer, cv::Size(WIDTH, BufferLength));
 	}
-	cv::Mat t = buffer;
+	//cv::Mat t = buffer;
 }
 VirtualCamera::~VirtualCamera()
 {

@@ -31,18 +31,18 @@ public:
 		Down
 	};
 
-	// 寻找左右边界，该程序需要
-	void Start();
+	// 寻找左右边界
+	bool Start();
 	// 寻找上下边缘
-	void StartUP_DOWN(BorderType bt);
+	bool StartUP_DOWN(BorderType bt);
 
 	//检测某一行的左侧边缘，返回边缘的x坐标，-1表示未找到
 	//传入参数为在第几行检测，不传入参数则检测leftY行
 	int DetectOneLineLeft(int y = -1);
 	int DetectOneLineRight(int y = -1);
 
-	//计算出四个顶点(图像上的四个顶点)
-	void ABCD();
+	//计算出四个顶点(图像上的四个顶点)，若四个点位置不对，返回false
+	bool ABCD();
 
 
 #ifdef OUTPUT_DEBUG_INFO
@@ -81,6 +81,10 @@ public:
 	vector < cv::Point > DownLeft;
 	vector < cv::Point > UpRight;
 	vector < cv::Point > DownRight;
+
+
+
+
 private:
 	cv::Mat img;
 

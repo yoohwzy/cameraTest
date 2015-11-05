@@ -75,4 +75,5 @@ public:
 	CString m_Info;
 	CString m_VirtualCamera;
 	afx_msg void OnEnChangeTbVirtualcamera();
+	afx_msg void OnEnKillfocusTbVirtualcamera();
 };

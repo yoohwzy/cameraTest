@@ -15,12 +15,8 @@ static string FILE_NAME = "log.log";
 
 
 
-#define CREATE_CONSOLE
-#ifdef CREATE_CONSOLE
-
 #include <io.h>  
 
-#endif
 
 //将信息输出到console
 static void printf_globle(const char *c)
@@ -28,9 +24,9 @@ static void printf_globle(const char *c)
 	if (CONSOLE_OPEN != NULL && CONSOLE_OPEN == true)
 	{
 		AllocConsole();
-		freopen("CON", "r", stdin);
+		//freopen("CON", "r", stdin);
 		freopen("CON", "w", stdout);
-		freopen("CON", "w", stderr);
+		//freopen("CON", "w", stderr);
 		printf(c);
 	}
 	else
@@ -66,29 +62,11 @@ static void printf_globle(stringstream ss)
 
 #define OUTPUT_DEBUG_INFO 1
 
-/*
-//调试相关
-//是否输出调试信息
-#include <Windows.h>
-// 若宏定义配置为输出
-// 则在控制台输出调试信息
-// 函数位于 global.h
-static void OutPutDebugInfo(string info){
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
-	{
-		string l = "--------------------------------\n" + info + "\n--------------------------------\n";
-		cout << info << endl;
-		int dwLen = strlen(l.c_str()) + 1;
-		int nwLen = MultiByteToWideChar(CP_ACP, 0, l.c_str(), dwLen, NULL, 0);//算出合适的长度
-		LPWSTR lpsz = new WCHAR[dwLen];
-		MultiByteToWideChar(CP_ACP, 0, l.c_str(), dwLen, lpsz, nwLen);
-
-		OutputDebugString(lpsz);
-	}
-#endif
+static void WriteImg(string path ,cv::Mat img)
+{
+	cv::imwrite(path, img);
 }
-*/
+
 
 
 
@@ -119,13 +97,5 @@ static void MD_ErrorMessageWait(Fg_Struct *fg)
 	fprintf(stderr, "Error: %d : %s\n", error, err_str);
 	ExitWithError(err_str);
 }
-
-
-
-
-
-
-
-
 
 #endif

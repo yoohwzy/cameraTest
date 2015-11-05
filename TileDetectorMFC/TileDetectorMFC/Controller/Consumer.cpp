@@ -4,6 +4,11 @@
 
 bool Consumer::StartNewProces(cv::Mat img)
 {
+	if (img.rows == 0 || img.cols == 0)
+	{
+		printf_globle("ÅÄÉãµÄÍ¼Æ¬²»´æÔÚ\r\n");
+		return false;
+	}
 	if (isProcessing) return false;
 	originalImg = img.clone();
 
@@ -40,25 +45,42 @@ void Consumer::processingThread()
 	//t = (double)cv::getTickCount();
 
 
-	//´É×©±ßÔµ¼ì²â
+	//´É×©Î»ÖÃ¼ì²â
 	cv::Mat DetectedImg = originalImg.clone();
 	BlocksDetector bd = BlocksDetector(DetectedImg);
 	double t = (double)cv::getTickCount();
-	bd.Start();
-	bd.StartUP_DOWN(BlocksDetector::Up);
-	bd.StartUP_DOWN(BlocksDetector::Down);
-	bd.ABCD();
+
+	//BlocksDetector¼ÓÈëÅÐ¶ÏÊÇ·ñ¼ì²âµ½ÍêÕû´É×©
+	if(bd.Start() && bd.StartUP_DOWN(BlocksDetector::Up) &&	bd.StartUP_DOWN(BlocksDetector::Down))
+	{
+	}
+	else
+	{
+		printf_globle("Î´¼ì²âµ½´É×©\r");
+		return;
+	}
+	if (!bd.ABCD())
+	{
+		printf_globle("Î´¼ì²âµ½ÍêÕûµÄ´É×©\r");
+		return;
+	}
+
+
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	ss << GrabbingIndex << " " << "BlocksDetector£º" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
 	t = (double)cv::getTickCount();
 
-	//TODO:BlocksDetector¼ÓÈëÅÐ¶ÏÊÇ·ñ¼ì²âµ½ÍêÕû´É×©
+	
 
 
 
 
+
+
+
+	//´É×©±À±ß¼ì²â
 	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
 	ed.start();
 
@@ -67,37 +89,43 @@ void Consumer::processingThread()
 	printf_globle(ss.str());
 	ss.str("");
 	t = (double)cv::getTickCount();
+
+	edgeFaults.clear();
 	if (ed.Defects.size() > 0)
 	{
+		for (size_t i = 0; i < ed.Defects.size(); i++)
+		{
+			edgeFaults.push_back(ed.Defects[i]);
+		}
 		ss << GrabbingIndex << " " << "±ßÔµÓÐÈ±ÏÝ£¬ÊýÁ¿£º" << ed.Defects.size() << endl;
 		printf_globle(ss.str());
 		ss.str("");
 	}
 
 
-	//#ifdef OUTPUT_DEBUG_INFO
-	//	if (OUTPUT_DEBUG_INFO)
-	//	{
-	//		cv::imwrite("samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
-	//		cv::imwrite("samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
-	//		cv::imwrite("samples/02drowDebugResult.jpg", bd.drowDebugResult);
-	//	}
-	//#endif
-	//
-	//	//´É×©±ßÔµÈ±ÏÝ¼ì²â
-	//	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
-	//	if (ed.Defects.size() > 0)
-	//	{
-	//		ss << GrabbingIndex << " " << "±ßÔµÓÐÈ±ÏÝ" << endl;
-	//printf_globle(ss.str());
-	//ss.str("");
-	//	}
-	//	else
-	//	{
-	//		Measurer m = Measurer();
-	//		m.CaculteSize(&bd);
-	//	}
-	//	BlockHoughDetector bhd = BlockHoughDetector(globle_var::s.NowBufferImg);
+	//´É×©ÄÚ²¿È±ÏÝ¼ì²â
+
+
+
+
+
+
+
+
+
+
+
+	#ifdef OUTPUT_DEBUG_INFO
+		if (OUTPUT_DEBUG_INFO)
+		{
+			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+			//t_write1.detach();
+			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
+			//t_write2.detach();
+			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd.drowDebugResult);
+			//t_write3.detach();
+		}
+	#endif
 
 
 	ss << GrabbingIndex << " " << "customer£ºEnd at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;

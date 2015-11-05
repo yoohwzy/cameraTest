@@ -23,6 +23,9 @@ public:
 	bool StartNewProces(cv::Mat img);
 	int GrabbingIndex = 0;
 
+	vector<cv::Point3f> edgeFaults;
+
+
 private:
 	cv::Mat originalImg;
 	HWND hwnd;

@@ -5,7 +5,7 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 {
 
 	hwnd = _hwnd;
-
+	Init(virtualImg);
 
 	/*读取定标图片 定标*/
 	//BlocksDetector bd_Standard = BlocksDetector(cv::imread("A9划痕凹点_x3二值化.jpg"));
@@ -15,23 +15,49 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	//bd_Standard.ABCD();
 	//Measurer m = Measurer(&bd_Standard, &globle_var::mdi, 300, 600);		 //定标图片初始化
 	//printf_globle("定标完成\n");
+}
+TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
+{
+	printf_globle("TiggerWatcherAndGrabber unload!\n");
+}
 
 
+void TiggerWatcherAndGrabber::Init(string virtualImg)
+{
 	if (virtualImg == "")
 	{
 		printf_globle("TiggerWatcherAndGrabber load! 当前模式为真实相机。\n");
-		initForE2V();
+		Switch2Real(true);
 	}
 	else
 	{
 		printf_globle("TiggerWatcherAndGrabber load! 当前模式为虚拟相机。\n");
-		initForVC(virtualImg);
+		Switch2Virtual(virtualImg, true);
 	}
 }
-
-void TiggerWatcherAndGrabber::initForE2V()
+void TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg, bool refresh)
 {
-	USING_VIRTUAL_CAMERA = 0;//是否使用虚拟摄像头 1使用 0用E2V
+	if (USING_VIRTUAL_CAMERA && !refresh)
+		return;
+	USING_VIRTUAL_CAMERA = true;
+	if (globle_var::mdi.fg != NULL)
+		MicroDisplayInit::Release(globle_var::mdi);
+
+
+
+
+	vc = VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
+	printf_globle("虚拟相机初始化完成！\n");
+}
+void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
+{
+	if (!USING_VIRTUAL_CAMERA && !refresh)
+		return;
+	USING_VIRTUAL_CAMERA = false;
+	if (globle_var::mdi.fg != NULL)
+		MicroDisplayInit::Release(globle_var::mdi);
+
+
 	//初始化采集卡
 	int status = MicroDisplayInit::InitParameter(globle_var::mdi);
 	//status = MicroDisplayInit::InitLoad(globle_var::mdi, "4096RGB1LineX1.mcf");
@@ -58,18 +84,7 @@ void TiggerWatcherAndGrabber::initForE2V()
 		printf_globle("打开采集卡0失败！\n");
 	}
 }
-void TiggerWatcherAndGrabber::initForVC(string virtualImg)
-{
-	USING_VIRTUAL_CAMERA = 1;
-	vc = VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
-	printf_globle("虚拟相机初始化完成！\n");
-}
 
-
-TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
-{
-	printf_globle("TiggerWatcherAndGrabber unload!\n");
-}
 
 
 
@@ -137,6 +152,16 @@ void TiggerWatcherAndGrabber::watcherThread()
 			}
 			else
 			{
+				if (vc.buffer.cols == 0 || vc.buffer.rows == 0)
+				{
+					printf_globle("虚拟相机底片不存在。");
+					IsGrabbing = false;
+					if (hwnd != NULL)
+					{
+						PostMessage(hwnd, WM_USER + 100, 0, 0);
+					}
+					return;
+				}
 				vc.FreeRunning(globle_var::mdi, globle_var::s);
 			}
 			//采样计时

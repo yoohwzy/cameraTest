@@ -68,18 +68,7 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 	printf_globle("");
 	if (FILE_LOG)
 		ofstream of(FILE_NAME);
-
-	//AllocConsole();
-	//string title = "debug info";
-	//size_t size = title.length();
-	//wchar_t *buffer = new wchar_t[size + 1];
-	//MultiByteToWideChar(CP_ACP, 0, title.c_str(), size, buffer, size * sizeof(wchar_t));
-	//buffer[size] = 0;  // 确保以 '\0' 结尾 
-	//SetConsoleTitle(buffer);
-	//delete buffer;
 }
-
-
 
 
 void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
@@ -107,6 +96,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_SAVE, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerSave)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad)
 	ON_EN_CHANGE(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera)
+	ON_EN_KILLFOCUS(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera)
 END_MESSAGE_MAP()
 
 
@@ -146,9 +136,6 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 
 
-
-
-	globle_var::VirtualCameraFileName = "result6_o原图.jpg";
 	//初始化设定数据
 	if (true)//判断配置文件是否存在
 	{
@@ -176,8 +163,10 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 		}
 	}
 
+
 	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
 	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
+
 
 
 	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
@@ -269,7 +258,7 @@ void CTileDetectorMFCDlg::BtnScan_OnBnClicked()
 	if (!twag->ManualTigger())
 	{
 		//MessageBox(L"当前无法触发！");
-		printf_globle("当前无法触发！\n");
+		printf_globle("当前无法触发!\n");
 	}
 	else
 	{
@@ -281,15 +270,18 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
 
 	consumer->GrabbingIndex = twag->GrabbingIndex;
+	//运行消费者进程处理图像
 	if (!consumer->StartNewProces(globle_var::s.NowBufferImg))
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
-	cv::Mat a;
-	cv::resize(globle_var::s.NowBufferImg, a, cv::Size(400, 1100));
-	DrawPicToHDC(a, IDC_PIC_Sample);
-
+	if (globle_var::s.NowBufferImg.cols > 0)
+	{
+		cv::Mat a;
+		cv::resize(globle_var::s.NowBufferImg, a, cv::Size(400, 1100));
+		DrawPicToHDC(a, IDC_PIC_Sample);
+	}
 
 	m_Info += _T("采图完成！\r\n");
 	UpdateData(false);
@@ -301,7 +293,6 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	UpdateData(false);
 	return 1;
 }
-
 void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
 	IplImage image(img); //原始图像
@@ -320,13 +311,9 @@ void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 void CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered()
 {
 	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-	{
 		twag->StartWatch();
-	}
 	else
-	{
 		twag->StopWatch();
-	}
 }
 
 
@@ -354,8 +341,14 @@ void CTileDetectorMFCDlg::OnBnClickedBtnGrabSave()
 	Setting::AddKey(Setting::GRAB_ColorType, (LPWSTR)(LPCWSTR)set_grabRGBType.GetBuffer(0));
 
 	twag->StopWatch();
-	delete twag;
-	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
+	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
+	{
+		twag->StartWatch();
+	}
+	else
+	{
+		twag->StopWatch();
+	}
 }
 //读取采集参数
 void CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad()
@@ -381,8 +374,9 @@ void CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad()
 
 
 	twag->StopWatch();
-	delete twag;
-	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
+	twag->Init();
+	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
+		twag->StartWatch();
 }
 
 //保存触发参数
@@ -411,9 +405,37 @@ void CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad()
 
 void CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera()
 {
-	UpdateData(true);
-	if (m_VirtualCamera == "")
-	{
 
+}
+
+
+void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
+{
+	UpdateData(true);
+	m_VirtualCamera.Trim();
+	CStringA stra(m_VirtualCamera.GetBuffer(0));
+	std::string strtmp = stra.GetBuffer(0);
+	stra.ReleaseBuffer();
+
+	if (globle_var::VirtualCameraFileName != "" && m_VirtualCamera == "")
+	{
+		globle_var::VirtualCameraFileName = strtmp;
+		twag->StopWatch();
+		twag->Switch2Real();
+		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
+			twag->StartWatch();
+		printf_globle("开始使用真实相机.\r\n\r\n");
+	}
+	else if ((globle_var::VirtualCameraFileName == "" && m_VirtualCamera != "") || (globle_var::VirtualCameraFileName != strtmp))
+	{
+		globle_var::VirtualCameraFileName = strtmp;
+		twag->StopWatch();
+		twag->Switch2Virtual(strtmp);
+		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
+			twag->StartWatch();
+		printf_globle("开始使用虚拟相机.\r\n\r\n");
+
+		if (twag->vc.buffer.cols == 0)
+			MessageBox(L"虚拟相机文件不存在！");
 	}
 }

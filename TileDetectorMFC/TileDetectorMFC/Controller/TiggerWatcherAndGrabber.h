@@ -25,13 +25,21 @@ public:
 
 	void StartWatch();
 	void StopWatch();
+
+	void Init(string virtualImg="");
+	void Switch2Real(bool refresh = false);
+	void Switch2Virtual(string virtualImg, bool refresh = false);
+
+
 	//手动触发，若无法触发返回false
 	bool ManualTigger();
-
 	int GrabbingIndex = 0;
 
-private:
 	VirtualCamera vc;
+
+
+
+private:
 	HWND hwnd;
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
@@ -47,10 +55,6 @@ private:
 	bool IsGrabbing = false;
 
 
-	//使用真实相机初始化
-	void initForE2V();
-	//使用虚拟相机初始化
-	void initForVC(string virtualImg);
 
 
 	void watcherThread();

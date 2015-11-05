@@ -42,7 +42,7 @@ BlocksDetector::~BlocksDetector()
 {
 }
 
-void BlocksDetector::Start()
+bool BlocksDetector::Start()
 {
 	A = B = C = D = cv::Point(0, 0);
 
@@ -62,7 +62,7 @@ void BlocksDetector::Start()
 		}
 		//若没有找到边缘，停止程序。
 		if (LeftBorder.size() < 2)
-			return;
+			return false;
 
 		//拟合直线，判断可疑点
 		cv::Vec4f leftLine;
@@ -158,7 +158,7 @@ void BlocksDetector::Start()
 		}
 		//若没有找到边缘，停止程序。
 		if (RightBorder.size() < 2)
-			return;
+			return false;
 
 		//拟合直线，判断可疑点
 		cv::Vec4f rightLine;
@@ -246,16 +246,18 @@ void BlocksDetector::Start()
 	//		cv::putText(drowDebugResult, "D", D, CV_FONT_HERSHEY_COMPLEX, 2, cv::Scalar(255, 0, 0));
 	//	}
 	//#endif
+
+	return true;
 }
-void BlocksDetector::StartUP_DOWN(BorderType bt)
+bool BlocksDetector::StartUP_DOWN(BorderType bt)
 {
 	int centerY = 0;
 	if (allLeftList.size() == 0 || allRightList.size() == 0)
-		return;
+		return false;
 	if (bt == BlocksDetector::Up && allLeftList[0].y == 0 && allRightList[0].y == 0)
-		return;
+		return false;
 	else if (bt == BlocksDetector::Down && !(allLeftList[allLeftList.size() - 1].y > 0 && allLeftList[allLeftList.size() - 1].y < (img.rows - SUM_COUNT) && allRightList[allRightList.size() - 1].y>0 && allRightList[allRightList.size() - 1].y < (img.rows - SUM_COUNT)))
-		return;
+		return false;
 	vector<cv::Point> *targetBorder;
 	vector<cv::Point> *tmptargetList;
 	vector<cv::Point> *alltargetList;
@@ -320,9 +322,7 @@ void BlocksDetector::StartUP_DOWN(BorderType bt)
 		}
 	}
 
-	//若没有找到边缘，停止程序。
-	if (RightBorder.size() < 2)
-		return;
+
 	//拟合直线，判断可疑点
 	cv::Vec4f line4f;
 	cv::fitLine(cv::Mat((*targetBorder)), line4f, CV_DIST_L2, 0, 0.01, 0.01);
@@ -402,8 +402,11 @@ void BlocksDetector::StartUP_DOWN(BorderType bt)
 		//	cv::circle(drowDebugResult, LeftDown[i], 1, cv::Scalar(0, 255, 0), 1);
 	}
 #endif
+
+
+	return true;
 }
-void BlocksDetector::ABCD()
+bool BlocksDetector::ABCD()
 {
 	//A
 	if (1 == 1)
@@ -453,6 +456,16 @@ void BlocksDetector::ABCD()
 		D.x = (y2 - y1 + k1*x1 - k2*x2) / (k1 - k2);
 		D.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
 	}
+
+	if (A.x <= 0 || A.x >= (img.cols - 1) || A.y <= 0 || A.y >= (img.rows - 1))
+		return false;
+	if (B.x <= 0 || B.x >= (img.cols - 1) || B.y <= 0 || B.y >= (img.rows - 1))
+		return false;
+	if (C.x <= 0 || C.x >= (img.cols - 1) || C.y <= 0 || C.y >= (img.rows - 1))
+		return false;
+	if (D.x <= 0 || D.x >= (img.cols - 1) || D.y <= 0 || D.y >= (img.rows - 1))
+		return false;
+	return true;
 }
 
 int BlocksDetector::DetectOneLineLeft(int y)
