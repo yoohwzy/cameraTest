@@ -10,6 +10,7 @@ bool Consumer::StartNewProces(cv::Mat img)
 		return false;
 	}
 	if (isProcessing) return false;
+	originalImg.release();
 	originalImg = img.clone();
 
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
@@ -47,11 +48,14 @@ void Consumer::processingThread()
 
 	//´É×©Î»ÖÃ¼ì²â
 	cv::Mat DetectedImg = originalImg.clone();
-	BlocksDetector bd = BlocksDetector(DetectedImg);
+	printf_globle("cv::Mat DetectedImg = originalImg.clone()\r");
+	BlocksDetector *bd =new BlocksDetector(DetectedImg);
+	printf_globle("BlocksDetector bd = BlocksDetector(DetectedImg)\r");
+
 	double t = (double)cv::getTickCount();
 
 	//BlocksDetector¼ÓÈëÅÐ¶ÏÊÇ·ñ¼ì²âµ½ÍêÕû´É×©
-	if(bd.Start() && bd.StartUP_DOWN(BlocksDetector::Up) &&	bd.StartUP_DOWN(BlocksDetector::Down))
+	if(bd->Start() && bd->StartUP_DOWN(BlocksDetector::Up) &&	bd->StartUP_DOWN(BlocksDetector::Down))
 	{
 	}
 	else
@@ -59,11 +63,14 @@ void Consumer::processingThread()
 		printf_globle("Î´¼ì²âµ½´É×©\r");
 		return;
 	}
-	if (!bd.ABCD())
+	printf_globle("bd->Start() && bd->StartUP_DOWN(BlocksDetector::Up) &&	bd->StartUP_DOWN(BlocksDetector::Down)\r");
+
+	if (!bd->ABCD())
 	{
 		printf_globle("Î´¼ì²âµ½ÍêÕûµÄ´É×©\r");
 		return;
 	}
+	printf_globle("bd->ABCD()\r");
 
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -81,7 +88,7 @@ void Consumer::processingThread()
 
 
 	//´É×©±À±ß¼ì²â
-	EdgeDetector ed = EdgeDetector(DetectedImg, &bd);
+	EdgeDetector ed = EdgeDetector(DetectedImg, bd);
 	ed.start();
 
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -90,12 +97,12 @@ void Consumer::processingThread()
 	ss.str("");
 	t = (double)cv::getTickCount();
 
-	edgeFaults.clear();
+	EdgeFaults.clear();
 	if (ed.Defects.size() > 0)
 	{
 		for (size_t i = 0; i < ed.Defects.size(); i++)
 		{
-			edgeFaults.push_back(ed.Defects[i]);
+			EdgeFaults.push_back(ed.Defects[i]);
 		}
 		ss << GrabbingIndex << " " << "±ßÔµÓÐÈ±ÏÝ£¬ÊýÁ¿£º" << ed.Defects.size() << endl;
 		printf_globle(ss.str());
@@ -118,11 +125,11 @@ void Consumer::processingThread()
 	#ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
-			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
+			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd->drowDebugDetectLR);
 			//t_write1.detach();
-			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
+			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd->drowDebugDetectUD);
 			//t_write2.detach();
-			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd.drowDebugResult);
+			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd->drowDebugResult);
 			//t_write3.detach();
 		}
 	#endif
@@ -138,4 +145,5 @@ void Consumer::processingThread()
 	{
 		PostMessage(hwnd, WM_USER + 101, 0, 0);
 	}
+	delete bd;
 }

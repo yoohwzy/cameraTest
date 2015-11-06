@@ -167,7 +167,8 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
 	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
 
-
+	globle_var::VirtualCameraFileName = "result1_o原图.jpg";
+	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
 
 	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
 	consumer = new Consumer(this->GetSafeHwnd());
@@ -290,6 +291,21 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 {
 	m_Info += _T("处理完成！\r\n");
+
+	if (consumer->EdgeFaults.size() > 0)
+	{
+		CString str;
+		str.Format(_T("%d 存在%d处崩边缺陷。\r"), consumer->GrabbingIndex, consumer->EdgeFaults.size());
+		m_Info += str;
+		//cv::Mat img(consumer->originalImg);
+		for (size_t i = 0; i < consumer->EdgeFaults.size(); i++)
+		{
+			cv::circle(consumer->originalImg, cv::Point(consumer->EdgeFaults[i].x, consumer->EdgeFaults[i].y), consumer->EdgeFaults[i].z + 20, cv::Scalar(0, 0, 255), 10);
+			cv::circle(consumer->originalImg, cv::Point(consumer->EdgeFaults[i].x, consumer->EdgeFaults[i].y), consumer->EdgeFaults[i].z + 3, cv::Scalar(0, 255, 0), 5);
+		}
+		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
+	}
+
 	UpdateData(false);
 	return 1;
 }
@@ -430,7 +446,7 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 	{
 		globle_var::VirtualCameraFileName = strtmp;
 		twag->StopWatch();
-		twag->Switch2Virtual(strtmp);
+		twag->Switch2Virtual(strtmp, true);
 		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
 			twag->StartWatch();
 		printf_globle("开始使用虚拟相机.\r\n\r\n");

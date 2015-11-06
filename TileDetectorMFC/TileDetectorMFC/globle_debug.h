@@ -60,7 +60,7 @@ static void printf_globle(stringstream ss)
 
 
 
-#define OUTPUT_DEBUG_INFO 1
+#define OUTPUT_DEBUG_INFO 0
 
 static void WriteImg(string path ,cv::Mat img)
 {
