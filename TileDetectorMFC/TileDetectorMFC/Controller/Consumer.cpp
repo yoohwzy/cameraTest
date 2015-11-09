@@ -111,11 +111,16 @@ void Consumer::processingThread()
 
 
 	//瓷砖内部缺陷检测
-
-
-
-
-
+	printf_globle("瓷砖内部缺陷检测 开始\r");
+	Pretreatment *p = new Pretreatment();
+	vector<cv::Point> lp = p->pretreatment(DetectedImg);
+	if (lp.size() > 0)
+	{
+		ss << GrabbingIndex << " " << "内部有缺陷，数量：" << ed.Defects.size() << endl;
+		printf_globle(ss.str());
+		ss.str("");
+	}
+	printf_globle("瓷砖内部缺陷检测 结束\r");
 
 
 

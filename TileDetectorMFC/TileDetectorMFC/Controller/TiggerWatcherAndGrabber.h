@@ -53,7 +53,7 @@ private:
 	};
 	bool IsWatching = false;
 	bool IsGrabbing = false;
-
+	bool IsThreeInOne = false;
 
 
 

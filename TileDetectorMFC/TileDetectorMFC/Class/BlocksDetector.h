@@ -72,15 +72,15 @@ public:
 	Line DownLine;
 
 	//存储边界顶点，临时存放，最后要进行分类
-	vector < cv::Point > LeftUp;
-	vector < cv::Point > LeftDown;
-	vector < cv::Point > RightUp;
-	vector < cv::Point > RightDown;
+	//vector < cv::Point > LeftUp;
+	//vector < cv::Point > LeftDown;
+	//vector < cv::Point > RightUp;
+	//vector < cv::Point > RightDown;
 
-	vector < cv::Point > UpLeft;
-	vector < cv::Point > DownLeft;
-	vector < cv::Point > UpRight;
-	vector < cv::Point > DownRight;
+	//vector < cv::Point > UpLeft;
+	//vector < cv::Point > DownLeft;
+	//vector < cv::Point > UpRight;
+	//vector < cv::Point > DownRight;
 
 
 
@@ -129,7 +129,7 @@ private:
 
 
 
-
+	 
 
 
 	 

@@ -11,6 +11,10 @@
 #include "../Class/Processor.h"
 #include "../Class/Measurer.h"
 #include "../Class/EdgeDetector.h"
+
+#include "../Class/Pretreatment.h"
+
+
 class Consumer
 {
 public:
@@ -24,6 +28,7 @@ public:
 	int GrabbingIndex = 0;
 
 	vector<cv::Point3f> EdgeFaults;
+	//vector<cv::Point3f> EdgeFaults;
 	cv::Mat originalImg;
 
 

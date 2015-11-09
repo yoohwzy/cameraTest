@@ -9,8 +9,16 @@ VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 	BufferLength = mdi.MaxPics;
 	WIDTH = mdi.width;
 	stringstream ss;
-	ss << "virtualcameras/" << imgname;
-	ss >> imgname;
+
+	if (imgname.find(":\\", 0) == std::string::npos)
+	{
+		ss << "virtualcameras/" << imgname;
+		ss >> imgname;
+	}
+	else
+	{
+		ss << imgname;
+	}
 	if (mdi.colorType == MicroDisplayInit::GRAY)
 		buffer = cv::imread(imgname, 0);
 	else
@@ -18,7 +26,7 @@ VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 	if (buffer.cols == 0 || buffer.rows == 0)
 	{
 		stringstream sss;
-		sss << "virtualcameras/" << imgname << "   do not exist!" << endl;
+		sss << imgname << "   do not exist!" << endl;
 		printf_globle(sss.str());
 		//ExitWithError(sss.str());
 	}
@@ -26,7 +34,6 @@ VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 	{
 		cv::resize(buffer, buffer, cv::Size(WIDTH, BufferLength));
 	}
-	//cv::Mat t = buffer;
 }
 VirtualCamera::~VirtualCamera()
 {

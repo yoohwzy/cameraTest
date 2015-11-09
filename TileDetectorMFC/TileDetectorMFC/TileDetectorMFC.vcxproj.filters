@@ -57,9 +57,6 @@
     <ClInclude Include="Class\BufferStorage.h">
       <Filter>Class</Filter>
     </ClInclude>
-    <ClInclude Include="Class\BlockHoughDetector.h">
-      <Filter>Class</Filter>
-    </ClInclude>
     <ClInclude Include="Class\BlocksDetector.h">
       <Filter>Class</Filter>
     </ClInclude>
@@ -93,6 +90,12 @@
     <ClInclude Include="Class\Setting.h">
       <Filter>Class</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Judgement.h">
+      <Filter>Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Pretreatment.h">
+      <Filter>Class</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -114,9 +117,6 @@
       <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
     <ClCompile Include="Class\BufferStorage.cpp">
-      <Filter>Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\BlockHoughDetector.cpp">
       <Filter>Class</Filter>
     </ClCompile>
     <ClCompile Include="Class\BlocksDetector.cpp">
@@ -145,6 +145,12 @@
     </ClCompile>
     <ClCompile Include="globle_var.cpp">
       <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Judgement.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Pretreatment.cpp">
+      <Filter>Class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

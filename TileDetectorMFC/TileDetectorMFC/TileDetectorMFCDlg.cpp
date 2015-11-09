@@ -272,25 +272,28 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 	//运行消费者进程处理图像
-	if (!consumer->StartNewProces(globle_var::s.NowBufferImg))
+	if (!consumer->StartNewProces(globle_var::s.BufferImg))
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
-	if (globle_var::s.NowBufferImg.cols > 0)
+	if (globle_var::s.BufferImg.cols > 0)
 	{
 		cv::Mat a;
-		cv::resize(globle_var::s.NowBufferImg, a, cv::Size(400, 1100));
+		cv::resize(globle_var::s.BufferImg, a, cv::Size(400, 1100));
 		DrawPicToHDC(a, IDC_PIC_Sample);
 	}
-
-	m_Info += _T("采图完成！\r\n");
+	CString msg;
+	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
+	m_Info += msg;
 	UpdateData(false);
 	return 1;
 }
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 {
-	m_Info += _T("处理完成！\r\n");
+	CString msg;
+	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
+	m_Info += msg;
 
 	if (consumer->EdgeFaults.size() > 0)
 	{

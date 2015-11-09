@@ -9,13 +9,9 @@ BufferStorage::BufferStorage(int _MaxPics, int _width)
 }
 BufferStorage::~BufferStorage()
 {
-	Buffer0.release();
-//	Buffer0Gray.release();
-	Buffer0Img.release();
-
-	Buffer1.release();
-//	Buffer1Gray.release();
-	Buffer1Img.release();
+	Buffer.release();
+//	BufferGray.release();
+	BufferImg.release();
 }
 void BufferStorage::Start()
 {
@@ -23,31 +19,13 @@ void BufferStorage::Start()
 	EndWriteFlag = false;
 	BufferWriteIndex = 0;
 	BufferReadIndex = 0;
-	if (bufferIndex % 2 == 0)
-	{
-		Buffer0.release();
-		Buffer0 = cv::Mat(MaxPics, width, CV_8UC3, cv::Scalar(0, 0, 0));
-		//Buffer0Gray.release();
-		//Buffer0Gray = cv::Mat(MaxPics, width, CV_8U, cv::Scalar(0));
-		Buffer0Img.release();
-		Buffer0Img = cv::Mat(MaxPics + 0, width, CV_8UC3, cv::Scalar(0, 0, 0));
-		NowBuffer = Buffer0;
-		//NowBufferGray = Buffer0Gray;
-		NowBufferImg = Buffer0Img;
-	}
-	else
-	{
-		Buffer1.release();
-		Buffer1 = cv::Mat(MaxPics, width, CV_8UC3, cv::Scalar(0, 0, 0));
-		//Buffer1Gray.release();
-		//Buffer1Gray = cv::Mat(MaxPics, width, CV_8U, cv::Scalar(0));
-		Buffer1Img.release();
-		Buffer1Img = cv::Mat(MaxPics + 0, width, CV_8UC3, cv::Scalar(0, 0, 0));
-		NowBuffer = Buffer1;
-		//NowBufferGray = Buffer1Gray;
-		NowBufferImg = Buffer1Img;
-	}
-	bufferIndex = 1 + bufferIndex;
+
+	Buffer.release();
+	Buffer = cv::Mat(MaxPics, width, CV_8UC3, cv::Scalar(0, 0, 0));
+	//BufferGray.release();
+	//BufferGray = cv::Mat(MaxPics, width, CV_8U, cv::Scalar(0));
+	BufferImg.release();
+	BufferImg = cv::Mat(MaxPics + 0, width, CV_8UC3, cv::Scalar(0, 0, 0));
 }
 bool BufferStorage::AddFrame(cv::Mat& frame)
 {
@@ -58,8 +36,8 @@ bool BufferStorage::AddFrame(cv::Mat& frame)
 	{
 		cv::cvtColor(frame, frame, CV_GRAY2BGR);
 	}
-	cv::Mat Now = NowBuffer;
-	cv::Mat oneFrame = NowBuffer(cv::Rect(0, BufferWriteIndex, width, 1));
+	cv::Mat Now = Buffer;
+	cv::Mat oneFrame = Buffer(cv::Rect(0, BufferWriteIndex, width, 1));
 	oneFrame += frame;
 
 	//几张合成一张
@@ -75,7 +53,7 @@ bool BufferStorage::AddFrame(cv::Mat& frame)
 }
 void BufferStorage::ThreeInOne(int lineIndex)
 {
-	cv::Mat frame = NowBuffer(cv::Rect(0, lineIndex, width, 1));
+	cv::Mat frame = Buffer(cv::Rect(0, lineIndex, width, 1));
 
 	////光照矫正
 	//if (SamplesRGB.cols != 0)
@@ -83,7 +61,7 @@ void BufferStorage::ThreeInOne(int lineIndex)
 
 
 	//N张图像叠加
-	cv::Mat oneFrame = NowBufferImg(cv::Rect(0, lineIndex, width, 1));
+	cv::Mat oneFrame = BufferImg(cv::Rect(0, lineIndex, width, 1));
 	oneFrame += frame;
 	if (lineIndex == 0)//补偿第一第二行没得到叠加的情况
 	{
@@ -96,12 +74,12 @@ void BufferStorage::ThreeInOne(int lineIndex)
 	}
 	if (lineIndex + 1 < MaxPics)
 	{
-		oneFrame = NowBufferImg(cv::Rect(0, lineIndex + 1, width, 1));
+		oneFrame = BufferImg(cv::Rect(0, lineIndex + 1, width, 1));
 		oneFrame += frame;
 	}
 	if (lineIndex + 2 < MaxPics)
 	{
-		oneFrame = NowBufferImg(cv::Rect(0, lineIndex + 2, width, 1));
+		oneFrame = BufferImg(cv::Rect(0, lineIndex + 2, width, 1));
 		oneFrame += frame;
 	}
 }
@@ -125,8 +103,8 @@ void BufferStorage::ThreeInOne(int lineIndex)
 //		return 0;
 //	}
 //
-//	cv::Mat Now = NowBuffer;
-//	cv::Mat oneFrame = NowBuffer(cv::Rect(0, BufferReadIndex, width, 1));
+//	cv::Mat Now = Buffer;
+//	cv::Mat oneFrame = Buffer(cv::Rect(0, BufferReadIndex, width, 1));
 //	oneFrame.copyTo(frame);
 //	return 1;
 //}

@@ -142,8 +142,8 @@ void TiggerWatcherAndGrabber::watcherThread()
 			//触发后，等待砖进入拍摄区。
 			Sleep(globle_var::TiggerWaitTimeMS);
 
-			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
-			t_3in1.detach();
+			//std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
+			//t_3in1.detach();
 
 
 			if (!USING_VIRTUAL_CAMERA)
@@ -171,19 +171,26 @@ void TiggerWatcherAndGrabber::watcherThread()
 			printf_globle(ss.str());
 			ss.str("");
 
-			while (globle_var::s.BufferReadIndex + globle_var::s.NinOne < globle_var::mdi.MaxPics)
+
+
+			threeInOne();
+
+			IsGrabbing = false;
+
+
+			//等待3合1
+			while (IsThreeInOne)
 			{
 				Sleep(1);
 				//printf_globle("Sleep(1)\n");
 			};
 			//threeInOne();
-
+			printf_globle("Sleep(1)\n");
 			if (hwnd != NULL)
 			{
 				PostMessage(hwnd, WM_USER + 100, 0, 0);
 			}
 			//标记生产者工作结束
-			IsGrabbing = false;
 		}
 		else
 		{
@@ -195,6 +202,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 //图片合成
 void TiggerWatcherAndGrabber::threeInOne()
 {
+	IsThreeInOne = true;
 	stringstream ss;
 	ss << GrabbingIndex << " " << "ThreeInOne：Start at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
@@ -215,4 +223,5 @@ void TiggerWatcherAndGrabber::threeInOne()
 	ss << GrabbingIndex << " " << "ThreeInOne：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
+	IsThreeInOne = false;
 }
