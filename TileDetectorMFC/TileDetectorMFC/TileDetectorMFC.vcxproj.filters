@@ -22,6 +22,9 @@
     <Filter Include="Class\MicroDisplay">
       <UniqueIdentifier>{3ebff08c-8ab6-4489-8c80-8ddb75da742c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\Base">
+      <UniqueIdentifier>{2d6fca3f-9891-4b8b-a42a-289c50a3000f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -96,6 +99,9 @@
     <ClInclude Include="Class\Pretreatment.h">
       <Filter>Class</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Base\Block.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -151,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="Class\Pretreatment.cpp">
       <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Base\Block.cpp">
+      <Filter>Class\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

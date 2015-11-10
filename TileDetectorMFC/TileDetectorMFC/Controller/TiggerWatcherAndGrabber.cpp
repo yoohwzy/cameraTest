@@ -3,8 +3,8 @@
 
 TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 {
-
 	hwnd = _hwnd;
+	vc = NULL;
 	Init(virtualImg);
 
 	/*读取定标图片 定标*/
@@ -18,6 +18,9 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 }
 TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
 {
+
+	if (vc == NULL)
+		delete vc;
 	printf_globle("TiggerWatcherAndGrabber unload!\n");
 }
 
@@ -46,7 +49,7 @@ void TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg, bool refresh)
 
 
 
-	vc = VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
+	vc = new VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
 	printf_globle("虚拟相机初始化完成！\n");
 }
 void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
@@ -91,11 +94,25 @@ void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
 void TiggerWatcherAndGrabber::StartWatch()
 {
 	if (!IsWatching)
-	IsWatching = true;
-	std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-	t_watcher.detach();
-	printf_globle("开始监控触发信号\n");
+	{
+		IsWatching = true;
+		std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+		t_watcher.detach();
+		printf_globle("StartWatch：开始监控触发信号\n");
+	}
+	else{
+		printf_globle("StartWatch：正在监控，不能重复监控操作。\n");
+	}
 }
+void TiggerWatcherAndGrabber::StartWatchWithCalibration()
+{
+	IsCalibration = true;
+	StartWatch();
+}
+
+
+
+
 void TiggerWatcherAndGrabber::StopWatch()
 {
 	printf_globle("停止监控触发信号\n");
@@ -152,7 +169,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 			}
 			else
 			{
-				if (vc.buffer.cols == 0 || vc.buffer.rows == 0)
+				if (vc->buffer.cols == 0 || vc->buffer.rows == 0)
 				{
 					printf_globle("虚拟相机底片不存在。");
 					IsGrabbing = false;
@@ -162,7 +179,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 					}
 					return;
 				}
-				vc.FreeRunning(globle_var::mdi, globle_var::s);
+				vc->FreeRunning(globle_var::mdi, globle_var::s);
 			}
 			//采样计时
 			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -172,10 +189,8 @@ void TiggerWatcherAndGrabber::watcherThread()
 			ss.str("");
 
 
-
 			threeInOne();
 
-			IsGrabbing = false;
 
 
 			//等待3合1
@@ -184,13 +199,20 @@ void TiggerWatcherAndGrabber::watcherThread()
 				Sleep(1);
 				//printf_globle("Sleep(1)\n");
 			};
-			//threeInOne();
-			printf_globle("Sleep(1)\n");
-			if (hwnd != NULL)
+			if (!IsCalibration)
 			{
-				PostMessage(hwnd, WM_USER + 100, 0, 0);
+				if (hwnd != NULL)
+				{
+					PostMessage(hwnd, WM_USER + 100, 0, 0);
+				}
+				//标记生产者工作结束
+				IsGrabbing = false;
 			}
-			//标记生产者工作结束
+			else
+			{
+				IsCalibration = false;
+				StopWatch();
+			}
 		}
 		else
 		{

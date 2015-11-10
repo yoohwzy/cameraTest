@@ -86,31 +86,6 @@ bool BlocksDetector::Start()
 
 
 
-		///******************逼近顶点******************/
-		//LeftUp.push_back(LeftBorder[0]);
-		//LeftDown.push_back(LeftBorder[LeftBorder.size() - 1]);
-		//int leftFirstLine = LeftBorder[0].y, leftFirstX = LeftBorder[0].x;
-		//int leftLastLine = LeftBorder[LeftBorder.size() - 1].y, leftLastX = LeftBorder[LeftBorder.size() - 1].x;
-		//cv::Point upstart = cv::Point(-1, (leftFirstLine > ROW_SPAN) ? (leftFirstLine - ROW_SPAN) : 0);
-		//cv::Point upend = cv::Point(leftFirstX, leftFirstLine);
-		//GetEdgeVerticalApproach(upstart, upend, RANGE_MINI, BorderType::Left, upstart);
-		//cv::Point downstart = cv::Point(leftLastX, leftLastLine);
-		//cv::Point downend = cv::Point(-1, (leftLastLine + ROW_SPAN) > img.rows ? (img.rows - 1) : (leftLastLine + ROW_SPAN));
-		//GetEdgeVerticalApproach(downstart, downend, RANGE_MINI, BorderType::Left, downend);
-		//if (LeftUp.size() > 0)
-		//{
-		//	std::sort(LeftUp.begin(), LeftUp.end(), ORDER_BY_Y_ASC);
-		//	DetectedA.y = LeftUp[0].y;
-		//}
-		//if (LeftUp.size() > 0)
-		//{
-		//	std::sort(LeftDown.begin(), LeftDown.end(), ORDER_BY_Y_DESC);
-		//	DetectedD.y = LeftDown[0].y;
-		//}
-		///******************逼近顶点结束******************/
-
-
-
 #ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
@@ -181,30 +156,6 @@ bool BlocksDetector::Start()
 		std::sort(RightBorder.begin(), RightBorder.end(), ORDER_BY_Y_ASC);
 
 
-		///******************逼近顶点******************/
-		//RightUp.push_back(RightBorder[RightBorder.size() - 1]);
-		//RightDown.push_back(RightBorder[0]);
-		//int rightFirstLine = RightBorder[0].y, rightFirstX = RightBorder[0].x;
-		//int rightLastLine = RightBorder[RightBorder.size() - 1].y, rightLastX = RightBorder[RightBorder.size() - 1].x;
-		//cv::Point upstart = cv::Point(-1, (rightFirstLine > ROW_SPAN) ? (rightFirstLine - ROW_SPAN) : 0);
-		//cv::Point upend = cv::Point(rightFirstX, rightFirstLine);
-		//GetEdgeVerticalApproach(upstart, upend, RANGE_MINI, BorderType::Right, upstart);
-		//cv::Point downstart = cv::Point(rightLastX, rightLastLine);
-		//cv::Point downend = cv::Point(-1, (rightLastLine + ROW_SPAN) > img.rows ? (img.rows - 1) : (rightLastLine + ROW_SPAN));
-		//GetEdgeVerticalApproach(downstart, downend, RANGE_MINI, BorderType::Right, downstart);
-
-		//if (RightUp.size() > 0)
-		//{
-		//	std::sort(RightUp.begin(), RightUp.end(), ORDER_BY_Y_ASC);
-		//	DetectedB.y = RightUp[0].y;
-		//}
-		//if (RightDown.size() > 0)
-		//{
-		//	std::sort(RightDown.begin(), RightDown.end(), ORDER_BY_Y_DESC);
-		//	DetectedC.y = RightDown[0].y;
-		//}
-		///******************逼近顶点结束******************/
-
 #ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
@@ -230,22 +181,6 @@ bool BlocksDetector::Start()
 	}
 	std::sort(allLeftList.begin(), allLeftList.end(), ORDER_BY_Y_ASC);
 	std::sort(allRightList.begin(), allRightList.end(), ORDER_BY_Y_ASC);
-	//return;
-	//
-	//	A = LeftBorder[0];
-	//	B = RightBorder[0];
-	//	C = RightBorder[RightBorder.size() - 1];
-	//	D = LeftBorder[LeftBorder.size() - 1];
-	//
-	//#ifdef OUTPUT_DEBUG_INFO
-	//	if (OUTPUT_DEBUG_INFO)
-	//	{
-	//		cv::putText(drowDebugResult, "A", A, CV_FONT_HERSHEY_COMPLEX, 2, cv::Scalar(255, 0, 0));
-	//		cv::putText(drowDebugResult, "B", B, CV_FONT_HERSHEY_COMPLEX, 2, cv::Scalar(255, 0, 0));
-	//		cv::putText(drowDebugResult, "C", C, CV_FONT_HERSHEY_COMPLEX, 2, cv::Scalar(255, 0, 0));
-	//		cv::putText(drowDebugResult, "D", D, CV_FONT_HERSHEY_COMPLEX, 2, cv::Scalar(255, 0, 0));
-	//	}
-	//#endif
 
 	return true;
 }
@@ -344,43 +279,6 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 	}
 	std::sort((*targetBorder).begin(), (*targetBorder).end(), ORDER_BY_X_ASC);
 
-	//if (bt == BorderType::Up)
-	//{
-	//	UpLeft.push_back((*targetBorder)[0]);
-	//	UpRight.push_back((*targetBorder)[(*targetBorder).size() - 1]);
-	//}
-	//else
-	//{
-	//	DownLeft.push_back((*targetBorder)[0]);
-	//	DownRight.push_back((*targetBorder)[(*targetBorder).size() - 1]);
-	//}
-
-	///******************逼近顶点******************/
-	//int upFirstCol = (*targetBorder)[0].x, upFirstRow = (*targetBorder)[0].y + ((*targetBorder)[0].y - (*targetBorder)[1].y) / 2;
-	//int upLastCol = (*targetBorder)[(*targetBorder).size() - 1].x, upLastRow = (*targetBorder)[(*targetBorder).size() - 1].y;
-	//cv::Point leftstart = cv::Point((upFirstCol > COL_SPAN) ? (upFirstCol - COL_SPAN) : 0, -1);
-	//cv::Point leftend = cv::Point(upFirstCol, upFirstRow);
-	//GetEdgeHorizontalApproach(leftstart, leftend, RANGE_MINI, bt, leftstart);
-	//cv::Point rightstart = cv::Point(upLastCol, upLastRow);
-	//cv::Point rightend = cv::Point((upLastCol + COL_SPAN) > img.cols ? (img.cols - 1) : (upLastCol + COL_SPAN), -1);
-	//GetEdgeHorizontalApproach(rightstart, rightend, RANGE_MINI, bt, rightend);
-
-	//////排序整理
-	//if (bt == BorderType::Up && UpLeft.size() > 0)
-	//{
-	//	std::sort(UpLeft.begin(), UpLeft.end(), ORDER_BY_X_ASC);
-	//	std::sort(UpRight.begin(), UpRight.end(), ORDER_BY_X_DESC);
-	//	DetectedA.x = UpLeft[0].x;
-	//	DetectedB.x = UpRight[0].x;
-	//}
-	//else if (DownRight.size() > 0)
-	//{
-	//	std::sort(DownLeft.begin(), DownLeft.end(), ORDER_BY_X_ASC);
-	//	std::sort(DownRight.begin(), DownRight.end(), ORDER_BY_X_DESC);
-	//	DetectedD.x = DownLeft[0].x;
-	//	DetectedC.x = DownRight[0].x;
-	//}
-	///******************逼近顶点结束******************/
 
 #ifdef OUTPUT_DEBUG_INFO
 	if (OUTPUT_DEBUG_INFO)
@@ -404,67 +302,6 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 #endif
 
 
-	return true;
-}
-bool BlocksDetector::ABCD()
-{
-	//A
-	if (1 == 1)
-	{
-		double k1 = UpLine.k;
-		double x1 = UpLine.x0;
-		double y1 = UpLine.y0;
-		double k2 = LeftLine.k;
-		double x2 = LeftLine.x0;
-		double y2 = LeftLine.y0;
-		A.x = (y2 - y1 + k1*x1 - k2*x2) / (k1 - k2);
-		A.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
-	}
-	//B
-	if (1 == 1)
-	{
-		double k1 = UpLine.k;
-		double x1 = UpLine.x0;
-		double y1 = UpLine.y0;
-		double k2 = RightLine.k;
-		double x2 = RightLine.x0;
-		double y2 = RightLine.y0;
-		B.x = (y2 - y1 + k1*x1 - k2*x2) / (k1 - k2);
-		B.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
-	}
-	//C
-	if (1 == 1)
-	{
-		double k1 = DownLine.k;
-		double x1 = DownLine.x0;
-		double y1 = DownLine.y0;
-		double k2 = RightLine.k;
-		double x2 = RightLine.x0;
-		double y2 = RightLine.y0;
-		C.x = (y2 - y1 + k1*x1 - k2*x2) / (k1 - k2);
-		C.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
-	}
-	//D
-	if (1 == 1)
-	{
-		double k1 = DownLine.k;
-		double x1 = DownLine.x0;
-		double y1 = DownLine.y0;
-		double k2 = LeftLine.k;
-		double x2 = LeftLine.x0;
-		double y2 = LeftLine.y0;
-		D.x = (y2 - y1 + k1*x1 - k2*x2) / (k1 - k2);
-		D.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
-	}
-
-	if (A.x <= 0 || A.x >= (img.cols - 1) || A.y <= 0 || A.y >= (img.rows - 1))
-		return false;
-	if (B.x <= 0 || B.x >= (img.cols - 1) || B.y <= 0 || B.y >= (img.rows - 1))
-		return false;
-	if (C.x <= 0 || C.x >= (img.cols - 1) || C.y <= 0 || C.y >= (img.rows - 1))
-		return false;
-	if (D.x <= 0 || D.x >= (img.cols - 1) || D.y <= 0 || D.y >= (img.rows - 1))
-		return false;
 	return true;
 }
 
@@ -599,95 +436,6 @@ int BlocksDetector::GetEdgeX3(cv::Point start, int range, BlocksDetector::Border
 	return -1;
 }
 
-//int BlocksDetector::GetEdgeVerticalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target)
-//{
-//	int x1 = -1;
-//	int startline = start.y;
-//	int endline = end.y;
-//	int middleLine = (endline - startline) / 2 + startline;
-//	Line *line;
-//
-//	vector<cv::Point> *collection;
-//	if (bt == BlocksDetector::Left)
-//	{
-//		line = &LeftLine;
-//		if (start.x == -1)
-//			collection = &LeftUp;
-//		else
-//			collection = &LeftDown;
-//	}
-//	else
-//	{
-//		line = &RightLine;
-//		if (start.x == -1)
-//			collection = &RightUp;
-//		else
-//			collection = &RightDown;
-//	}
-//
-//#ifdef OUTPUT_DEBUG_INFO
-//	if (OUTPUT_DEBUG_INFO)
-//	{
-//		cv::circle(drowDebugDetectLR, cv::Point(end.x, middleLine), 3, cv::Scalar(255, 0, 0), 2);
-//	}
-//#endif
-//	//二分法，求startline与endline的中间是否有边界
-//	//递归直至startline = endline
-//	//找上边缘顶点
-//	if (start.x == -1)
-//	{
-//		//若找到的点与最初目标点重合，扩大区域继续搜索
-//		if (middleLine == Target.y && middleLine != 0 && middleLine < (img.rows - 2))
-//		{
-//			Target = cv::Point(-1, (Target.y > ROW_SPAN) ? (Target.y - ROW_SPAN) : 0);
-//			return GetEdgeVerticalApproach(Target, end, range, bt, Target);
-//		}
-//		if (middleLine == startline || middleLine == endline)
-//			return end.x;
-//		x1 = GetEdgeX3(cv::Point(end.x, middleLine), range, bt);
-//		if (x1 > 0)//  && IsPointNearline(*line, cv::Point(x1, middleLine))
-//		{
-//#ifdef OUTPUT_DEBUG_INFO
-//			if (OUTPUT_DEBUG_INFO)
-//			{
-//				cv::circle(drowDebugResult, cv::Point(x1, middleLine), 3, cv::Scalar(0, 255, 0), 1);
-//			}
-//#endif
-//			(*collection).push_back(cv::Point(x1, middleLine));
-//			x1 = GetEdgeVerticalApproach(start, cv::Point(x1, middleLine), range, bt, Target);
-//		}
-//		else
-//			x1 = GetEdgeVerticalApproach(cv::Point(x1, middleLine), end, range, bt, Target);
-//	}
-//	//找下边缘顶点
-//	else
-//	{
-//		//若找到的点与最初目标点重合，扩大区域继续搜索
-//		if (middleLine == Target.y)
-//		{
-//			Target = cv::Point(-1, (Target.y + ROW_SPAN) > img.rows ? (img.rows - 1) : (Target.y + ROW_SPAN));
-//			return GetEdgeVerticalApproach(start, Target, range, bt, Target);
-//		}
-//		if (middleLine == startline || middleLine == endline)
-//			return start.x;
-//		x1 = GetEdgeX3(cv::Point(start.x, middleLine), range, bt);
-//		if (x1 > 0)// && IsPointNearline(*line, cv::Point(x1, middleLine))
-//		{
-//#ifdef OUTPUT_DEBUG_INFO
-//			if (OUTPUT_DEBUG_INFO)
-//			{
-//				cv::circle(drowDebugResult, cv::Point(x1, middleLine), 3, cv::Scalar(0, 255, 0), 1);
-//			}
-//#endif
-//			(*collection).push_back(cv::Point(x1, middleLine));
-//			x1 = GetEdgeVerticalApproach(cv::Point(x1, middleLine), end, range, bt, Target);
-//		}
-//		else
-//			x1 = GetEdgeVerticalApproach(start, cv::Point(-1, middleLine), range, bt, Target);
-//	}
-//
-//	return x1;
-//}
 int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 {
 	const int sumcount = SUM_COUNT;
@@ -773,97 +521,7 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 	}
 	return ret;
 }
-//int BlocksDetector::GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target)
-//{
-//	vector<cv::Point> *targetBorder;
-//	Line *line;
-//
-//	int y1 = -1;
-//	int startCol = start.x;
-//	int endCol = end.x;
-//	int middleCol = (endCol - startCol) / 2 + startCol;
-//#ifdef OUTPUT_DEBUG_INFO
-//	if (OUTPUT_DEBUG_INFO)
-//	{
-//		cv::circle(drowDebugDetectUD, cv::Point(middleCol, end.y == -1 ? start.y : end.y), 3, cv::Scalar(255, 0, 0), 1);
-//	}
-//#endif
-//	//逼近左边，此时end为已找到的点
-//	if (start.y == -1)
-//	{
-//		if (bt == BlocksDetector::Up)
-//		{
-//			targetBorder = &UpLeft;
-//			line = &UpLine;
-//		}
-//		else
-//		{
-//			targetBorder = &DownLeft;
-//			line = &DownLine;
-//		}
-//		//若找到的点与最初目标点重合，扩大区域继续搜索
-//		if (middleCol == Target.x)
-//		{
-//			Target = cv::Point((Target.x - COL_SPAN) > 0 ? (Target.x - COL_SPAN) : 0, -1);
-//			return GetEdgeHorizontalApproach(Target, end, range, bt, Target);
-//		}
-//		if (middleCol == startCol || middleCol == endCol)
-//			return end.y;
-//		y1 = GetEdgeX3(cv::Point(middleCol, end.y), range, bt);
-//		if (y1 > 0)// && IsPointNearline((*line), cv::Point(middleCol, y1))
-//		{
-//#ifdef OUTPUT_DEBUG_INFO
-//			if (OUTPUT_DEBUG_INFO)
-//			{
-//				cv::circle(drowDebugResult, cv::Point(middleCol, y1), 3, cv::Scalar(255, 255, 0), 1);
-//				cv::circle(drowDebugResult, cv::Point(middleCol, y1), 1, cv::Scalar(255, 0, 255), -1);
-//			}
-//#endif
-//			targetBorder->push_back(cv::Point(middleCol, y1));
-//			y1 = GetEdgeHorizontalApproach(start, cv::Point(middleCol, y1), range, bt, Target);
-//		}
-//		else
-//			y1 = GetEdgeHorizontalApproach(cv::Point(middleCol, y1), end, range, bt, Target);
-//	}
-//	//逼近右边，此时start为已经找到的点
-//	else
-//	{
-//		if (bt == BlocksDetector::Up)
-//		{
-//			targetBorder = &UpRight;
-//			line = &UpLine;
-//		}
-//		else
-//		{
-//			targetBorder = &DownRight;
-//			line = &DownLine;
-//		}
-//		//若找到的点与最初目标点重合，扩大区域继续搜索
-//		if (middleCol == Target.x)
-//		{
-//			Target = cv::Point((Target.x + COL_SPAN + 1) > img.cols ? (img.cols - 1) : Target.x + COL_SPAN, -1);
-//			return GetEdgeHorizontalApproach(start, Target, range, bt, Target);
-//		}
-//		if (middleCol == startCol || middleCol == endCol)
-//			return start.y;
-//		y1 = GetEdgeX3(cv::Point(middleCol, start.y), range, bt);
-//		if (y1 > 0)//&& IsPointNearline((*line), cv::Point(middleCol, y1))
-//		{
-//#ifdef OUTPUT_DEBUG_INFO
-//			if (OUTPUT_DEBUG_INFO)
-//			{
-//				cv::circle(drowDebugResult, cv::Point(middleCol, y1), 3, cv::Scalar(255, 255, 0), 1);
-//				cv::circle(drowDebugResult, cv::Point(middleCol, y1), 1, cv::Scalar(255, 0, 255), -1);
-//			}
-//#endif
-//			targetBorder->push_back(cv::Point(middleCol, y1));
-//			y1 = GetEdgeHorizontalApproach(cv::Point(middleCol, y1), end, range, bt, Target);
-//		}
-//		else
-//			y1 = GetEdgeHorizontalApproach(start, cv::Point(middleCol, y1), range, bt, Target);
-//	}
-//	return y1;
-//}
+
 int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 {
 	cv::Mat oneLineGray;

@@ -21,17 +21,24 @@ public:
 	Consumer(HWND _hwnd){
 		hwnd = _hwnd;
 	}
-	~Consumer(){};
+	~Consumer()
+	{
+		if (block == NULL)
+			delete block;
+	};
+	Block *block;
 
 	//传入照片，开始一场新的处理，若上一轮处理还未完成，返回false
 	bool StartNewProces(cv::Mat img);
 	int GrabbingIndex = 0;
 
 	vector<cv::Point3f> EdgeFaults;
-	//vector<cv::Point3f> EdgeFaults;
 	cv::Mat originalImg;
 
-
+	//定标
+	bool IsCalibration = false;
+	Measurer *m;
+	void Process4Calibraion();
 private:
 	HWND hwnd;
 	void processingThread();

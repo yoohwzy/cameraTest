@@ -1,10 +1,9 @@
 #include "Measurer.h"
 
 
-Measurer::Measurer(BlocksDetector *b, MicroDisplayInit *mdii, double TileStandardWidth, double TileStandardHeight)
+Measurer::Measurer(Block *_b, int TileStandardWidth, int TileStandardHeight)
 {
-	bd_Standard = b;
-	mdi = mdii;
+	b = _b;
 	tileStandardWidth_mm = TileStandardWidth;
 	tileStandardHeight_mm = TileStandardHeight;
 	ObserveCalibration();
@@ -217,11 +216,11 @@ void Measurer::PincushionImgAdjust(cv::Mat& Img)
 
 void Measurer::ObserveCalibration()
 {
-	int width = (*mdi).width;
+	int width = b->imageWidth;
 	int max = 0;
-	for (int i = 0; i < (*mdi).width; i++)
+	for (int i = 0; i < b->imageWidth; i++)
 	{
-		int v = (*bd_Standard).UpLine.k*(i - (*bd_Standard).UpLine.x0);
+		int v = (*b).UpLine.k*(i - (*b).UpLine.x0);
 		if (v > max)
 			max = v;
 		RowAdjust.push_back(v);
@@ -232,10 +231,10 @@ void Measurer::ObserveCalibration()
 	}
 
 	//此处为复制，非指针
-	A_Standard = (*bd_Standard).A;
-	B_Standard = (*bd_Standard).B;
-	C_Standard = (*bd_Standard).C;
-	D_Standard = (*bd_Standard).D;
+	A_Standard = (*b).A;
+	B_Standard = (*b).B;
+	C_Standard = (*b).C;
+	D_Standard = (*b).D;
 
 	//矫正ABCD四点
 	A_Standard.y = A_Standard.y - RowAdjust[A_Standard.x];
@@ -264,12 +263,12 @@ void Measurer::ObserveCalibration()
 void Measurer::ObserveImgAdjust(cv::Mat& Img)
 {
 	cv::Mat oldimg = Img.clone();
-	for (int i = 0; i < (*mdi).MaxPics; i++)
+	for (int i = 0; i < b->imageHeight; i++)
 	{
 		uchar* linehead = Img.ptr<uchar>(i);//每行的起始地址
-		for (int j = 0; j < (*mdi).width; j++)
+		for (int j = 0; j < b->imageWidth; j++)
 		{
-			if ((i + RowAdjust[j]) < 0 || (i + RowAdjust[j]) >= (*mdi).MaxPics)
+			if ((i + RowAdjust[j]) < 0 || (i + RowAdjust[j]) >= b->imageHeight)
 				continue;
 			uchar* linehead_tmp = oldimg.ptr<uchar>(i + RowAdjust[j]);//每行的起始地址
 			linehead[j * 3 + 0] = linehead_tmp[j * 3 + 0];
@@ -279,7 +278,7 @@ void Measurer::ObserveImgAdjust(cv::Mat& Img)
 	}
 }
 
-void Measurer::CaculteSize(BlocksDetector *bd)
+void Measurer::CaculteSize(Block *_b)
 {
 	//实际的四个顶点
 	cv::Point AA;
@@ -288,10 +287,10 @@ void Measurer::CaculteSize(BlocksDetector *bd)
 	cv::Point DD;
 
 	//此处为复制，非指针
-	AA = (*bd).A;
-	BB = (*bd).B;
-	CC = (*bd).C;
-	DD = (*bd).D;
+	AA = (*_b).A;
+	BB = (*_b).B;
+	CC = (*_b).C;
+	DD = (*_b).D;
 
 	//矫正ABCD四点，并计算一个像素长度为多少
 	AA.y = AA.y - RowAdjust[AA.x];

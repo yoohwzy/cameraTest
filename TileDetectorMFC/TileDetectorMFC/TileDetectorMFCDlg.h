@@ -15,6 +15,7 @@
 
 #define WM_MSG_POSTMSG (WM_USER + 99)
 #define WM_MSG_GRABBING_END (WM_USER + 100)
+#define WM_MSG_GRABBINGCalibartion_END (WM_USER + 102)
 #define WM_MSG_PROCESSING_END (WM_USER + 101)
 
 // CTileDetectorMFCDlg ¶Ô»°¿ò
@@ -52,6 +53,7 @@ protected:
 public:
 	afx_msg void BtnScan_OnBnClicked();
 	afx_msg LRESULT OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMsgPostMsg(WPARAM wParam, LPARAM lParam);
 private:
@@ -76,4 +78,5 @@ public:
 	CString m_VirtualCamera;
 	afx_msg void OnEnChangeTbVirtualcamera();
 	afx_msg void OnEnKillfocusTbVirtualcamera();
+	afx_msg void OnBnClickedBtnCalibration();
 };

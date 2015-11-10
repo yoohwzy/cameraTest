@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_MSG_GRABBING_END, &CTileDetectorMFCDlg::OnMsgGrabbingEnd)//采集结束处理程序
+	ON_MESSAGE(WM_MSG_GRABBINGCalibartion_END, &CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd)//定标、采集结束处理程序
 	ON_MESSAGE(WM_MSG_PROCESSING_END, &CTileDetectorMFCDlg::OnMsgProcessingEnd)//处理结束处理程序
 	ON_BN_CLICKED(IDC_BTN_SCAN, &CTileDetectorMFCDlg::BtnScan_OnBnClicked)
 	ON_BN_CLICKED(IDC_CB_CanBeTiggered, &CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered)
@@ -97,6 +98,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_TIGGER_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad)
 	ON_EN_CHANGE(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera)
 	ON_EN_KILLFOCUS(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera)
+	ON_BN_CLICKED(IDC_BTN_CALIBRATION, &CTileDetectorMFCDlg::OnBnClickedBtnCalibration)
 END_MESSAGE_MAP()
 
 
@@ -267,6 +269,15 @@ void CTileDetectorMFCDlg::BtnScan_OnBnClicked()
 		UpdateData(false);
 	}
 }
+
+
+void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
+{
+	m_Info = _T("");
+	m_Info += _T("开始等待标准砖进入...\r\n");
+	UpdateData(false);
+	twag->StartWatchWithCalibration();
+}
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
 
@@ -286,6 +297,15 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	CString msg;
 	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
 	m_Info += msg;
+	UpdateData(false);
+	return 1;
+}
+LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
+{
+	//consumer->GrabbingIndex = twag->GrabbingIndex;
+	//运行消费者进程处理图像
+	consumer->Process4Calibraion();
+	m_Info += _T("定标采图完成！\r\n");
 	UpdateData(false);
 	return 1;
 }
@@ -454,7 +474,9 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 			twag->StartWatch();
 		printf_globle("开始使用虚拟相机.\r\n\r\n");
 
-		if (twag->vc.buffer.cols == 0)
+		if (twag->vc->buffer.cols == 0)
 			MessageBox(L"虚拟相机文件不存在！");
 	}
 }
+
+

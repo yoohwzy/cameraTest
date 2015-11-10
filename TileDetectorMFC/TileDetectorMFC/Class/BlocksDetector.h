@@ -3,7 +3,9 @@
 #include "../stdafx.h"
 #include "../globle_head.h"
 #include "../globle_debug.h"
-#include "MicroDisplay/MicroDisplayInit.h";
+
+#include "Base\Block.h"
+#include "MicroDisplay\MicroDisplayInit.h";
 
 
 //@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
@@ -16,14 +18,7 @@ public:
 	//BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
 	BlocksDetector(cv::Mat& Img);
 	~BlocksDetector();
-	struct Line
-	{
-		int x0;
-		int y0;
-		double k;
-		double dx;
-		double dy;
-	};
+
 	enum BorderType{
 		Left,
 		Up,
@@ -42,7 +37,7 @@ public:
 	int DetectOneLineRight(int y = -1);
 
 	//计算出四个顶点(图像上的四个顶点)，若四个点位置不对，返回false
-	bool ABCD();
+	//bool ABCD();
 
 
 #ifdef OUTPUT_DEBUG_INFO
@@ -51,16 +46,12 @@ public:
 	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
 #endif
+
 	//拟合直线求出的焦点ABCD
 	cv::Point A;
 	cv::Point B;
 	cv::Point C;
 	cv::Point D;
-	//检测出的ABCD点
-	//cv::Point DetectedA;
-	//cv::Point DetectedB;
-	//cv::Point DetectedC;
-	//cv::Point DetectedD;
 
 	vector < cv::Point > LeftBorder;
 	Line LeftLine;
@@ -70,20 +61,6 @@ public:
 	Line UpLine;
 	vector < cv::Point > DownBorder;
 	Line DownLine;
-
-	//存储边界顶点，临时存放，最后要进行分类
-	//vector < cv::Point > LeftUp;
-	//vector < cv::Point > LeftDown;
-	//vector < cv::Point > RightUp;
-	//vector < cv::Point > RightDown;
-
-	//vector < cv::Point > UpLeft;
-	//vector < cv::Point > DownLeft;
-	//vector < cv::Point > UpRight;
-	//vector < cv::Point > DownRight;
-
-
-
 
 private:
 	cv::Mat img;

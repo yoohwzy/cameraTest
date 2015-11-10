@@ -12,6 +12,7 @@
 #include "../Class/MicroDisplay/MicroDisplayControler.h"
 #include "../Class/VirtualCamera.h"
 
+#include "../Class/Base/Block.h"
 
 #include <thread>
 #include "../mc100.h"
@@ -24,6 +25,8 @@ public:
 	~TiggerWatcherAndGrabber();
 
 	void StartWatch();
+	//开始一次定标，完成后自动停止
+	void StartWatchWithCalibration();
 	void StopWatch();
 
 	void Init(string virtualImg="");
@@ -35,9 +38,7 @@ public:
 	bool ManualTigger();
 	int GrabbingIndex = 0;
 
-	VirtualCamera vc;
-
-
+	VirtualCamera *vc;
 
 private:
 	HWND hwnd;
@@ -51,6 +52,7 @@ private:
 		else
 			return false;
 	};
+	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;
 	bool IsThreeInOne = false;

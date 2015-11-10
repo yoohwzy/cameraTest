@@ -257,16 +257,16 @@ void  EdgeDetector::Defect_Detector(vector < vector<Point> >contours_, vector<Ve
 	}
 }
 
-EdgeDetector::EdgeDetector(Mat img, BlocksDetector *_bd)
+EdgeDetector::EdgeDetector(Mat img, Block *_block)
 {
-	bd = _bd;
+	block = _block;
 	src = img;
 
 	
-	A = bd->A;
-	B = bd->B;
-	C = bd->C;
-	D = bd->D;
+	A = block->A;
+	B = block->B;
+	C = block->C;
+	D = block->D;
 
 	xleft = A.x - abs(A.x - D.x) - 100, yleft = A.y - 100, left_height = D.y - A.y + 200, left_width = 2 * abs(A.x - D.x) + 200;
 	xright = B.x - abs(B.x - C.x) - 100, yright = B.y - 100, right_height = C.y - B.y + 200, right_width = 2 * abs(B.x - C.x) + 200;
@@ -441,10 +441,10 @@ void EdgeDetector::start()
 	// 求出四个交点A\B\C\D
 	Vector<Point> Point_of_Intersection;
 	PointOfIntersection(line_, Point_of_Intersection);
-	bd->A = Point_of_Intersection[3];
-	bd->B = Point_of_Intersection[2];
-	bd->C = Point_of_Intersection[1];
-	bd->D = Point_of_Intersection[0];
+	block->A = Point_of_Intersection[3];
+	block->B = Point_of_Intersection[2];
+	block->C = Point_of_Intersection[1];
+	block->D = Point_of_Intersection[0];
 	//for (int i = 0; i < Point_of_Intersection.size(); i++)
 	//	cout << Point_of_Intersection[i] << "\n";
 

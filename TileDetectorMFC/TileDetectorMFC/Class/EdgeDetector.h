@@ -6,6 +6,8 @@ using namespace std;
 #include "opencv2/highgui/highgui.hpp"
 #include "BlocksDetector.h"
 
+#include "Base/Block.h"
+
 /*2015Äê10ÔÂ10ÈÕ*/
 
 using namespace cv;
@@ -15,7 +17,7 @@ class EdgeDetector
 	
 public:
 	
-	EdgeDetector(Mat, BlocksDetector *bd); 
+	EdgeDetector(Mat, Block *_block);
 	~EdgeDetector();
 	void  Defect_Detector(vector < vector<Point> >contours_, vector<Vec4f> line_, vector<Point3f> &defects);
 	void start();
@@ -30,7 +32,7 @@ public:
 
 
 private:
-	BlocksDetector *bd;
+	Block *block;
 	Mat src;
 	vector<Mat> ROI;
 	Mat leftROI, upROI, rightROI, downROI; // ±ßÔµROI

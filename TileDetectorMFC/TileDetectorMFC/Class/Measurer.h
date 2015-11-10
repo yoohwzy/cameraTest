@@ -3,8 +3,7 @@
 #include "../stdafx.h"
 #include "../globle_head.h"
 #include "../globle_debug.h"
-#include "MicroDisplay/MicroDisplayInit.h"
-#include "BlocksDetector.h"
+#include "Base\Block.h"
 #define RADIAN(a)  (a*CV_PI/180.0) //根据角度获得弧度
 #define ANGLE(r)	(180.0*r/CV_PI)//根据弧度获得角度
 #include <iostream>
@@ -14,8 +13,7 @@
 class Measurer
 {
 private:
-	MicroDisplayInit *mdi;
-	BlocksDetector *bd_Standard;
+	Block *b;
 
 
 
@@ -67,9 +65,9 @@ public:
 
 
 	//计算初始化 瓷砖宽度单位为mm
-	//Measurer(BlocksDetector *b, MicroDisplayInit *mdii, int TileStandardWidthmm, int TileStandardHeightmm);
+	Measurer(Block *_b, int TileStandardWidthmm, int TileStandardHeightmm);
 	//读取数据初始化 后两参数表示一个像素表示多少毫米
-	Measurer(BlocksDetector *b, MicroDisplayInit *mdii, double MilliMeterPerPix_Width, double MilliMeterPerPix_Height);
+	//Measurer(Block *_b, double MilliMeterPerPix_Width, double MilliMeterPerPix_Height);
 	//读取参
 	Measurer();
 	~Measurer();
@@ -86,7 +84,7 @@ public:
 	//根据标定数据
 	void ObserveImgAdjust(cv::Mat& Img);
 	//计算出瓷砖尺寸，四个角的角度
-	void CaculteSize(BlocksDetector *bd);
+	void CaculteSize(Block *b);
 
 
 	/**********************测量数据**********************/
