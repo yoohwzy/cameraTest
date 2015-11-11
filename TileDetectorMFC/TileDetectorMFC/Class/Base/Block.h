@@ -29,6 +29,10 @@ public:
 	//根据ABCD四个点算出四个边
 	bool ABCD2Lines();
 
+	cv::Point GetPonintByX(int x, Line *l);
+	cv::Point GetPonintByY(int y, Line *l);
+
+
 	int imageWidth = 0;
 	int imageHeight = 0;
 };

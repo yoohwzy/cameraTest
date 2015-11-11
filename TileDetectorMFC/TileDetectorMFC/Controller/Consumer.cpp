@@ -123,6 +123,9 @@ void Consumer::processingThread()
 		delete ed;
 	}
 
+
+
+
 	//定标分支
 	if (IsCalibration)
 	{
@@ -138,6 +141,11 @@ void Consumer::processingThread()
 	}
 	else//内部缺陷检测分支
 	{
+		EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
+
+
+
+
 
 		//瓷砖内部缺陷检测
 		//if (3 == 3)

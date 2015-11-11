@@ -72,11 +72,12 @@ public:
 	int set_grabWidth;
 	// 颜色模式
 	CString set_grabRGBType;
-	// 触发后等待时机
+	// 触发后等待时间
 	int set_TiggerWaitTimeMS;
 	CString m_Info;
 	CString m_VirtualCamera;
 	afx_msg void OnEnChangeTbVirtualcamera();
 	afx_msg void OnEnKillfocusTbVirtualcamera();
 	afx_msg void OnBnClickedBtnCalibration();
+	afx_msg void OnBnClickedBtnSavePic();
 };

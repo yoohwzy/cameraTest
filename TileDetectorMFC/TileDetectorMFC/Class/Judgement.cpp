@@ -55,10 +55,10 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 	minMaxLoc(dstHist, &minValue, &maxValue, NULL, &maxloc);
 	int anoThres = maxloc.y;//Ѱ�Ҵη�ֵ
 
-	Scalar avgnum;
-	Mat StdDevImg;
-	meanStdDev(histoImg, avgnum, StdDevImg);
-	double Stdnum = StdDevImg.at<double>(Point(0, 0));
+	//Scalar avgnum;
+	//Mat StdDevImg;
+	//meanStdDev(histoImg, avgnum, StdDevImg);
+	//double Stdnum = StdDevImg.at<double>(Point(0, 0));
 	//cout << "	     " << mindata << "	     " << maxdata << endl;
 	//cout << "	     " << avgnum[0] << "	     " << Stdnum << endl;
 

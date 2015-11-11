@@ -75,5 +75,39 @@ bool Block::Lines2ABCD()
 }
 bool Block::ABCD2Lines()
 {
-	return false;
+	UpLine.k = (double)(B.y - A.y) / (double)(B.x - B.y);
+	UpLine.x0 = A.x;
+	UpLine.y0 = A.y;
+
+	RightLine.k = (double)(C.y - B.y) / (double)(C.x - C.y);
+	RightLine.x0 = B.x;
+	RightLine.y0 = B.y;
+
+	DownLine.k = (double)(D.y - C.y) / (double)(D.x - C.y);
+	DownLine.x0 = C.x;
+	DownLine.y0 = C.y;
+
+	LeftLine.k = (double)(A.y - D.y) / (double)(A.x - D.y);
+	LeftLine.x0 = D.x;
+	LeftLine.y0 = D.y;
+
+	return true;
+}
+cv::Point Block::GetPonintByX(int x, Line *l)
+{
+	cv::Point p;
+
+	p.x = x;
+	p.y = (int)(l->k*(x - l->x0)) + l->y0;
+
+	return p;
+}
+cv::Point Block::GetPonintByY(int y, Line *l)
+{
+	cv::Point p;
+
+	p.y = y;
+	p.x = (double)(y - l->y0) / l->k + l->x0;
+
+	return p;
 }

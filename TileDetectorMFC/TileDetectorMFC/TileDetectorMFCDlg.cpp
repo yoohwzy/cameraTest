@@ -99,6 +99,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera)
 	ON_EN_KILLFOCUS(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera)
 	ON_BN_CLICKED(IDC_BTN_CALIBRATION, &CTileDetectorMFCDlg::OnBnClickedBtnCalibration)
+	ON_BN_CLICKED(IDC_BTN_SAVE_PIC, &CTileDetectorMFCDlg::OnBnClickedBtnSavePic)
 END_MESSAGE_MAP()
 
 
@@ -169,7 +170,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
 	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
 
-	globle_var::VirtualCameraFileName = "result1_o原图.jpg";
+	globle_var::VirtualCameraFileName = "33叠釉A.jpg";
 	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
 
 	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
@@ -318,7 +319,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	if (consumer->EdgeFaults.size() > 0)
 	{
 		CString str;
-		str.Format(_T("%d 存在%d处崩边缺陷。\r"), consumer->GrabbingIndex, consumer->EdgeFaults.size());
+		str.Format(_T("%d 存在%d处崩边缺陷。\r\n"), consumer->GrabbingIndex, consumer->EdgeFaults.size());
 		m_Info += str;
 		//cv::Mat img(consumer->originalImg);
 		for (size_t i = 0; i < consumer->EdgeFaults.size(); i++)
@@ -480,3 +481,23 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 }
 
 
+
+
+void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
+{
+	CString msg;
+	msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
+	m_Info += msg;
+	stringstream ss;
+	UpdateData(false);
+	ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
+	cv::imwrite(ss.str(), globle_var::s.Buffer);
+
+	ss.str("");
+	ss << "samples/" << twag->GrabbingIndex << "_x3.jpg";
+	cv::imwrite(ss.str(), globle_var::s.BufferImg);
+
+	m_Info += _T("保存完成\r\n");
+	UpdateData(false);
+
+}

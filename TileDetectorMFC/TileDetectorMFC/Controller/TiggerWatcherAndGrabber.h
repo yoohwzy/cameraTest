@@ -10,7 +10,7 @@
 
 
 #include "../Class/MicroDisplay/MicroDisplayControler.h"
-#include "../Class/VirtualCamera.h"
+#include "../Class/Base/VirtualCamera.h"
 
 #include "../Class/Base/Block.h"
 

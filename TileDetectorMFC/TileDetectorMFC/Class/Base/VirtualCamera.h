@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../stdafx.h"
-#include "../globle_head.h"
-#include "../globle_debug.h"
-#include "MicroDisplay\MicroDisplayInit.h"
-#include "BufferStorage.h"
+#include "../../stdafx.h"
+#include "../../globle_head.h"
+#include "../../globle_debug.h"
+#include "../MicroDisplay/MicroDisplayInit.h"
+#include "../BufferStorage.h"
 
 //@description 虚拟相机类，用于读取一张图片作为底片，在程序脱机测试时使用。
 //@author VShawn

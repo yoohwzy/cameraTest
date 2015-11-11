@@ -12,6 +12,8 @@
 #include "../Class/Measurer.h"
 #include "../Class/EdgeDetector.h"
 
+#include "../Class/EdgeInnerDetctor.h"
+
 #include "../Class/Pretreatment.h"
 
 

@@ -72,9 +72,6 @@
     <ClInclude Include="Class\Processor.h">
       <Filter>Class</Filter>
     </ClInclude>
-    <ClInclude Include="Class\VirtualCamera.h">
-      <Filter>Class</Filter>
-    </ClInclude>
     <ClInclude Include="globle_debug.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -90,9 +87,6 @@
     <ClInclude Include="Controller\Consumer.h">
       <Filter>Controller</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Setting.h">
-      <Filter>Class</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Judgement.h">
       <Filter>Class</Filter>
     </ClInclude>
@@ -101,6 +95,15 @@
     </ClInclude>
     <ClInclude Include="Class\Base\Block.h">
       <Filter>Class\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Base\Setting.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Base\VirtualCamera.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\EdgeInnerDetctor.h">
+      <Filter>Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -137,17 +140,11 @@
     <ClCompile Include="Class\Processor.cpp">
       <Filter>Class</Filter>
     </ClCompile>
-    <ClCompile Include="Class\VirtualCamera.cpp">
-      <Filter>Class</Filter>
-    </ClCompile>
     <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Controller\Consumer.cpp">
       <Filter>Controller</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\Setting.cpp">
-      <Filter>Class</Filter>
     </ClCompile>
     <ClCompile Include="globle_var.cpp">
       <Filter>头文件</Filter>
@@ -160,6 +157,15 @@
     </ClCompile>
     <ClCompile Include="Class\Base\Block.cpp">
       <Filter>Class\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Base\Setting.cpp">
+      <Filter>Class\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Base\VirtualCamera.cpp">
+      <Filter>Class\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\EdgeInnerDetctor.cpp">
+      <Filter>Class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
