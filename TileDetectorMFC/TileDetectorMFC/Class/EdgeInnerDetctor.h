@@ -11,7 +11,7 @@ using namespace std;
 
 
 #include "Base\Block.h"
-
+#include "../globle_var.h"
 class EdgeInnerDetctor
 {
 public:
@@ -20,5 +20,10 @@ public:
 private:
 	Block *block;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
+
+	double getFrechetDistance(vector<double> lineA, vector<double> lineB);
+	void saveVector(vector<vector<double>> lines, string flodername, string filename);
+	void splitImgX(int start);
+	void processAndSaveData(vector<vector<double>>& reduceList, vector<vector<double>>& differList, string prefix);
 };
 

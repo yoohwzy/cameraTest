@@ -10,7 +10,7 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int y1 = FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
 		int x2 = 4096;
 		int y2 = FitLine[1] * x2 / FitLine[0] + FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
-		cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		//cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 	else
 	{
@@ -18,7 +18,7 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int x1 = FitLine[2] - FitLine[0] / FitLine[1] * FitLine[3];
 		int y2 = 11000;
 		int x2 = (y2 - FitLine[3])*FitLine[0] / FitLine[1] + FitLine[2];
-		line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		//line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 }
 
@@ -350,7 +350,7 @@ void EdgeDetector::start()
 					i = ylD - 10;
 				}
 			}
-			if (ey - sy > 50)
+			if (ey - sy > 51)
 			{
 				int xx = min((line_1[0][0] / line_1[0][1] * (sy - line_1[0][3]) + line_1[0][2]),
 					(line_1[0][0] / line_1[0][1] * (ey - line_1[0][3]) + line_1[0][2]));
@@ -387,7 +387,7 @@ void EdgeDetector::start()
 					temp.y = sy + (ey - sy) / 2 + yleft;
 					temp.z = (ey - sy) / 2;
 					Defects.push_back(temp);
-					circle(src, Point(xx + xleft, sy + (ey - sy) / 2 + yleft), (ey - sy) / 2, Scalar(255, 255, 255));
+					//circle(src, Point(xx + xleft, sy + (ey - sy) / 2 + yleft), (ey - sy) / 2, Scalar(255, 255, 255));
 				}
 
 
@@ -462,7 +462,7 @@ void EdgeDetector::start()
 					temp.y = yy + ydown;
 					temp.z = (ex - sx) / 2;
 					Defects.push_back(temp);
-					circle(src, Point(sx + (ex - sx) / 2 + xdown, yy + ydown), (ex - sx) / 2, Scalar(255, 255, 255));
+					//circle(src, Point(sx + (ex - sx) / 2 + xdown, yy + ydown), (ex - sx) / 2, Scalar(255, 255, 255));
 				}
 
 				ex = 0; sx = 0;
@@ -538,7 +538,7 @@ void EdgeDetector::start()
 					temp.y = sy + (ey - sy) / 2 + yright;
 					temp.z = (ey - sy) / 2;
 					Defects.push_back(temp);
-					circle(src, Point(xx + xright, sy + (ey - sy) / 2 + yright), (ey - sy) / 2, Scalar(255, 255, 255));
+					//circle(src, Point(xx + xright, sy + (ey - sy) / 2 + yright), (ey - sy) / 2, Scalar(255, 255, 255));
 				}
 
 				ey = 0; sy = 0;
@@ -618,7 +618,7 @@ void EdgeDetector::start()
 					temp.y = yy + yup;
 					temp.z = (ex - sx) / 2;
 					Defects.push_back(temp);
-					circle(src, Point(sx + (ex - sx) / 2 + xup, yy + yup), (ex - sx) / 2, Scalar(255, 255, 255));
+					//circle(src, Point(sx + (ex - sx) / 2 + xup, yy + yup), (ex - sx) / 2, Scalar(255, 255, 255));
 				}
 
 				ex = 0; sx = 0;

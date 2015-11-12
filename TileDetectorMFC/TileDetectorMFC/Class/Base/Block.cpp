@@ -75,19 +75,19 @@ bool Block::Lines2ABCD()
 }
 bool Block::ABCD2Lines()
 {
-	UpLine.k = (double)(B.y - A.y) / (double)(B.x - B.y);
+	UpLine.k = (double)(B.y - A.y) / (double)(B.x - A.x);
 	UpLine.x0 = A.x;
 	UpLine.y0 = A.y;
 
-	RightLine.k = (double)(C.y - B.y) / (double)(C.x - C.y);
+	RightLine.k = (double)(C.y - B.y) / (double)(C.x - B.x);
 	RightLine.x0 = B.x;
 	RightLine.y0 = B.y;
 
-	DownLine.k = (double)(D.y - C.y) / (double)(D.x - C.y);
+	DownLine.k = (double)(D.y - C.y) / (double)(D.x - C.x);
 	DownLine.x0 = C.x;
 	DownLine.y0 = C.y;
 
-	LeftLine.k = (double)(A.y - D.y) / (double)(A.x - D.y);
+	LeftLine.k = (double)(A.y - D.y) / (double)(A.x - D.x);
 	LeftLine.x0 = D.x;
 	LeftLine.y0 = D.y;
 
