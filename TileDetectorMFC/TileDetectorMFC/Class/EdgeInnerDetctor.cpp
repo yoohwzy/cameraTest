@@ -15,7 +15,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 	cv::line(image, block->D, block->GetPonintByX(3000, &block->DownLine), cv::Scalar(255));
 	cv::line(image, block->C, block->GetPonintByY(3000, &block->RightLine), cv::Scalar(255));*/
 
-
+	
 
 	if (1 == 1)
 	{
@@ -37,6 +37,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
 			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
+#ifdef WRITEIMG
 			//保存图片
 			char num[10];
 			sprintf(num, "%03d", index);
@@ -47,7 +48,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			ss.str("");
 			ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
 			cv::imwrite(ss.str(), tmpROI);
-
+#endif
 			tmpROI.release();
 
 			vector<double> reduceMat;
@@ -85,6 +86,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
 			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
+#ifdef WRITEIMG
 			//保存图片
 			char num[10];
 			sprintf(num, "%03d", index);
@@ -95,6 +97,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			ss.str("");
 			ss << "EdgeInner\\D\\下_" << strnum << ".jpg";
 			cv::imwrite(ss.str(), tmpROI);
+#endif
 
 			tmpROI.release();
 
@@ -137,6 +140,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols/2, reduceImg.rows));//宽缩减为一半
 			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
+#ifdef WRITEIMG
 			//保存图片
 			char num[10];
 			sprintf(num, "%03d", index);
@@ -147,6 +151,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			ss.str("");
 			ss << "EdgeInner\\L\\左_" << strnum << ".jpg";
 			cv::imwrite(ss.str(), tmpROI);
+#endif
 
 			tmpROI.release();
 
@@ -156,7 +161,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			for (size_t j = 0; j < reduceImg.cols - 1; j++)
 			{
 				reduceMat.push_back(reduceImg.ptr<uchar>(0)[j]);
-				int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j + 1];
+				int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j];
 				diffMat.push_back(different);
 			}
 
@@ -188,6 +193,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
 			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
+#ifdef WRITEIMG
 			//保存图片
 			char num[10];
 			sprintf(num, "%03d", index);
@@ -198,6 +204,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			ss.str("");
 			ss << "EdgeInner\\R\\右_" << strnum << ".jpg";
 			cv::imwrite(ss.str(), tmpROI);
+#endif
 
 			tmpROI.release();
 
@@ -207,7 +214,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
 			for (size_t j = 0; j < reduceImg.cols - 1; j++)
 			{
 				reduceMat.push_back(reduceImg.ptr<uchar>(0)[j]);
-				int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j + 1];
+				int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j];
 				diffMat.push_back(different);
 			}
 
@@ -284,6 +291,24 @@ void EdgeInnerDetctor::saveVector(vector<vector<double>> lines,string flodername
 
 void EdgeInnerDetctor::processAndSaveData(vector<vector<double>>& reduceList, vector<vector<double>>& differList, string prefix)
 {
+	//正规化
+	for (size_t i = 0; i < reduceList.size(); i++)
+	{
+		double maxDiff = 0;
+		for (size_t j = 0; j < reduceList[i].size(); j++)
+		{
+			if (maxDiff < abs(reduceList[i][j]))
+				maxDiff = abs(reduceList[i][j]);
+		}
+		if (maxDiff > 0)
+			for (size_t j = 0; j < reduceList[i].size(); j++)
+			{
+				if (reduceList[i][j] != 0)
+					reduceList[i][j] = reduceList[i][j] / maxDiff;
+			}
+	}
+
+
 	//计算欧氏距离
 	vector<vector<double>> reduceDists;
 	for (size_t i = 0; i < reduceList.size(); i++)
@@ -324,8 +349,8 @@ void EdgeInnerDetctor::processAndSaveData(vector<vector<double>>& reduceList, ve
 		double maxDiff = 0;
 		for (size_t j = 0; j < differList[i].size(); j++)
 		{
-			if (maxDiff < differList[i][j])
-				maxDiff = differList[i][j];
+			if (maxDiff < abs(differList[i][j]))
+				maxDiff = abs(differList[i][j]);
 		}
 		if (maxDiff > 0)
 			for (size_t j = 0; j < differList[i].size(); j++)
@@ -368,12 +393,13 @@ void EdgeInnerDetctor::processAndSaveData(vector<vector<double>>& reduceList, ve
 				diffFDists[i].push_back(0);
 	}
 
-
+#ifdef WRITEIMG
 	stringstream ss_floder;
 	ss_floder << "EdgeInner\\" << prefix;//加前缀以区别上下边界
 
 	//保存数据 reduce
-	saveVector(reduceList, ss_floder.str(), "reduce.txt");
+	saveVector(reduceList, ss_floder.str(), "reduce normalize.txt");
+	//saveVector(reduceList, ss_floder.str(), "reduce.txt");
 	saveVector(reduceDists, ss_floder.str(), "reduce欧氏距离.txt");
 	saveVector(reduceFrechetDist, ss_floder.str(), "reduce弗雷歇距离.txt");
 
@@ -382,6 +408,7 @@ void EdgeInnerDetctor::processAndSaveData(vector<vector<double>>& reduceList, ve
 	saveVector(differList, ss_floder.str(), "diff.txt");
 	saveVector(diffDists, ss_floder.str(), "diff欧氏距离.txt");
 	saveVector(diffFDists, ss_floder.str(), "diff弗雷歇距离.txt");
+#endif
 }
 
 

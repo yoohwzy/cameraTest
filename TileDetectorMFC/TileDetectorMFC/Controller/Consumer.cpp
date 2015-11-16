@@ -132,7 +132,7 @@ void Consumer::processingThread()
 		isProcessing = false;
 		IsCalibration = false;
 
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		t = (double)cv::getTickCount();
 		m = new Measurer(block, 300, 600);
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "标定：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
@@ -141,8 +141,12 @@ void Consumer::processingThread()
 	}
 	else//内部缺陷检测分支
 	{
+		t = (double)cv::getTickCount();
 		EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
-
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		printf_globle(ss.str());
+		ss.str("");
 
 
 

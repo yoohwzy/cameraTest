@@ -12,6 +12,10 @@ using namespace std;
 
 #include "Base\Block.h"
 #include "../globle_var.h"
+
+#define WRITEIMG
+
+
 class EdgeInnerDetctor
 {
 public:
