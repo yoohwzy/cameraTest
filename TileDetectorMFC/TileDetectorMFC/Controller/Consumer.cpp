@@ -141,32 +141,46 @@ void Consumer::processingThread()
 	}
 	else//内部缺陷检测分支
 	{
-		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		printf_globle(ss.str());
-		ss.str("");
+		//t = (double)cv::getTickCount();
+		//EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
+		//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		//ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		//printf_globle(ss.str());
+		//ss.str("");
 
 
 
 
 		//瓷砖内部缺陷检测
-		//if (3 == 3)
-		//{
-		//	printf_globle("瓷砖内部缺陷检测 开始\r");
-		//	Pretreatment *p = new Pretreatment();
-		//	vector<cv::Point> lp = p->pretreatment(DetectedImg);
-		//	if (lp.size() > 0)
-		//	{
-		//		ss << GrabbingIndex << " " << "内部有缺陷，数量：" << lp.size() << endl;
-		//		printf_globle(ss.str());
-		//		ss.str("");
-		//	}
-		//	printf_globle("瓷砖内部缺陷检测 结束\r");
-		//	delete p;
-		//}
+		if (3 == 3)
+		{
+			t = (double)cv::getTickCount();
+			printf_globle("瓷砖内部缺陷检测 开始\r");
+			Pretreatment *p = new Pretreatment();
+			vector<cv::Point> vp;
+			vp.push_back(block->A);
+			vp.push_back(block->B);
+			vp.push_back(block->C);
+			vp.push_back(block->D);
+			vector<cv::Point3f> lp = p->pretreatment(DetectedImg, vp);
+			if (lp.size() > 0)
+			{
+				for (size_t i = 0; i < lp.size(); i++)
+				{
+					InnerFaults.push_back(cv::Point3f(lp[i]));
+				}
+				ss << GrabbingIndex << " " << "内部有缺陷，数量：" << lp.size() << endl;
+				printf_globle(ss.str());
+				ss.str("");
+			}
+			printf_globle("瓷砖内部缺陷检测 结束\r");
+			delete p;
 
+			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+			ss << GrabbingIndex << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+			printf_globle(ss.str());
+			ss.str("");
+		}
 	}
 
 

@@ -291,22 +291,22 @@ void EdgeInnerDetctor::saveVector(vector<vector<double>> lines,string flodername
 
 void EdgeInnerDetctor::processAndSaveData(vector<vector<double>>& reduceList, vector<vector<double>>& differList, string prefix)
 {
-	//正规化
-	for (size_t i = 0; i < reduceList.size(); i++)
-	{
-		double maxDiff = 0;
-		for (size_t j = 0; j < reduceList[i].size(); j++)
-		{
-			if (maxDiff < abs(reduceList[i][j]))
-				maxDiff = abs(reduceList[i][j]);
-		}
-		if (maxDiff > 0)
-			for (size_t j = 0; j < reduceList[i].size(); j++)
-			{
-				if (reduceList[i][j] != 0)
-					reduceList[i][j] = reduceList[i][j] / maxDiff;
-			}
-	}
+	////正规化
+	//for (size_t i = 0; i < reduceList.size(); i++)
+	//{
+	//	double maxDiff = 0;
+	//	for (size_t j = 0; j < reduceList[i].size(); j++)
+	//	{
+	//		if (maxDiff < abs(reduceList[i][j]))
+	//			maxDiff = abs(reduceList[i][j]);
+	//	}
+	//	if (maxDiff > 0)
+	//		for (size_t j = 0; j < reduceList[i].size(); j++)
+	//		{
+	//			if (reduceList[i][j] != 0)
+	//				reduceList[i][j] = reduceList[i][j] / maxDiff;
+	//		}
+	//}
 
 
 	//计算欧氏距离

@@ -330,6 +330,22 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
 
+	if (consumer->InnerFaults.size() > 0)
+	{
+		CString str;
+		str.Format(_T("%d 存在%d处内部缺陷。\r\n"), consumer->GrabbingIndex, consumer->InnerFaults.size());
+		m_Info += str;
+		//cv::Mat img(consumer->originalImg);
+		for (size_t i = 0; i < consumer->InnerFaults.size(); i++)
+		{
+			cv::circle(consumer->originalImg, cv::Point(consumer->InnerFaults[i].x, consumer->InnerFaults[i].y), consumer->InnerFaults[i].z*2 + 30, cv::Scalar(0, 255, 255), 10);
+			//cv::circle(consumer->originalImg, cv::Point(consumer->InnerFaults[i].x, consumer->InnerFaults[i].y), consumer->InnerFaults[i].z + 3, cv::Scalar(255, 255, 0), 5);
+		}
+		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
+	}
+
+
+
 	UpdateData(false);
 	return 1;
 }

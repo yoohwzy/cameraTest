@@ -16,7 +16,7 @@ private:
 	const float *ranges[1];
 	int channels;
 public:
-	vector<Point> pretreatment(Mat &image);
+	vector<Point3f> pretreatment(Mat &image, vector<Point> pointlist);
 	Pretreatment()
 	{
 		size = 256;

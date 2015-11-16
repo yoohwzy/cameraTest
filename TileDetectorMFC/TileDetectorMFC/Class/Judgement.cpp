@@ -16,8 +16,16 @@ Judgement::~Judgement()
 {
 }
 
+Point barycenter(vector<Point> contoursi)//计算轮廓重心
+{
+	Moments m = moments(contoursi);
+	Point center = Point(0,0);
+	center.x = (int)(m.m10 / m.m00);
+	center.y = (int)(m.m01 / m.m00);
+	return center;
+}
 
-int Judgement::JudgementYON(Mat &image, int n, int m)
+int Judgement::JudgementYON(Mat &image)
 {
 	int success = 0;
 	MatND dstHist;
@@ -31,7 +39,6 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 	//cout << "	     " << n << "." << m << "	     " << maxValue << endl;
 	int hpt = saturate_cast<int>(0.9 * 256);
 	vector<int> Boundnum;
-	int Lnum = 0;
 	for (int j = 0; j < 256; j++)
 	{
 		float binValue = dstHist.at<float>(j);
@@ -55,10 +62,10 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 	minMaxLoc(dstHist, &minValue, &maxValue, NULL, &maxloc);
 	int anoThres = maxloc.y;//寻找次峰值
 
-	//Scalar avgnum;
-	//Mat StdDevImg;
-	//meanStdDev(histoImg, avgnum, StdDevImg);
-	//double Stdnum = StdDevImg.at<double>(Point(0, 0));
+	Scalar avgnum;
+	Mat StdDevImg;
+	meanStdDev(histoImg, avgnum, StdDevImg);
+	double Stdnum = StdDevImg.at<double>(Point(0, 0));
 	//cout << "	     " << mindata << "	     " << maxdata << endl;
 	//cout << "	     " << avgnum[0] << "	     " << Stdnum << endl;
 
@@ -101,12 +108,18 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 	int StepNum = 30;
 	int OrStep = mindata + int(ThreStep / 10);
 	int Dstep = int(ThreStep / 30.0 + 0.5);
+	if (Dstep == 0)
+	{
+		Dstep = 1;
+		StepNum = ThreStep;
+	}
 	Mat TempImg;
 	histoImg.copyTo(TempImg);
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 	Point pointSN, maxPoint = Point(0, 0);
-	int Marknum = 0;
+	int Marknumone = 0;
+	int Marknumtwo = 0;
 	for (int i = 0; i < StepNum; i++)
 	{
 		vector<Point> SN;
@@ -135,8 +148,9 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 		Mat PlusImg(TempImg.rows + 2, TempImg.cols + 2, CV_8UC1, Scalar(255));
 		Mat PlusROI = PlusImg(Rect(1, 1, TempImg.cols, TempImg.rows));
 		TempImg.copyTo(PlusROI);
+		Mat ContoursImg = PlusImg.clone();
 
-		findContours(PlusImg, contours, hierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		findContours(ContoursImg, contours, hierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 		for (size_t j = 0; j < contours.size(); j++)
 		{
 			double area = cv::contourArea(contours[j]);
@@ -155,6 +169,8 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 			{
 				Dstep = int(ThreStep / 30.0 + 0.5);
 			}
+			if (Dstep == 0)
+				Dstep = 1;
 			int k = maxPoint.y;
 
 
@@ -163,27 +179,43 @@ int Judgement::JudgementYON(Mat &image, int n, int m)
 			bitwise_and(BoundImg, MarkImg, MarkImg);
 			int Mbound = 0;//判断轮廓是否到边界
 			Mbound = countNonZero(MarkImg);
-			if (Mbound>0.5*(histoImg.cols + histoImg.rows))
+			if (Mbound>0.5*(histoImg.cols))
 				break;
-
+			if (contours[k].size() <= 4)
+				continue;
 			int son = hierarchy[k][2];
-			if (son >= 0)//父轮廓
+			Point gravitycore = barycenter(contours[k]);//寻找轮廓重心
+
+			Rect maxcontours = boundingRect(contours[k]);
+			int wValue = maxcontours.width/12;
+
+			Mat gravityImg(TempImg.rows + 2*wValue, TempImg.cols + 2*wValue, CV_8UC1, Scalar(0));
+			Mat gravityImgROI = gravityImg(Rect(wValue, wValue, TempImg.cols, TempImg.rows));
+			TempImg.copyTo(gravityImgROI);
+
+			Rect gravityrect = Rect(gravitycore - Point(1, 1), gravitycore + Point(2 * wValue, 2 * wValue) - Point(1, 1));//画出重心周围(2 * wValue)*(2 * wValue)的矩形区域
+			
+			
+			int avnum = countNonZero(gravityImg(Rect(gravityrect)));
+			if (son >= 0)//判断是否为父轮廓
 			{
 				int sonarea = 0;
 				for (size_t j = 0; j < contours.size(); j++)
 				{
-					if (hierarchy[j][3] == k&&contourArea(contours[j])>2.0)
+					if (hierarchy[j][3] == k&&contourArea(contours[j])>4.0)
 						sonarea = sonarea + contourArea(contours[j]);
 				}
 				if (50 * sonarea>maxPoint.x)//此处忽略一些偶然出现的中空点
-					Marknum++;
+					Marknumone++;
 			}
+			if (avnum <= 2*wValue*wValue)//在重心区域中的白色点的数量是否过半
+				Marknumtwo++;
 
 		}
 
 	}
 
-	if (Marknum >= 2)//缺陷点也可能偶然出现包含
+	if (Marknumone > 2 || Marknumtwo >= 2)//缺陷点也可能偶然出现包含
 	{
 		/*cout << "该点是水渍2" << endl;*/
 

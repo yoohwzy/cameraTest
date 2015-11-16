@@ -18,7 +18,7 @@ private:
 	const float *ranges[1];
 	int channels;
 public:
-	int JudgementYON(Mat &image, int n, int m);
+	int JudgementYON(Mat &image);
 	Judgement()
 	{
 		size = 256;
