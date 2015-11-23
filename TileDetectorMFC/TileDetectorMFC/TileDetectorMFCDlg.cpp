@@ -325,11 +325,20 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		for (size_t i = 0; i < consumer->EdgeFaults.size(); i++)
 		{
 			cv::circle(consumer->originalImg, cv::Point(consumer->EdgeFaults[i].x, consumer->EdgeFaults[i].y), consumer->EdgeFaults[i].z + 20, cv::Scalar(0, 0, 255), 10);
-			cv::circle(consumer->originalImg, cv::Point(consumer->EdgeFaults[i].x, consumer->EdgeFaults[i].y), consumer->EdgeFaults[i].z + 3, cv::Scalar(0, 255, 0), 5);
 		}
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
-
+	if (consumer->EIDFaults.size() > 0)
+	{
+		CString str;
+		str.Format(_T("%d ´æÔÚ%d´¦EIDÈ±ÏÝ¡£\r\n"), consumer->GrabbingIndex, consumer->EIDFaults.size());
+		m_Info += str;
+		for (size_t i = 0; i < consumer->EIDFaults.size(); i++)
+		{
+			cv::circle(consumer->originalImg, cv::Point(consumer->EIDFaults[i].x, consumer->EIDFaults[i].y), consumer->EIDFaults[i].z, cv::Scalar(255, 0, 0), 5);
+		}
+		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
+	}
 	if (consumer->InnerFaults.size() > 0)
 	{
 		CString str;

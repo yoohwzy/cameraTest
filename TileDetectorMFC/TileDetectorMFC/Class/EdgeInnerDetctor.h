@@ -13,7 +13,7 @@ using namespace std;
 #include "Base\Block.h"
 #include "../globle_var.h"
 
-#define WRITEIMG
+//#define WRITEIMG
 
 
 class EdgeInnerDetctor
@@ -21,13 +21,14 @@ class EdgeInnerDetctor
 public:
 	EdgeInnerDetctor(cv::Mat&, Block*);
 	~EdgeInnerDetctor();
+
+	vector<cv::Point3f> EIDFaults;
 private:
 	Block *block;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
 
 	double getFrechetDistance(vector<double> lineA, vector<double> lineB);
-	void saveVector(vector<vector<double>> lines, string flodername, string filename);
+	double getFrechetDistance(cv::Mat lineA, cv::Mat lineB);
 	void splitImgX(int start);
-	void processAndSaveData(vector<vector<double>>& reduceList, vector<vector<double>>& differList, string prefix);
+	void processAndSaveData(vector<cv::Mat> reduceList,vector<cv::Point3f> points,string prefix);
 };
-

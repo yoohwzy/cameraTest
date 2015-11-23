@@ -141,13 +141,24 @@ void Consumer::processingThread()
 	}
 	else//内部缺陷检测分支
 	{
-		//t = (double)cv::getTickCount();
-		//EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
-		//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		//ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		//printf_globle(ss.str());
-		//ss.str("");
+		t = (double)cv::getTickCount();
+		EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
+		if (eid.EIDFaults.size() > 0)
+		{
+			for (size_t i = 0; i < eid.EIDFaults.size(); i++)
+			{
+				EIDFaults.push_back(cv::Point3f(eid.EIDFaults[i]));
+			}
+			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << eid.EIDFaults.size() << endl;
+			printf_globle(ss.str());
+			ss.str("");
+		}
+
+		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		printf_globle(ss.str());
+		ss.str("");
 
 
 
