@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class\Base\Block.h" />
+    <ClInclude Include="Class\Base\Faults.h" />
     <ClInclude Include="Class\Base\Setting.h" />
     <ClInclude Include="Class\Base\VirtualCamera.h" />
     <ClInclude Include="Class\BlocksDetector.h" />

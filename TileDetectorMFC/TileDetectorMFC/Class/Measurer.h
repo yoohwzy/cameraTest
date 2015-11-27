@@ -44,11 +44,6 @@ private:
 	//瓷砖标准高度
 	double tileStandardHeight_mm = 600;
 
-	//一个像素表示多少mm
-	double MilliMeterPerPix_Width = 0;
-	double MilliMeterPerPix_Height = 0;
-	double MilliMeterPerPix_Diagonal = 0;
-
 
 	//矫正用数据
 
@@ -62,6 +57,13 @@ private:
 	/**************************标准数据END***********************/
 
 public:
+	//X轴一个像素表示多少mm
+	double MilliMeterPerPix_Width = 0;
+	//Y轴一个像素表示多少mm
+	double MilliMeterPerPix_Height = 0;
+	//Z轴一个像素表示多少mm
+	double MilliMeterPerPix_Diagonal = 0;
+
 
 
 	//计算初始化 瓷砖宽度单位为mm

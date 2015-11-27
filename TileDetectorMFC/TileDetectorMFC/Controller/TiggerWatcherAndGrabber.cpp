@@ -208,10 +208,11 @@ void TiggerWatcherAndGrabber::watcherThread()
 				//标记生产者工作结束
 				IsGrabbing = false;
 			}
-			else
+			else//若是标定环境，则停止监控
 			{
 				IsCalibration = false;
 				StopWatch();
+				PostMessage(hwnd, WM_USER + 102, 0, 0);//定标、采集结束处理程序
 			}
 		}
 		else

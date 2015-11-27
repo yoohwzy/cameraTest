@@ -10,8 +10,13 @@ bool Consumer::StartNewProces(cv::Mat img)
 		return false;
 	}
 	if (isProcessing) return false;
+
+	//将采集到的图像保存一份副本，并灰度化
 	originalImg.release();
 	originalImg = img.clone();
+	if (originalImg.channels() == 3)
+		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
+
 
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
@@ -19,16 +24,35 @@ bool Consumer::StartNewProces(cv::Mat img)
 	block = new Block(globle_var::mdi.width, globle_var::mdi.MaxPics);
 	return true;
 }
-void Consumer::Process4Calibraion()
+bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 {
+	if (img.rows == 0 || img.cols == 0)
+	{
+		printf_globle("拍摄的图片不存在\r\n");
+		return false;
+	}
+	if (isProcessing) return false;
+
+	//将采集到的图像保存一份副本，并灰度化
+	originalImg.release();
+	originalImg = img.clone();
+	if (originalImg.channels() == 3)
+		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
+
+	block = new Block(globle_var::mdi.width, globle_var::mdi.MaxPics);
 	IsCalibration = true;
 	processingThread();
+	return true;
 }
 
 void Consumer::processingThread()
 {
+	//清空
+	faults.Clear();
 	isProcessing = true;
-  
+ 
+
+
 	stringstream ss;
 	ss << GrabbingIndex << " " << "customer：Start at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
@@ -54,7 +78,9 @@ void Consumer::processingThread()
 
 	double t = 0;
 	cv::Mat DetectedImg = originalImg;
-	//瓷砖位置检测
+
+
+	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
 		printf_globle("cv::Mat DetectedImg = originalImg.clone()\r");
@@ -76,7 +102,6 @@ void Consumer::processingThread()
 		block->LeftLine = bd->LeftLine;
 		block->RightLine = bd->RightLine;
 
-
 		delete bd;
 
 		if (!block->Lines2ABCD())
@@ -92,14 +117,19 @@ void Consumer::processingThread()
 		ss.str("");
 		t = (double)cv::getTickCount();
 	}
+	//若没有初始化定标
+	if (!IsCalibration && m == NULL)
+	{
+		m = new Measurer(block, 300, 600);
+		m->ObserveCalibration();
+	}
+	
 
 
-
-
-	//瓷砖崩边检测
+	//瓷砖精确定位  &&  崩边检测
 	if (2 == 2)
 	{
-		EdgeDetector *ed = new EdgeDetector(DetectedImg, block);
+		EdgeDetector *ed = new EdgeDetector(grayImg, block);
 		ed->start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -125,7 +155,6 @@ void Consumer::processingThread()
 
 
 
-
 	//定标分支
 	if (IsCalibration)
 	{
@@ -134,15 +163,16 @@ void Consumer::processingThread()
 
 		t = (double)cv::getTickCount();
 		m = new Measurer(block, 300, 600);
+		m->ObserveCalibration();
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "标定：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 		printf_globle(ss.str());
 		ss.str("");
 	}
-	else//内部缺陷检测分支
+	else//缺陷检测分支
 	{
 		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(DetectedImg, block);
+		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, block);
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
 		if (eid.EIDFaults.size() > 0)
@@ -173,7 +203,7 @@ void Consumer::processingThread()
 			vp.push_back(block->B);
 			vp.push_back(block->C);
 			vp.push_back(block->D);
-			vector<cv::Point3f> lp = p->pretreatment(DetectedImg, vp);
+			vector<cv::Point3f> lp = p->pretreatment(grayImg, vp);
 			if (lp.size() > 0)
 			{
 				for (size_t i = 0; i < lp.size(); i++)

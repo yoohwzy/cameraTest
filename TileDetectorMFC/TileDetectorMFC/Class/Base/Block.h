@@ -11,6 +11,7 @@ struct Line
 	double dx;
 	double dy;
 };
+//用于存储瓷砖在图像中的位置信息
 class Block
 {
 public:

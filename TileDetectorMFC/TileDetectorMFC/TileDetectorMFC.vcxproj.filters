@@ -105,6 +105,9 @@
     <ClInclude Include="Class\EdgeInnerDetctor.h">
       <Filter>Class</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Base\Faults.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
