@@ -197,7 +197,9 @@ void Consumer::processingThread()
 		{
 			t = (double)cv::getTickCount();
 			printf_globle("瓷砖内部缺陷检测 开始\r");
-			Pretreatment *p = new Pretreatment();
+			Pretreatment p;
+			p.pretreatment(grayImg,block,&faults);
+			/*Pretreatment *p = new Pretreatment();
 			vector<cv::Point> vp;
 			vp.push_back(block->A);
 			vp.push_back(block->B);
@@ -213,9 +215,9 @@ void Consumer::processingThread()
 				ss << GrabbingIndex << " " << "内部有缺陷，数量：" << lp.size() << endl;
 				printf_globle(ss.str());
 				ss.str("");
-			}
+			}*/
 			printf_globle("瓷砖内部缺陷检测 结束\r");
-			delete p;
+			/*delete p;*/
 
 			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 			ss << GrabbingIndex << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;

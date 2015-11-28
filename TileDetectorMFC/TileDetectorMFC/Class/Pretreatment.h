@@ -3,20 +3,51 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/stitching/stitcher.hpp"
 #include <opencv2/imgproc/imgproc.hpp>
+#include <queue>
+#include <mutex>
+#include <thread>
+#include <cstdlib>
+#include <condition_variable>
+#include "Base\Block.h"
+
+
+
+
 
 using namespace cv;
 using namespace std;
+
+#include "Base\Faults.h"
+
 
 #pragma once
 class Pretreatment
 {
 private:
-	int size;
+	static const int kItemRepositorySize = 2; // Item buffer size.
+	struct ItemRepository {
+		int item_buffer[kItemRepositorySize]; // 产品缓冲区, 配合 read_position 和 write_position 模型环形队列.
+		size_t read_position; // 消费者读取产品位置.
+		size_t write_position; // 生产者写入产品位置.
+		std::mutex mtx; // 互斥量,保护产品缓冲区
+		std::condition_variable repo_not_full; // 条件变量, 指示产品缓冲区不为满.
+		std::condition_variable repo_not_empty; // 条件变量, 指示产品缓冲区不为空.
+	} gItemRepository; // 产品库全局变量, 生产者和消费者操作该变量.
+
+	typedef struct ItemRepository ItemRepository;
+	int size;	
+	Faults *_faults;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
+	void linedetect(Mat &image);
+	void ProduceItem(ItemRepository *ir, int item);
+	void ProducerTask();
+	int ConsumeItem(ItemRepository *ir);
+	void ConsumerTask();
+	void InitItemRepository(ItemRepository *ir);
 public:
-	vector<Point3f> pretreatment(Mat &image, vector<Point> pointlist);
+	void pretreatment(Mat &image, Block *_block, Faults *faults);
 	Pretreatment()
 	{
 		size = 256;

@@ -19,7 +19,7 @@ Judgement::~Judgement()
 Point barycenter(vector<Point> contoursi)//计算轮廓重心
 {
 	Moments m = moments(contoursi);
-	Point center = Point(0,0);
+	Point center = Point(0, 0);
 	center.x = (int)(m.m10 / m.m00);
 	center.y = (int)(m.m01 / m.m00);
 	return center;
@@ -66,44 +66,7 @@ int Judgement::JudgementYON(Mat &image)
 	Mat StdDevImg;
 	meanStdDev(histoImg, avgnum, StdDevImg);
 	double Stdnum = StdDevImg.at<double>(Point(0, 0));
-	//cout << "	     " << mindata << "	     " << maxdata << endl;
-	//cout << "	     " << avgnum[0] << "	     " << Stdnum << endl;
 
-	//hextent htent;//找范围类
-
-	//int* Btentnum;
-	//int Bnum[2];
-	//int Dvulue = 0;
-	//Mat BAvgImgy;
-	//Btentnum = htent.dhtent(histoImg, BAvgImgy, Boundnum, avgnum[0] - 5, 1);
-	//Bnum[0] = *Btentnum;
-	//Btentnum++;
-	//Bnum[1] = *Btentnum;
-	//cout << "	     " << Bnum[0] << "	     " << Bnum[1] << endl;//黑色
-
-	//int* Wtentnum;
-	//int Wnum[2];
-	//Mat WAvgImgy;
-	//double Tnum = avgnum[0] + 5;
-	//do
-	//{
-
-	//	Wtentnum = htent.dhtent(histoImg, WAvgImgy, Boundnum, Tnum, 0, Bnum[1] - Bnum[0]);
-	//	Wnum[0] = *Wtentnum;
-	//	Wtentnum++;
-	//	Wnum[1] = *Wtentnum;
-	//	cout << "	     " << Wnum[0] << "	     " << Wnum[1] << endl;//白色
-	//	if (Wnum[1]<Bnum[0])
-	//		Tnum = Tnum - 3;
-	//	else
-	//		Tnum = Tnum + 3;
-	//} while (Wnum[1] - Wnum[0] >= Bnum[1] - Bnum[0] && Wnum[1]>Bnum[0]);
-	//cout << endl;
-
-	/*Mat AndImg;
-	bitwise_and(BAvgImgy, WAvgImgy, AndImg);
-	int AndNum = countNonZero(AndImg);*/
-    
 	int ThreStep = maxdata - mindata;
 	int StepNum = 30;
 	int OrStep = mindata + int(ThreStep / 10);
@@ -120,6 +83,7 @@ int Judgement::JudgementYON(Mat &image)
 	Point pointSN, maxPoint = Point(0, 0);
 	int Marknumone = 0;
 	int Marknumtwo = 0;
+	int Marknumthree = 0;
 	for (int i = 0; i < StepNum; i++)
 	{
 		vector<Point> SN;
@@ -187,16 +151,23 @@ int Judgement::JudgementYON(Mat &image)
 			Point gravitycore = barycenter(contours[k]);//寻找轮廓重心
 
 			Rect maxcontours = boundingRect(contours[k]);
-			int wValue = maxcontours.width/12;
+			int wValue = maxcontours.width / 12;
+			gravitycore = gravitycore + Point(wValue - 1, wValue - 1);
 
-			Mat gravityImg(TempImg.rows + 2*wValue, TempImg.cols + 2*wValue, CV_8UC1, Scalar(0));
+			Mat gravityImg(TempImg.rows + 2 * wValue, TempImg.cols + 2 * wValue, CV_8UC1, Scalar(0));
 			Mat gravityImgROI = gravityImg(Rect(wValue, wValue, TempImg.cols, TempImg.rows));
 			TempImg.copyTo(gravityImgROI);
 
-			Rect gravityrect = Rect(gravitycore - Point(1, 1), gravitycore + Point(2 * wValue, 2 * wValue) - Point(1, 1));//画出重心周围(2 * wValue)*(2 * wValue)的矩形区域
-			
-			
+
+			Rect gravityrect = Rect(gravitycore - Point(1, 1), gravitycore + Point(2 * wValue, 2 * wValue) - Point(2, 2));//画出重心周围(2 * wValue)*(2 * wValue)的矩形区域
+			if (gravityrect.x < 0 || gravityrect.y < 0)
+				continue;
+
 			int avnum = countNonZero(gravityImg(Rect(gravityrect)));
+			vector<Point> hull;
+			convexHull(contours[k], hull, false);
+			double promark = (contourArea(contours[k])) / (contourArea(hull));
+
 			if (son >= 0)//判断是否为父轮廓
 			{
 				int sonarea = 0;
@@ -208,14 +179,15 @@ int Judgement::JudgementYON(Mat &image)
 				if (50 * sonarea>maxPoint.x)//此处忽略一些偶然出现的中空点
 					Marknumone++;
 			}
-			if (avnum <= 2*wValue*wValue)//在重心区域中的白色点的数量是否过半
+			if (avnum < double(0.5 * gravityrect.width*gravityrect.width))//在重心区域中的白色点的数量是否过半
 				Marknumtwo++;
-
+			if (promark < 0.6)
+				Marknumthree++;
 		}
 
 	}
 
-	if (Marknumone > 2 || Marknumtwo >= 2)//缺陷点也可能偶然出现包含
+	if (Marknumone > 2 || Marknumtwo >= 2 || Marknumthree > 3)//缺陷点也可能偶然出现包含
 	{
 		/*cout << "该点是水渍2" << endl;*/
 

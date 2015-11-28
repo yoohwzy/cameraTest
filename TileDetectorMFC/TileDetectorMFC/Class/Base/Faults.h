@@ -1,4 +1,3 @@
-
 #pragma once
 #include "../stdafx.h"
 
@@ -7,9 +6,13 @@
 #include "opencv2/highgui/highgui.hpp"
 #endif
 
+#ifndef FAULTS
+#define FAULTS
+
 //用于存放检测到的缺陷，包含了所有类型
 class Faults
 {
+public:
 	//缺边
 	struct BrokenEdge
 	{
@@ -47,7 +50,7 @@ class Faults
 
 
 
-public:
+
 
 
 	/************************方法************************/
@@ -94,3 +97,5 @@ private:
 	double milliMeterPerPix_Y = 0;//y轴每像素对应多少毫米
 	double milliMeterPerPix_Diagonal = 0;//对角线每像素对应多少毫米
 };
+
+#endif
