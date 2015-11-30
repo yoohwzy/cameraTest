@@ -85,9 +85,10 @@ int EdgeDetector::Distamce_MaxTabel(Vector<float> Distance)
 	return Tabel;
 }
 
-EdgeDetector::EdgeDetector(Mat img, Block *_block)
+EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
 {
 	block = _block;
+	faults = _faults;
 
 	src = img;
 
@@ -226,7 +227,6 @@ void EdgeDetector::start()
 				ptemp.y = contourstemp[i][j].y/* + yp*/;
 				p1.push_back(ptemp);
 			}
-
 		}
 		else
 		{
@@ -382,11 +382,12 @@ void EdgeDetector::start()
 				}
 				if (flag > 7)
 				{
-					Point3f temp;
-					temp.x = xx + xleft;
-					temp.y = sy + (ey - sy) / 2 + yleft;
-					temp.z = (ey - sy) / 2;
-					Defects.push_back(temp);
+					Faults::BrokenEdge be;
+					be.position.x = xx + xleft;
+					be.position.y = sy + (ey - sy) / 2 + yleft;
+					be.length = (ey - sy);
+
+					faults->BrokenEdges.push_back(be);
 					//circle(src, Point(xx + xleft, sy + (ey - sy) / 2 + yleft), (ey - sy) / 2, Scalar(255, 255, 255));
 				}
 
@@ -457,11 +458,13 @@ void EdgeDetector::start()
 				}
 				if (flag > 7)
 				{
-					Point3f temp;
-					temp.x = sx + (ex - sx) / 2 + xdown;
-					temp.y = yy + ydown;
-					temp.z = (ex - sx) / 2;
-					Defects.push_back(temp);
+
+					Faults::BrokenEdge be;
+					be.position.x = sx + (ex - sx) / 2 + xdown;
+					be.position.y = yy + ydown;
+					be.length = (ex - sx);
+
+					faults->BrokenEdges.push_back(be);
 					//circle(src, Point(sx + (ex - sx) / 2 + xdown, yy + ydown), (ex - sx) / 2, Scalar(255, 255, 255));
 				}
 
@@ -533,11 +536,12 @@ void EdgeDetector::start()
 				}
 				if (flag > 7)
 				{
-					Point3f temp;
-					temp.x = xx + xright;
-					temp.y = sy + (ey - sy) / 2 + yright;
-					temp.z = (ey - sy) / 2;
-					Defects.push_back(temp);
+					Faults::BrokenEdge be;
+					be.position.x = xx + xright;
+					be.position.y = sy + (ey - sy) / 2 + yright;
+					be.length = (ey - sy);
+
+					faults->BrokenEdges.push_back(be);
 					//circle(src, Point(xx + xright, sy + (ey - sy) / 2 + yright), (ey - sy) / 2, Scalar(255, 255, 255));
 				}
 
@@ -609,15 +613,13 @@ void EdgeDetector::start()
 				}
 				if (flag > 7)
 				{
-					/*stringstream ss;
-					static int cc = 1;
-					ss << "roi_" << cc++ << ".jpg";
-					imwrite(ss.str, src1(Rect(sx, yy, ex - sx, 100)));*/
-					Point3f temp;
-					temp.x = sx + (ex - sx) / 2 + xup;
-					temp.y = yy + yup;
-					temp.z = (ex - sx) / 2;
-					Defects.push_back(temp);
+					Faults::BrokenEdge be;
+					be.position.x = sx + (ex - sx) / 2 + xup;
+					be.position.y = yy + yup;
+					be.length = (ex - sx);
+
+					faults->BrokenEdges.push_back(be);
+
 					//circle(src, Point(sx + (ex - sx) / 2 + xup, yy + yup), (ex - sx) / 2, Scalar(255, 255, 255));
 				}
 

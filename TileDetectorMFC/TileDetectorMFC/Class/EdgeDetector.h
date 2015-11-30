@@ -7,6 +7,7 @@ using namespace std;
 #include "BlocksDetector.h"
 
 #include "Base/Block.h"
+#include "Base\Faults.h"
 
 /*2015年10月10日*/
 
@@ -17,18 +18,10 @@ class EdgeDetector
 	
 public:
 	
-	EdgeDetector(Mat, Block *_block);
+	EdgeDetector(Mat&, Block *_block,Faults *_faults);
 	~EdgeDetector();
-	void Defect_Detector(vector < vector<Point> >contours_, vector<Vec4f> line_, vector<Point3f> &defects);
-	void Defect_Detector(Mat src, vector<Vec4f> line_, vector<Point3f> &defects);
-	void classifying(vector < vector<Point> > contours, vector<Vec4f> line_, vector < vector<Point> > &contours_);
 	void start();
-	void DistanceDetector_set(Vector<Point> Boundary_Point_temp, Vec4f FitLine, Vector<float> &Distance); // 边缘点到拟合直线的距离，距离存在向量Distance中
-	int DistanceDetector(Point Boundary_Point_temp, Vec4f FitLine); // 边缘点到拟合直线的距离
-	int Distamce_MaxTabel(Vector<float> Distance);  // 边缘点到拟合直线的最大距离，返回集合中距离最大点的标号
-	void DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B); // 划线函数，EdgeIndex是用来判断是上下边缘划线还是左右边缘划线
-	void PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Point> &Point_of_Intersection);  // FitLine_Aggregate是四条拟合直线的参数（左、上、右、下），Point_of_Intersection存储四条直线的交点（左上、右上、右下、左下）
-	vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
+	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
 
 	
@@ -36,6 +29,7 @@ public:
 
 private:
 	Block *block;
+	Faults *faults;
 	Mat src;
 	vector<Mat> ROI, ROI1;
 	Mat leftROI, upROI, rightROI, downROI; // 边缘ROI
@@ -56,5 +50,17 @@ private:
 	float distance = 0;
 	int t1 = 0, t2 = 0;
 	int Tabel = 0;
+
+
+	void Defect_Detector(vector < vector<Point> >contours_, vector<Vec4f> line_, vector<Point3f> &defects);
+	void Defect_Detector(Mat src, vector<Vec4f> line_, vector<Point3f> &defects);
+	void classifying(vector < vector<Point> > contours, vector<Vec4f> line_, vector < vector<Point> > &contours_);
+	void DistanceDetector_set(Vector<Point> Boundary_Point_temp, Vec4f FitLine, Vector<float> &Distance); // 边缘点到拟合直线的距离，距离存在向量Distance中
+	int DistanceDetector(Point Boundary_Point_temp, Vec4f FitLine); // 边缘点到拟合直线的距离
+	int Distamce_MaxTabel(Vector<float> Distance);  // 边缘点到拟合直线的最大距离，返回集合中距离最大点的标号
+	void DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B); // 划线函数，EdgeIndex是用来判断是上下边缘划线还是左右边缘划线
+	void PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Point> &Point_of_Intersection);  // FitLine_Aggregate是四条拟合直线的参数（左、上、右、下），Point_of_Intersection存储四条直线的交点（左上、右上、右下、左下）
+
+
 };
 

@@ -1,13 +1,15 @@
 #include "EdgeInnerDetctor.h"
 
 
-EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat& img, Block *b)
+EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 {
 	if (img.channels() == 1)
 		image = img.clone();
 	else
 		cv::cvtColor(img, image, CV_RGB2GRAY);
-	block = b;
+	block = _block;
+	faults = _faults;
+
 
 	block->ABCD2Lines();
 	/*cv::line(image, block->A, block->GetPonintByY(3000, &block->LeftLine), cv::Scalar(255));
@@ -387,8 +389,16 @@ void EdgeInnerDetctor::processAndSaveData(vector<cv::Mat> reduceList, vector<cv:
 			distances[i] = distancesL2R[i] * weightsL2R[i] + distancesR2L[i] * (1 - weightsL2R[i]);
 		else
 			distances[i] = distancesL2R[i] > distancesR2L[i] ? distancesL2R[i] : distancesR2L[i];
+
+		//¸ù¾Ý¾àÀëÅÐ¶ÏÈ±ÏÝ
 		if (distances[i] > 0.6)
-			EIDFaults.push_back(points[i]);
+		{
+			Faults::SomethingBig sb;
+			sb.position.x = points[i].x;
+			sb.position.y = points[i].y;
+			sb.diameter = points[i].z;
+			faults->SomethingBigs.push_back(sb);
+		}
 	}
 
 

@@ -321,43 +321,51 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
 	m_Info += msg;
 
-	if (consumer->EdgeFaults.size() > 0)
+	if (consumer->faults.BrokenEdges.size() > 0)
 	{
 		CString str;
-		str.Format(_T("%d 存在%d处崩边缺陷。\r\n"), consumer->GrabbingIndex, consumer->EdgeFaults.size());
+		str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenEdges.size());
 		m_Info += str;
 		//cv::Mat img(consumer->originalImg);
-		for (size_t i = 0; i < consumer->EdgeFaults.size(); i++)
+		for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
 		{
-			cv::circle(consumer->originalImg, cv::Point(consumer->EdgeFaults[i].x, consumer->EdgeFaults[i].y), consumer->EdgeFaults[i].z + 20, cv::Scalar(0, 0, 255), 10);
+			cv::circle(consumer->originalImg, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
 		}
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
-	if (consumer->EIDFaults.size() > 0)
+	if (consumer->faults.SomethingBigs.size() > 0)
 	{
 		CString str;
-		str.Format(_T("%d 存在%d处EID缺陷。\r\n"), consumer->GrabbingIndex, consumer->EIDFaults.size());
+		str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.SomethingBigs.size());
 		m_Info += str;
-		for (size_t i = 0; i < consumer->EIDFaults.size(); i++)
+		for (size_t i = 0; i < consumer->faults.SomethingBigs.size(); i++)
 		{
-			cv::circle(consumer->originalImg, cv::Point(consumer->EIDFaults[i].x, consumer->EIDFaults[i].y), consumer->EIDFaults[i].z, cv::Scalar(255, 0, 0), 5);
+			cv::circle(consumer->originalImg, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
 		}
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
-	if (consumer->InnerFaults.size() > 0)
+	if (consumer->faults.Scratchs.size() > 0)
 	{
 		CString str;
-		str.Format(_T("%d 存在%d处内部缺陷。\r\n"), consumer->GrabbingIndex, consumer->InnerFaults.size());
+		str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Scratchs.size());
 		m_Info += str;
-		//cv::Mat img(consumer->originalImg);
-		for (size_t i = 0; i < consumer->InnerFaults.size(); i++)
+		for (size_t i = 0; i < consumer->faults.Scratchs.size(); i++)
 		{
-			cv::circle(consumer->originalImg, cv::Point(consumer->InnerFaults[i].x, consumer->InnerFaults[i].y), consumer->InnerFaults[i].z*2 + 30, cv::Scalar(0, 255, 255), 10);
-			//cv::circle(consumer->originalImg, cv::Point(consumer->InnerFaults[i].x, consumer->InnerFaults[i].y), consumer->InnerFaults[i].z + 3, cv::Scalar(255, 255, 0), 5);
+			cv::circle(consumer->originalImg, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
 		}
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
-
+	if (consumer->faults.Holes.size() > 0)
+	{
+		CString str;
+		str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Holes.size());
+		m_Info += str;
+		for (size_t i = 0; i < consumer->faults.Holes.size(); i++)
+		{
+			cv::circle(consumer->originalImg, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+		}
+		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
+	}
 
 
 	UpdateData(false);

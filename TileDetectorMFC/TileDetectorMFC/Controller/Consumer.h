@@ -35,9 +35,9 @@ public:
 	int GrabbingIndex = 0;
 
 	Faults faults;
-	vector<cv::Point3f> EdgeFaults;
-	vector<cv::Point3f> EIDFaults;
-	vector<cv::Point3f> InnerFaults;
+	//vector<cv::Point3f> EdgeFaults;
+	//vector<cv::Point3f> EIDFaults;
+	//vector<cv::Point3f> InnerFaults;
 	cv::Mat originalImg;
 	cv::Mat grayImg;
 

@@ -83,18 +83,17 @@ void Consumer::processingThread()
 	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
-		printf_globle("cv::Mat DetectedImg = originalImg.clone()\r");
 		BlocksDetector *bd = new BlocksDetector(DetectedImg);
-		printf_globle("BlocksDetector bd = BlocksDetector(DetectedImg)\r");
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖
 		if (!bd->Start() || !bd->StartUP_DOWN(BlocksDetector::Up) || !bd->StartUP_DOWN(BlocksDetector::Down))
 		{
+			isProcessing = false;
 			printf_globle("未检测到瓷砖\r");
 			return;
 		}
-		printf_globle("bd->Start() && bd->StartUP_DOWN(BlocksDetector::Up) &&	bd->StartUP_DOWN(BlocksDetector::Down)\r");
+		ss << "bd->Start() && bd->StartUP_DOWN(BlocksDetector::Up) &&	bd->StartUP_DOWN(BlocksDetector::Down)" << endl;
 
 
 		block->UpLine = bd->UpLine;
@@ -110,7 +109,7 @@ void Consumer::processingThread()
 			return;
 		}
 
-		printf_globle("block->ABCD()\r");
+		ss << "block->ABCD()" << endl;
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 		printf_globle(ss.str());
@@ -129,27 +128,18 @@ void Consumer::processingThread()
 	//瓷砖精确定位  &&  崩边检测
 	if (2 == 2)
 	{
-		EdgeDetector *ed = new EdgeDetector(grayImg, block);
+		EdgeDetector *ed = new EdgeDetector(grayImg, block,&faults);
 		ed->start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
+		if (faults.BrokenEdges.size() > 0)
+		{
+			ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << faults.BrokenEdges.size() << endl;
+		}
 		printf_globle(ss.str());
 		ss.str("");
-		t = (double)cv::getTickCount();
-
-		EdgeFaults.clear();
-		if (ed->Defects.size() > 0)
-		{
-			for (size_t i = 0; i < ed->Defects.size(); i++)
-			{
-				EdgeFaults.push_back(ed->Defects[i]);
-			}
-			ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << ed->Defects.size() << endl;
-			printf_globle(ss.str());
-			ss.str("");
-		}
-
 		delete ed;
 	}
 
@@ -172,16 +162,12 @@ void Consumer::processingThread()
 	else//缺陷检测分支
 	{
 		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, block);
+		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, block, &faults);
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
-		if (eid.EIDFaults.size() > 0)
+		if (faults.SomethingBigs.size() > 0)
 		{
-			for (size_t i = 0; i < eid.EIDFaults.size(); i++)
-			{
-				EIDFaults.push_back(cv::Point3f(eid.EIDFaults[i]));
-			}
-			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << eid.EIDFaults.size() << endl;
+			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
 			printf_globle(ss.str());
 			ss.str("");
 		}
@@ -196,28 +182,13 @@ void Consumer::processingThread()
 		if (3 == 3)
 		{
 			t = (double)cv::getTickCount();
-			printf_globle("瓷砖内部缺陷检测 开始\r");
+			ss << "瓷砖内部缺陷检测 开始" << endl;
 			Pretreatment p;
 			p.pretreatment(grayImg,block,&faults);
-			/*Pretreatment *p = new Pretreatment();
-			vector<cv::Point> vp;
-			vp.push_back(block->A);
-			vp.push_back(block->B);
-			vp.push_back(block->C);
-			vp.push_back(block->D);
-			vector<cv::Point3f> lp = p->pretreatment(grayImg, vp);
-			if (lp.size() > 0)
-			{
-				for (size_t i = 0; i < lp.size(); i++)
-				{
-					InnerFaults.push_back(cv::Point3f(lp[i]));
-				}
-				ss << GrabbingIndex << " " << "内部有缺陷，数量：" << lp.size() << endl;
-				printf_globle(ss.str());
-				ss.str("");
-			}*/
-			printf_globle("瓷砖内部缺陷检测 结束\r");
-			/*delete p;*/
+
+			ss << GrabbingIndex << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
+			ss << GrabbingIndex << " " << "内部有凹点：" << faults.Holes.size() << endl;
+			ss << "瓷砖内部缺陷检测 结束" << endl;
 
 			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 			ss << GrabbingIndex << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;

@@ -11,6 +11,7 @@ using namespace std;
 
 
 #include "Base\Block.h"
+#include "Base\Faults.h"
 #include "../globle_var.h"
 
 //#define WRITEIMG
@@ -19,12 +20,11 @@ using namespace std;
 class EdgeInnerDetctor
 {
 public:
-	EdgeInnerDetctor(cv::Mat&, Block*);
+	EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults);
 	~EdgeInnerDetctor();
-
-	vector<cv::Point3f> EIDFaults;
 private:
 	Block *block;
+	Faults *faults;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
 
 	double getFrechetDistance(vector<double> lineA, vector<double> lineB);

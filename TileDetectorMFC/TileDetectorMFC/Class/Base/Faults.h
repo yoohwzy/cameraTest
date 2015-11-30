@@ -31,7 +31,7 @@ public:
 	//釉裂
 	struct Crazing
 	{
-		cv::Point position;//缺角位置
+		cv::Point position;//釉裂位置
 		double diameter;//直径（毫米）
 	};
 	//凹点
@@ -44,10 +44,15 @@ public:
 	struct Scratch
 	{
 		cv::Point position;//位置
-		double length;//缺角长y轴（毫米）
-		double angel;//直径（毫米）
+		double length;//划痕长度（毫米）
+		double angel;//角度°
 	};
-
+	//巨大缺陷，一遇到就判断为不合格品
+	struct SomethingBig
+	{
+		cv::Point position;//位置
+		double diameter;//直径（毫米）
+	};
 
 
 
@@ -92,6 +97,7 @@ public:
 	vector<Crazing> Crazings;//釉裂
 	vector<Hole> Holes;//凹点
 	vector<Scratch> Scratchs;//划痕
+	vector<SomethingBig> SomethingBigs;//巨大缺陷，一遇到就判断为不合格品
 private:
 	double milliMeterPerPix_X = 0;//x轴每像素对应多少毫米
 	double milliMeterPerPix_Y = 0;//y轴每像素对应多少毫米
