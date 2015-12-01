@@ -338,7 +338,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 	{
 		if (defectpoint.size() == 0)
 		{
-			defectpoint.push_back(defectcenter);
+			/*defectpoint.push_back(defectcenter);*/
 			hole.position.x = defectcenter.x;
 			hole.position.y = defectcenter.y;
 			hole.diameter = defectcenter.z;
@@ -355,7 +355,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			}
 			if (k == defectpoint.size())
 			{
-				defectpoint.push_back(defectcenter);
+				/*defectpoint.push_back(defectcenter);*/
 				hole.position.x = defectcenter.x;
 				hole.position.y = defectcenter.y;
 				hole.diameter = defectcenter.z;
@@ -409,7 +409,7 @@ Mat thin(Mat &ROIImage)//细线化
 
 
 	int n = 0, i = 0, j = 0;
-	for (n = 0; n < 40; n++)//开始进行迭代 40次 
+	for (n = 0; n < 20; n++)//开始进行迭代 20次 
 	{
 		Mat  t_image = dstImg.clone();
 		for (i = 0; i < ROIImage.rows; i++)
@@ -614,7 +614,7 @@ void Pretreatment::linedetect(Mat &image)
 		Mat TproImg(resultImg.cols, 1, CV_8UC1, Scalar(0));
 		proImg.convertTo(proImg, CV_8UC1);//threshold不支持32位
 		linenumall = countNonZero(proImg);
-		threshold(proImg, TproImg, 1, 255, CV_THRESH_BINARY);
+		threshold(proImg, TproImg, 2, 255, CV_THRESH_BINARY);
 		linenum = countNonZero(TproImg);
 		m++;
 		if (double(linenum) < double(0.7*linenumall))
@@ -676,6 +676,8 @@ void Pretreatment::linedetect(Mat &image)
 			scratch.position.x = cannyrect.x + 0.5*cannyrect.width + recImg.x + maxRect.x + 2;
 			scratch.position.y = cannyrect.y + 0.5*cannyrect.height + recImg.y + maxRect.y + 400;
 			scratch.length = (cannyrect.width >cannyrect.height) ? 0.5*cannyrect.width : 0.5*cannyrect.height;
+			if (scratch.length < 35)
+				continue;
 			_faults->Scratchs.push_back(scratch);
 		}
 	}
@@ -731,16 +733,29 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//边缘检测
 	Mat DilateImg = getStructuringElement(MORPH_RECT, Size(5, 5));
 
-	Canny(MidImg, CannyImg, 5, 20);
+	Canny(MidImg, CannyImg, 8, 20);
 	rectangle(CannyImg, Rect(Point(0, 0), Point(20, CannyImg.rows)), Scalar(0), -1);
 	rectangle(CannyImg, Rect(Point(CannyImg.cols - 10, 0), Point(CannyImg.cols, CannyImg.rows)), Scalar(0), -1);//左右靠边边缘线舍弃
 
-	dilate(CannyImg, CannyImg, DilateImg, Point(-1, -1), 2);
-
+	dilate(CannyImg, CannyImg, Mat());
+	erode(CannyImg, CannyImg, Mat());
 	vector<vector<cv::Point>> dilatecontours;
-	vector<double> areanum;
 	findContours(CannyImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	Mat dilateImg(CannyImg.size(), CV_8UC1, Scalar(0));
+	for (size_t i = 0; i < dilatecontours.size(); i++)
+	{
+		if (contourArea(dilatecontours[i])> 200 )
+			dilateneedcontours.push_back(dilatecontours[i]);
+	}
+	drawContours(dilateImg, dilateneedcontours, -1, Scalar(255), -1);
+	CannyImg = dilateImg.clone();
+	dilate(CannyImg, CannyImg, DilateImg, Point(-1, -1), 4);
+
+	dilateImg.release();
+	dilatecontours.clear();
+	vector<double> areanum;
+	findContours(CannyImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	Mat bdilateImg(CannyImg.size(), CV_8UC1, Scalar(0));
 	for (size_t i = 0; i < dilatecontours.size(); i++)
 	{
 		areanum.push_back(contourArea(dilatecontours[i]));
@@ -751,8 +766,8 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 		if (contourArea(dilatecontours[i])>areanum[areanum.size() / 2] * 10)
 			dilateneedcontours.push_back(dilatecontours[i]);
 	}
-	drawContours(dilateImg, dilateneedcontours, -1, Scalar(255), -1);
-	erode(dilateImg, dilateImg, DilateImg, Point(-1, -1), 2);
+	drawContours(bdilateImg, dilateneedcontours, -1, Scalar(255), -1);
+	erode(bdilateImg, bdilateImg, Mat());
 
 	Mat ThImgROI, MidImgROI;
 	Point Thpt = Point(0, 0);
@@ -816,8 +831,12 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect),this, dilateImg);//划痕检测
+	std::thread line(std::mem_fn(&Pretreatment::linedetect),this, bdilateImg);//划痕检测
 	producer.join();
 	consumer.join();
 	line.join();
+	needContour.clear();
+	dilateneedcontours.clear();
+	p2c.clear();
+	p2cp.clear();
 }
