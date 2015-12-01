@@ -27,6 +27,11 @@ bool SortByM1(const Vec4i &v1, const Vec4i &v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊýµÄÀàÐÍÒ»¶¨ÒªÓ
 	return v1[3] < v2[3];//ÉýÐòÅÅÁÐ  
 }
 
+bool SortBysize(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊýµÄÀàÐÍÒ»¶¨ÒªÓëvectorÖÐÔªËØµÄÀàÐÍÒ»ÖÂ  
+{
+	return v1.size() > v2.size();//½µÐòÅÅÁÐ  
+}
+
 Point barycenter1(vector<Point> contoursi)//¼ÆËãÂÖÀªÖØÐÄ
 {
 	Moments m = moments(contoursi);
@@ -403,283 +408,57 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 }
 
 
-Mat thin(Mat &ROIImage)//Ï¸Ïß»¯
+void Pretreatment::linedetect()
 {
-	Mat dstImg = ROIImage.clone();
+	Mat CannyImg,BlurImg;
+	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_AREA);
+	bilateralFilter(CannyImg, BlurImg, 5, 5, 5);
+	Canny(BlurImg, BlurImg, 5, 20);
+	rectangle(BlurImg, Rect(Point(0, 0), Point(20, BlurImg.rows)), Scalar(0), -1);
+	rectangle(BlurImg, Rect(Point(BlurImg.cols - 10, 0), Point(BlurImg.cols, BlurImg.rows)), Scalar(0), -1);//×óÓÒ¿¿±ß±ßÔµÏßÉáÆú
 
+	vector<vector<cv::Point>> dilatecontours;
+	findContours(BlurImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
-	int n = 0, i = 0, j = 0;
-	for (n = 0; n < 20; n++)//¿ªÊ¼½øÐÐµü´ú 20´Î 
-	{
-		Mat  t_image = dstImg.clone();
-		for (i = 0; i < ROIImage.rows; i++)
-		{
-			for (j = 0; j < ROIImage.cols; j++)
-			{
-				if (t_image.at<uchar>(i, j) == 255)
-				{
-					int ap = 0;
-					int p2 = (i == 0) ? 0 : t_image.at<uchar>(i - 1, j);
-					int p3 = (i == 0 || j == ROIImage.cols - 1) ? 0 : t_image.at<uchar>(i - 1, j + 1);
-					if (p2 == 0 && p3 == 255)
-					{
-						ap++;
-					}
+	int move_n = 0;
+	if (dilatecontours.size() > 100)
+		move_n = 20;
+	else
+		move_n = dilatecontours.size()*0.5;
+	partial_sort(dilatecontours.begin(), dilatecontours.begin() + move_n, dilatecontours.end(), SortBysize);
+	Mat dilateImg(BlurImg.size(), CV_8UC1, Scalar(0));
 
-					int p4 = (j == ROIImage.cols - 1) ? 0 : t_image.at<uchar>(i, j + 1);
-					if (p3 == 0 && p4 == 255)
-					{
-						ap++;
-					}
+	vector<vector<Point>> bigcontours;
+	bigcontours.insert(bigcontours.end(), dilatecontours.begin(), dilatecontours.begin() + move_n);
+	drawContours(dilateImg, bigcontours, -1, Scalar(255), -1);
+	/*dilate(dilateImg, dilateImg, Mat());
+	erode(dilateImg, dilateImg, Mat());*/
 
-					int p5 = (i == ROIImage.rows - 1 || j == ROIImage.cols - 1) ? 0 : t_image.at<uchar>(i + 1, j + 1);
-					if (p4 == 0 && p5 == 255)
-					{
-						ap++;
-					}
+	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
+	vector<vector<Point>> Linecontours;
+	line(LineImg, Point(4, 80), Point(156, 80), Scalar(255), 2, 8);//»­Ö±Ïß
+	cv::findContours(LineImg, Linecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//±È½ÏÂÖÀªµÄ±ê×¼
 
-					int p6 = (i == ROIImage.rows - 1) ? 0 : t_image.at<uchar>(i + 1, j);
-					if (p5 == 0 && p6 == 255)
-					{
-						ap++;
-					}
-
-					int p7 = (i == ROIImage.rows - 1 || j == 0) ? 0 : t_image.at<uchar>(i + 1, j - 1);
-					if (p6 == 0 && p7 == 255)
-					{
-						ap++;
-					}
-
-					int p8 = (j == 0) ? 0 : t_image.at<uchar>(i, j - 1);
-					if (p7 == 0 && p8 == 255)
-					{
-						ap++;
-					}
-
-					int p9 = (i == 0 || j == 0) ? 0 : t_image.at<uchar>(i - 1, j - 1);
-					if (p8 == 0 && p9 == 255)
-					{
-						ap++;
-					}
-					if (p9 == 0 && p2 == 255)
-					{
-						ap++;
-					}
-
-					if ((p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) > 255 && (p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) < 1785)
-					{
-						if (ap == 1)
-						{
-							if (!(p2 && p4 && p6))
-							{
-								if (!(p4 && p6 && p8))
-								{
-									dstImg.at<uchar>(i, j) = 0;//ÉèÖÃÄ¿±êÍ¼ÏñÖÐÏñËØÖµÎª0µÄµã  
-								}
-							}
-						}
-					}
-
-				}
-			}
-		}
-	}
-	return dstImg;
-}
-Mat Hysteresis(Mat &image, Point seedpoint)//ÕÒµ½ROI×î°µµã£¬ÏòÖÜÎ§8ÁÚÓòÉú³¤
-{
-	Mat HyImg = image.clone();
-	Scalar avgmean;
-	Mat StdImg(HyImg.size(), CV_8UC1, Scalar(0));
-	meanStdDev(HyImg, avgmean, StdImg);//ÕÒROIµÄ»Ò¶ÈÆ½¾ùÖµ
-	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));//ÓÃÀ´Éú³¤µÄÈ«ºÚÍ¼
-	vector<Point> seedq;//ÖÖ×ÓµãÐòÁÐ
-	seedq.push_back(seedpoint);
-	while (!seedq.empty())//»¹ÓÐÖÖ×Óµã
-	{
-		Point growpoint = seedq.back();
-		seedq.pop_back();
-		if ((growpoint.x > 0) && (growpoint.x < (image.cols - 1)) && (growpoint.y > 0) && (growpoint.y < (image.rows - 1)))//ÊÇ·ñÔÚROI±ßÔµÉÏ
-		{
-			if (HyImg.at<uchar>(growpoint.y, growpoint.x - 1) < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y));//´æÈëÖÖ×ÓµãÐòÁÐ
-					SameImg.at<uchar>(growpoint.y, growpoint.x - 1) = 255;//±ê¼Ç¸Ãµã
-				}
-			}
-
-			if (HyImg.at<uchar>(growpoint.y, growpoint.x + 1) < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y));
-					SameImg.at<uchar>(growpoint.y, growpoint.x + 1) = 255;
-				}
-			}
-
-			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x) < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x, growpoint.y - 1));
-					SameImg.at<uchar>(growpoint.y - 1, growpoint.x) = 255;
-				}
-			}
-
-			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x)  < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x, growpoint.y + 1));
-					SameImg.at<uchar>(growpoint.y + 1, growpoint.x) = 255;
-				}
-			}
-			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x - 1)  < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y - 1));
-					SameImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) = 255;
-				}
-			}
-			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x + 1)  < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y - 1));
-					SameImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) = 255;
-				}
-			}
-			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x - 1)  < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y + 1));
-					SameImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) = 255;
-				}
-			}
-			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x + 1)  < avgmean[0] - 5)
-			{
-				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y + 1));
-					SameImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) = 255;
-				}
-			}
-		}
-
-
-	}
-	return SameImg;
-}
-
-
-void Pretreatment::linedetect(Mat &image)
-{
-
-	Mat CcontourImg = image.clone();
+	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
 	int m = 0, linenumall = 0, linenum = 0;
-	for (size_t i = 0; i < dilateneedcontours.size(); i++)
+	for (size_t i = 0; i < bigcontours.size(); i++)
 	{
-		cannyrect = boundingRect(dilateneedcontours[i]);
-		Mat waitImg = image(Rect(cannyrect));
-
-		RotatedRect originalRect = minAreaRect(dilateneedcontours[i]);
-		Point2f vertices[4];
-		originalRect.points(vertices);
-
-		double widthnum = sqrt((vertices[1].x - vertices[2].x)*(vertices[1].x - vertices[2].x) + (vertices[1].y - vertices[2].y)*(vertices[1].y - vertices[2].y));
-		double hightnum = sqrt((vertices[3].x - vertices[2].x)*(vertices[3].x - vertices[2].x) + (vertices[3].y - vertices[2].y)*(vertices[3].y - vertices[2].y));
-		if (double(widthnum / hightnum) < 3 && double(widthnum / hightnum) > 0.33)
+		
+		cannyrect = boundingRect(bigcontours[i]);
+		Mat waitImg = dilateImg(Rect(cannyrect));
+		if (cannyrect.width < 50 && cannyrect.height < 50)
 			continue;
-
-
-		/*waitImg = ~waitImg;*/
-		Mat resultImg = thin(waitImg), proImg;
-		int k = 1;
-		if (resultImg.rows>resultImg.cols)
-		{
-			proImg = resultImg(Range(1, 1), Range::all());
-		}
-		else
-		{
-			proImg = resultImg(Range::all(), Range(1, 1));
-			k = 0;
-		}
-		normalize(resultImg, resultImg, 1.0, 0.0, NORM_MINMAX);
-		reduce(resultImg, proImg, k, CV_REDUCE_SUM, CV_32S);//ÈôÎÞ¸ÃÊý¾ÝÀàÐÍ»á±¨´í
-		Mat TproImg(resultImg.cols, 1, CV_8UC1, Scalar(0));
-		proImg.convertTo(proImg, CV_8UC1);//threshold²»Ö§³Ö32Î»
-		linenumall = countNonZero(proImg);
-		threshold(proImg, TproImg, 2, 255, CV_THRESH_BINARY);
-		linenum = countNonZero(TproImg);
-		m++;
-		if (double(linenum) < double(0.7*linenumall))
-		{
-			Mat OrImg = MidImg(Rect(cannyrect));
-			double LminV;
-			Point Lminpoint;
-			minMaxLoc(OrImg, &LminV, NULL, &Lminpoint);
-			Mat minP_Img = Hysteresis(OrImg, Lminpoint);
-			int Wmark = countNonZero(minP_Img);
-			int colnum = (minP_Img.cols > minP_Img.rows) ? minP_Img.cols : minP_Img.rows;
-			int cominnum = (minP_Img.cols < minP_Img.rows) ? minP_Img.cols : minP_Img.rows;
-			colnum = (0.5*colnum > cominnum) ? 0.5*colnum : cominnum;
-			if (Wmark < colnum || Wmark > 0.5*minP_Img.cols*minP_Img.rows)
-				continue;
-
-			Mat tent;
-
-			vector<vector<Point>> hycontours;
-			vector<Vec4i> hyhierarchy;
-			Point pointSN = Point(0, 0);
-			double maxs = 0;
-			int maxnum = 0;
-			findContours(minP_Img, hycontours, hyhierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-			if (hycontours.size() == 0)
-				continue;
-			for (size_t j = 0; j < hycontours.size(); j++)
-			{
-				double area = cv::contourArea(hycontours[j]);
-				if (maxs < area)
-				{
-					maxnum = j;
-					maxs = area;
-				}
-			}
-			int son = hyhierarchy[maxnum][2], Cmark = 0;;
-			if (son >= 0)
-			{
-				for (size_t j = 0; j < hycontours.size(); j++)
-				{
-					if (hyhierarchy[j][3] == maxnum&&hycontours[j].size()>6)
-						Cmark++;
-				}
-
-			}
-			if (Cmark > 1)
-				continue;
-			originalRect = minAreaRect(hycontours[maxnum]);
-			Point2f verticesgrow[4];
-			originalRect.points(verticesgrow);
-			if (cannyrect.x <= 5 || cannyrect.y <= 5 || cannyrect.x + cannyrect.width >= CcontourImg.cols - 5 || cannyrect.y + cannyrect.height >= CcontourImg.rows - 5)
-				if ((verticesgrow[1].x - verticesgrow[2].x)*(verticesgrow[1].y - verticesgrow[2].y) == 0 || (verticesgrow[3].x - verticesgrow[2].x)*(verticesgrow[3].y - verticesgrow[2].y) == 0)
-					continue;
-			widthnum = sqrt((verticesgrow[1].x - verticesgrow[2].x)*(verticesgrow[1].x - verticesgrow[2].x) + (verticesgrow[1].y - verticesgrow[2].y)*(verticesgrow[1].y - verticesgrow[2].y));
-			hightnum = sqrt((verticesgrow[3].x - verticesgrow[2].x)*(verticesgrow[3].x - verticesgrow[2].x) + (verticesgrow[3].y - verticesgrow[2].y)*(verticesgrow[3].y - verticesgrow[2].y));
-			if (double(widthnum / hightnum) < 3 && double(widthnum / hightnum) > 0.33)
-				continue;
-			Faults::Scratch scratch;
-			scratch.position.x = cannyrect.x + 0.5*cannyrect.width + recImg.x + maxRect.x + 2;
-			scratch.position.y = cannyrect.y + 0.5*cannyrect.height + recImg.y + maxRect.y + 400;
-			scratch.length = (cannyrect.width >cannyrect.height) ? 0.5*cannyrect.width : 0.5*cannyrect.height;
-			if (scratch.length < 35)
-				continue;
-			_faults->Scratchs.push_back(scratch);
-		}
+		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I3, 0);
+		if (matchlinepro>1.0)
+			continue;
+		Faults::Scratch scratch;
+		scratch.position.x = 4*cannyrect.x + 2*cannyrect.width + recImg.x + maxRect.x + 2;
+		scratch.position.y = 4*cannyrect.y + 2*cannyrect.height + recImg.y + maxRect.y + 400;
+		scratch.length = (cannyrect.width >cannyrect.height) ? 2*cannyrect.width : 2*cannyrect.height;
+		if (scratch.length < 35)
+			continue;
+		_faults->Scratchs.push_back(scratch);
 	}
 }
 
@@ -729,45 +508,9 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 	MidImg = ImgROI(Rect(2, 400, ImgROI.cols - 4, ImgROI.rows - 800));
 
-	Mat CannyImg;
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//±ßÔµ¼ì²â
 	Mat DilateImg = getStructuringElement(MORPH_RECT, Size(5, 5));
 
-	Canny(MidImg, CannyImg, 8, 20);
-	rectangle(CannyImg, Rect(Point(0, 0), Point(20, CannyImg.rows)), Scalar(0), -1);
-	rectangle(CannyImg, Rect(Point(CannyImg.cols - 10, 0), Point(CannyImg.cols, CannyImg.rows)), Scalar(0), -1);//×óÓÒ¿¿±ß±ßÔµÏßÉáÆú
-
-	dilate(CannyImg, CannyImg, Mat());
-	erode(CannyImg, CannyImg, Mat());
-	vector<vector<cv::Point>> dilatecontours;
-	findContours(CannyImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	Mat dilateImg(CannyImg.size(), CV_8UC1, Scalar(0));
-	for (size_t i = 0; i < dilatecontours.size(); i++)
-	{
-		if (contourArea(dilatecontours[i])> 200 )
-			dilateneedcontours.push_back(dilatecontours[i]);
-	}
-	drawContours(dilateImg, dilateneedcontours, -1, Scalar(255), -1);
-	CannyImg = dilateImg.clone();
-	dilate(CannyImg, CannyImg, DilateImg, Point(-1, -1), 4);
-
-	dilateImg.release();
-	dilatecontours.clear();
-	vector<double> areanum;
-	findContours(CannyImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	Mat bdilateImg(CannyImg.size(), CV_8UC1, Scalar(0));
-	for (size_t i = 0; i < dilatecontours.size(); i++)
-	{
-		areanum.push_back(contourArea(dilatecontours[i]));
-	}
-	sort(areanum.begin(), areanum.end());
-	for (size_t i = 0; i < dilatecontours.size(); i++)
-	{
-		if (contourArea(dilatecontours[i])>areanum[areanum.size() / 2] * 10)
-			dilateneedcontours.push_back(dilatecontours[i]);
-	}
-	drawContours(bdilateImg, dilateneedcontours, -1, Scalar(255), -1);
-	erode(bdilateImg, bdilateImg, Mat());
 
 	Mat ThImgROI, MidImgROI;
 	Point Thpt = Point(0, 0);
@@ -831,9 +574,10 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // ´ý¼ì²âÈ±ÏÝµÄÔ¤´¦Àí.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // Çø·ÖÈ±ÏÝÓëË®×Õ.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect),this, bdilateImg);//»®ºÛ¼ì²â
-	producer.join();
+	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//»®ºÛ¼ì²â
+	
 	consumer.join();
+	producer.join();
 	line.join();
 	needContour.clear();
 	dilateneedcontours.clear();
