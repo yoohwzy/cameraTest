@@ -367,7 +367,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
 
-
+	cv::imwrite("result.jpg", consumer->originalImg);
 	UpdateData(false);
 	return 1;
 }

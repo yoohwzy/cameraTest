@@ -67,6 +67,7 @@ public:
 		Crazings.clear();//釉裂
 		Holes.clear();//凹点
 		Scratchs.clear();//划痕
+		SomethingBigs.clear();
 	};
 
 	//设置参数，输入：x轴每像素对应多少毫米，y轴每像素对应多少毫米，对角线每像素对应多少毫米
