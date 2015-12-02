@@ -24,7 +24,7 @@ using namespace std;
 class Pretreatment
 {
 private:
-	static const int kItemRepositorySize = 2; // Item buffer size.
+	static const int kItemRepositorySize = 200; // Item buffer size.
 	struct ItemRepository {
 		int item_buffer[kItemRepositorySize]; // 产品缓冲区, 配合 read_position 和 write_position 模型环形队列.
 		size_t read_position; // 消费者读取产品位置.
@@ -40,7 +40,7 @@ private:
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
-	void linedetect(Mat &image);
+	void linedetect();
 	void ProduceItem(ItemRepository *ir, int item);
 	void ProducerTask();
 	int ConsumeItem(ItemRepository *ir);
