@@ -7,9 +7,10 @@ using namespace cv;
 
 
 int kItemsToProduce = 100;   // How many items we plan to produce.
+int m = 0;
 vector<Point3f> defectpoint;
 vector<Point3f> repoint;
-Mat MidImg, ThImg, boxImg, CMidImg;
+Mat MidImg, ThImg, CMidImg,PMidImg;
 vector<vector<cv::Point>> needContour;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
 Rect maxRect = Rect(Point(0, 0), Point(0, 0));
@@ -84,103 +85,95 @@ int otsuThreshold(Mat &frame, MatND hist)//局部二值化的阈值选取
 	return threshold;
 }
 
-Mat Grow(Mat &image, Mat seedImg)//区域生长
+Mat Grow(Mat &image, Point seedpoint,double th_v)//区域生长
 {
-	Point3f point;
-	queue<Point3f> seedd;
-	vector<Point3f> num;
-	double sum = 0;
-
-	for (int i = 0; i<image.rows; i++)
+	Mat HyImg = image.clone();
+	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
+	vector<Point> seedq;
+	seedq.push_back(seedpoint);
+	while (!seedq.empty())
 	{
-		for (int j = 0; j<image.cols; j++)
+		Point growpoint = seedq.back();
+		seedq.pop_back();
+		if ((growpoint.x > 0) && (growpoint.x < (image.cols - 1)) && (growpoint.y > 0) && (growpoint.y < (image.rows - 1)))
 		{
-			if (seedImg.at<uchar>(i, j) == 255)
+			if (HyImg.at<uchar>(growpoint.y, growpoint.x - 1) < th_v)
 			{
-				point.x = i;
-				point.y = j;
-				point.z = image.at<uchar>(i, j);
-				seedd.push(point);
-				num.push_back(point);
-				sum += point.z;
+				if (SameImg.at<uchar>(growpoint.y, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x - 1, growpoint.y));
+					SameImg.at<uchar>(growpoint.y, growpoint.x - 1) = 255;
+				}
+			}
+
+			if (HyImg.at<uchar>(growpoint.y, growpoint.x + 1) < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x + 1, growpoint.y));
+					SameImg.at<uchar>(growpoint.y, growpoint.x + 1) = 255;
+				}
+			}
+
+			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x) < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x, growpoint.y - 1));
+					SameImg.at<uchar>(growpoint.y - 1, growpoint.x) = 255;
+				}
+			}
+
+			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x)  < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x, growpoint.y + 1));
+					SameImg.at<uchar>(growpoint.y + 1, growpoint.x) = 255;
+				}
+			}
+			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x - 1)  < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x - 1, growpoint.y - 1));
+					SameImg.at<uchar>(growpoint.y - 1, growpoint.x - 1) = 255;
+				}
+			}
+			if (HyImg.at<uchar>(growpoint.y - 1, growpoint.x + 1)  < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x + 1, growpoint.y - 1));
+					SameImg.at<uchar>(growpoint.y - 1, growpoint.x + 1) = 255;
+				}
+			}
+			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x - 1)  < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x - 1, growpoint.y + 1));
+					SameImg.at<uchar>(growpoint.y + 1, growpoint.x - 1) = 255;
+				}
+			}
+			if (HyImg.at<uchar>(growpoint.y + 1, growpoint.x + 1)  < th_v)
+			{
+				if (SameImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) == 0 && HyImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) - HyImg.at<uchar>(growpoint.y, growpoint.x) <= 2)
+				{
+					seedq.push_back(Point(growpoint.x + 1, growpoint.y + 1));
+					SameImg.at<uchar>(growpoint.y + 1, growpoint.x + 1) = 255;
+				}
 			}
 		}
+
+
 	}
-	double Tnum = sum / double(num.size());
-	Point3f temppoint;
-	while (!seedd.empty())
-	{
-		point = seedd.front();
-		seedd.pop();
-
-		if ((point.x>0) && (point.x<(image.rows - 1)) && (point.y>0) && (point.y<(image.cols - 1)))
-		{
-			if (seedImg.at<uchar>(point.x - 1, point.y) == 0 && (abs(image.at<uchar>(point.x - 1, point.y) - point.z) <= 1))
-			{
-				if (sum / double(num.size()) < Tnum + 5)
-				{
-					seedImg.at<uchar>(point.x - 1, point.y) = 255;
-					temppoint.x = point.x - 1;
-					temppoint.y = point.y;
-					temppoint.z = image.at<uchar>(point.x - 1, point.y);
-					seedd.push(temppoint);
-					num.push_back(point);
-					sum += temppoint.z;
-
-				}
-
-			}
-			if (seedImg.at<uchar>(point.x, point.y + 1) == 0 && (abs(image.at<uchar>(point.x, point.y + 1) - point.z) <= 1))
-			{
-				if (sum / double(num.size()) < Tnum + 5)
-				{
-					seedImg.at<uchar>(point.x, point.y + 1) = 255;
-					temppoint.x = point.x;
-					temppoint.y = point.y + 1;
-					temppoint.z = image.at<uchar>(point.x, point.y + 1);
-					seedd.push(temppoint);
-					num.push_back(point);
-					sum += temppoint.z;
-
-				}
-			}
-			if (seedImg.at<uchar>(point.x, point.y - 1) == 0 && (abs(image.at<uchar>(point.x, point.y - 1) - point.z) <= 1))
-			{
-				if (sum / double(num.size()) < Tnum + 5)
-				{
-					seedImg.at<uchar>(point.x, point.y - 1) = 255;
-					temppoint.x = point.x;
-					temppoint.y = point.y - 1;
-					temppoint.z = image.at<uchar>(point.x, point.y - 1);
-					seedd.push(temppoint);
-					num.push_back(point);
-					sum += temppoint.z;
-
-				}
-			}
-			if (seedImg.at<uchar>(point.x + 1, point.y) == 0 && (abs(image.at<uchar>(point.x + 1, point.y) - point.z) <= 1))
-			{
-				if (sum / double(num.size()) < Tnum + 5)
-				{
-					seedImg.at<uchar>(point.x + 1, point.y) = 255;
-					temppoint.x = point.x + 1;
-					temppoint.y = point.y;
-					temppoint.z = image.at<uchar>(point.x + 1, point.y);
-					seedd.push(temppoint);
-					num.push_back(point);
-					sum += temppoint.z;
-
-				}
-
-			}
-		}
-	}
-	return seedImg;
+	return SameImg;
 }
 
 
 
-void Pretreatment::ProduceItem(ItemRepository *ir, int item)
+void Pretreatment::ProduceItem(ItemRepository *ir, int item, Rect rect_grow, Point a, Point b,bool write_data)
 {
 	std::unique_lock<std::mutex> lock(ir->mtx);
 	while (((ir->write_position + 1) % kItemRepositorySize)
@@ -191,123 +184,68 @@ void Pretreatment::ProduceItem(ItemRepository *ir, int item)
 
 	(ir->item_buffer)[ir->write_position] = item; // 写入产品.
 
-	Rect box = boundingRect(needContour[item]);
-	Point pt7 = Point(box.x, box.y);
-	Point pt8 = Point(box.x + box.width, box.y + box.height);
-	Point pt_ROI_a = Point(0, 0);
-	Point pt_ROI_b = Point(MidImg.cols - 1, MidImg.rows - 1);//截取原始点
+	
 
-	if (pt7.x - 10 * box.width > 0)
-		pt_ROI_a.x = pt7.x - 10 * box.width;
-	if (pt7.y - 10 * box.height > 0)
-		pt_ROI_a.y = pt7.y - 10 * box.height;
-	if (pt8.x + 10 * box.width < MidImg.cols - 1)
-		pt_ROI_b.x = pt8.x + 10 * box.width;
-	if (pt8.y + 10 * box.height < MidImg.rows - 1)
-		pt_ROI_b.y = pt8.y + 10 * box.height;
+	//int maxszie = 0;
+	//int n = -1;
+	//for (size_t j = 0; j < tempttours.size(); j++)
+	//{
+	//	Rect rectemp = boundingRect(tempttours[j]);
+	//	if (rectemp.x < centermark.x&&rectemp.y < centermark.y)
+	//	{
+	//		if (rectemp.x + rectemp.width>centermark.x && rectemp.y + rectemp.height>centermark.y)
+	//			n = j;
+	//	}
+	//}
+	//if (n == -1)
+	//{
+	//	for (size_t j = 0; j < tempttours.size(); j++)
+	//	{
+	//		if (maxszie < tempttours[j].size())
+	//		{
+	//			maxszie = tempttours[j].size();
+	//			n = j;
+	//		}
+	//	}
+	//}
+	//vector<int> hullsI;
+	//vector<Vec4i> defects;
+	//vector<Point> hull;
+	//convexHull(tempttours[n], hull, false);
+	//convexHull(tempttours[n], hullsI, false);//寻找凸包
+	//convexityDefects(tempttours[n], hullsI, defects);
+	//Point gpoint = barycenter1(hull);
+	//int countnum = countNonZero(growImg(Rect(gpoint - Point(1, 1), gpoint + Point(2, 2))));
+	//double asextent = matchShapes(tempttours[n], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//椭圆形状匹配
+	//if (countnum < 9 || asextent>1.0)
+	//	return;
 
-	Point centermark = 0.5 * (pt7 + pt8) - pt_ROI_a;//在boxImg中待检测连通域的中心标记
-	boxImg = MidImg(Rect(pt_ROI_a, pt_ROI_b));//截取连通域外界矩形面积100倍大的区域
-	Mat boxTImg = ThImg(Rect(pt_ROI_a, pt_ROI_b)).clone();
-	Mat growImg = Grow(boxImg, boxTImg);//区域生长
-	Mat growtemp = growImg.clone();
-
-	vector<vector<cv::Point>> tempttours;
-	findContours(growtemp, tempttours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-
-	int maxszie = 0;
-	int n = -1;
-	for (size_t j = 0; j < tempttours.size(); j++)
+	//int d1, d2, d3, d4;
+	//d1 = d2 = d3 = d4 = 1;//d1,d2,d3,d4分别代表左，右，上，下
+	if (write_data)
 	{
-		Rect rectemp = boundingRect(tempttours[j]);
-		if (rectemp.x < centermark.x&&rectemp.y < centermark.y)
-		{
-			if (rectemp.x + rectemp.width>centermark.x && rectemp.y + rectemp.height>centermark.y)
-				n = j;
-		}
+		Point pt7 = Point(rect_grow.x, rect_grow.y) + a;
+		Point pt8 = Point(rect_grow.x + rect_grow.width, rect_grow.y + rect_grow.height) + a;
+
+		defectcenter.x = 0.5*(pt7.x + pt8.x) + recImg.x + maxRect.x + 2;//坐标变换回原图
+		defectcenter.y = 0.5*(pt7.y + pt8.y) + recImg.y + maxRect.y + 400;
+		if (abs(pt8.y - pt7.y) > abs(pt8.x - pt7.x))
+			defectcenter.z = abs(pt8.x - pt7.x);
+		else
+			defectcenter.z = abs(pt8.y - pt7.y);
+		p2cp.clear();
+		p2cp.push_back(defectcenter);
+		Point3f pttemp;
+		pttemp.x = b.x;
+		pttemp.y = b.y;
+		pttemp.z = 0;
+		p2cp.push_back(pttemp);
+		pttemp.x = a.x;
+		pttemp.y = a.y;
+		p2cp.push_back(pttemp);
+		p2c.push_back(p2cp);
+		m++;
 	}
-	if (n == -1)
-	{
-		for (size_t j = 0; j < tempttours.size(); j++)
-		{
-			if (maxszie < tempttours[j].size())
-			{
-				maxszie = tempttours[j].size();
-				n = j;
-			}
-		}
-	}
-	vector<int> hullsI;
-	vector<Vec4i> defects;
-	vector<Point> hull;
-	convexHull(tempttours[n], hull, false);
-	convexHull(tempttours[n], hullsI, false);//寻找凸包
-	convexityDefects(tempttours[n], hullsI, defects);
-	Point gpoint = barycenter1(hull);
-	int countnum = countNonZero(growImg(Rect(gpoint - Point(1, 1), gpoint + Point(2, 2))));
-	double asextent = matchShapes(tempttours[n], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//椭圆形状匹配
-	if (countnum < 9 || asextent>1.0)
-		return;
-
-	int d1, d2, d3, d4;
-	d1 = d2 = d3 = d4 = 1;//d1,d2,d3,d4分别代表左，右，上，下
-
-	if (defects.size() != 0)
-	{
-		sort(defects.begin(), defects.end(), SortByM1);
-		Point farpoint = tempttours[n][defects.back()[2]];
-		Point startpoint = tempttours[n][defects.back()[0]];
-		Point endpoint = tempttours[n][defects.back()[1]];
-		Point diffpoint = farpoint - 0.5*(startpoint + endpoint);
-		if (diffpoint.x >= 0 && diffpoint.y >= 0 && diffpoint.x > diffpoint.y)
-			d1 = 5;
-		if (diffpoint.x > 0 && diffpoint.y > 0 && diffpoint.x <= diffpoint.y)
-			d3 = 5;
-		if (diffpoint.x <= 0 && diffpoint.y >= 0 && abs(diffpoint.x) > diffpoint.y)
-			d2 = 5;
-		if (diffpoint.x < 0 && diffpoint.y > 0 && abs(diffpoint.x) <= diffpoint.y)
-			d3 = 5;
-		if (diffpoint.x >= 0 && diffpoint.y <= 0 && diffpoint.x > abs(diffpoint.y))
-			d1 = 5;
-		if (diffpoint.x > 0 && diffpoint.y < 0 && diffpoint.x <= abs(diffpoint.y))
-			d4 = 5;
-		if (diffpoint.x <= 0 && diffpoint.y <= 0 && diffpoint.x > diffpoint.y)
-			d4 = 5;
-		if (diffpoint.x < 0 && diffpoint.y < 0 && diffpoint.x <= diffpoint.y)
-			d2 = 5;
-	}//选择选优后的截取范围
-
-	box = boundingRect(tempttours[n]);
-	pt7 = Point(box.x, box.y) + pt_ROI_a;
-	pt8 = Point(box.x + box.width, box.y + box.height) + pt_ROI_a;
-
-	if (pt7.x - 0.4 *d1* box.width > 0)
-		pt_ROI_a.x = pt7.x - 0.4 *d1* box.width;
-	if (pt7.y - 0.4 *d3* box.height > 0)
-		pt_ROI_a.y = pt7.y - 0.4 *d3* box.height;
-	if (pt8.x + 0.4 *d2* box.width < MidImg.cols - 1)
-		pt_ROI_b.x = pt8.x + 0.4 *d2* box.width;
-	if (pt8.y + 0.4 *d4* box.height < MidImg.rows - 1)
-		pt_ROI_b.y = pt8.y + 0.4 *d4* box.height;
-
-	defectcenter.x = 0.5*(pt7.x + pt8.x) + recImg.x + maxRect.x + 2;//坐标变换回原图
-	defectcenter.y = 0.5*(pt7.y + pt8.y) + recImg.y + maxRect.y + 400;
-	if (abs(pt8.y - pt7.y)>abs(pt8.x - pt7.x))
-		defectcenter.z = abs(pt8.x - pt7.x);
-	else
-		defectcenter.z = abs(pt8.y - pt7.y);
-	p2cp.clear();
-	p2cp.push_back(defectcenter);
-	Point3f pttemp;
-	pttemp.x = pt_ROI_b.x;
-	pttemp.y = pt_ROI_b.y;
-	pttemp.z = 0;
-	p2cp.push_back(pttemp);
-	pttemp.x = pt_ROI_a.x;
-	pttemp.y = pt_ROI_a.y;
-	p2cp.push_back(pttemp);
-	p2c.push_back(p2cp);
-
 	(ir->write_position)++; // 写入位置后移.
 
 	if (ir->write_position == kItemRepositorySize) // 写入位置若是在队列最后则重新设置为初始位置.
@@ -328,47 +266,50 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 	}
 
 	data = (ir->item_buffer)[ir->read_position]; // 读取某一产品
-
-	Judgement JYON;
-	Point pt_ROI_a, pt_ROI_b;
-	pt_ROI_a.x = p2c.back()[2].x;
-	pt_ROI_a.y = p2c.back()[2].y;
-	pt_ROI_b.x = p2c.back()[1].x;
-	pt_ROI_b.y = p2c.back()[1].y;
-	boxImg = CMidImg(Rect(pt_ROI_a, pt_ROI_b));
-	defectcenter = p2c.back()[0];
-	p2c.pop_back();
-	Faults::Hole hole;
-	if (JYON.JudgementYON(boxImg))//判断是否为缺陷
+	if (p2c.size() != 0 )
 	{
-		if (defectpoint.size() == 0)
+		Judgement JYON;
+		Point a, b;
+		a.x = p2c.back()[2].x;
+		a.y = p2c.back()[2].y;
+		b.x = p2c.back()[1].x;
+		b.y = p2c.back()[1].y;
+		Mat boxJImg = PMidImg(Rect(a, b));
+		defectcenter = p2c.back()[0];
+		p2c.pop_back();
+		Faults::Hole hole;
+		if (1)//判断是否为缺陷
 		{
-			/*defectpoint.push_back(defectcenter);*/
-			hole.position.x = defectcenter.x;
-			hole.position.y = defectcenter.y;
-			hole.diameter = defectcenter.z;
-  			_faults->Holes.push_back(hole);
-			/*cout << data << endl;*/
-		}
-		else
-		{
-			int k = 0;
-			for (int j = 0; j < defectpoint.size(); j++)
+			if (defectpoint.size() == 0)
 			{
-				if (abs(defectpoint[j].x - defectcenter.x) + abs(defectpoint[j].y - defectcenter.y) > 20)
-					k++;
-			}
-			if (k == defectpoint.size())
-			{
-				/*defectpoint.push_back(defectcenter);*/
+				defectpoint.push_back(defectcenter);
 				hole.position.x = defectcenter.x;
 				hole.position.y = defectcenter.y;
 				hole.diameter = defectcenter.z;
 				_faults->Holes.push_back(hole);
 				/*cout << data << endl;*/
 			}
+			else
+			{
+				int k = 0;
+				for (int j = 0; j < defectpoint.size(); j++)
+				{
+					if (abs(defectpoint[j].x - defectcenter.x) + abs(defectpoint[j].y - defectcenter.y) > 20)
+						k++;
+				}
+				if (k == defectpoint.size())
+				{
+					defectpoint.push_back(defectcenter);
+					hole.position.x = defectcenter.x;
+					hole.position.y = defectcenter.y;
+					hole.diameter = defectcenter.z;
+					_faults->Holes.push_back(hole);
+					/*cout << data << endl;*/
+				}
+			}
 		}
 	}
+	
 
 	(ir->read_position)++; // 读取位置后移
 
@@ -386,8 +327,88 @@ void Pretreatment::ProducerTask() // 生产者任务
 {
 	for (size_t i = 0; i < needContour.size(); i++)
 	{
+		Rect box = boundingRect(needContour[i]);
+		Point pt7 = Point(box.x, box.y);
+		Point pt8 = Point(box.x + box.width, box.y + box.height);
+		Point pt_ROI_a = Point(0, 0);
+		Point pt_ROI_b = Point(PMidImg.cols - 1, PMidImg.rows - 1);//截取原始点
+
+		if (pt7.x - 10 * box.width > 0)
+			pt_ROI_a.x = pt7.x - 10 * box.width;
+		if (pt7.y - 10 * box.height > 0)
+			pt_ROI_a.y = pt7.y - 10 * box.height;
+		if (pt8.x + 10 * box.width < MidImg.cols - 1)
+			pt_ROI_b.x = pt8.x + 10 * box.width;
+		if (pt8.y + 10 * box.height < MidImg.rows - 1)
+			pt_ROI_b.y = pt8.y + 10 * box.height;
+
+		Point centermark = 0.5 * (pt7 + pt8) - pt_ROI_a;//在boxImg中待检测连通域的中心标记
+		Mat ready_boxImg = PMidImg(Rect(pt_ROI_a, pt_ROI_b));//截取连通域外界矩形面积100倍大的区域
+		Scalar avgmean;
+		Mat StdImg(ready_boxImg.size(), CV_8UC1, Scalar(0));
+		meanStdDev(ready_boxImg, avgmean, StdImg);
+		Mat growImg = Grow(ready_boxImg, centermark, avgmean[0] - 5);//区域生长
+
+		int whitenum = countNonZero(growImg);
+		Mat growtemp = growImg.clone();
+
+		/*erode(growtemp, growtemp,Mat(),Point(-1,-1),2);*/
+		vector<vector<cv::Point>> tempttours;
+		findContours(growtemp, tempttours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		if (tempttours.size() == 0 || countNonZero(growImg) <= 2)
+		{
+			ProduceItem(&gItemRepository, i, box, pt_ROI_a, pt_ROI_b, 0);
+			continue;
+		}
+		Rect growT_RECT = boundingRect(tempttours[0]);
+		double proportion = double(growT_RECT.width) / double(growT_RECT.height);
+		if (proportion > 3 || proportion < 0.33)
+		{
+			ProduceItem(&gItemRepository, i, growT_RECT, pt_ROI_a, pt_ROI_b, 0);
+			continue;
+		}
+
+		int k = 1;
+		Mat oneImg;
+		if (growImg.rows>growImg.cols)
+		{
+			oneImg = growImg(Range(1, 1), Range::all());
+		}
+		else
+		{
+			oneImg = growImg(Range::all(), Range(1, 1));
+			k = 0;
+		}
+		reduce(growImg, oneImg, k, CV_REDUCE_AVG);
+		double maxV_white;
+		minMaxLoc(oneImg, NULL, &maxV_white);
+		int white_range = countNonZero(oneImg);
+		maxV_white = (k == 1) ? growImg.rows * maxV_white : growImg.cols * maxV_white;
+		maxV_white /= 255;
+		if (1.5*whitenum / white_range > maxV_white || 2 * whitenum < growT_RECT.width*growT_RECT.height)
+		{
+			ProduceItem(&gItemRepository, i, growT_RECT, pt_ROI_a, pt_ROI_b, 0);
+			continue;
+		}
+		Mat ano_boxImg = ready_boxImg.clone();
+		threshold(ano_boxImg, ano_boxImg, avgmean[0] - 10, 255, 1);
+		bitwise_and(ano_boxImg, growImg, ano_boxImg);
+		vector<vector<cv::Point>> lowTcontour;
+		findContours(ano_boxImg, lowTcontour, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		int size_v = lowTcontour.size();
+		sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+		for (size_t j = 1; j < lowTcontour.size(); j++)
+		{
+			if (contourArea(lowTcontour[0]) > 100 * contourArea(lowTcontour[j]))
+				size_v--;
+		}
+		if (size_v > 1)
+		{
+			ProduceItem(&gItemRepository, i, growT_RECT, pt_ROI_a, pt_ROI_b, 0);
+			continue;
+		}
 		/*std::cout << "Produce the " << i << "^th item..." << std::endl;*/
-		ProduceItem(&gItemRepository, i);
+		ProduceItem(&gItemRepository, i, growT_RECT, pt_ROI_a,pt_ROI_b,1);
 	}
 }
 
@@ -570,14 +591,15 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	}
 
 	CMidImg = MidImg.clone();
+	PMidImg = MidImg.clone();
 	kItemsToProduce = needContour.size();
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
 	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
 	
-	consumer.join();
 	producer.join();
+	consumer.join();
 	line.join();
 	needContour.clear();
 	dilateneedcontours.clear();
