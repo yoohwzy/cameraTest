@@ -41,7 +41,7 @@ private:
 	const float *ranges[1];
 	int channels;
 	void linedetect();
-	void ProduceItem(ItemRepository *ir, int item);
+	void ProduceItem(ItemRepository *ir, int item, Rect growT_RECT, Point pt_ROI_a, Point pt_ROI_b, bool write_data);
 	void ProducerTask();
 	int ConsumeItem(ItemRepository *ir);
 	void ConsumerTask();
