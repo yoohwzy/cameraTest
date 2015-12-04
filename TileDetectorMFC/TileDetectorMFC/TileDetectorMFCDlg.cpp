@@ -57,11 +57,6 @@ END_MESSAGE_MAP()
 
 
 CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CTileDetectorMFCDlg::IDD, pParent)
-
-, set_grabMaxPics(0)
-, set_grabWidth(0)
-, set_grabRGBType(_T(""))
-, set_TiggerWaitTimeMS(0)
 , m_Info(_T(""))
 , m_VirtualCamera(_T(""))
 {
@@ -74,12 +69,6 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_TB_GrabMaxPics, set_grabMaxPics);
-	DDV_MinMaxInt(pDX, set_grabMaxPics, 100, 40000);
-	DDX_Text(pDX, IDC_TB_GrabWidth, set_grabWidth);
-	DDV_MinMaxInt(pDX, set_grabWidth, 0, 4096);
-	DDX_CBString(pDX, IDC_COMBO1, set_grabRGBType);
-	DDX_Text(pDX, IDC_TB_TiggerWaitMS, set_TiggerWaitTimeMS);
 	DDX_Text(pDX, IDC_TB_INFO, m_Info);
 	DDX_Text(pDX, IDC_TB_VirtualCamera, m_VirtualCamera);
 }
@@ -91,15 +80,15 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_MESSAGE(WM_MSG_PROCESSING_END, &CTileDetectorMFCDlg::OnMsgProcessingEnd)//处理结束处理程序
 	ON_BN_CLICKED(IDC_BTN_SCAN, &CTileDetectorMFCDlg::BtnScan_OnBnClicked)
 	ON_BN_CLICKED(IDC_CB_CanBeTiggered, &CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered)
-	ON_BN_CLICKED(IDC_BTN_GRAB_SAVE, &CTileDetectorMFCDlg::OnBnClickedBtnGrabSave)
-	ON_BN_CLICKED(IDC_BTN_GRAB_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad)
-	ON_BN_CLICKED(IDC_BTN_TIGGER_SAVE, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerSave)
-	ON_BN_CLICKED(IDC_BTN_TIGGER_LOAD, &CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad)
 	ON_EN_CHANGE(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera)
 	ON_EN_KILLFOCUS(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera)
 	ON_BN_CLICKED(IDC_BTN_CALIBRATION, &CTileDetectorMFCDlg::OnBnClickedBtnCalibration)
 	ON_MESSAGE(WM_MSG_GRABBINGCalibartion_END, &CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd)//定标、采集结束处理程序
 	ON_BN_CLICKED(IDC_BTN_SAVE_PIC, &CTileDetectorMFCDlg::OnBnClickedBtnSavePic)
+	ON_BN_CLICKED(IDC_BTN_Setting, &CTileDetectorMFCDlg::OnBnClickedBtnSetting)
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -138,40 +127,13 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 
 
-
-	//初始化设定数据
-	if (true)//判断配置文件是否存在
-	{
-		string s;
-		if (Setting::GetKeyString(Setting::GRAB_ColorType, s))
-		{
-			CString cs(s.c_str());
-			set_grabRGBType = cs;
-		}
-		else
-		{
-			set_grabRGBType = globle_var::mdi.colorType == globle_var::mdi.RGB ? "RGB" : "Gray";
-		}
-		if (!Setting::GetKeyInt(Setting::GRAB_MaxPics, set_grabMaxPics) || set_grabMaxPics < 1000)
-		{
-			set_grabMaxPics = globle_var::mdi.MaxPics;
-		}
-		if (!Setting::GetKeyInt(Setting::GRAB_Width, set_grabWidth) || set_grabWidth < 1000)
-		{
-			set_grabWidth = globle_var::mdi.width;
-		}
-		if (!Setting::GetKeyInt(Setting::TIGGER_WaitTime, set_TiggerWaitTimeMS))
-		{
-			set_TiggerWaitTimeMS = globle_var::TiggerWaitTimeMS;
-		}
-	}
-
-
-	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
-	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
-
+	//读取参数
+	globle_var::InitSetting(true);
 	globle_var::VirtualCameraFileName = "33叠釉A.jpg";
+
 	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
+
+
 
 	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
 	consumer = new Consumer(this->GetSafeHwnd());
@@ -184,6 +146,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	{
 		twag->StopWatch();
 	}
+	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
 	UpdateData(false);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -292,7 +255,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	if (globle_var::s.BufferImg.cols > 0)
 	{
 		cv::Mat a;
-		cv::resize(globle_var::s.BufferImg, a, cv::Size(400, 1100));
+		//cv::resize(globle_var::s.BufferImg, a, cv::Size(400, 1100));
 		DrawPicToHDC(a, IDC_PIC_Sample);
 	}
 	CString msg;
@@ -321,17 +284,17 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
 	m_Info += msg;
 
+	img_on_show = consumer->originalImg;
 	if (consumer->faults.BrokenEdges.size() > 0)
 	{
 		CString str;
 		str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenEdges.size());
 		m_Info += str;
-		//cv::Mat img(consumer->originalImg);
+		//cv::Mat img(img_on_show);
 		for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
 		{
-			cv::circle(consumer->originalImg, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
+			cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
 		}
-		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
 	if (consumer->faults.SomethingBigs.size() > 0)
 	{
@@ -340,9 +303,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		m_Info += str;
 		for (size_t i = 0; i < consumer->faults.SomethingBigs.size(); i++)
 		{
-			cv::circle(consumer->originalImg, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
+			cv::circle(img_on_show, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
 		}
-		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
 	if (consumer->faults.Scratchs.size() > 0)
 	{
@@ -351,9 +313,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		m_Info += str;
 		for (size_t i = 0; i < consumer->faults.Scratchs.size(); i++)
 		{
-			cv::circle(consumer->originalImg, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
+			cv::circle(img_on_show, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
 		}
-		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
 	if (consumer->faults.Holes.size() > 0)
 	{
@@ -362,13 +323,13 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 		m_Info += str;
 		for (size_t i = 0; i < consumer->faults.Holes.size(); i++)
 		{
-			cv::circle(consumer->originalImg, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+			cv::circle(img_on_show, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
 		}
-		DrawPicToHDC(consumer->originalImg, IDC_PIC_Sample);
 	}
-
-	cv::imwrite("result.jpg", consumer->originalImg);
 	UpdateData(false);
+
+	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+	cv::imwrite("result.jpg", img_on_show);
 	return 1;
 }
 void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
@@ -399,86 +360,6 @@ void CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered()
 
 
 
-
-
-//保存采集参数
-void CTileDetectorMFCDlg::OnBnClickedBtnGrabSave()
-{
-	UpdateData(true);
-	//存入设置
-	globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
-
-	//存入文件
-	stringstream ss;
-	ss << set_grabMaxPics;
-	Setting::AddKey(Setting::GRAB_MaxPics, ss.str());
-	ss.str("");
-	ss << set_grabWidth;
-	Setting::AddKey(Setting::GRAB_Width, ss.str());
-	ss.str("");
-	Setting::AddKey(Setting::GRAB_ColorType, (LPWSTR)(LPCWSTR)set_grabRGBType.GetBuffer(0));
-
-	twag->StopWatch();
-	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-	{
-		twag->StartWatch();
-	}
-	else
-	{
-		twag->StopWatch();
-	}
-}
-//读取采集参数
-void CTileDetectorMFCDlg::OnBnClickedBtnGrabLoad()
-{
-	string s = "";
-	Setting::GetKeyString(Setting::GRAB_ColorType, s);
-	CString cs(s.c_str());
-	set_grabRGBType = cs;
-
-	Setting::GetKeyInt(Setting::GRAB_MaxPics, set_grabMaxPics);
-	Setting::GetKeyInt(Setting::GRAB_Width, set_grabWidth);
-
-	if ((set_grabRGBType != "RGB" && set_grabRGBType != "Gray") || set_grabMaxPics < 100 || set_grabWidth < 100)
-	{
-		MessageBox(L"配置文件数据错误，将使用默认参数!");
-		globle_var::InitSetting();
-	}
-	else
-	{
-		globle_var::InitSetting((set_grabRGBType == "RGB" ? "RGB" : "Gray"), set_grabMaxPics, set_grabWidth);
-	}
-	UpdateData(false);
-
-
-	twag->StopWatch();
-	twag->Init();
-	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-		twag->StartWatch();
-}
-
-//保存触发参数
-void CTileDetectorMFCDlg::OnBnClickedBtnTiggerSave()
-{
-	UpdateData(true);
-	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
-
-	stringstream ss;
-	ss << set_TiggerWaitTimeMS;
-	Setting::AddKey(Setting::TIGGER_WaitTime, ss.str());
-
-}
-//读取触发参数
-void CTileDetectorMFCDlg::OnBnClickedBtnTiggerLoad()
-{
-	if (Setting::GetKeyInt(Setting::TIGGER_WaitTime, set_TiggerWaitTimeMS))
-	{
-		globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
-	}
-	UpdateData(false);
-
-
-}
 
 
 void CTileDetectorMFCDlg::OnEnChangeTbVirtualcamera()
@@ -538,4 +419,145 @@ void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
 	m_Info += _T("保存完成\r\n");
 	UpdateData(false);
 
+}
+
+
+void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
+{
+	SettingDlg sd;
+	twag->StopWatch();
+
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CanBeTiggered);
+	pBtn->SetCheck(FALSE);
+
+	if (sd.DoModal() == IDOK)
+	{
+		delete twag;
+		twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
+	}
+	else
+	{
+	}
+}
+
+
+void CTileDetectorMFCDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	ShowImgROI(point);
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void CTileDetectorMFCDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	img_big_flag = !img_big_flag;//标记放大/不放大图像
+	//if (img_big_flag)
+	//	zoom = 1;
+	ShowImgROI(point);
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+//鼠标滚轮
+BOOL CTileDetectorMFCDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
+{
+	//zDelta：大于0时为向上滚动，小于0时为向下滚动。
+	if (img_on_show.rows > 0)
+	{
+		if (mouse_in_img)   //鼠标是否在控件范围之内
+		{
+			//if (!img_big_flag)
+			//	img_big_flag = true;
+			if (zDelta > 0)
+			{
+				zoom = zoom % 2 == 0 ? zoom - 2 : zoom - 1;
+				zoom = zoom < 1 ? 1 : zoom;
+			}
+			else
+			{
+				zoom = zoom % 2 == 0 ? zoom + 2 : zoom + 1;
+				zoom = zoom > 4 ? 4 : zoom;
+			}
+		}
+		ShowImgROI(CPoint(0,0));
+	}
+	return CDialogEx::OnMouseWheel(nFlags, zDelta, point);
+}
+
+void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0,0))
+{
+	if (img_on_show.rows > 0)
+	{
+		if (point != CPoint(0, 0))
+		{
+			ClientToScreen(&point);
+			mouse_point = point;
+		}
+		CRect rect;
+		GetDlgItem(IDC_PIC_Sample)->GetClientRect(rect);
+		GetDlgItem(IDC_PIC_Sample)->ClientToScreen(rect);//函数是将你打开的APP中客户区的坐标点信息转换为整个屏幕的坐标
+		bool inRect = rect.PtInRect(point);
+		bool inRectFlag = (point == CPoint(0, 0) && mouse_in_img);
+		if (inRect || inRectFlag)   //鼠标是否在控件范围之内
+		{
+			if (point == CPoint(0, 0))
+				point = mouse_point;
+			mouse_in_img = true;//标记鼠标移入图像
+			if (img_big_flag)
+			{
+				int idc_width = rect.right - rect.left;//图像控件宽
+				int idc_height = rect.bottom - rect.top;//图像控件高
+
+				//将鼠标所在位置换算为原始图像坐标点
+				int x = (float)(point.x - rect.left) / idc_width * img_on_show.cols;
+				int y = (float)(point.y - rect.top) / idc_height * img_on_show.rows;
+
+				//根据放大系数转换ROI长宽
+				int zoom_width = zoom * idc_width;
+				int zoom_height = zoom * idc_height;
+				if (zoom_width >= img_on_show.cols || zoom_height >= img_on_show.rows)//若放大系数过小，则显示全图
+				{
+					img_big_flag = false;//标记不放大图像
+					DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+					GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+				}
+				else//放大显示
+				{
+
+					int startx = x - zoom_width / 2;
+					int starty = y - zoom_height / 2;
+
+					//防止越界
+					if (startx < 0)startx = 0;
+					if (starty < 0)starty = 0;
+					if (img_on_show.cols - startx < zoom_width)
+						startx = img_on_show.cols - startx;
+					if (img_on_show.rows - starty < zoom_height)
+						starty = img_on_show.rows - starty;
+					//ROI
+					cv::Mat roi = img_on_show(cv::Rect(startx, starty, zoom_width, zoom_height));
+					DrawPicToHDC(roi, IDC_PIC_Sample);
+
+					stringstream ss;
+					ss << "(" << x << "," << y << ") " << zoom << "×";
+
+					int dwLen = ss.str().length() + 1;//strlen(ss.str().c_str()) + 1;
+					int nwLen = MultiByteToWideChar(CP_ACP, 0, ss.str().c_str(), dwLen, NULL, 0);//算出合适的长度
+					LPWSTR lpszPath = new WCHAR[dwLen];
+					MultiByteToWideChar(CP_ACP, 0, ss.str().c_str(), dwLen, lpszPath, nwLen);
+
+					GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(lpszPath);
+				}
+			}
+			else// if(!inRect && !inRectFlag)
+			{
+				mouse_in_img = false;//标记鼠标移出图像
+				DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+				GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+			}
+		}
+		else
+		{
+			DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+			GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+			img_big_flag = false;//标记不放大图像
+		}
+	}
 }

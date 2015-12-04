@@ -112,7 +112,7 @@
   <ItemGroup>
     <ClInclude Include="Class\Base\Block.h" />
     <ClInclude Include="Class\Base\Faults.h" />
-    <ClInclude Include="Class\Base\Setting.h" />
+    <ClInclude Include="Class\Base\SettingHelper.h" />
     <ClInclude Include="Class\Base\VirtualCamera.h" />
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
@@ -132,6 +132,7 @@
     <ClInclude Include="globle_var.h" />
     <ClInclude Include="mc100.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TileDetectorMFC.h" />
@@ -139,7 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class\Base\Block.cpp" />
-    <ClCompile Include="Class\Base\Setting.cpp" />
+    <ClCompile Include="Class\Base\SettingHelper.cpp" />
     <ClCompile Include="Class\Base\VirtualCamera.cpp" />
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp" />
     <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="globle_var.cpp" />
+    <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

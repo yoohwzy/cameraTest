@@ -96,9 +96,6 @@
     <ClInclude Include="Class\Base\Block.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Base\Setting.h">
-      <Filter>Class\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Base\VirtualCamera.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
@@ -106,6 +103,12 @@
       <Filter>Class</Filter>
     </ClInclude>
     <ClInclude Include="Class\Base\Faults.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Base\SettingHelper.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
   </ItemGroup>
@@ -161,14 +164,17 @@
     <ClCompile Include="Class\Base\Block.cpp">
       <Filter>Class\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Class\Base\Setting.cpp">
-      <Filter>Class\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Class\Base\VirtualCamera.cpp">
       <Filter>Class\Base</Filter>
     </ClCompile>
     <ClCompile Include="Class\EdgeInnerDetctor.cpp">
       <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Base\SettingHelper.cpp">
+      <Filter>Class\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

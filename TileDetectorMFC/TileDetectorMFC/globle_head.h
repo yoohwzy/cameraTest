@@ -24,7 +24,7 @@ using namespace std;
 #include "opencv2/highgui/highgui.hpp"
 
 
-#include "Class/Base/Setting.h"
+#include "Class/Base/SettingHelper.h"
 //Í·ÎÄ¼şEND
 
 
