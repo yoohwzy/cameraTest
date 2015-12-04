@@ -13,7 +13,7 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	//bd_Standard.StartUP_DOWN(BlocksDetector::Up);
 	//bd_Standard.StartUP_DOWN(BlocksDetector::Down);
 	//bd_Standard.ABCD();
-	//Measurer m = Measurer(&bd_Standard, &globle_var::mdi, 300, 600);		 //定标图片初始化
+	//Measurer m = Measurer(&bd_Standard, &globle_var::mdi(), 300, 600);		 //定标图片初始化
 	//printf_globle("定标完成\n");
 }
 TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
@@ -43,13 +43,13 @@ void TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg, bool refresh)
 	if (USING_VIRTUAL_CAMERA && !refresh)
 		return;
 	USING_VIRTUAL_CAMERA = true;
-	if (globle_var::mdi.fg != NULL)
-		MicroDisplayInit::Release(globle_var::mdi);
+	if (globle_var::mdi().fg != NULL)
+		MicroDisplayInit::Release(globle_var::mdi());
 
 
 
 
-	vc = new VirtualCamera(globle_var::mdi, virtualImg);//初始化虚拟相机
+	vc = new VirtualCamera(globle_var::mdi(), virtualImg);//初始化虚拟相机
 	printf_globle("虚拟相机初始化完成！\n");
 }
 void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
@@ -57,21 +57,21 @@ void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
 	if (!USING_VIRTUAL_CAMERA && !refresh)
 		return;
 	USING_VIRTUAL_CAMERA = false;
-	if (globle_var::mdi.fg != NULL)
-		MicroDisplayInit::Release(globle_var::mdi);
+	if (globle_var::mdi().fg != NULL)
+		MicroDisplayInit::Release(globle_var::mdi());
 
 
 	//初始化采集卡
-	int status = MicroDisplayInit::InitParameter(globle_var::mdi);
-	//status = MicroDisplayInit::InitLoad(globle_var::mdi, "4096RGB1LineX1.mcf");
+	int status = MicroDisplayInit::InitParameter(globle_var::mdi());
+	//status = MicroDisplayInit::InitLoad(globle_var::mdi(), "4096RGB1LineX1.mcf");
 	if (status < 0)
 	{
-		MD_ErrorMessageWait(globle_var::mdi.fg);
+		MD_ErrorMessageWait(globle_var::mdi().fg);
 		return;
 	}
-	MicroDisplayInit::CreateBufferWithOutDiplay(globle_var::mdi);
-	//MicroDisplayInit::CreateBufferWithDiplay(globle_var::mdi);
-	Fg_saveConfig(globle_var::mdi.fg, "save.mcf");
+	MicroDisplayInit::CreateBufferWithOutDiplay(globle_var::mdi());
+	//MicroDisplayInit::CreateBufferWithDiplay(globle_var::mdi());
+	Fg_saveConfig(globle_var::mdi().fg, "save.mcf");
 	//没有报错说明初始化完成，有错会自动报错并退出。
 	printf_globle("相机&采集卡初始化完成！\n");
 
@@ -165,7 +165,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 			if (!USING_VIRTUAL_CAMERA)
 			{
-				MicroDisplayControler::FreeRunning(globle_var::mdi, globle_var::s);
+				MicroDisplayControler::FreeRunning(globle_var::mdi(), globle_var::s);
 			}
 			else
 			{
@@ -179,12 +179,12 @@ void TiggerWatcherAndGrabber::watcherThread()
 					}
 					return;
 				}
-				vc->FreeRunning(globle_var::mdi, globle_var::s);
+				vc->FreeRunning(globle_var::mdi(), globle_var::s);
 			}
 			//采样计时
 			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
-			ss << GrabbingIndex << " " << "producer:" << globle_var::mdi.width << "x" << globle_var::mdi.MaxPics << "：" << t << "  End  at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+			ss << GrabbingIndex << " " << "producer:" << globle_var::mdi().width << "x" << globle_var::mdi().MaxPics << "：" << t << "  End  at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 			printf_globle(ss.str());
 			ss.str("");
 
@@ -233,10 +233,10 @@ void TiggerWatcherAndGrabber::threeInOne()
 
 	double t = (double)cv::getTickCount();
 	//同步进行光照矫正与叠加
-	for (globle_var::s.BufferReadIndex = 0; globle_var::s.BufferReadIndex < globle_var::mdi.MaxPics; globle_var::s.BufferReadIndex++)
+	for (globle_var::s.BufferReadIndex = 0; globle_var::s.BufferReadIndex < globle_var::mdi().MaxPics; globle_var::s.BufferReadIndex++)
 	{
 		//尚未写入缓存，等待
-		while (globle_var::s.BufferReadIndex + globle_var::s.NinOne >= globle_var::s.BufferWriteIndex && globle_var::s.BufferWriteIndex != globle_var::mdi.MaxPics)
+		while (globle_var::s.BufferReadIndex + globle_var::s.NinOne >= globle_var::s.BufferWriteIndex && globle_var::s.BufferWriteIndex < globle_var::mdi().MaxPics)
 		{
 			Sleep(1);
 		}

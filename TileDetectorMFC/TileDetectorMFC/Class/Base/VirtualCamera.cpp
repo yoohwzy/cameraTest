@@ -43,7 +43,7 @@ VirtualCamera::~VirtualCamera()
 cv::Mat VirtualCamera::GetNext()
 {
 	int i = BufferIndex;
-	if (!EndFlag && ++BufferIndex >= BufferLength)
+	if (!EndFlag && ++BufferIndex > BufferLength)
 	{
 		EndFlag = true;
 		i = 0;
@@ -56,7 +56,7 @@ int VirtualCamera::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 {
 	EndFlag = false;
 	BufferIndex = 0;
-	cv::Mat OriginalImage;
+	//cv::Mat OriginalImage;
 	double t = (double)cv::getTickCount();
 	do{
 		Sleep(0.1);

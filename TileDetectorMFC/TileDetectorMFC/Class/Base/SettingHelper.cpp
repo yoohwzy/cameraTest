@@ -1,26 +1,26 @@
-#include "Setting.h"
+#include "SettingHelper.h"
 
 
-Setting::Setting()
+SettingHelper::SettingHelper()
 {
 }
 
 
-Setting::~Setting()
+SettingHelper::~SettingHelper()
 {
 }
-//void Setting::Init(Key key)
+//void SettingHelper::Init(Key key)
 //{
 //
 //	switch (key)
 //	{
-//	case Setting::GRAB_MaxPics:
+//	case SettingHelper::GRAB_MaxPics:
 //		break;
-//	case Setting::GRAB_Width:
+//	case SettingHelper::GRAB_Width:
 //		break;
-//	case Setting::GRAB_ColorType:
+//	case SettingHelper::GRAB_ColorType:
 //		break;
-//	case Setting::TIGGER_WaitTime:
+//	case SettingHelper::TIGGER_WaitTime:
 //		break;
 //	default:
 //		break;
@@ -28,25 +28,25 @@ Setting::~Setting()
 //}
 
 
-void Setting::AddKey(Key key, int value)
+void SettingHelper::AddKey(Key key, int value)
 {
 	std::stringstream ss;
 	ss << value;
 	AddKey(key, ss.str());
 }
-void Setting::AddKey(Key key, float value)
+void SettingHelper::AddKey(Key key, float value)
 {
 	std::stringstream ss;
 	ss << value;
 	AddKey(key, ss.str());
 }
-void Setting::AddKey(Key key, double value)
+void SettingHelper::AddKey(Key key, double value)
 {
 	std::stringstream ss;
 	ss << value;
 	AddKey(key, ss.str());
 }
-void Setting::AddKey(Key key, LPWSTR value)
+void SettingHelper::AddKey(Key key, LPWSTR value)
 {
 	wstring ws(value);
 	std::string curLocale = setlocale(LC_ALL, NULL);        // curLocale = "C";
@@ -62,7 +62,7 @@ void Setting::AddKey(Key key, LPWSTR value)
 
 	AddKey(key, result);
 }
-void Setting::AddKey(Key key, string value)
+void SettingHelper::AddKey(Key key, string value)
 {
 	string strkey = getKeyName(key);
 	string strsection = getSectionName(key);
@@ -83,13 +83,13 @@ void Setting::AddKey(Key key, string value)
 	MultiByteToWideChar(CP_ACP, 0, value.c_str(), size, valuebuffer, size * sizeof(wchar_t));
 	valuebuffer[size] = 0;  // 确保以 '\0' 结尾 
 
-	::WritePrivateProfileStringW(sectionbuffer, keybuffer, valuebuffer, Setting::path);
+	::WritePrivateProfileStringW(sectionbuffer, keybuffer, valuebuffer, SettingHelper::path);
 
 	delete valuebuffer;
 	delete keybuffer;
 	delete sectionbuffer;
 }
-bool Setting::GetKeyInt(Key key, int& value)
+bool SettingHelper::GetKeyInt(Key key, int& value)
 {
 	string str;
 	bool flag = GetKeyString(key, str);
@@ -101,7 +101,7 @@ bool Setting::GetKeyInt(Key key, int& value)
 	//value = atoi(str.c_str());
 	return true;
 }
-bool Setting::GetKeyFloat(Key key, float& value)
+bool SettingHelper::GetKeyFloat(Key key, float& value)
 {
 	string str;
 	bool flag = GetKeyString(key, str);
@@ -114,7 +114,7 @@ bool Setting::GetKeyFloat(Key key, float& value)
 	return true;
 }
 
-bool Setting::GetKeyDouble(Key key, double& value)
+bool SettingHelper::GetKeyDouble(Key key, double& value)
 {
 	string str;
 	bool flag = GetKeyString(key, str);
@@ -127,7 +127,7 @@ bool Setting::GetKeyDouble(Key key, double& value)
 	//value = atof(str.c_str());
 	return true;
 }
-bool Setting::GetKeyString(Key key, string& value)
+bool SettingHelper::GetKeyString(Key key, string& value)
 {
 	string strkey = getKeyName(key);
 	string strsection = getSectionName(key);
@@ -147,7 +147,7 @@ bool Setting::GetKeyString(Key key, string& value)
 	char tmp[128];
 	LPSTR lpstr = tmp;
 	lwpstr = (LPWSTR)lpstr;
-	::GetPrivateProfileString(sectionbuffer, keybuffer, NULL, lwpstr, 128, Setting::path);
+	::GetPrivateProfileString(sectionbuffer, keybuffer, NULL, lwpstr, 128, SettingHelper::path);
 
 	wstring ws(lwpstr);
 	std::string curLocale = setlocale(LC_ALL, NULL);        // curLocale = "C";
@@ -169,36 +169,36 @@ bool Setting::GetKeyString(Key key, string& value)
 
 
 
-string Setting::getSectionName(Key key)
+string SettingHelper::getSectionName(Key key)
 {
 	//return "GRAB";
 	//return "TIGGER";
 	switch (key)
 	{
-	case Setting::GRAB_MaxPics:
+	case SettingHelper::GRAB_MaxPics:
 		return "GRAB";
-	case Setting::GRAB_Width:
+	case SettingHelper::GRAB_Width:
 		return "GRAB";
-	case Setting::GRAB_ColorType:
+	case SettingHelper::GRAB_ColorType:
 		return "GRAB";
-	case Setting::TIGGER_WaitTime:
+	case SettingHelper::TIGGER_WaitTime:
 		return "TIGGER";
 	default:
 		break;
 	}
 	return "";
 }
-string Setting::getKeyName(Key key)
+string SettingHelper::getKeyName(Key key)
 {
 	switch (key)
 	{
-	case Setting::GRAB_MaxPics:
+	case SettingHelper::GRAB_MaxPics:
 		return "GRAB_MaxPics";
-	case Setting::GRAB_Width:
+	case SettingHelper::GRAB_Width:
 		return "GRAB_Width";
-	case Setting::GRAB_ColorType:
+	case SettingHelper::GRAB_ColorType:
 		return "GRAB_ColorType";
-	case Setting::TIGGER_WaitTime:
+	case SettingHelper::TIGGER_WaitTime:
 		return "TIGGER_WaitTime";
 	default:
 		break;
@@ -206,4 +206,8 @@ string Setting::getKeyName(Key key)
 	return "";
 }
 
-const LPWSTR Setting::path = _T("src/../setting.ini");
+
+
+
+
+const LPWSTR SettingHelper::path = _T("src/../Setting.ini");
