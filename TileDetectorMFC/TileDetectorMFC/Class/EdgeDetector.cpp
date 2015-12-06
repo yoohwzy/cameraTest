@@ -10,7 +10,7 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int y1 = FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
 		int x2 = 4096;
 		int y2 = FitLine[1] * x2 / FitLine[0] + FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
-		//cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 	else
 	{
@@ -18,13 +18,11 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int x1 = FitLine[2] - FitLine[0] / FitLine[1] * FitLine[3];
 		int y2 = 11000;
 		int x2 = (y2 - FitLine[3])*FitLine[0] / FitLine[1] + FitLine[2];
-		//line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 }
 
-
-
-void EdgeDetector::DistanceDetector_set(Vector<Point> Boundary_Point_temp, Vec4f FitLine, Vector<float> &Distance)
+void EdgeDetector::DistanceDetector_set(vector<Point> Boundary_Point_temp, Vec4f FitLine, vector<float> &Distance)
 {
 	//float distance = 0;
 	for (int Boundary_Point_tempIndex = 0; Boundary_Point_tempIndex < Boundary_Point_temp.size(); Boundary_Point_tempIndex++)
@@ -43,7 +41,7 @@ int EdgeDetector::DistanceDetector(Point Boundary_Point_temp, Vec4f FitLine)
 	return Distance;
 }
 
-void EdgeDetector::PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Point> &Point_of_Intersection)
+void EdgeDetector::PointOfIntersection(vector<Vec4f>FitLine_Aggregate, vector<Point> &Point_of_Intersection)
 {
 	for (int FitLine_Aggregate_Index = 0; FitLine_Aggregate_Index < FitLine_Aggregate.size(); FitLine_Aggregate_Index++)
 	{
@@ -71,7 +69,7 @@ void EdgeDetector::PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Po
 	}
 }
 
-int EdgeDetector::Distamce_MaxTabel(Vector<float> Distance)
+int EdgeDetector::Distamce_MaxTabel(vector<float> Distance)
 {
 	float Temp = 0;
 	for (int DistanceIndex = 0; DistanceIndex < Distance.size(); DistanceIndex++)
@@ -83,6 +81,328 @@ int EdgeDetector::Distamce_MaxTabel(Vector<float> Distance)
 		}
 	}
 	return Tabel;
+}
+
+void EdgeDetector::Dynamic_range(Mat &image)
+{
+	int graymax = 0;
+	for (int j = 0; j < image.rows; j++)
+	{
+		uchar *data = image.ptr(j);
+		for (int k = 0; k < image.cols; k++)
+		{
+			if (data[k]>graymax)
+				graymax = data[k];
+		}
+	}
+
+	for (int j = 0; j <image.rows; j++)
+	{
+		uchar *data = image.ptr<uchar>(j);
+		for (int k = 0; k < image.cols; k++)
+		{
+			if (data[k] < Dynamic_range_min)
+				data[k] = 0;
+			else
+			{
+				if (data[k]>(graymax*Dynamic_range_max))
+					data[k] = 255;
+				else
+				{
+					int a = 255 / (graymax*Dynamic_range_max - Dynamic_range_min);
+					int b = (-1)*Dynamic_range_min * a;
+					data[k] = data[k] * a + b;
+				}
+			}
+		}
+	}
+	//dilate(ROI[i], ROI[i], Mat()); // 膨胀
+}
+
+void EdgeDetector::Find_contours(vector<Mat> image, vector<vector<Point>> &Contours, vector<vector<Point>> &ROI_Contours)
+{
+	for (int index = 0; index < image.size(); index++)
+	{
+		vector<Point> contours_temp;
+		vector<Point> contours_temp_roi;
+		int flag = 1;
+		int t1 = 0, t2 = 0;
+		int xp = 0, yp = 0;
+
+		if (index % 2 == 0) // 左右ROI
+		{
+
+			if (index == 0) // 左边ROI
+			{
+				t1 = 0;	t2 = image[index].cols;	xp = xleft; yp = yleft;
+			}
+			else // 右边ROI
+			{
+				t1 = -1 * image[index].cols + 1;	t2 = 0;	xp = xright;	yp = yright;
+			}
+
+			for (int i = 0; i < image[index].rows; i++) 
+			{
+				flag = 1;
+				const uchar *data = image[index].ptr<uchar>(i);
+				for (int j = t1; j < t2; j++)
+				{
+					if (data[abs(j)] >= Pixel_threld)
+					{
+						flag = 1;
+						for (int p = j + 1; p < j + contours_threld; p++)
+						{
+							if (data[abs(p)] < Pixel_threld)
+							{
+								j = p + 1;
+								break;
+							}
+							else
+								flag++;
+						}
+						if (flag == contours_threld)
+						{
+							Point temp;
+							temp.y = i;
+							temp.x = abs(j);
+							contours_temp_roi.push_back(temp);
+							temp.y = temp.y + yp;
+							temp.x = temp.x + xp;
+							contours_temp.push_back(temp);
+							break;
+						}
+
+					}
+				}
+
+			}
+
+		}
+
+		else
+		{
+			if (index == 1)
+			{
+				t1 = -1 * image[index].rows + 1;	t2 = 0;	xp = xdown;	yp = ydown;
+			}
+			else
+			{
+				t1 = 0;	t2 = image[index].rows - 1;	xp = xup;	yp = yup;
+			}
+			for (int j = 0; j < image[index].cols; j++)
+			{
+
+				for (int i = t1; i < t2; i++)
+				{
+					flag = 1;
+					const uchar *data = image[index].ptr<uchar>(abs(i));
+
+					if (data[j] >= Pixel_threld)
+					{
+						flag = 1;
+
+						for (int p = i + 1; p < i + contours_threld; p++)
+						{
+							if (p == abs(t2))
+								break;
+							const uchar *data = image[index].ptr<uchar>(abs(p));
+							if (data[j] < Pixel_threld)
+							{
+								i = p + 1;
+								break;
+							}
+							else
+								flag++;
+						}
+					}
+					if (flag == contours_threld)
+					{
+						Point temp;
+						temp.y = abs(i);
+						temp.x = j;
+						contours_temp_roi.push_back(temp);
+						temp.y = abs(i) + yp;
+						temp.x = j + xp;
+						contours_temp.push_back(temp);
+						break;
+					}
+
+				}
+			}
+		}
+
+
+
+		Contours.push_back(contours_temp);
+		ROI_Contours.push_back(contours_temp_roi);
+		contours_temp.clear();
+		contours_temp_roi.clear();
+	}
+}
+
+void EdgeDetector::FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &line_, vector<Vec4f> &line_roi, Vec4f &Fit_Line)
+{
+	for (int i = 0; i < Fit_contours.size(); i++)
+	{
+		if (!Fit_contours[i].empty())
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				vector<float> Distance;
+				fitLine(Mat(Fit_contours[i]), Fit_Line, CV_DIST_L2, 0, 1, 1);
+				//
+
+				DistanceDetector_set(Fit_contours[i], Fit_Line, Distance);
+				int Tabel = Distamce_MaxTabel(Distance);
+				if (Distance[Tabel]>5)
+				{
+					//
+					//					circle(image, Fit_contours[i][Tabel], 20, CV_RGB(160, 0, 50 + i * 50), 1);
+					Fit_contours[i].erase(Fit_contours[i].begin() + Tabel); // 擦除奇异点
+				}
+				else
+					break;
+			}
+			line_roi.push_back(Fit_Line);
+			/////////////////////////////////////////////////////
+			/*DrawLine(i, ROI[i], Fit_Line, 200, 200, 100);*/
+			/////////////////////////////////////////////////////
+			int t1 = 0, t2 = 0;
+			switch (i)
+			{
+			case 0: t1 = xleft; t2 = yleft; break;
+			case 1: t1 = xdown; t2 = ydown; break;
+			case 2: t1 = xright; t2 = yright; break;
+			case 3: t1 = xup; t2 = yup; break;
+			}
+			Fit_Line[2] += t1;
+			Fit_Line[3] += t2;
+			DrawLine(i, src, Fit_Line, 200, 200, 100);
+			/*DrawLine(i, image1, Fit_Line, 200, 200, 100);*/
+			line_.push_back(Fit_Line);
+		}
+	}
+}
+
+void EdgeDetector::Merge_Defects(vector<Point3f> &Defects)
+{
+	if (Defects.size() > 1)
+	{
+		for (int i = 0; i < Defects.size(); i++)
+		{
+			for (int j = i + 1; j < Defects.size(); j++)
+			{
+				int distan = sqrt(pow((Defects[i].x - Defects[j].x), 2) + pow((Defects[i].y - Defects[j].y), 2));
+				if (distan <= (Defects[i].z + Defects[j].z + 100))
+				{
+					Defects[i].x = (Defects[i].x + Defects[j].x) / 2;
+					Defects[i].y = (Defects[i].y + Defects[j].y) / 2;
+					Defects[i].z = Defects[i].z + Defects[j].z + distan / 2;
+					Defects.erase(Defects.begin() + j);
+					j--;
+				}
+			}
+		}
+	}
+}
+
+void EdgeDetector::Blocks_Defects(vector<Mat> roi, vector<Vec4f> line_1, vector<Mat> &Blocks, vector<Point3f> &local_)
+{
+	int ylA = (block->A).y - yleft, ylD = (block->D).y - yleft;
+	int xdD = (block->D).x - xdown, xdC = (block->C).x - xdown;
+	int yrB = (block->B).y - yright, yrC = (block->C).y - yright;
+	int xuA = (block->A).x - xup, xuB = (block->B).x - xup;
+	int st = 0, st1 = 0;
+	int fir = 0, las = 0, p = 0;
+	int xp = 0, yp = 0;
+	int Pixel_t = 255;
+	for (int index = 0; index < roi.size(); index++)
+	{
+		switch (index)
+		{
+		case 0:	fir = ylA + 100;	las = ylD - 100;	p = 15;		Pixel_t = 40;	 xp = xleft;	 yp = yleft;	 break;
+		case 1:	fir = xdD + 100;	las = xdC - 100;	p = -15;	Pixel_t = 15;	 xp = xdown;	 yp = ydown;	 break;
+		case 2:	fir = yrB + 100;	las = yrC - 100;	p = -15;	Pixel_t = 40;	 xp = xright;	 yp = yright;	 break;
+		case 3:	fir = xuA + 100;	las = xuB - 100;	p = 15;		Pixel_t = 15;	 xp = xup;		 yp = yup;		 break;
+		}
+		for (int i = fir; i < las; i += 5)
+		{
+			int j = 0;
+			Point tm;
+			Point tm1;
+			if (index % 2 == 0)
+			{
+				j = line_1[index][0] / line_1[index][1] * (i - line_1[index][3]) + line_1[index][2];
+				int j1 = line_1[index][0] / line_1[index][1] * (i + 5 - line_1[index][3]) + line_1[index][2];
+				tm1.x = j1 + p;
+				tm1.y = i + 5;
+				tm.x = j + p;
+				tm.y = i;
+			}
+
+			else
+			{
+				j = line_1[index][1] / line_1[index][0] * (i - line_1[index][2]) + line_1[index][3];
+				int j0 = line_1[index][1] / line_1[index][0] * (i + 5 - line_1[index][2]) + line_1[index][3];
+				tm1.x = i + 5;
+				tm1.y = j0 + p;
+				tm.x = i;
+				tm.y = j + p;
+			}
+
+
+			Point temp;
+			Point3f temp1;
+			int tt = 0, tt1 = 0;
+			if (abs(ROI[index].at<uchar>(tm)-ROI[index].at<uchar>(tm1)) > Pixel_t)
+			{
+				st = i - 30;
+				if (index % 2 == 0)
+				{
+					st1 = line_1[index][0] / line_1[index][1] * (st - line_1[index][3]) + line_1[index][2];
+					tt = min(50, ROI[index].cols - st1);
+					if (index == 0)
+					{
+						temp.x = st1;
+						temp.y = st;
+					}
+					else
+					{
+						temp.x = st1 - tt;
+						temp.y = st;
+					}
+					temp1.x = st1 + xp;
+					temp1.y = st + 45 + yp;
+					temp1.z = tt;
+					tt1 = 90;
+				}
+				else
+				{
+					st1 = line_1[index][1] / line_1[index][0] * (st - line_1[index][2]) + line_1[index][3];
+					tt = 90;
+					tt1 = min(50, ROI[index].rows - st1);
+					if (index == 1)
+					{
+						temp.x = st;
+						temp.y = st1 - tt1;
+					}
+					else
+					{
+						temp.x = st;
+						temp.y = st1;
+					}
+					temp1.x = st + 45 + xp;
+					temp1.y = st1 + yp;
+					temp1.z = tt1;
+				}
+				i += 65;
+				local_.push_back(temp1);
+				Blocks.push_back(ROI[index](Rect(temp.x, temp.y, tt, tt1)));
+			}
+
+		}
+	}
+
 }
 
 EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
@@ -153,480 +473,311 @@ EdgeDetector::~EdgeDetector()
 
 }
 
+
 void EdgeDetector::start()
 {
+	/*double t2 = (double)cv::getTickCount();
 
-	Processor ps;
-
-
-	//double	t = (double)cv::getTickCount();
-	//if (src.channels() == 3)
-	//for (int i = 0; i < ROI.size(); i++)
-	//	cvtColor(ROI[i], ROI[i], CV_BGR2GRAY);
-
-
-	//if (src.channels() == 3)
-	//	cvtColor(src, src, CV_BGR2GRAY);
-
-	// ROI二值化
+	double t = (double)cv::getTickCount();*/
+	// 预处理
 	for (int i = 0; i < ROI.size(); i++)
 	{
-		ps.Binaryzation(ROI[i]);
-		//Canny(ROI[i], ROI[i], 40, 80);
+		Dynamic_range(ROI[i]);  
 	}
-
-	//if (src.channels() == 3)
-	//for (int i = 0; i < ROI1.size(); i++)
-	//	cvtColor(ROI1[i], ROI1[i], CV_BGR2GRAY);
 	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << t;*/
-	vector<Point> p, p1;
-	Vector<Point> Center;
-	vector<vector<Point>> contourstemp; // 保存各个边界的最大轮廓边界点
-	vector<vector<Point>> temp;			// 保存一个边界的所有轮廓点集合
-	vector<vector<Point>> contours, fitcontours;		// 保存每个边界的有效边界点
-	// 搜索ROI边界轮廓
-	for (int roi_index = 0; roi_index < ROI.size(); roi_index++)
-	{
+	cout << "预处理time=" << t << "\t";
 
-		findContours(ROI[roi_index], temp, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-		int maxtemp = 0, maxt = 0;
-		for (int i = 0; i < temp.size(); i++)
-		{
-			if (maxt < temp[i].size())
-			{
-				maxt = temp[i].size();
-				maxtemp = i;
-			}
-
-		}
-		contourstemp.push_back(temp[maxtemp]);
-		/*temp.clear();*/
-	}
-	//ROI.clear();
+	t = (double)cv::getTickCount();*/
+	// 获取边缘
+	vector<vector<Point>> Contours;// 原图的边缘坐标
+	vector<vector<Point>> ROI_Contours; // ROI上的边缘坐标
+	Find_contours(ROI, Contours, ROI_Contours); // 找到的边缘对应于原图和ROI分别保存
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "获取边缘time=" << t << "\t";
 
 
-	// 得到每个边界轮廓的有效边界
-	for (int i = 0; i < contourstemp.size(); i++)
-	{
-		int t = 0, t1 = 0, t2 = 0, xp = 0, yp = 0;
-		switch (i)
-		{
-		case 0: t = left_width - 2; xp = xleft; yp = yleft - 1; break;
-		case 1: t = 1; xp = xdown; yp = ydown; break;
-		case 2:	t = 1; xp = xright; yp = yright - 1; break;
-		case 3: t = up_height - 2; xp = xup; yp = yup; break;
-		}
-		if (i % 2 == 0)
-		{
-			for (int j = 0; j < contourstemp[i].size(); j++)
-			if (contourstemp[i][j].x != t)
-			{
-				Point ptemp;
-				ptemp.x = contourstemp[i][j].x/* + xp*/;
-				ptemp.y = contourstemp[i][j].y/* + yp*/;
-				p1.push_back(ptemp);
-			}
-		}
-		else
-		{
-			for (int j = 0; j < contourstemp[i].size(); j++)
-			if (contourstemp[i][j].y != t)
-			{
-				Point ptemp;
-				ptemp.x = contourstemp[i][j].x/* + xp*/;
-				ptemp.y = contourstemp[i][j].y/* + yp*/;
-				p1.push_back(ptemp);
-			}
-		}
-		contours.push_back(p1);
-		p1.clear();
-	}
-	/*contourstemp.clear();*/
+	t = (double)cv::getTickCount();*/
+	// 取边缘样点用于拟合
+	vector<vector<Point>> Fit_contours; // 存储样点用于拟合
 
-	vector<vector<Point>> Fit_contours;
-
-	for (int i = 0; i < contours.size(); i++)
+	for (int i = 0; i < ROI_Contours.size(); i++)
 	{
 		vector<Point> tm;
-		for (int j = 300; j < contours[i].size() - 300; j = j + 70)
+		for (int j = 50; j < ROI_Contours[i].size() - 50; j = j + 50) // 每隔50个点取一个
 		{
-			tm.push_back(contours[i][j]);
+			tm.push_back(ROI_Contours[i][j]);
 		}
 		Fit_contours.push_back(tm);
 	}
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "取边缘样点用于拟合time=" << t << "\t";
 
-	vector<Vec4f> line_;
-	vector<Vec4f> line_1;
+
+	t = (double)cv::getTickCount();*/
+	// 边缘直线拟合
+	vector<Vec4f> line_;   // 拟合后原图上的直线
+	vector<Vec4f> line_roi; // 拟合后roi上的直线
 	Vec4f Fit_Line;
-	for (int i = 0; i < Fit_contours.size(); i++)
-	{
-		if (!Fit_contours[i].empty())
-		{
-			for (int j = 0; j < 10; j++)
-			{
-				Vector<float> Distance;
-				fitLine(Mat(Fit_contours[i]), Fit_Line, CV_DIST_L2, 0, 1, 1);
-				//
+	FitLine(Fit_contours, line_, line_roi, Fit_Line);	 // 直线拟合
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "边缘直线拟合time=" << t << "\t";
 
-				DistanceDetector_set(Fit_contours[i], Fit_Line, Distance);
-				int Tabel = Distamce_MaxTabel(Distance);
-				if (Distance[Tabel]>5)
-				{
-					//
-					//					circle(image, Fit_contours[i][Tabel], 20, CV_RGB(160, 0, 50 + i * 50), 1);
-					Fit_contours[i].erase(Fit_contours[i].begin() + Tabel); // 擦除奇异点
-				}
-				else
-					break;
-			}
-			line_1.push_back(Fit_Line);
-			DrawLine(i, ROI1[i], Fit_Line, 200, 200, 100);
-			int t1 = 0, t2 = 0;
-			switch (i)
-			{
-			case 0: t1 = xleft; t2 = yleft; break;
-			case 1: t1 = xdown; t2 = ydown; break;
-			case 2: t1 = xright; t2 = yright; break;
-			case 3: t1 = xup; t2 = yup; break;
-			}
-			Fit_Line[2] += t1;
-			Fit_Line[3] += t2;
-			DrawLine(i, src, Fit_Line, 200, 200, 100);
-			line_.push_back(Fit_Line);
-		}
-	}
-	/*Fit_contours.clear();*/
-
+	t = (double)cv::getTickCount();*/
 	// 求出四个交点A\B\C\D
-	Vector<Point> Point_of_Intersection;
+	vector<Point> Point_of_Intersection;
 	PointOfIntersection(line_, Point_of_Intersection);
 	block->A = Point_of_Intersection[3];
-
 	block->B = Point_of_Intersection[2];
-
 	block->C = Point_of_Intersection[1];
-
 	block->D = Point_of_Intersection[0];
+	
+	vector<Point> corner;
+	corner.push_back(block->A);
+	corner.push_back(block->D);
+	corner.push_back(block->C);
+	corner.push_back(block->B);
 
-	/*line_.clear();
-	Point_of_Intersection.clear();*/
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "求出四个交点time=" << t << "\t";*/
 
-	// 左边
-	int sy = 0, ey = 0;
-	int ylA = (block->A).y - yleft, ylD = (block->D).y - yleft;
-	for (int i = ylA; i < ylD - 10; i += 10)
+	/*Mat image1(src.size(), src.type(),Scalar(0));
+	for (int i = 0; i < Contours.size(); i++)
 	{
-		int thred = 0;
-		ey = 0; sy = 0;
-		int j = line_1[0][0] / line_1[0][1] * (i - line_1[0][3]) + line_1[0][2];
-		/*ROI1[0].at<uchar>(i, j) = 255;*/
-		if (i < ylA + 50)
-			thred = 10;
-		else
-			thred = 15;
-		if (ROI1[0].at<uchar>(i, j + 6) < thred)
+		for (int j = 0; j < Contours[i].size(); j++)
 		{
-			/*		ROI1[0].at<uchar>(i, j + 6) = 255;*/
-
-			if (i < ylA + 20)
-				sy = ylA;
-			else
-				sy = i - 20;
-			for (int q = i + 1; q < ylD - 10; q += 10)
-			{
-				int p = line_1[0][0] / line_1[0][1] * (q - line_1[0][3]) + line_1[0][2];
-				if (ROI1[0].at<uchar>(q, p + 6) > thred)
-				{
-					ey = q + 20;
-					i = q + 20;
-					if (i > ylD - 9)
-						i = ylD - 9;
-					break;
-				}
-				if (ey == 0 && (ylD - q <= 20))
-				{
-					ey = ylD;
-					i = ylD - 10;
-				}
-			}
-			if (ey - sy > 51)
-			{
-				int xx = min((line_1[0][0] / line_1[0][1] * (sy - line_1[0][3]) + line_1[0][2]),
-					(line_1[0][0] / line_1[0][1] * (ey - line_1[0][3]) + line_1[0][2]));
-				ps.Binaryzation(ROI1[0](Rect(xx, sy, min(100, ROI1[0].cols - xx), ey - sy)));
-				//	Canny(src(Rect(xx, sy, 100, ey - sy)), src(Rect(xx, sy, 100, ey - sy)), 100, 250);
-				/*ps.Binaryzation_otsu(src(Rect(xx, sy, 100, ey - sy)));*/
-				int flag = 0;
-				for (int a = sy; a < ey; a++)
-				{
-					int h = line_1[0][0] / line_1[0][1] * (a - line_1[0][3]) + line_1[0][2];
-					for (int b = h + 2; b < xx + 100; b++)
-					{
-						if (b > h + 10)
-						{
-							flag++;
-							break;
-						}
-
-						if (ROI1[0].at<uchar>(a, b) != 0)
-						{
-							//	src.at<uchar>(a, b)=0;
-							int k = DistanceDetector(Point(b, a), line_1[0]);
-							if (DistanceDetector(Point(b, a), line_1[0])>5)
-								flag++;
-							break;
-						}
-
-					}
-				}
-				if (flag > 7)
-				{
-					Faults::BrokenEdge be;
-					be.position.x = xx + xleft;
-					be.position.y = sy + (ey - sy) / 2 + yleft;
-					be.length = (ey - sy);
-
-					faults->BrokenEdges.push_back(be);
-					//circle(src, Point(xx + xleft, sy + (ey - sy) / 2 + yleft), (ey - sy) / 2, Scalar(255, 255, 255));
-				}
-
-
-			}
+			image1.at<uchar>(Contours[i][j]) = 255;
 		}
-		//src.at<uchar>(i, j + 5) = 255;
+	}*/
+
+	
+	/*t = (double)cv::getTickCount();*/
+	// 崩边检测
+	int starter = 0, ender = 0; // 一个边缘点集合的起始点和结束点
+	int aa = 0, bb = 0, cc = 0, dd = 0;
+	int aa1 = 0, bb1 = 0, cc1 = 0, dd1 = 0;
+
+	// 瓷砖向右歪斜
+	if ((block->A).y > (block->B).y)
+	{
+		aa1 = ROI_Contours[0].size();	bb1 = ROI_Contours[1].size();	cc = 0;	dd = 0;
+		for (int i = 0; i < 50; i++)
+		{
+			int t0 = abs(Contours[0][i].x - Contours[0][i + 1].x);
+			int t1 = abs(Contours[0][i].x - (block->A).x);
+			if (t1 < 30){
+				aa = i;		break;
+			}
+			else
+			if (i == 49)	aa = 49;
+		}
+
+		for (int i = 0; i < 50; i++)
+		{
+			int t0 = abs(Contours[1][i].y - Contours[1][i + 1].y);
+			int t1 = abs(Contours[1][i].y - (block->D).y);
+			if (t1 < 30){
+				bb = i;	break;
+			}
+			else
+			if (i == 49)	bb = 49;
+		}
+
+		for (int i = ROI_Contours[2].size() - 2; i > ROI_Contours[2].size() - 50; i--)
+		{
+			int t0 = abs(Contours[2][i].x - Contours[2][i + 1].x);
+			int t1 = abs(Contours[2][i].x - (block->C).x);
+			if (abs(Contours[2][i].x - (block->C).x) < 30)	{
+				cc1 = i;		break;
+			}
+			else
+			if (i == ROI_Contours[2].size() - 49)
+				cc1 = ROI_Contours[2].size() - 49;
+		}
+
+
+		for (int i = ROI_Contours[3].size() - 2; i > ROI_Contours[3].size() - 50; i--)
+		{
+			int t0 = abs(Contours[3][i].y - Contours[3][i + 1].y);
+			int t1 = abs(Contours[3][i].y - (block->B).y);
+			if (t1 < 30){
+				dd1 = i;	break;
+			}
+			else
+			if (i == ROI_Contours[3].size() - 49)
+				dd1 = ROI_Contours[3].size() - 49;
+		}
 	}
 
-	// 下边
-	int sx = 0, ex = 0;
-	int xdD = (block->D).x - xdown, xdC = (block->C).x - xdown;
-	for (int i = xdD; i < xdC; i += 10)
+	else  // 瓷砖向左歪斜
 	{
-		sx = 0; ex = 0;
-		int j = line_1[1][1] / line_1[1][0] * (i - line_1[1][2]) + line_1[1][3];
-		//	ROI1[1].at<uchar>(j, i) = 250;
-		if (ROI1[1].at<uchar>(j - 6, i) < 10)
+		aa = 0; bb = 0;	cc1 = ROI_Contours[2].size();	dd1 = ROI_Contours[3].size();
+		for (int i = ROI_Contours[0].size() - 2; i > ROI_Contours[0].size() - 50; i--)
 		{
-			//	src.at<uchar>(i, j + 5) = 255;
-			if (i < xdD + 10)
-				sx = xdD;
+			if (abs(Contours[0][i].x - (block->D).x) < 30){
+				aa1 = i;		break;
+			}
 			else
-				sx = i - 10;
-			for (int q = i + 1; q < xdC; q += 10)
-			{
-				int p = line_1[1][1] / line_1[1][0] * (q - line_1[1][2]) + line_1[1][3];
-				if (ROI1[1].at<uchar>(p - 6, q) >= 10)
-				{
-					ex = q + 10;
-					i = q + 10;
-					if (i > xdC)
-						i = xdC;
-					break;
-				}
-				if (ex == 0 && (xdC - q <= 10))
-				{
-					ex = xdC;
-					i = xdC;
-				}
-			}
-			if (ex - sx > 30)
-			{
-				int yy = max((line_1[1][1] / line_1[1][0] * (sx - line_1[1][2]) + line_1[1][3]),
-					(line_1[1][1] / line_1[1][0] * (ex - line_1[1][2]) + line_1[1][3]));
-
-				ps.Binaryzation(ROI1[1](Rect(sx, yy - min(100, yy), ex - sx, min(100, yy))));
-				//	Canny(src(Rect(sx, yy - 100, ex - sx, 100)), src(Rect(sx, yy - 100, ex - sx, 100)), 100, 250);
-				/*ps.Binaryzation_otsu(src(Rect(sx, yy - 100, ex - sx, 100)));*/
-
-				int flag = 0;
-				for (int a = sx; a < ex; a++)
-				{
-					int h = line_1[1][1] / line_1[1][0] * (a - line_1[1][2]) + line_1[1][3];
-					for (int b = h - 2; b > yy - 100; b--)
-					{
-						if (b == yy - 99)
-							flag++;
-						if (ROI1[1].at<uchar>(b, a) != 0)
-						{
-							//	src.at<uchar>(a, b)=0;
-							if (DistanceDetector(Point(a, b), line_1[1])>5)
-								flag++;
-							break;
-						}
-
-					}
-				}
-				if (flag > 7)
-				{
-
-					Faults::BrokenEdge be;
-					be.position.x = sx + (ex - sx) / 2 + xdown;
-					be.position.y = yy + ydown;
-					be.length = (ex - sx);
-
-					faults->BrokenEdges.push_back(be);
-					//circle(src, Point(sx + (ex - sx) / 2 + xdown, yy + ydown), (ex - sx) / 2, Scalar(255, 255, 255));
-				}
-
-				ex = 0; sx = 0;
-			}
+			if (i == ROI_Contours[0].size() - 49)	aa1 = ROI_Contours[0].size() - 49;
 		}
-		//src.at<uchar>(i, j + 5) = 255;
+
+		for (int i = ROI_Contours[1].size() - 2; i > ROI_Contours[1].size() - 50; i--)
+		{
+			if (abs(Contours[1][i].y - (block->C).y) < 30){ bb1 = i;		break; }
+			else
+			if (i == ROI_Contours[1].size() - 49)	bb1 = ROI_Contours[1].size() - 49;
+		}
+
+		for (int i = 0; i <50; i++)
+		{
+			if (abs(Contours[2][i].x - (block->B).x) < 30)	{
+				cc = i;		break;
+			}
+			else
+			if (i == 49)
+				cc = 49;
+		}
+
+
+		for (int i = 0; i <50; i++)
+		{
+			if (abs(Contours[3][i].y - (block->A).y)<30)	{
+				dd = i;		break;
+			}
+			else
+			if (i == 49)
+				dd = 49;
+		}
 	}
 
-	// 右边
-	int yrB = (block->B).y - yright, yrC = (block->C).y - yright;
-	for (int i = yrB; i < yrC - 20; i += 10)
+
+	// 崩边检测
+	for (int index = 0; index < ROI_Contours.size(); index++)
 	{
-		int thred = 0;
-		sy = 0, ey = 0;
-		int j = line_1[2][0] / line_1[2][1] * (i - line_1[2][3]) + line_1[2][2];
-		if (i < yrB + 50)
-			thred = 10;
-		else
-			thred = 15;
-		if (ROI1[2].at<uchar>(i, j - 6) < thred)
+		int xp = 0, yp = 0;
+		int st = 0, et = ROI_Contours[index].size();;
+		switch (index)
 		{
-			//	src.at<uchar>(i, j + 5) = 255;
-			if (i < yrB + 20)
-				sy = yrB;
-			else
-				sy = i - 20;
-			for (int q = i + 1; q < yrC - 10; q += 10)
-			{
-				int p = line_1[2][0] / line_1[2][1] * (q - line_1[2][3]) + line_1[2][2];
-				if (ROI1[2].at<uchar>(q, p - 6) > thred)
-				{
-					ey = q + 20;
-					i = q + 20;
-					if (i > yrC - 9)
-						i = yrC - 9;
-					break;
-				}
-				if (ey == 0 && (yrC - q <= 20))
-				{
-					ey = yrC;
-					i = yrC - 10;
-				}
-			}
-			if (ey - sy > 50)
-			{
-				int xx = max((line_1[2][0] / line_1[2][1] * (sy - line_1[2][3]) + line_1[2][2]),
-					(line_1[2][0] / line_1[2][1] * (ey - line_1[2][3]) + line_1[2][2]));
-				ps.Binaryzation(ROI1[2](Rect(xx - min(100, xx), sy, min(100, xx), ey - sy)));
-				//	Canny(src(Rect(xx - 100, sy, 100, ey - sy)), src(Rect(xx - 100, sy, 100, ey - sy)), 100, 250);
-				/*ps.Binaryzation_otsu(src(Rect(xx - 100, sy, 100, ey - sy)));*/
-				int flag = 0;
-				for (int a = sy; a < ey; a++)
-				{
-					int h = line_1[2][0] / line_1[2][1] * (a - line_1[2][3]) + line_1[2][2];
-					for (int b = h - 2; b > xx - 100; b--)
-					{
-						if (b == xx - 99)
-							flag++;
-						if (ROI1[2].at<uchar>(a, b) != 0)
-						{
-							//	src.at<uchar>(a, b)=0;
-							if (DistanceDetector(Point(b, a), line_1[2])>5)
-								flag++;
-							break;
-						}
-
-					}
-				}
-				if (flag > 7)
-				{
-					Faults::BrokenEdge be;
-					be.position.x = xx + xright;
-					be.position.y = sy + (ey - sy) / 2 + yright;
-					be.length = (ey - sy);
-
-					faults->BrokenEdges.push_back(be);
-					//circle(src, Point(xx + xright, sy + (ey - sy) / 2 + yright), (ey - sy) / 2, Scalar(255, 255, 255));
-				}
-
-				ey = 0; sy = 0;
-			}
+		case 0:	st = aa;	 et = aa1;	xp = xleft;	yp = yleft;	break;
+		case 1:	st = bb;	 et = bb1;	xp = xdown;	yp = ydown;	break;
+		case 2:	st = cc;     et = cc1;	xp = xright;	yp = yright;	break;
+		case 3:	st = dd;	 et = dd1;	xp = xup;	yp = yup;	break;
 		}
-		//src.at<uchar>(i, j + 5) = 255;
-	}
 
-	// 上边
-	int xuA = (block->A).x - xup, xuB = (block->B).x - xup;
-	for (int i = xuA + 3200; i < xuB - 20; i += 10)
-	{
-		sx = 0; ex = 0;
-		int j = line_1[3][1] / line_1[3][0] * (i - line_1[3][2]) + line_1[3][3];
-		/*ROI1[3].at<uchar>(j, i) = 255;*/
-		if (ROI1[3].at<uchar>(j + 6, i) < 10)
+		
+
+		for (int i = st; i < et; i += simple)  // 间隔simple个点采样检测
 		{
-			//	src.at<uchar>(i, j + 5) = 255;
-			if (i < xuA + 10)
-				sx = xuA;
-			else
-				sx = i - 10;
-			for (int q = i + 1; q < xuB; q += 10)
+			int tt = ROI_Contours[index][i].x;
+			int tt1 = ROI_Contours[index][i].y;
+			starter = st;	ender = 0;
+			int dist = DistanceDetector(ROI_Contours[index][i], line_roi[index]);
+			if (dist >= distance_threld)
 			{
-				int p = line_1[3][1] / line_1[3][0] * (q - line_1[3][2]) + line_1[3][3];
-				if (ROI1[3].at<uchar>(p + 6, q) > 10)
+				if (i < st + 20)
+					starter = 0;
+				else
+					starter = i - 19;
+				if (starter > ROI_Contours[index].size() - 30)
+					ender = ROI_Contours[index].size() - 1;
+				else
+				for (int q = i + 5; q < ROI_Contours[index].size(); q += 5)
 				{
-					ex = q + 10;
-					i = q + 10;
-					if (i > xuB)
-						i = xuB;
-					break;
-				}
-				if (ex == 0 && (xuB - q <= 10))
-				{
-					ex = xuB;
-					i = xuB;
-				}
-			}
-			if (ex - sx > 30)
-			{
-				int yy = min((line_1[3][1] / line_1[3][0] * (sx - line_1[3][2]) + line_1[3][3]),
-					(line_1[3][1] / line_1[3][0] * (ex - line_1[3][2]) + line_1[3][3]));
-				ps.Binaryzation(ROI1[3](Rect(sx, yy, ex - sx, min(100, ROI1[3].rows - yy))));
-				//	Canny(src(Rect(sx, yy, ex - sx, 100)), src(Rect(sx, yy, ex - sx, 100)), 100, 250);
-				/*ps.Binaryzation_otsu(src(Rect(sx, yy, ex - sx, 100)));*/
-				int flag = 0;
-				for (int a = sx; a < ex; a++)
-				{
-					int h = (line_1[3][1] / line_1[3][0] * (a - line_1[3][2]) + line_1[3][3]);
-					for (int b = h + 2; b < h + 15; b++)
+					int dist = DistanceDetector(ROI_Contours[index][q], line_roi[index]);
+					if (dist < distance_threld)
 					{
-						if (b == h + 14)
+						ender = q + 20;
+						i = q + 20;
+						if (i>ROI_Contours[index].size() - 7)
 						{
-							flag++;
-							break;
+							i = ROI_Contours[index].size() - 1;
+							ender = ROI_Contours[index].size() - 1;
 						}
-
-						if (ROI1[3].at<uchar>(b, a) != 0)
-						{
-							//	src.at<uchar>(a, b)=0;
-							if (DistanceDetector(Point(a, b), line_1[3])>5)
-								flag++;
-							break;
-						}
-
+						break;
 					}
 				}
-				if (flag > 7)
+				if ((ender - starter > 39 + distance_threld) || (starter == st) || (ender == ROI_Contours[index].size() - 1))
 				{
-					Faults::BrokenEdge be;
-					be.position.x = sx + (ex - sx) / 2 + xup;
-					be.position.y = yy + yup;
-					be.length = (ex - sx);
+					/////////////////////////////////////////////////////////////////
+					//cv::circle(ROI[index], ROI_Contours[index][starter + (ender - starter) / 2], (ender - starter) / 2, Scalar(255));
+					/////////////////////////////////////////////////////////////////
+					int flag = 0;
+					int edge_deep = 0;
+					for (int a = starter; a < ender; a++)
+					{
+						int dist = DistanceDetector(ROI_Contours[index][a], line_roi[index]);
+						if (edge_deep < dist)
+							edge_deep = dist;
+						if (dist >= distance_threld)
+						{
+							int tt = ROI_Contours[index][a].x;
+							int tt1 = ROI_Contours[index][a].y;
+							flag++;
+						}
+					}
 
-					faults->BrokenEdges.push_back(be);
+					if (flag > Edge_threld)
+					{
+						flag = 0;
+						// 边角判别
+						Point location;
+						location.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
+						location.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
+						int length = (ender - starter);
 
-					//circle(src, Point(sx + (ex - sx) / 2 + xup, yy + yup), (ex - sx) / 2, Scalar(255, 255, 255));
+						int current = index;
+						int next = index + 1;
+						if (next == 4) next = 0;
+						double corner_distance_fir = sqrt(pow((location.x - corner[index].x), 2) + pow((location.y - corner[index].y), 2)) - length / 2;
+						double corner_distance_sec = sqrt(pow((location.x - corner[next].x), 2) + pow((location.y - corner[next].y), 2)) - length / 2;
+						if (corner_distance_fir < 10 || corner_distance_sec < 10)
+						{
+							Faults::BrokenCorner bc;
+							bc.position = location;
+							if (current % 2)
+							{
+								bc.width = length;
+								bc.length = edge_deep;
+							}
+							else
+							{
+								bc.length = length;
+								bc.width = edge_deep;
+							}
+							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
+							faults->BrokenCorners.push_back(bc);
+							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
+							break;
+						}
+						else
+						{
+							Faults::BrokenEdge be;
+							/*Faults fs;*/
+							be.position.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
+							be.position.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
+							if (index % 2)
+							{
+								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_X())*/;
+								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_Y())*/;
+							}
+
+							else
+							{
+								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_Y())*/;
+								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
+							}
+
+							faults->BrokenEdges.push_back(be);
+							cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
+							break;
+						}
+					}
 				}
-
-				ex = 0; sx = 0;
 			}
 		}
 	}
-	/*line_1.clear();
-	contours.clear();*/
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//cout << "崩边检测time=" << t << endl;
+	//cout << "start time= " << ((double)cv::getTickCount() - t2) / cv::getTickFrequency() << endl;
 }
+
+
