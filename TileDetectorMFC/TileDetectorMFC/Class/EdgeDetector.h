@@ -9,7 +9,7 @@ using namespace std;
 #include "Base/Block.h"
 #include "Base\Faults.h"
 
-/*2015年10月10日*/
+/*2015年12月1日*/
 
 using namespace cv;
 
@@ -30,37 +30,57 @@ public:
 private:
 	Block *block;
 	Faults *faults;
+	// 边缘点集合到拟合直线的距离，距离存在向量Distance中
+	void DistanceDetector_set(vector<Point> Boundary_Point_temp, Vec4f FitLine, vector<float> &Distance);
+	// 边缘点到拟合直线的距离
+	int DistanceDetector(Point Boundary_Point_temp, Vec4f FitLine);
+	// 边缘点到拟合直线的最大距离，返回集合中距离最大点的标号
+	int Distamce_MaxTabel(vector<float> Distance);
+	// 划线函数，EdgeIndex是用来判断是上下边缘划线还是左右边缘划线
+	void DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B);
+	// 求拟合直线的交点
+	void PointOfIntersection(vector<Vec4f>FitLine_Aggregate, vector<Point> &Point_of_Intersection);
+	// 预处理ROI，获取动态范围
+	void Dynamic_range(Mat &image);
+	// 寻找边缘点，Contours为原图边缘，ROI_Contours为ROI边缘
+	void Find_contours(vector<Mat> image, vector<vector<Point>> &Contours, vector<vector<Point>> &ROI_Contours);
+	// 将临近的点合并
+	void Merge_Defects(vector<Point3f> &Defects);
+	// 边缘点附近的缺陷检测,异常块存入Blocks中，异常块坐标存入local_中
+	void Blocks_Defects(vector<Mat> roi, vector<Vec4f> line, vector<Mat> &Blocks, vector<Point3f> &local_);
+	// 直线拟合
+	void FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &line_, vector<Vec4f> &line_roi, Vec4f &Fit_Line);
+
 	Mat src;
 	vector<Mat> ROI, ROI1;
-	Mat leftROI, upROI, rightROI, downROI; // 边缘ROI
+	// 边缘ROI
+	Mat leftROI, upROI, rightROI, downROI;
 	Point A, B, C, D;
-	int xleft = 0, yleft = 0, left_height = 0, left_width = 0; // 左边缘ROI参数：ROI起点x、起点y、长、宽
-	int xright = 0, yright = 0, right_height = 0, right_width = 0; // 右边ROI参数
-	int xup = 0, yup = 0, up_height = 0, up_width = 0;  // 上边ROI参数
-	int xdown = 0, ydown = 0, down_height = 0, down_width = 0; // 下边ROI参数
+	// 左边缘ROI参数：ROI起点x、起点y、长、宽
+	int xleft = 0, yleft = 0, left_height = 0, left_width = 0;
+	// 右边ROI参数
+	int xright = 0, yright = 0, right_height = 0, right_width = 0;
+	// 上边ROI参数
+	int xup = 0, yup = 0, up_height = 0, up_width = 0;
+	// 下边ROI参数
+	int xdown = 0, ydown = 0, down_height = 0, down_width = 0;
 
-	int distance_threld = 5; // 点到拟合直线的距离阈值
-	int Edge_threld = 16; // 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
-	int tolerate_threld = 2; // 容忍度阈值
+	// 点到拟合直线的距离阈值
+	int distance_threld = 6;
+	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
+	int Edge_threld = 8;
+	// 容忍度阈值
+	int seat = 6;
+	int simple = 5;
+	int Pixel_threld = 15;
 
-
-
-
+	int contours_threld = 31;
+	int Dynamic_range_min = 5;
+	float Dynamic_range_max = 0.9;
 
 	float distance = 0;
 	int t1 = 0, t2 = 0;
 	int Tabel = 0;
-
-
-	void Defect_Detector(vector < vector<Point> >contours_, vector<Vec4f> line_, vector<Point3f> &defects);
-	void Defect_Detector(Mat src, vector<Vec4f> line_, vector<Point3f> &defects);
-	void classifying(vector < vector<Point> > contours, vector<Vec4f> line_, vector < vector<Point> > &contours_);
-	void DistanceDetector_set(Vector<Point> Boundary_Point_temp, Vec4f FitLine, Vector<float> &Distance); // 边缘点到拟合直线的距离，距离存在向量Distance中
-	int DistanceDetector(Point Boundary_Point_temp, Vec4f FitLine); // 边缘点到拟合直线的距离
-	int Distamce_MaxTabel(Vector<float> Distance);  // 边缘点到拟合直线的最大距离，返回集合中距离最大点的标号
-	void DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B); // 划线函数，EdgeIndex是用来判断是上下边缘划线还是左右边缘划线
-	void PointOfIntersection(Vector<Vec4f>FitLine_Aggregate, Vector<Point> &Point_of_Intersection);  // FitLine_Aggregate是四条拟合直线的参数（左、上、右、下），Point_of_Intersection存储四条直线的交点（左上、右上、右下、左下）
-
 
 };
 
