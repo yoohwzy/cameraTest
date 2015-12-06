@@ -12,7 +12,6 @@ vector<Point3f> repoint;
 Mat MidImg, ThImg, CMidImg,PMidImg;
 vector<vector<cv::Point>> needContour;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
-Rect maxRect = Rect(Point(0, 0), Point(0, 0));
 vector<vector<cv::Point>> ecliptours;
 vector<vector<cv::Point>> dilateneedcontours;
 
@@ -362,8 +361,8 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Point pt9 = Point(growT_RECT.x, growT_RECT.y) + pt_ROI_a;
 		Point pt10 = Point(growT_RECT.x + growT_RECT.width, growT_RECT.y + growT_RECT.height) + pt_ROI_a;
 		Faults::Hole hole;
-		hole.position.x = 0.5*(pt9.x + pt10.x) + recImg.x + maxRect.x + 100 + locationpoint.x;//坐标变换回原图
-		hole.position.y = 0.5*(pt9.y + pt10.y) + recImg.y + maxRect.y + 400 + locationpoint.y;
+		hole.position.x = 0.5*(pt9.x + pt10.x) + recImg.x + locationpoint.x;//坐标变换回原图
+		hole.position.y = 0.5*(pt9.y + pt10.y) + recImg.y + locationpoint.y;
 		if (growT_RECT.height > growT_RECT.width)
 			hole.diameter = growT_RECT.height;
 		else
@@ -571,22 +570,22 @@ void Pretreatment::linedetect()
 	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
 	int m = 0, linenumall = 0, linenum = 0;
-	for (size_t i = 0; i < bigcontours.size(); i++)
+	for (size_t i = 10; i < bigcontours.size(); i++)
 	{
 		
 		cannyrect = boundingRect(bigcontours[i]);
 		Mat waitImg = dilateImg(Rect(cannyrect));
 		if (cannyrect.width < 50 && cannyrect.height < 50)
 			continue;
-		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I3, 0);
-		if (matchlinepro>1.0)
+		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I1, 0);
+		if (matchlinepro> 1.0)
 			continue;
 		Faults::Scratch scratch;
-		scratch.position.x = 4*cannyrect.x + 2*cannyrect.width + recImg.x + maxRect.x + 100;
-		scratch.position.y = 4*cannyrect.y + 2*cannyrect.height + recImg.y + maxRect.y + 400;
+		scratch.position.x = 4*cannyrect.x + 2*cannyrect.width + recImg.x;
+		scratch.position.y = 4*cannyrect.y + 2*cannyrect.height + recImg.y;
 		scratch.length = (cannyrect.width >cannyrect.height) ? 2*cannyrect.width : 2*cannyrect.height;
-		if (scratch.length < 35)
-			continue;
+		//if (scratch.length < 35)
+		//	continue;
 		_faults->Scratchs.push_back(scratch);
 	}
 }

@@ -129,7 +129,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	//读取参数
 	globle_var::InitSetting(true);
-	globle_var::VirtualCameraFileName = "33叠釉A.jpg";
+	globle_var::VirtualCameraFileName = "1杂质凹点A.jpg";
 
 	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
 
