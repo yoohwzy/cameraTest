@@ -244,14 +244,21 @@ void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
-
-	consumer->GrabbingIndex = twag->GrabbingIndex;
 	//运行消费者进程处理图像
-	if (!consumer->StartNewProces(globle_var::s.BufferImg))
+	if (consumer->IsProcessing)
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
+
+	delete consumer;
+	consumer = new Consumer(this->GetSafeHwnd());
+	consumer->GrabbingIndex = twag->GrabbingIndex;
+
+	consumer->StartNewProces(globle_var::s.BufferImg);
+
+
+
 	if (globle_var::s.BufferImg.cols > 0)
 	{
 		cv::Mat a;
@@ -262,18 +269,25 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
 	m_Info += msg;
 	UpdateData(false);
+	
 	return 1;
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
 {
-	consumer->GrabbingIndex = twag->GrabbingIndex;
-	//consumer->GrabbingIndex = twag->GrabbingIndex;
+
 	//运行消费者进程处理图像
-	if (!consumer->StartNewProces4Calibraion(globle_var::s.BufferImg))
+
+	if (consumer->IsProcessing)
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
+
+	delete consumer;
+	consumer = new Consumer(this->GetSafeHwnd());
+	consumer->GrabbingIndex = twag->GrabbingIndex;
+
+	consumer->StartNewProces4Calibraion(globle_var::s.BufferImg);
 	m_Info += _T("定标采图完成！\r\n");
 	UpdateData(false);
 	return 1;
@@ -329,7 +343,21 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	UpdateData(false);
 
 	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
-	cv::imwrite("result.jpg", img_on_show);
+	//cv::imwrite("result.jpg", img_on_show);
+
+
+	if (!twag->ManualTigger())
+	{
+		//MessageBox(L"当前无法触发！");
+		printf_globle("当前无法触发!\n");
+	}
+	else
+	{
+		m_Info = _T("");
+		UpdateData(false);
+	}
+
+
 	return 1;
 }
 void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)

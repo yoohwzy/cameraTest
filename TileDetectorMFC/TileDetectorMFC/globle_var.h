@@ -28,7 +28,7 @@ public:
 	static string VirtualCameraFileName;
 	static BufferStorage s;
 	static MicroDisplayInit mdi(){ return _mdi; };//mdiÐ´ÎªÖ»¶Á
-private:
 	static MicroDisplayInit _mdi;
+private:
 };
 

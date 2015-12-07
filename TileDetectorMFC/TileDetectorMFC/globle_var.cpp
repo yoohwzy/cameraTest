@@ -43,7 +43,7 @@ bool globle_var::InitSetting(bool isload)
 //将手动配置初始化globle_var
 bool globle_var::SetGrabSetting(string colorType, int maxPics, int width)
 {
-	_mdi.colorType = colorType == "Gray" ? globle_var::_mdi.RGB : globle_var::_mdi.GRAY;
+	_mdi.colorType = colorType == "RGB" ? globle_var::_mdi.RGB : globle_var::_mdi.GRAY;
 	_mdi.width = width;
 	//_mdi.height = 1;
 	//_mdi.colorType = _mdi.RGB;

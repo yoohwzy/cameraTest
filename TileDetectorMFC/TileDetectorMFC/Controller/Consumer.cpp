@@ -9,7 +9,7 @@ bool Consumer::StartNewProces(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (isProcessing) return false;
+	if (IsProcessing) return false;
 
 	//将采集到的图像保存一份副本，并灰度化
 	originalImg.release();
@@ -31,7 +31,7 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (isProcessing) return false;
+	if (IsProcessing) return false;
 
 	//将采集到的图像保存一份副本，并灰度化
 	originalImg.release();
@@ -49,7 +49,7 @@ void Consumer::processingThread()
 {
 	//清空
 	faults.Clear();
-	isProcessing = true;
+	IsProcessing = true;
  
 
 
@@ -89,7 +89,7 @@ void Consumer::processingThread()
 		//BlocksDetector加入判断是否检测到完整瓷砖
 		if (!bd->Start() || !bd->StartUP_DOWN(BlocksDetector::Up) || !bd->StartUP_DOWN(BlocksDetector::Down))
 		{
-			isProcessing = false;
+			IsProcessing = false;
 			printf_globle("未检测到瓷砖\r");
 			return;
 		}
@@ -148,7 +148,7 @@ void Consumer::processingThread()
 	//定标分支
 	if (IsCalibration)
 	{
-		isProcessing = false;
+		IsProcessing = false;
 		IsCalibration = false;
 
 		t = (double)cv::getTickCount();
@@ -217,7 +217,7 @@ void Consumer::processingThread()
 	ss.str("");
 
 
-	isProcessing = false;
+	IsProcessing = false;
 	if (hwnd != NULL)
 	{
 		PostMessage(hwnd, WM_USER + 101, 0, 0);

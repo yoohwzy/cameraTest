@@ -10,7 +10,6 @@ BufferStorage::BufferStorage(int _MaxPics, int _width)
 BufferStorage::~BufferStorage()
 {
 	Buffer.release();
-//	BufferGray.release();
 	BufferImg.release();
 }
 void BufferStorage::Start()
@@ -55,11 +54,6 @@ void BufferStorage::ThreeInOne(int lineIndex)
 {
 	cv::Mat frame = Buffer(cv::Rect(0, lineIndex, width, 1));
 
-	////光照矫正
-	//if (SamplesRGB.cols != 0)
-	//	frame = frame + SamplesRGB;
-
-
 	//N张图像叠加
 	cv::Mat oneFrame = BufferImg(cv::Rect(0, lineIndex, width, 1));
 	oneFrame += frame;
@@ -83,28 +77,3 @@ void BufferStorage::ThreeInOne(int lineIndex)
 		oneFrame += frame;
 	}
 }
-//int BufferStorage::GetFrame(cv::Mat& frame)
-//{
-//	//-1下一帧尚未写入完成
-//	if (BufferReadIndex == BufferWriteIndex && BufferReadIndex != MaxPics)
-//		return -1;
-//
-//	if (BufferReadIndex >= MaxPics)
-//	{
-//		EndReadFlag = true;
-//		return 0;
-//	}
-//
-//	++BufferReadIndex;
-//
-//	if (BufferReadIndex >= MaxPics)
-//	{
-//		EndReadFlag = true;
-//		return 0;
-//	}
-//
-//	cv::Mat Now = Buffer;
-//	cv::Mat oneFrame = Buffer(cv::Rect(0, BufferReadIndex, width, 1));
-//	oneFrame.copyTo(frame);
-//	return 1;
-//}

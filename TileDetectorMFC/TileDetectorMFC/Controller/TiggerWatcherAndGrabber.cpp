@@ -40,11 +40,13 @@ void TiggerWatcherAndGrabber::Init(string virtualImg)
 }
 void TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg, bool refresh)
 {
+	IsGrabbing = false;
+
 	if (USING_VIRTUAL_CAMERA && !refresh)
 		return;
 	USING_VIRTUAL_CAMERA = true;
-	if (globle_var::mdi().fg != NULL)
-		MicroDisplayInit::Release(globle_var::mdi());
+	if (globle_var::_mdi.fg != NULL)
+		MicroDisplayInit::Release(globle_var::_mdi);
 
 
 
@@ -54,23 +56,25 @@ void TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg, bool refresh)
 }
 void TiggerWatcherAndGrabber::Switch2Real(bool refresh)
 {
+	IsGrabbing = false;
+
 	if (!USING_VIRTUAL_CAMERA && !refresh)
 		return;
 	USING_VIRTUAL_CAMERA = false;
-	if (globle_var::mdi().fg != NULL)
-		MicroDisplayInit::Release(globle_var::mdi());
+	if (globle_var::_mdi.fg != NULL)
+		MicroDisplayInit::Release(globle_var::_mdi);
 
 
 	//初始化采集卡
-	int status = MicroDisplayInit::InitParameter(globle_var::mdi());
-	//status = MicroDisplayInit::InitLoad(globle_var::mdi(), "4096RGB1LineX1.mcf");
+	int status = MicroDisplayInit::InitParameter(globle_var::_mdi);
+	//status = MicroDisplayInit::InitLoad(globle_var::_mdi, "4096RGB1LineX1.mcf");
 	if (status < 0)
 	{
 		MD_ErrorMessageWait(globle_var::mdi().fg);
 		return;
 	}
-	MicroDisplayInit::CreateBufferWithOutDiplay(globle_var::mdi());
-	//MicroDisplayInit::CreateBufferWithDiplay(globle_var::mdi());
+	MicroDisplayInit::CreateBufferWithOutDiplay(globle_var::_mdi);
+	//MicroDisplayInit::CreateBufferWithDiplay(globle_var::_mdi);
 	Fg_saveConfig(globle_var::mdi().fg, "save.mcf");
 	//没有报错说明初始化完成，有错会自动报错并退出。
 	printf_globle("相机&采集卡初始化完成！\n");
@@ -121,7 +125,16 @@ void TiggerWatcherAndGrabber::StopWatch()
 bool TiggerWatcherAndGrabber::ManualTigger()
 {
 	if (IsGrabbing || !IsWatching)
+	{
+		printf_globle("IsGrabbing = 1\n");
 		return false;
+	}
+	if (IsGrabbing || !IsWatching)
+	{
+		printf_globle("IsWatching = 0\n");
+		return false;
+	}
+
 	BeManualTiggered = true;
 	return true;
 }
@@ -165,7 +178,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 			if (!USING_VIRTUAL_CAMERA)
 			{
-				MicroDisplayControler::FreeRunning(globle_var::mdi(), globle_var::s);
+				MicroDisplayControler::FreeRunning(globle_var::_mdi, globle_var::s);
 			}
 			else
 			{
@@ -179,7 +192,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 					}
 					return;
 				}
-				vc->FreeRunning(globle_var::mdi(), globle_var::s);
+				vc->FreeRunning(globle_var::_mdi, globle_var::s);
 			}
 			//采样计时
 			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

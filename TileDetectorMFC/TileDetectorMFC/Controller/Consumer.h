@@ -43,6 +43,9 @@ public:
 
 	//定标标志
 	bool IsCalibration = false;
+	//是否正在处理
+	bool IsProcessing = false;
+
 	Measurer *m = NULL;
 
 	//传入照片，开始一场新的处理，若上一轮处理还未完成，返回false
@@ -53,5 +56,4 @@ private:
 	HWND hwnd;
 	void processingThread();
 
-	bool isProcessing = false;
 };
