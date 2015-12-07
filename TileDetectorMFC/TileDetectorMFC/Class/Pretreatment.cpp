@@ -342,6 +342,8 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Mat ano_boxImg = ready_boxImg.clone();
 		double min_v = 0.0;
 		minMaxLoc(ano_boxImg, &min_v);
+		if (2 * min_v > avgmean[0])
+			continue;
 		bitwise_and(ano_boxImg, growImg, ano_boxImg);
 		threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + min_v), 255, 0);
 		bitwise_not(ano_boxImg, ano_boxImg, growImg);
@@ -354,7 +356,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			if (contourArea(lowTcontour[0]) > 1000 * contourArea(lowTcontour[j]))
 				size_v--;
 		}
-		if (size_v != 1 || double(contourArea(lowTcontour[0])) > 0.95*double(contourArea(tempttours[0])))
+		if (size_v != 1)
 		{
 			continue;
 		}
@@ -487,14 +489,14 @@ void Pretreatment::ProducerTask() // 生产者任务
 
 			threshold(MidImgROI, ThImgROI, OtsuV, 255, CV_THRESH_BINARY);
 			ThImgROI = ~ThImgROI;
-			dilate(ThImgROI, ThImgROI, DilateImg);
+			/*dilate(ThImgROI, ThImgROI, DilateImg);*/
 			vector<vector<cv::Point>> decontours;
 			Mat anoImg = ThImgROI.clone();
 			cv::findContours(anoImg, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 			vector<double> listnum;
 			for (size_t k = 0; k < decontours.size(); k++)
 			{
-				if (decontours[k].size() > 6)
+				if (decontours[k].size() > 8)
 				{
 					double matchextent = matchShapes(decontours[k], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//比较待检测缺陷的形态
 					listnum.push_back(matchextent);
