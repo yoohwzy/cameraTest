@@ -1,11 +1,7 @@
 #pragma once
 
-#include "Class\MicroDisplay\MicroDisplayInit.h"
 //#include "Class\BufferStorage.h"
-
-
-
-
+#include "Class\Base\SettingHelper.h"
 
 
 //@description	此处声明全局变量，全局类，以及相关函数
@@ -30,8 +26,28 @@ public:
 	static int TiggerWaitTimeMS;
 	//虚拟相机底片文件名，为""时使用真实相机
 	static string VirtualCameraFileName;
-	static MicroDisplayInit mdi(){ return _mdi; };//mdi写为只读
-	static MicroDisplayInit _mdi;
+
+	static int Width;					//每帧宽度
+	static const int FrameHeight = 1;		//每帧高度
+	static int FrameCount;			//总共帧数
+	static int ColorType;				//采图颜色模式
+
+
+
+
+
+
+
+
+
+
+
+
+	enum ColorType
+	{
+		GRAY = 0,
+		RGB = 1
+	};
 private:
 };
 

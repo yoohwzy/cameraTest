@@ -28,7 +28,7 @@ protected:
 public:
 	afx_msg void OnBnClickedSave();
 	// 采集参数，总采集行数
-	int set_grabMaxPics;
+	int set_grabFrameCount;
 	// 采集参数，一行的采集宽度
 	int set_grabWidth;
 	// 采图时颜色类型 "RGB" or "Gray" 区分大小写

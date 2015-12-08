@@ -121,8 +121,6 @@
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\MicroDisplay\MicroDisplay.h" />
-    <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h" />
-    <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h" />
     <ClInclude Include="Class\Pretreatment.h" />
     <ClInclude Include="Class\Processor.h" />
     <ClInclude Include="Controller\Consumer.h" />
@@ -150,8 +148,6 @@
     <ClCompile Include="Class\Judgement.cpp" />
     <ClCompile Include="Class\Measurer.cpp" />
     <ClCompile Include="Class\MicroDisplay\MicroDisplay.cpp" />
-    <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp" />
-    <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp" />
     <ClCompile Include="Class\Pretreatment.cpp" />
     <ClCompile Include="Class\Processor.cpp" />
     <ClCompile Include="Controller\Consumer.cpp" />

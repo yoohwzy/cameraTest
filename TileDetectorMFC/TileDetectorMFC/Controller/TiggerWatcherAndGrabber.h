@@ -10,7 +10,6 @@
 
 
 #include "../Class/MicroDisplay/MicroDisplay.h"
-//#include "../Class/MicroDisplay/MicroDisplayControler.h"
 #include "../Class/Base/VirtualCamera.h"
 #include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
@@ -31,22 +30,22 @@ public:
 	void StopWatch();
 
 	void Init(string virtualImg="");
-	void Switch2Real(bool refresh = false);
-	void Switch2Virtual(string virtualImg, bool refresh = false);
+	bool Switch2Real();
+	bool Switch2Virtual(string virtualImg);
 
 
 	//手动触发，若无法触发返回false
 	bool ManualTigger();
 	int GrabbingIndex = 0;
 
-	VirtualCamera *vc;
 	//原始图像
-	cv::Mat BufferOrg;
+	cv::Mat OriginalImage;
 	//三行叠加后的图像
-	cv::Mat BufferImg;
+	cv::Mat Image;
 private:
 	HWND hwnd;
-	BufferStorage *s = NULL;
+	GrabbingBuffer *gb = NULL;
+	
 
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
@@ -61,8 +60,8 @@ private:
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;
-
-
+	
+	string _virtualImg = "";//虚拟相机文件名
 
 	void watcherThread();
 	//采图进程

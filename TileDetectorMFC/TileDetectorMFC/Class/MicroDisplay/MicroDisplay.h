@@ -15,19 +15,35 @@
 class MicroDisplay
 {
 public:
+/*	//初始化采集参数
+	//1.采集行数
+	//2.采集宽度
+	//3.采集卡编号Logical number of the board.（默认为0）
+	//4.采集卡Port口号，PORT_A(默认) OR PORT_B
+	MicroDisplay(GrabbingBuffer *gb, int frameCount, int width, int boardID = 0, int Camport = PORT_A);*/
+
 	//初始化采集参数
 	//1.采集行数
 	//2.采集宽度
 	//3.色彩模式 枚举 RGB OR GRAY
 	//4.采集卡编号Logical number of the board.（默认为0）
 	//5.采集卡Port口号，PORT_A(默认) OR PORT_B
-	MicroDisplay(int height, int width,int colorType = RGB,int boardID = 0, int Camport = PORT_A);
+	MicroDisplay(GrabbingBuffer *gb, int frameCount, int width, int colorType = RGB, int boardID = 0, int Camport = PORT_A);
+	~MicroDisplay();
+
+	
+
 	void Capture();
 
-	//测试采集卡-相机功能是否正常。
-	static int TestCam();
+	//测试采集卡-相机功能是否正常，若有错直接报错退出！
+	static bool TestCam();
 
-	~MicroDisplay();
+
+	enum ColorType
+	{
+		GRAY = 0,
+		RGB = 1
+	};
 private:
 	const char *dllNameGRAY = "DualLineGray16.dll";
 	const char *dllNameRGB = "DualLineRGB30.dll";
@@ -39,33 +55,23 @@ private:
 	int nBoard = 0;					//采集卡编号
 	int camPort = PORT_A;			//采集卡Port
 
-	//frame grabber
-	Fg_Struct *fg = NULL;
-	//Memory buffer
-	dma_mem *memHandle = NULL;
+	
+	Fg_Struct *fg = NULL;			//frame grabber
+	dma_mem *memHandle = NULL;		//Memory buffer
 
-	BufferStorage *s;
+	GrabbingBuffer *_gb;
 
-
-	// 采图颜色模式
-	int _colorType = 0;
-	enum ColorType
-	{
-		GRAY = 0,
-		RGB = 1
-	};
+	
+	int _colorType = 1;				//采图颜色模式
 
 
-
-
-
+	void test();
 
 	// 在控制台显示出采集卡信息
 	int getNrOfBoards();
 	// get board and camera-link serial port information
 	// using silicon-software runtime library fglib5
 	int getBoardInfo();
-
 
 
 	//初始化fg，返回ErrCode，0为无错误

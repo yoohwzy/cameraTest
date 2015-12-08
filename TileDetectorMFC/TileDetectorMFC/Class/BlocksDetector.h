@@ -5,7 +5,6 @@
 #include "../globle_debug.h"
 
 #include "Base\Block.h"
-#include "MicroDisplay\MicroDisplayInit.h";
 
 
 //@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
