@@ -3,10 +3,14 @@
 //@last modify date 2015年10月31日 By VShawn
 
 
-
-#ifndef INCLUDE_ONCE
-#define INCLUDE_ONCE
 #pragma once
+
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
+using namespace std;
 
 //开启控制台，用于输出信息
 static bool CONSOLE_OPEN = true;
@@ -14,8 +18,10 @@ static bool FILE_LOG = true;
 static string FILE_NAME = "log.log";
 
 
-
-#include <io.h>  
+#include <fgrab_struct.h>
+#include <fgrab_prototyp.h>
+#include <fgrab_define.h>
+#include <SisoDisplay.h>
 
 
 //将信息输出到console
@@ -62,10 +68,6 @@ static void printf_globle(stringstream ss)
 
 #define OUTPUT_DEBUG_INFO 0
 
-static void WriteImg(string path ,cv::Mat img)
-{
-	cv::imwrite(path, img);
-}
 
 
 
@@ -98,4 +100,3 @@ static void MD_ErrorMessageWait(Fg_Struct *fg)
 	ExitWithError(err_str);
 }
 
-#endif

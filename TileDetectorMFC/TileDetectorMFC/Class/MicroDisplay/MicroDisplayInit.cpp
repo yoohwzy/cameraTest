@@ -36,10 +36,10 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	//≥ı ºªØfg
 	int status = MicroDisplayInit::initFG(mdi);
 	char debugInfo[256];
-	if (Fg_setParameter(mdi.fg, FG_WIDTH, &mdi.width, mdi.nCamPort) < 0) {
+	if (Fg_setParameter(mdi.fg, FG_WIDTH, &mdi.Width, mdi.nCamPort) < 0) {
 		return status;
 	}
-	if (Fg_setParameter(mdi.fg, FG_HEIGHT, &mdi.height, mdi.nCamPort) < 0) {
+	if (Fg_setParameter(mdi.fg, FG_HEIGHT, &mdi.Height, mdi.nCamPort) < 0) {
 		return status;
 	}
 	int bitAlignment = FG_LEFT_ALIGNED;
@@ -51,8 +51,9 @@ int MicroDisplayInit::InitParameter(MicroDisplayInit& mdi)
 	//if (Fg_setParameter(mdi.fg, FG_KNEE_LUT_SCALE, &_FG_KNEE_LUT_SCALE, mdi.nCamPort) < 0) {
 	//	return status;
 	//}
-	sprintf(debugInfo, "Set Image Size on port %d (w: %d,h: %d) ok\n", mdi.nCamPort, mdi.width, mdi.height);
-	printf_globle(debugInfo);
+
+	//sprintf(debugInfo, "Set Image Size on port %d (w: %d,h: %d) ok\n", mdi.nCamPort, mdi.Width, mdi.Height);
+	//printf_globle(debugInfo);
 
 	return MicroDisplayInit::memoryAllocation(mdi);
 }
@@ -75,8 +76,8 @@ void MicroDisplayInit::CreateBufferWithDiplay(MicroDisplayInit& mdi)
 	// Creating a display window for image output
 	int Bits = getNoOfBitsFromImageFormat(format);
 
-	mdi.nId = ::CreateDisplay(Bits, mdi.width, mdi.height);
-	SetBufferWidth(mdi.nId, mdi.width, mdi.height);
+	mdi.nId = ::CreateDisplay(Bits, mdi.Width, mdi.Height);
+	SetBufferWidth(mdi.nId, mdi.Width, mdi.Height);
 }
 void MicroDisplayInit::CreateBufferWithOutDiplay(MicroDisplayInit& mdi)
 {
@@ -144,7 +145,7 @@ int MicroDisplayInit::memoryAllocation(MicroDisplayInit& mdi)
 	case FG_COL30:	bytesPerPixel = 5; break;
 	case FG_COL48:	bytesPerPixel = 6; break;
 	}
-	size_t totalBufSize = mdi.width*mdi.height*mdi.nr_of_buffer*bytesPerPixel;
+	size_t totalBufSize = mdi.Width*mdi.Height*mdi.nr_of_buffer*bytesPerPixel;
 	if ((mdi.pMem0 = Fg_AllocMemEx(mdi.fg, totalBufSize, mdi.nr_of_buffer)) == NULL){
 		return status;
 	}

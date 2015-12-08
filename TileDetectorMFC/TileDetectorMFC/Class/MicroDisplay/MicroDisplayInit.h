@@ -36,8 +36,8 @@ public:
 		RGB = 1
 	};
 	// Setting the image size
-	int width = 4096;
-	int height = 10;
+	int Width = 4096;
+	int Height = 10;
 
 	cv::Mat SamplesGray;
 	cv::Mat SamplesRGB;
@@ -45,6 +45,7 @@ public:
 	//加载配置文件初始化
 	static int InitLoad(MicroDisplayInit& mdi, char * mcfName = "4096grayline.mcf");
 	//参数初始化
+	//依次、设置宽度、设置高度、申请内存memoryAllocation
 	static int InitParameter(MicroDisplayInit& mdi);
 	//创建内存  不弄窗口
 	static void CreateBufferWithOutDiplay(MicroDisplayInit& mdi);

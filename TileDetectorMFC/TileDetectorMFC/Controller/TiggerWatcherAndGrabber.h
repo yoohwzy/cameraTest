@@ -9,9 +9,10 @@
 #include "../globle_var.h"
 
 
-#include "../Class/MicroDisplay/MicroDisplayControler.h"
+#include "../Class/MicroDisplay/MicroDisplay.h"
+//#include "../Class/MicroDisplay/MicroDisplayControler.h"
 #include "../Class/Base/VirtualCamera.h"
-
+#include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
 
 #include <thread>
@@ -39,9 +40,14 @@ public:
 	int GrabbingIndex = 0;
 
 	VirtualCamera *vc;
-
+	//原始图像
+	cv::Mat BufferOrg;
+	//三行叠加后的图像
+	cv::Mat BufferImg;
 private:
 	HWND hwnd;
+	BufferStorage *s = NULL;
+
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
 	bool BeManualTiggered = false;
@@ -55,12 +61,13 @@ private:
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;
-	bool IsThreeInOne = false;
 
 
 
 	void watcherThread();
-
+	//采图进程
+	void capture();
+	//叠加进程
 	void threeInOne();
 
 };

@@ -7,7 +7,7 @@ VirtualCamera::VirtualCamera()
 VirtualCamera::VirtualCamera(MicroDisplayInit& mdi, string imgname)
 {
 	BufferLength = mdi.MaxPics;
-	WIDTH = mdi.width;
+	WIDTH = mdi.Width;
 	stringstream ss;
 
 	if (imgname.find(":\\", 0) == std::string::npos)
@@ -52,7 +52,7 @@ cv::Mat VirtualCamera::GetNext()
 	cv::Mat ret = ROI.clone();
 	return ret;
 }
-int VirtualCamera::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
+int VirtualCamera::FreeRunning(MicroDisplayInit& mdi, BufferStorage *s)
 {
 	EndFlag = false;
 	BufferIndex = 0;
@@ -60,7 +60,7 @@ int VirtualCamera::FreeRunning(MicroDisplayInit& mdi, BufferStorage& s)
 	double t = (double)cv::getTickCount();
 	do{
 		Sleep(0.1);
-	} while (!s.AddFrame(GetNext()));
+	} while (!s->AddFrame(GetNext()));
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
 	t *= 1000;

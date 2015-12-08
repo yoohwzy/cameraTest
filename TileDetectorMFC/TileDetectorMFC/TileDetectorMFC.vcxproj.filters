@@ -111,6 +111,9 @@
     <ClInclude Include="Class\Base\SettingHelper.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
+    <ClInclude Include="Class\MicroDisplay\MicroDisplay.h">
+      <Filter>Class\MicroDisplay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="Class\Base\SettingHelper.cpp">
       <Filter>Class\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\MicroDisplay\MicroDisplay.cpp">
+      <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

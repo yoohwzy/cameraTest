@@ -20,7 +20,7 @@ public:
 	//采样停止标志
 	bool EndFlag = false;
 	//循环采图 直到采够为止
-	int FreeRunning(MicroDisplayInit& mdi, BufferStorage& s);
+	int FreeRunning(MicroDisplayInit& mdi, BufferStorage *s);
 	cv::Mat buffer;
 private:
 	int WIDTH = 0;

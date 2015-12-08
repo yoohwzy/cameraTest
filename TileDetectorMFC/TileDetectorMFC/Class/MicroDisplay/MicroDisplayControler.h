@@ -17,7 +17,10 @@ public:
 	//结束采集
 	static void EndGrabbing(MicroDisplayInit& mdi);
 	//循环采图 直到采够为止
-	static int FreeRunning(MicroDisplayInit& mdi, BufferStorage& s);
+	static int FreeRunning(MicroDisplayInit& mdi, BufferStorage *s);
 	//对焦用
 	static int FreeRunningFocusing(MicroDisplayInit& mdi);
+
+	//测试采集卡是否正常
+	static int Test(MicroDisplayInit& mdi);
 };

@@ -35,13 +35,10 @@ bool BufferStorage::AddFrame(cv::Mat& frame)
 	{
 		cv::cvtColor(frame, frame, CV_GRAY2BGR);
 	}
-	cv::Mat Now = Buffer;
 	cv::Mat oneFrame = Buffer(cv::Rect(0, BufferWriteIndex, width, 1));
 	oneFrame += frame;
 
-	//几张合成一张
-	//ThreeInOne(BufferWriteIndex);
-	//指向下一条缓冲
+	//指向下一行
 	++BufferWriteIndex;
 	if (BufferWriteIndex >= MaxPics)
 	{

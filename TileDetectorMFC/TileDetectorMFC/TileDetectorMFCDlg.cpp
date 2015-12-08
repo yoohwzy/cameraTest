@@ -250,19 +250,15 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
-
 	delete consumer;
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 
-	consumer->StartNewProces(globle_var::s.BufferImg);
+	consumer->StartNewProces(twag->BufferImg);
 
-
-
-	if (globle_var::s.BufferImg.cols > 0)
+	if (twag->BufferImg.cols > 0)
 	{
 		cv::Mat a;
-		//cv::resize(globle_var::s.BufferImg, a, cv::Size(400, 1100));
 		DrawPicToHDC(a, IDC_PIC_Sample);
 	}
 	CString msg;
@@ -287,18 +283,20 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM l
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 
-	consumer->StartNewProces4Calibraion(globle_var::s.BufferImg);
+	consumer->StartNewProces4Calibraion(twag->BufferImg);
 	m_Info += _T("定标采图完成！\r\n");
 	UpdateData(false);
 	return 1;
 }
+
+
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 {
 	CString msg;
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
 	m_Info += msg;
 
-	img_on_show = consumer->originalImg;
+	img_on_show = consumer->originalImg.clone();
 	if (consumer->faults.BrokenEdges.size() > 0)
 	{
 		CString str;
@@ -343,19 +341,24 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
 	UpdateData(false);
 
 	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+
+	//delete consumer;
+	//delete twag;
+
+
 	//cv::imwrite("result.jpg", img_on_show);
 
 
-	if (!twag->ManualTigger())
-	{
-		//MessageBox(L"当前无法触发！");
-		printf_globle("当前无法触发!\n");
-	}
-	else
-	{
-		m_Info = _T("");
-		UpdateData(false);
-	}
+	//if (!twag->ManualTigger())
+	//{
+	//	//MessageBox(L"当前无法触发！");
+	//	printf_globle("当前无法触发!\n");
+	//}
+	//else
+	//{
+	//	m_Info = _T("");
+	//	UpdateData(false);
+	//}
 
 
 	return 1;
@@ -432,21 +435,21 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 
 void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
 {
-	CString msg;
+	/*CString msg;
 	msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
 	m_Info += msg;
 	stringstream ss;
 	UpdateData(false);
 	ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
-	cv::imwrite(ss.str(), globle_var::s.Buffer);
+	cv::imwrite(ss.str(), globle_var::ImageBuffer);
 
 	ss.str("");
 	ss << "samples/" << twag->GrabbingIndex << "_x3.jpg";
-	cv::imwrite(ss.str(), globle_var::s.BufferImg);
+	cv::imwrite(ss.str(), globle_var::ImageBufferX3);
 
 	m_Info += _T("保存完成\r\n");
 	UpdateData(false);
-
+*/
 }
 
 

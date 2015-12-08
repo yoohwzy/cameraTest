@@ -30,7 +30,7 @@ BOOL SettingDlg::OnInitDialog()
 	{
 		//…Ë÷√≤Œ ˝
 		set_grabMaxPics = globle_var::mdi().MaxPics;
-		set_grabWidth = globle_var::mdi().width;
+		set_grabWidth = globle_var::mdi().Width;
 		set_grabRGBType = globle_var::mdi().colorType == globle_var::mdi().RGB ? "RGB" : "Gray";
 		set_TiggerWaitTimeMS = globle_var::TiggerWaitTimeMS;
 	}

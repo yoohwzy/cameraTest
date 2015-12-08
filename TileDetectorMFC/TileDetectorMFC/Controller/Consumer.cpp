@@ -21,7 +21,7 @@ bool Consumer::StartNewProces(cv::Mat img)
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
 
-	block = new Block(globle_var::mdi().width, globle_var::mdi().MaxPics);
+	block = new Block(globle_var::mdi().Width, globle_var::mdi().MaxPics);
 	return true;
 }
 bool Consumer::StartNewProces4Calibraion(cv::Mat img)
@@ -39,7 +39,7 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 	if (originalImg.channels() == 3)
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
 
-	block = new Block(globle_var::mdi().width, globle_var::mdi().MaxPics);
+	block = new Block(globle_var::mdi().Width, globle_var::mdi().MaxPics);
 	IsCalibration = true;
 	processingThread();
 	return true;
