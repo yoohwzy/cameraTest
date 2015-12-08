@@ -65,10 +65,6 @@ private:
 
 	afx_msg void OnBnClickedBtnStart();
 	afx_msg void OnBnClickedCbCanbetiggered();
-	afx_msg void OnBnClickedBtnGrabSave();
-	afx_msg void OnBnClickedBtnGrabLoad();
-	afx_msg void OnBnClickedBtnTiggerSave();
-	afx_msg void OnBnClickedBtnTiggerLoad();
 
 
 	CString m_Info;
@@ -76,7 +72,6 @@ private:
 	afx_msg void OnEnChangeTbVirtualcamera();
 	afx_msg void OnEnKillfocusTbVirtualcamera();
 	afx_msg void OnBnClickedBtnCalibration();
-	afx_msg void OnBnClickedBtnSavePic();
 	afx_msg void OnBnClickedBtnSetting();
 
 

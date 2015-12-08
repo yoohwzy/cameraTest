@@ -1,13 +1,17 @@
 #include "MicroDisplay.h"
 
 
-MicroDisplay::MicroDisplay(int height, int width, int colorType, int boardID, int Camport)
+MicroDisplay::MicroDisplay(GrabbingBuffer *gb, int frameCount, int width, int colorType, int boardID, int Camport)
 {
 	_width = width;
-	_frameCount = height;
-
+	_frameCount = frameCount;
+	_colorType = colorType;
 	nBoard = boardID;
 	camPort = Camport;
+}
+MicroDisplay::~MicroDisplay()
+{
+	release();
 }
 void MicroDisplay::Capture()
 {
@@ -27,6 +31,8 @@ void MicroDisplay::Capture()
 	frameindex_t fcount = 0;
 	frameindex_t last_pic_nr = 0;
 	frameindex_t cur_pic_nr;
+
+	
 	cv::Mat OriginalImage;
 	while (fcount < _frameCount)
 	{
@@ -36,20 +42,40 @@ void MicroDisplay::Capture()
 			Fg_stopAcquire(fg, camPort);
 			errorMessageWait();
 		}
-		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, last_pic_nr, 0, memHandle);
+		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, cur_pic_nr, 0, memHandle);
 		//if (nId != -1)
 		//	::DrawBuffer(nId, Fg_getImagePtrEx(fg, lastPicNr, 0, memHandle), (int)lastPicNr, "");
 		if (_colorType == GRAY)
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8U, bytePtr);
 		else
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
-		//s->AddFrame(OriginalImage);
+		_gb->AddFrame(OriginalImage);
 		fcount++;
 	}
 	release();
 }
 
 
+
+
+bool MicroDisplay::TestCam()
+{
+	MicroDisplay *md = new MicroDisplay(NULL, 1, 100);
+	md->test();
+	delete md;
+	return true;
+}
+
+
+
+
+
+/**********************Ë½ÓÐ*********************/
+void MicroDisplay::test()
+{
+	init_fg();
+	release();
+}
 
 void MicroDisplay::init_fg()
 {
@@ -94,20 +120,13 @@ void MicroDisplay::init_fg()
 		errorMessageWait();
 	}
 
-	//
-	CloseDisplay(createDiplayBuffer());
-
 	//´´½¨DMA»º´æ
 	memoryAllocation();
+
+	//
+	//CloseDisplay(createDiplayBuffer());
+
 }
-
-MicroDisplay::~MicroDisplay()
-{
-	release();
-}
-
-
-
 
 
 int MicroDisplay::createDiplayBuffer()
@@ -140,8 +159,8 @@ int MicroDisplay::createDiplayBuffer()
 		Bits = 8;
 		break;
 	};
-	int dispId0 = ::CreateDisplay(Bits, _width, _frameCount);
-	SetBufferWidth(dispId0, _width, _frameCount);
+	int dispId0 = ::CreateDisplay(Bits, _width, _frameHeight);
+	SetBufferWidth(dispId0, _width, _frameHeight);
 	return dispId0;
 }
 
@@ -160,7 +179,7 @@ void MicroDisplay::memoryAllocation()
 	case FG_COL48:	bytesPerPixel = 6; break;
 	}
 	int nr_of_buffer = 8;
-	size_t totalBufSize = _width*_frameCount*nr_of_buffer*bytesPerPixel;
+	size_t totalBufSize = _width*_frameHeight*nr_of_buffer*bytesPerPixel;
 	if ((memHandle = Fg_AllocMemEx(fg, totalBufSize, nr_of_buffer)) == NULL){
 		errorMessageWait();
 	}
@@ -171,10 +190,12 @@ void MicroDisplay::release()
 	if (memHandle != NULL)
 	{
 		Fg_FreeMemEx(fg, memHandle);
+		memHandle = NULL;
 	}
 	if (fg != NULL)
 	{
 		Fg_FreeGrabber(fg);
+		fg = NULL;
 	}
 }
 

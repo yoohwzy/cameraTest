@@ -16,53 +16,50 @@ globle_var::~globle_var()
 //将默认设置读取值globle_var
 bool globle_var::InitSetting(bool isload)
 {
-	_mdi.Width = 4096;
-	_mdi.Height = 1;
-	_mdi.colorType = _mdi.RGB;
-	_mdi.MaxPics = 10001;
+	Width = 4096;
+	ColorType = RGB;
+	FrameCount = 12000;
 
 	if (isload)
 	{
 		string str;
 		if (
 			SettingHelper::GetKeyString(SettingHelper::GRAB_ColorType, str) &&
-			SettingHelper::GetKeyInt(SettingHelper::GRAB_MaxPics, _mdi.MaxPics) &&
-			SettingHelper::GetKeyInt(SettingHelper::GRAB_Width, _mdi.Width) &&
+			SettingHelper::GetKeyInt(SettingHelper::GRAB_MaxPics, FrameCount) &&
+			SettingHelper::GetKeyInt(SettingHelper::GRAB_Width, Width) &&
 			SettingHelper::GetKeyInt(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS)
 			)
 		{
 			if (str == "RGB")
-				_mdi.colorType = _mdi.RGB;
+				ColorType = RGB;
 			else
-				_mdi.colorType = _mdi.GRAY;
+				ColorType = GRAY;
 		}
 		else
 			return false;
 	}
 
-	//s = BufferStorage(_mdi.MaxPics, _mdi.Width);
+	//s = BufferStorage(FrameCount, Width);
 
 	return true;
 }
 //将手动配置初始化globle_var
-bool globle_var::SetGrabSetting(string colorType, int maxPics, int width)
+bool globle_var::SetGrabSetting(string colorType, int frameCount, int width)
 {
-	_mdi.colorType = colorType == "RGB" ? globle_var::_mdi.RGB : globle_var::_mdi.GRAY;
-	_mdi.Width = width;
-	//_mdi.Height = 1;
-	//_mdi.colorType = _mdi.RGB;
-	_mdi.MaxPics = maxPics;
+	ColorType = colorType == "RGB" ? globle_var::RGB : globle_var::GRAY;
+	Width = width;
+	FrameCount = frameCount;
 
-	//s = BufferStorage(_mdi.MaxPics, _mdi.Width);
+	//s = BufferStorage(FrameCount, Width);
 
 	return true;
 }
 void globle_var::SaveSetting()
 {
 	//写入ini文件
-	SettingHelper::AddKey(SettingHelper::GRAB_MaxPics, _mdi.MaxPics);
-	SettingHelper::AddKey(SettingHelper::GRAB_Width, _mdi.Width);
-	SettingHelper::AddKey(SettingHelper::GRAB_ColorType, _mdi.colorType == globle_var::_mdi.RGB ? "RGB" : "Gray");
+	SettingHelper::AddKey(SettingHelper::GRAB_MaxPics, FrameCount);
+	SettingHelper::AddKey(SettingHelper::GRAB_Width, Width);
+	SettingHelper::AddKey(SettingHelper::GRAB_ColorType, ColorType == globle_var::RGB ? "RGB" : "Gray");
 
 	SettingHelper::AddKey(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS);
 }
@@ -73,8 +70,11 @@ void globle_var::SaveSetting()
 
 /********************全局变量***********************/
 
-MicroDisplayInit globle_var::_mdi;
-//BufferStorage globle_var::s = BufferStorage(_mdi.MaxPics, _mdi.Width);
+
+//BufferStorage globle_var::s = BufferStorage(FrameCount, Width);
 int globle_var::TiggerWaitTimeMS = 400;
 string globle_var::VirtualCameraFileName = "";
 
+int globle_var::Width = 0;					//每帧宽度
+int globle_var::FrameCount = 0;				//总共帧数
+int globle_var::ColorType = globle_var::RGB;				//采图颜色模式

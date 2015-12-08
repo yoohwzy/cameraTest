@@ -51,12 +51,6 @@
     <ClInclude Include="mc100.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Class\MicroDisplay\MicroDisplayInit.h">
-      <Filter>Class\MicroDisplay</Filter>
-    </ClInclude>
-    <ClInclude Include="Class\MicroDisplay\MicroDisplayControler.h">
-      <Filter>Class\MicroDisplay</Filter>
-    </ClInclude>
     <ClInclude Include="Class\BufferStorage.h">
       <Filter>Class</Filter>
     </ClInclude>
@@ -127,12 +121,6 @@
     </ClCompile>
     <ClCompile Include="CvvImage.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\MicroDisplay\MicroDisplayInit.cpp">
-      <Filter>Class\MicroDisplay</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\MicroDisplay\MicroDisplayControler.cpp">
-      <Filter>Class\MicroDisplay</Filter>
     </ClCompile>
     <ClCompile Include="Class\BufferStorage.cpp">
       <Filter>Class</Filter>

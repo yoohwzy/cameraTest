@@ -84,7 +84,6 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_EN_KILLFOCUS(IDC_TB_VirtualCamera, &CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera)
 	ON_BN_CLICKED(IDC_BTN_CALIBRATION, &CTileDetectorMFCDlg::OnBnClickedBtnCalibration)
 	ON_MESSAGE(WM_MSG_GRABBINGCalibartion_END, &CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd)//定标、采集结束处理程序
-	ON_BN_CLICKED(IDC_BTN_SAVE_PIC, &CTileDetectorMFCDlg::OnBnClickedBtnSavePic)
 	ON_BN_CLICKED(IDC_BTN_Setting, &CTileDetectorMFCDlg::OnBnClickedBtnSetting)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
@@ -149,6 +148,10 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
 	UpdateData(false);
+
+	CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
+	radio->SetCheck(1);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -254,18 +257,32 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 
-	consumer->StartNewProces(twag->BufferImg);
+	consumer->StartNewProces(twag->Image);
 
-	if (twag->BufferImg.cols > 0)
+	if (twag->Image.cols > 0)
 	{
-		cv::Mat a;
-		DrawPicToHDC(a, IDC_PIC_Sample);
+		DrawPicToHDC(twag->Image, IDC_PIC_Sample);
 	}
 	CString msg;
 	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
 	m_Info += msg;
 	UpdateData(false);
-	
+
+	//保存底片
+	if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	{
+		CString msg;
+		msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
+		m_Info += msg;
+		stringstream ss;
+		UpdateData(false);
+		ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
+		cv::imwrite(ss.str(), twag->OriginalImage);
+
+		m_Info += _T("保存完成\r\n");
+		UpdateData(false);
+	}
+	twag->OriginalImage.release();
 	return 1;
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
@@ -283,7 +300,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM l
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 
-	consumer->StartNewProces4Calibraion(twag->BufferImg);
+	consumer->StartNewProces4Calibraion(twag->Image);
 	m_Info += _T("定标采图完成！\r\n");
 	UpdateData(false);
 	return 1;
@@ -420,37 +437,38 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 	{
 		globle_var::VirtualCameraFileName = strtmp;
 		twag->StopWatch();
-		twag->Switch2Virtual(strtmp, true);
+		if (!twag->Switch2Virtual(strtmp))
+		{
+			MessageBox(L"虚拟相机文件不存在！");
+			return;
+		}
 		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
 			twag->StartWatch();
 		printf_globle("开始使用虚拟相机.\r\n\r\n");
-
-		if (twag->vc->buffer.cols == 0)
-			MessageBox(L"虚拟相机文件不存在！");
 	}
 }
 
 
 
 
-void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
-{
-	/*CString msg;
-	msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
-	m_Info += msg;
-	stringstream ss;
-	UpdateData(false);
-	ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
-	cv::imwrite(ss.str(), globle_var::ImageBuffer);
-
-	ss.str("");
-	ss << "samples/" << twag->GrabbingIndex << "_x3.jpg";
-	cv::imwrite(ss.str(), globle_var::ImageBufferX3);
-
-	m_Info += _T("保存完成\r\n");
-	UpdateData(false);
-*/
-}
+//void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
+//{
+//	/*CString msg;
+//	msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
+//	m_Info += msg;
+//	stringstream ss;
+//	UpdateData(false);
+//	ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
+//	cv::imwrite(ss.str(), globle_var::ImageBuffer);
+//
+//	ss.str("");
+//	ss << "samples/" << twag->GrabbingIndex << "_x3.jpg";
+//	cv::imwrite(ss.str(), globle_var::ImageBufferX3);
+//
+//	m_Info += _T("保存完成\r\n");
+//	UpdateData(false);
+//*/
+//}
 
 
 void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
