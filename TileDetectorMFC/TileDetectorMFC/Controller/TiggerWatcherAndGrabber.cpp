@@ -72,11 +72,12 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 
 void TiggerWatcherAndGrabber::StartWatch()
 {
-	if (!IsWatching)
+	if (!IsWatching && t_watcher == NULL)
 	{
 		IsWatching = true;
-		std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-		t_watcher.detach();
+		//std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+		t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+		t_watcher->detach();
 		printf_globle("StartWatch£º¿ªÊ¼¼à¿Ø´¥·¢ÐÅºÅ\n");
 	}
 	else{
@@ -94,6 +95,8 @@ void TiggerWatcherAndGrabber::StopWatch()
 {
 	printf_globle("Í£Ö¹¼à¿Ø´¥·¢ÐÅºÅ\n");
 	IsWatching = false;
+	Sleep(50);
+	t_watcher = NULL;
 }
 bool TiggerWatcherAndGrabber::ManualTigger()
 {

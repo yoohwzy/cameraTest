@@ -52,8 +52,22 @@ public:
 	bool StartNewProces(cv::Mat img);
 	//为定标处理一次
 	bool StartNewProces4Calibraion(cv::Mat img);
+
+
+
+	static string GetErrorDescription(int subtype)
+	{
+		switch (subtype)
+		{
+		case 1:return "未检测到瓷砖";
+		case 2:return "未检测到完整的瓷砖";
+		default:
+			return "";
+		}
+	}
+
 private:
 	HWND hwnd;
 	void processingThread();
-
+	void sendMsg(int type, int subtype);
 };

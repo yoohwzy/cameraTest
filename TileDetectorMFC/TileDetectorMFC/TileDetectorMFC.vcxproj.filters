@@ -19,11 +19,11 @@
     <Filter Include="Controller">
       <UniqueIdentifier>{14cb1352-af02-45d3-a4df-019e4263193c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Class\MicroDisplay">
-      <UniqueIdentifier>{3ebff08c-8ab6-4489-8c80-8ddb75da742c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Class\Base">
       <UniqueIdentifier>{2d6fca3f-9891-4b8b-a42a-289c50a3000f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Camera">
+      <UniqueIdentifier>{62e56917-c224-428e-b484-5a70bb8aaec6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,9 +90,6 @@
     <ClInclude Include="Class\Base\Block.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Base\VirtualCamera.h">
-      <Filter>Class\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Class\EdgeInnerDetctor.h">
       <Filter>Class</Filter>
     </ClInclude>
@@ -105,8 +102,11 @@
     <ClInclude Include="Class\Base\SettingHelper.h">
       <Filter>Class\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Class\MicroDisplay\MicroDisplay.h">
-      <Filter>Class\MicroDisplay</Filter>
+    <ClInclude Include="Class\Camera\MicroDisplay.h">
+      <Filter>Class\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\VirtualCamera.h">
+      <Filter>Class\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -123,9 +123,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Class\BufferStorage.cpp">
-      <Filter>Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\BlocksDetector.cpp">
       <Filter>Class</Filter>
     </ClCompile>
     <ClCompile Include="Class\EdgeDetector.cpp">
@@ -155,9 +152,6 @@
     <ClCompile Include="Class\Base\Block.cpp">
       <Filter>Class\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Class\Base\VirtualCamera.cpp">
-      <Filter>Class\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Class\EdgeInnerDetctor.cpp">
       <Filter>Class</Filter>
     </ClCompile>
@@ -167,8 +161,14 @@
     <ClCompile Include="Class\Base\SettingHelper.cpp">
       <Filter>Class\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Class\MicroDisplay\MicroDisplay.cpp">
-      <Filter>Class\MicroDisplay</Filter>
+    <ClCompile Include="Class\BlocksDetector.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\MicroDisplay.cpp">
+      <Filter>Class\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\VirtualCamera.cpp">
+      <Filter>Class\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -113,14 +113,14 @@
     <ClInclude Include="Class\Base\Block.h" />
     <ClInclude Include="Class\Base\Faults.h" />
     <ClInclude Include="Class\Base\SettingHelper.h" />
-    <ClInclude Include="Class\Base\VirtualCamera.h" />
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
+    <ClInclude Include="Class\Camera\MicroDisplay.h" />
+    <ClInclude Include="Class\Camera\VirtualCamera.h" />
     <ClInclude Include="Class\EdgeDetector.h" />
     <ClInclude Include="Class\EdgeInnerDetctor.h" />
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
-    <ClInclude Include="Class\MicroDisplay\MicroDisplay.h" />
     <ClInclude Include="Class\Pretreatment.h" />
     <ClInclude Include="Class\Processor.h" />
     <ClInclude Include="Controller\Consumer.h" />
@@ -140,14 +140,14 @@
   <ItemGroup>
     <ClCompile Include="Class\Base\Block.cpp" />
     <ClCompile Include="Class\Base\SettingHelper.cpp" />
-    <ClCompile Include="Class\Base\VirtualCamera.cpp" />
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
+    <ClCompile Include="Class\Camera\MicroDisplay.cpp" />
+    <ClCompile Include="Class\Camera\VirtualCamera.cpp" />
     <ClCompile Include="Class\EdgeDetector.cpp" />
     <ClCompile Include="Class\EdgeInnerDetctor.cpp" />
     <ClCompile Include="Class\Judgement.cpp" />
     <ClCompile Include="Class\Measurer.cpp" />
-    <ClCompile Include="Class\MicroDisplay\MicroDisplay.cpp" />
     <ClCompile Include="Class\Pretreatment.cpp" />
     <ClCompile Include="Class\Processor.cpp" />
     <ClCompile Include="Controller\Consumer.cpp" />

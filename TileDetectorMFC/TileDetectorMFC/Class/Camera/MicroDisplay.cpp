@@ -6,6 +6,7 @@ MicroDisplay::MicroDisplay(GrabbingBuffer *gb, int frameCount, int width, int co
 	_width = width;
 	_frameCount = frameCount;
 	_colorType = colorType;
+	_gb = gb;
 	nBoard = boardID;
 	camPort = Camport;
 }
@@ -32,7 +33,7 @@ void MicroDisplay::Capture()
 	frameindex_t last_pic_nr = 0;
 	frameindex_t cur_pic_nr;
 
-	
+
 	cv::Mat OriginalImage;
 	while (fcount < _frameCount)
 	{
@@ -84,22 +85,26 @@ void MicroDisplay::init_fg()
 	if (_colorType == GRAY)
 	{
 		if ((fg = Fg_Init(dllNameGRAY, nBoard)) == NULL) {
+			fprintf(stderr, "Fg_Init() failed: %s\n", Fg_getLastErrorDescription(fg));
 			errorMessageWait();
 		}
 		//设置传输模式，设置后才为4k
 		int _FG_CAMERA_LINK_CAMTYP = FG_CL_DUALTAP_8_BIT;
 		if (Fg_setParameter(fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, camPort) < 0) {
+			fprintf(stderr, "Fg_setParameter(FG_CAMERA_LINK_CAMTYP) failed: %s\n", Fg_getLastErrorDescription(fg));
 			errorMessageWait();
 		}
 	}
 	else
 	{
 		if ((fg = Fg_Init(dllNameRGB, nBoard)) == NULL) {
+			fprintf(stderr, "Fg_Init() failed: %s\n", Fg_getLastErrorDescription(fg));
 			errorMessageWait();
 		}
 		//传输模式的调整
 		int _FG_CAMERA_LINK_CAMTYP = FG_CL_RGB;
 		if (Fg_setParameter(fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, camPort) < 0) {
+			fprintf(stderr, "Fg_setParameter(FG_CAMERA_LINK_CAMTYP) failed: %s\n", Fg_getLastErrorDescription(fg));
 			errorMessageWait();
 		}
 	}
@@ -109,14 +114,17 @@ void MicroDisplay::init_fg()
 
 	// 设置参数
 	if (Fg_setParameter(fg, FG_WIDTH, &_width, camPort) < 0) {
+		fprintf(stderr, "Fg_setParameter(FG_WIDTH) failed: %s\n", Fg_getLastErrorDescription(fg));
 		errorMessageWait();
 	}
 	int h = _frameHeight;//每帧采集图像高度
 	if (Fg_setParameter(fg, FG_HEIGHT, &h, camPort) < 0) {
+		fprintf(stderr, "Fg_setParameter(FG_HEIGHT) failed: %s\n", Fg_getLastErrorDescription(fg));
 		errorMessageWait();
 	}
 	int bitAlignment = FG_LEFT_ALIGNED;
 	if (Fg_setParameter(fg, FG_BITALIGNMENT, &bitAlignment, camPort) < 0) {
+		fprintf(stderr, "Fg_setParameter(FG_BITALIGNMENT) failed: %s\n", Fg_getLastErrorDescription(fg));
 		errorMessageWait();
 	}
 
@@ -181,6 +189,7 @@ void MicroDisplay::memoryAllocation()
 	int nr_of_buffer = 8;
 	size_t totalBufSize = _width*_frameHeight*nr_of_buffer*bytesPerPixel;
 	if ((memHandle = Fg_AllocMemEx(fg, totalBufSize, nr_of_buffer)) == NULL){
+		fprintf(stderr, "Fg_AllocMemEx() failed: %s\n", Fg_getLastErrorDescription(fg));
 		errorMessageWait();
 	}
 }

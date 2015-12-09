@@ -83,40 +83,42 @@ void Consumer::processingThread()
 	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
-		BlocksDetector *bd = new BlocksDetector(DetectedImg);
+		BlocksDetector bd = BlocksDetector(DetectedImg);
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖
-		if (!bd->Start() || !bd->StartUP_DOWN(BlocksDetector::Up) || !bd->StartUP_DOWN(BlocksDetector::Down))
+		if (!bd.Start() || !bd.StartUP_DOWN(BlocksDetector::Up) || !bd.StartUP_DOWN(BlocksDetector::Down))
 		{
 			IsProcessing = false;
-			printf_globle("未检测到瓷砖\r");
+			sendMsg(0, 1);
+			printf_globle(Consumer::GetErrorDescription(1));
 			return;
 		}
-		ss << "bd->Start() && bd->StartUP_DOWN(BlocksDetector::Up) &&	bd->StartUP_DOWN(BlocksDetector::Down)" << endl;
+		//ss << "bd.Start() && bd.StartUP_DOWN(BlocksDetector::Up) &&	bd.StartUP_DOWN(BlocksDetector::Down)" << endl;
 
 
-		block->UpLine = bd->UpLine;
-		block->DownLine = bd->DownLine;
-		block->LeftLine = bd->LeftLine;
-		block->RightLine = bd->RightLine;
+		block->UpLine = bd.UpLine;
+		block->DownLine = bd.DownLine;
+		block->LeftLine = bd.LeftLine;
+		block->RightLine = bd.RightLine;
 
-		delete bd;
 
 		if (!block->Lines2ABCD())
 		{
-			printf_globle("未检测到完整的瓷砖\r");
+			IsProcessing = false;
+			sendMsg(0, 2);
+			printf_globle(Consumer::GetErrorDescription(2));
 			return;
 		}
 
-		ss << "block->ABCD()" << endl;
+		//ss << "block->ABCD()" << endl;
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 		printf_globle(ss.str());
 		ss.str("");
 		t = (double)cv::getTickCount();
 	}
-	//若没有初始化定标
+	//若没有则初始化定标
 	if (!IsCalibration && m == NULL)
 	{
 		m = new Measurer(block, 300, 600);
@@ -128,8 +130,8 @@ void Consumer::processingThread()
 	//瓷砖精确定位  &&  崩边检测
 	if (2 == 2)
 	{
-		EdgeDetector *ed = new EdgeDetector(grayImg, block,&faults);
-		ed->start();
+		EdgeDetector ed = EdgeDetector(grayImg, block, &faults);
+		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
@@ -140,7 +142,6 @@ void Consumer::processingThread()
 		}
 		printf_globle(ss.str());
 		ss.str("");
-		delete ed;
 	}
 
 
@@ -202,11 +203,11 @@ void Consumer::processingThread()
 	#ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
-			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd->drowDebugDetectLR);
+			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
 			//t_write1.detach();
-			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd->drowDebugDetectUD);
+			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
 			//t_write2.detach();
-			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd->drowDebugResult);
+			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd.drowDebugResult);
 			//t_write3.detach();
 		}
 	#endif
@@ -218,8 +219,12 @@ void Consumer::processingThread()
 
 
 	IsProcessing = false;
+	sendMsg(0, 0);
+}
+void Consumer::sendMsg(int type, int subtype)
+{
 	if (hwnd != NULL)
 	{
-		PostMessage(hwnd, WM_USER + 101, 0, 0);
+		PostMessage(hwnd, WM_USER + 101, type, subtype);
 	}
 }

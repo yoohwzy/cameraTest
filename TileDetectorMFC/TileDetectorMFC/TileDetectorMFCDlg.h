@@ -84,6 +84,10 @@ private:
 	cv::Mat img_on_show;//È«³ß´çÍ¼
 	//Ëõ·ÅÏÔÊ¾Í¼Æ¬
 	void ShowImgROI(CPoint point);
+
+
+
+	bool IsConsumerProcessing = false;
 public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

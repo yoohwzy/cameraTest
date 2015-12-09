@@ -9,8 +9,8 @@
 #include "../globle_var.h"
 
 
-#include "../Class/MicroDisplay/MicroDisplay.h"
-#include "../Class/Base/VirtualCamera.h"
+#include "../Class/Camera/MicroDisplay.h"
+#include "../Class/Camera/VirtualCamera.h"
 #include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
 
@@ -46,6 +46,7 @@ private:
 	HWND hwnd;
 	GrabbingBuffer *gb = NULL;
 	
+	std::thread *t_watcher = NULL;
 
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志

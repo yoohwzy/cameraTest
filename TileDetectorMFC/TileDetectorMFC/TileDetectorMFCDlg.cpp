@@ -19,13 +19,13 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 对话框数据
+	// 对话框数据
 	enum { IDD = IDD_ABOUTBOX };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
-// 实现
+	// 实现
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -236,8 +236,6 @@ void CTileDetectorMFCDlg::BtnScan_OnBnClicked()
 		UpdateData(false);
 	}
 }
-
-
 void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 {
 	m_Info = _T("");
@@ -248,25 +246,37 @@ void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
 	//运行消费者进程处理图像
-	if (consumer->IsProcessing)
+	if (consumer != NULL && consumer->IsProcessing == false)
+	{
+		delete consumer;
+		consumer = NULL;
+	}
+	else if (IsConsumerProcessing)
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
-	delete consumer;
+	if (consumer != NULL)
+		delete consumer;
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
-
+	IsConsumerProcessing = true;
 	consumer->StartNewProces(twag->Image);
+
+
 
 	if (twag->Image.cols > 0)
 	{
 		DrawPicToHDC(twag->Image, IDC_PIC_Sample);
 	}
+
+
 	CString msg;
 	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
 	m_Info += msg;
 	UpdateData(false);
+	 
+
 
 	//保存底片
 	if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
@@ -288,83 +298,90 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
 {
 
-	//运行消费者进程处理图像
+	////运行消费者进程处理图像
 
-	if (consumer->IsProcessing)
-	{
-		printf_globle("算法太慢，上一轮运算尚未结束！");
-		return 0;
-	}
+	//if (consumer->IsProcessing)
+	//{
+	//	printf_globle("算法太慢，上一轮运算尚未结束！");
+	//	return 0;
+	//}
 
-	delete consumer;
-	consumer = new Consumer(this->GetSafeHwnd());
-	consumer->GrabbingIndex = twag->GrabbingIndex;
+	//delete consumer;
+	//consumer = new Consumer(this->GetSafeHwnd());
+	//consumer->GrabbingIndex = twag->GrabbingIndex;
 
-	consumer->StartNewProces4Calibraion(twag->Image);
-	m_Info += _T("定标采图完成！\r\n");
-	UpdateData(false);
+	//consumer->StartNewProces4Calibraion(twag->Image);
+	//m_Info += _T("定标采图完成！\r\n");
+	//UpdateData(false);
 	return 1;
 }
-
-
-LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM lParam)
+//wParam = 0表示检测完成，1表示有错误
+//lParam 表示错误类型
+LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 {
 	CString msg;
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
 	m_Info += msg;
 
-	img_on_show = consumer->originalImg.clone();
-	if (consumer->faults.BrokenEdges.size() > 0)
+	if (wParam == 0)
 	{
-		CString str;
-		str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenEdges.size());
-		m_Info += str;
-		//cv::Mat img(img_on_show);
-		for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
+		img_on_show.release();
+		img_on_show = consumer->originalImg.clone();
+		if (consumer->faults.BrokenEdges.size() > 0)
 		{
-			cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
+			CString str;
+			str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenEdges.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
+			{
+				cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
+			}
 		}
-	}
-	if (consumer->faults.SomethingBigs.size() > 0)
-	{
-		CString str;
-		str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.SomethingBigs.size());
-		m_Info += str;
-		for (size_t i = 0; i < consumer->faults.SomethingBigs.size(); i++)
+		if (consumer->faults.SomethingBigs.size() > 0)
 		{
-			cv::circle(img_on_show, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
+			CString str;
+			str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.SomethingBigs.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.SomethingBigs.size(); i++)
+			{
+				cv::circle(img_on_show, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
+			}
 		}
-	}
-	if (consumer->faults.Scratchs.size() > 0)
-	{
-		CString str;
-		str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Scratchs.size());
-		m_Info += str;
-		for (size_t i = 0; i < consumer->faults.Scratchs.size(); i++)
+		if (consumer->faults.Scratchs.size() > 0)
 		{
-			cv::circle(img_on_show, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
+			CString str;
+			str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Scratchs.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.Scratchs.size(); i++)
+			{
+				cv::circle(img_on_show, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
+			}
 		}
-	}
-	if (consumer->faults.Holes.size() > 0)
-	{
-		CString str;
-		str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Holes.size());
-		m_Info += str;
-		for (size_t i = 0; i < consumer->faults.Holes.size(); i++)
+		if (consumer->faults.Holes.size() > 0)
 		{
-			cv::circle(img_on_show, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+			CString str;
+			str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Holes.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.Holes.size(); i++)
+			{
+				cv::circle(img_on_show, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+			}
 		}
-	}
-	UpdateData(false);
+		UpdateData(false);
 
-	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+	}
+	else
+	{
+		m_Info += Consumer::GetErrorDescription(subtype).c_str();
+		UpdateData(false);
+	}
+	delete consumer;
+	consumer = NULL;
 
-	//delete consumer;
-	//delete twag;
-
+	IsConsumerProcessing = false;
 
 	//cv::imwrite("result.jpg", img_on_show);
-
 
 	//if (!twag->ManualTigger())
 	//{
@@ -525,12 +542,12 @@ BOOL CTileDetectorMFCDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
 				zoom = zoom > 4 ? 4 : zoom;
 			}
 		}
-		ShowImgROI(CPoint(0,0));
+		ShowImgROI(CPoint(0, 0));
 	}
 	return CDialogEx::OnMouseWheel(nFlags, zDelta, point);
 }
 
-void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0,0))
+void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 {
 	if (img_on_show.rows > 0)
 	{

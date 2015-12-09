@@ -9,7 +9,6 @@ VirtualCamera::VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, stri
 	_gb = gb;
 
 	stringstream ss;
-
 	if (imgname.find(":\\", 0) == std::string::npos)
 	{
 		ss << "virtualcameras/" << imgname;
@@ -20,9 +19,10 @@ VirtualCamera::VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, stri
 		ss << imgname;
 	}
 	if (_colorType == GRAY)
-		buffer = cv::imread(imgname, 0);
+		buffer = cv::imread(ss.str(), 0);
 	else
-		buffer = cv::imread(imgname, 1);
+		buffer = cv::imread(ss.str(), 1);
+	ss.str("");
 	if (buffer.cols == 0 || buffer.rows == 0)
 	{
 		stringstream sss;
@@ -30,7 +30,7 @@ VirtualCamera::VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, stri
 		printf_globle(sss.str());
 		//ExitWithError(sss.str());
 	}
-	else if (buffer.cols != _width || buffer.rows < _frameCount)
+	else if (buffer.cols != _width || buffer.rows != _frameCount)
 	{
 		cv::resize(buffer, buffer, cv::Size(_width, _frameCount));
 	}
