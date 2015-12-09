@@ -40,6 +40,7 @@ private:
 	vector<Point> locationpoints;
 	vector<vector<Point>> CneedContours;
 	vector<vector<vector<Point>>> Warehousecontours;
+	Mat Mask_result_big, Mask_result_small;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;

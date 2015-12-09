@@ -367,6 +367,16 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 				cv::circle(img_on_show, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
 			}
 		}
+		if (consumer->faults.MarkPens.size() > 0)
+		{
+			CString str;
+			str.Format(_T("%d 存在%d处人工标记，橙色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.MarkPens.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.MarkPens.size(); i++)
+			{
+				cv::rectangle(img_on_show, consumer->faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
+			}
+		}
 		UpdateData(false);
 
 		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
