@@ -17,12 +17,6 @@ vector<vector<cv::Point>> dilateneedcontours;
 
 
 
-
-bool SortByM1(const Vec4i &v1, const Vec4i &v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致  
-{
-	return v1[3] < v2[3];//升序排列  
-}
-
 bool SortBysize(const vector<Point>v1, const vector<Point>v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致  
 {
 	return v1.size() > v2.size();//降序排列  
@@ -189,68 +183,6 @@ void Pretreatment::ProduceItem(ItemRepository *ir, int item)
 
 	(ir->item_buffer)[ir->write_position] = item; // 写入产品.
 
-	
-
-	//int maxszie = 0;
-	//int n = -1;
-	//for (size_t j = 0; j < tempttours.size(); j++)
-	//{
-	//	Rect rectemp = boundingRect(tempttours[j]);
-	//	if (rectemp.x < centermark.x&&rectemp.y < centermark.y)
-	//	{
-	//		if (rectemp.x + rectemp.width>centermark.x && rectemp.y + rectemp.height>centermark.y)
-	//			n = j;
-	//	}
-	//}
-	//if (n == -1)
-	//{
-	//	for (size_t j = 0; j < tempttours.size(); j++)
-	//	{
-	//		if (maxszie < tempttours[j].size())
-	//		{
-	//			maxszie = tempttours[j].size();
-	//			n = j;
-	//		}
-	//	}
-	//}
-	//vector<int> hullsI;
-	//vector<Vec4i> defects;
-	//vector<Point> hull;
-	//convexHull(tempttours[n], hull, false);
-	//convexHull(tempttours[n], hullsI, false);//寻找凸包
-	//convexityDefects(tempttours[n], hullsI, defects);
-	//Point gpoint = barycenter1(hull);
-	//int countnum = countNonZero(growImg(Rect(gpoint - Point(1, 1), gpoint + Point(2, 2))));
-	//double asextent = matchShapes(tempttours[n], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//椭圆形状匹配
-	//if (countnum < 9 || asextent>1.0)
-	//	return;
-
-	//int d1, d2, d3, d4;
-	//d1 = d2 = d3 = d4 = 1;//d1,d2,d3,d4分别代表左，右，上，下
-	//if (write_data)
-	//{
-	//	Point pt7 = Point(rect_grow.x, rect_grow.y) + a;
-	//	Point pt8 = Point(rect_grow.x + rect_grow.width, rect_grow.y + rect_grow.height) + a;
-
-	//	defectcenter.x = 0.5*(pt7.x + pt8.x) + recImg.x + maxRect.x + 100;//坐标变换回原图
-	//	defectcenter.y = 0.5*(pt7.y + pt8.y) + recImg.y + maxRect.y + 400;
-	//	if (abs(pt8.y - pt7.y) > abs(pt8.x - pt7.x))
-	//		defectcenter.z = abs(pt8.x - pt7.x);
-	//	else
-	//		defectcenter.z = abs(pt8.y - pt7.y);
-	//	p2cp.clear();
-	//	p2cp.push_back(defectcenter);
-	//	Point3f pttemp;
-	//	pttemp.x = b.x;
-	//	pttemp.y = b.y;
-	//	pttemp.z = 0;
-	//	p2cp.push_back(pttemp);
-	//	pttemp.x = a.x;
-	//	pttemp.y = a.y;
-	//	p2cp.push_back(pttemp);
-	//	p2c.push_back(p2cp);
-	//	m++;
-	//}
 	needContour.push_back(locationpoints);
 	Warehousecontours.push_back(needContour);
 	(ir->write_position)++; // 写入位置后移.
@@ -354,7 +286,9 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		for (size_t j = 1; j < lowTcontour.size(); j++)
 		{
 			if (contourArea(lowTcontour[0]) > 1000 * contourArea(lowTcontour[j]))
-				size_v--;
+				break;
+			else
+				size_v++;
 		}
 		if (size_v != 1)
 		{
@@ -370,81 +304,8 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		else
 			hole.diameter = growT_RECT.height;
 		_faults->Holes.push_back(hole);
-		//if (defectpoint.size() == 0)
-		//{
-		//	defectpoint.push_back(defectcenter);
-		//	hole.position.x = defectcenter.x;
-		//	hole.position.y = defectcenter.y;
-		//	hole.diameter = defectcenter.z;
-		//	_faults->Holes.push_back(hole);
-		//	/*cout << data << endl;*/
-		//}
-		//else
-		//{
-		//	int k = 0;
-		//	for (int j = 0; j < defectpoint.size(); j++)
-		//	{
-		//		if (abs(defectpoint[j].x - defectcenter.x) + abs(defectpoint[j].y - defectcenter.y) > 20)
-		//			k++;
-		//	}
-		//	if (k == defectpoint.size())
-		//	{
-		//		defectpoint.push_back(defectcenter);
-		//		hole.position.x = defectcenter.x;
-		//		hole.position.y = defectcenter.y;
-		//		hole.diameter = defectcenter.z;
-		//		_faults->Holes.push_back(hole);
-		//		/*cout << data << endl;*/
-		//	}
-		//}
-		/*std::cout << "Produce the " << i << "^th item..." << std::endl;*/
 
 	}
-	//if (p2c.size() != 0 )
-	//{
-	//	Judgement JYON;
-	//	Point a, b;
-	//	a.x = p2c.back()[2].x;
-	//	a.y = p2c.back()[2].y;
-	//	b.x = p2c.back()[1].x;
-	//	b.y = p2c.back()[1].y;
-	//	Mat boxJImg = PMidImg(Rect(a, b));
-	//	defectcenter = p2c.back()[0];
-	//	p2c.pop_back();
-	//	Faults::Hole hole;
-	//	if (1)//判断是否为缺陷
-	//	{
-	//		if (defectpoint.size() == 0)
-	//		{
-	//			defectpoint.push_back(defectcenter);
-	//			hole.position.x = defectcenter.x;
-	//			hole.position.y = defectcenter.y;
-	//			hole.diameter = defectcenter.z;
-	//			_faults->Holes.push_back(hole);
-	//			/*cout << data << endl;*/
-	//		}
-	//		else
-	//		{
-	//			int k = 0;
-	//			for (int j = 0; j < defectpoint.size(); j++)
-	//			{
-	//				if (abs(defectpoint[j].x - defectcenter.x) + abs(defectpoint[j].y - defectcenter.y) > 20)
-	//					k++;
-	//			}
-	//			if (k == defectpoint.size())
-	//			{
-	//				defectpoint.push_back(defectcenter);
-	//				hole.position.x = defectcenter.x;
-	//				hole.position.y = defectcenter.y;
-	//				hole.diameter = defectcenter.z;
-	//				_faults->Holes.push_back(hole);
-	//				/*cout << data << endl;*/
-	//			}
-	//		}
-	//	}
-	//}
-	
-
 	(ir->read_position)++; // 读取位置后移
 
 	if (ir->read_position >= kItemRepositorySize) // 读取位置若移到最后，则重新置位.
@@ -487,12 +348,10 @@ void Pretreatment::ProducerTask() // 生产者任务
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);
 			int OtsuV = otsuThreshold(MidImgROI, histolist);//找到离散灰度值导数的阈值
 
-			threshold(MidImgROI, ThImgROI, OtsuV, 255, CV_THRESH_BINARY);
-			ThImgROI = ~ThImgROI;
-			/*dilate(ThImgROI, ThImgROI, DilateImg);*/
+			threshold(MidImgROI, ThImgROI, OtsuV, 255, CV_THRESH_BINARY_INV);
 			vector<vector<cv::Point>> decontours;
-			Mat anoImg = ThImgROI.clone();
-			cv::findContours(anoImg, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
+			cv::findContours(ThImgROI, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 			vector<double> listnum;
 			for (size_t k = 0; k < decontours.size(); k++)
 			{
@@ -516,9 +375,6 @@ void Pretreatment::ProducerTask() // 生产者任务
 		}
 		Thpt.y = i*int(MidImg.rows*0.2);
 	}
-	//ThImg = ~ThImg;
-	//DilateImg = getStructuringElement(MORPH_RECT, Size(3, 3));
-	//dilate(ThImg, ThImg, DilateImg);
 }
 
 void Pretreatment::ConsumerTask() // 消费者任务
@@ -542,10 +398,8 @@ void Pretreatment::linedetect()
 {
 	Mat CannyImg,BlurImg;
 	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_AREA);
-	bilateralFilter(CannyImg, BlurImg, 5, 5, 5);
+	bilateralFilter(CannyImg, BlurImg, 5, 10, 2);
 	Canny(BlurImg, BlurImg, 5, 20);
-	rectangle(BlurImg, Rect(Point(0, 0), Point(20, BlurImg.rows)), Scalar(0), -1);
-	rectangle(BlurImg, Rect(Point(BlurImg.cols - 10, 0), Point(BlurImg.cols, BlurImg.rows)), Scalar(0), -1);//左右靠边边缘线舍弃
 
 	vector<vector<cv::Point>> dilatecontours;
 	findContours(BlurImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -561,8 +415,7 @@ void Pretreatment::linedetect()
 	vector<vector<Point>> bigcontours;
 	bigcontours.insert(bigcontours.end(), dilatecontours.begin(), dilatecontours.begin() + move_n);
 	drawContours(dilateImg, bigcontours, -1, Scalar(255), -1);
-	/*dilate(dilateImg, dilateImg, Mat());
-	erode(dilateImg, dilateImg, Mat());*/
+
 
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	vector<vector<Point>> Linecontours;
@@ -619,22 +472,6 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	recImg.width -= 200;
 	recImg.height -= 800;
 	MidImg = image(Rect(recImg));
-	//Mat CalImg = ImgROI(Range::all(), Range(1, 1));//垂直投影，光照矫正
-
-	//reduce(ImgROI, CalImg, 0, CV_REDUCE_AVG);
-
-	//double min, max;
-	//minMaxLoc(CalImg, &min, &max);
-	//int Maxrows = (int)max;
-	//Mat LightPlusrows(CalImg.rows, CalImg.cols, CV_8U, Scalar(Maxrows));
-	//absdiff(LightPlusrows, CalImg, LightPlusrows);//找出补偿值
-
-	//Mat Light;
-	//for (int i = 0; i < ImgROI.rows; i++)//构建补偿矩阵
-	//{
-	//	Light.push_back(LightPlusrows);
-	//}
-	//add(ImgROI, Light, ImgROI);//光照补偿
 
 	PMidImg = MidImg.clone();
 	InitItemRepository(&gItemRepository);
@@ -647,4 +484,6 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	line.join();
 	needContour.clear();
 	dilateneedcontours.clear();
+	CneedContours.clear();
+	Warehousecontours.clear();
 }
