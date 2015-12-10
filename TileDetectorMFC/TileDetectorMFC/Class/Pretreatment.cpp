@@ -365,14 +365,11 @@ void Pretreatment::ProducerTask() // 生产者任务
 			vector<vector<cv::Point>> decontours;
 
 			cv::findContours(ThImgROI, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-			vector<double> listnum;
 			for (size_t k = 0; k < decontours.size(); k++)
 			{
 				if (decontours[k].size() > 8)
 				{
 					double matchextent = matchShapes(decontours[k], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//比较待检测缺陷的形态
-					listnum.push_back(matchextent);
-
 					if (matchextent < 1.0)
 					{
 						needContour.push_back(decontours[k]);
@@ -395,7 +392,6 @@ void Pretreatment::ConsumerTask() // 消费者任务
 	static int cnt = 1;
 	while (1) {
 		int item = ConsumeItem(&gItemRepository); // 消费一个产品.
-		/*std::cout << "Consume the " << item << "^th item" << std::endl;*/
 		if (++item == kItemsToProduce) break; // 如果产品消费个数为 kItemsToProduce, 则退出.
 	}
 }
@@ -528,7 +524,11 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 					mask_rect.x += recImg.x;
 					mask_rect.y += recImg.y;
 					markpen.markposition = mask_rect;
-					_faults->MarkPens.push_back(markpen);
+					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
+					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
+					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//检测该标记是否在瓷砖上，防止瓷砖倾斜误判
+						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
+							_faults->MarkPens.push_back(markpen);
 				}
 			}
 		}
