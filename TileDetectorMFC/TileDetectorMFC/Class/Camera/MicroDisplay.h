@@ -12,6 +12,7 @@
 
 #include <opencv2/opencv.hpp>
 
+
 class MicroDisplay
 {
 public:

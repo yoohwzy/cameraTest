@@ -119,6 +119,8 @@
     <ClInclude Include="Class\Camera\VirtualCamera.h" />
     <ClInclude Include="Class\EdgeDetector.h" />
     <ClInclude Include="Class\EdgeInnerDetctor.h" />
+    <ClInclude Include="Class\Helper\LogHelper.h" />
+    <ClInclude Include="Class\Helper\StringHelper.h" />
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\Pretreatment.h" />
@@ -146,6 +148,7 @@
     <ClCompile Include="Class\Camera\VirtualCamera.cpp" />
     <ClCompile Include="Class\EdgeDetector.cpp" />
     <ClCompile Include="Class\EdgeInnerDetctor.cpp" />
+    <ClCompile Include="Class\Helper\LogHelper.cpp" />
     <ClCompile Include="Class\Judgement.cpp" />
     <ClCompile Include="Class\Measurer.cpp" />
     <ClCompile Include="Class\Pretreatment.cpp" />

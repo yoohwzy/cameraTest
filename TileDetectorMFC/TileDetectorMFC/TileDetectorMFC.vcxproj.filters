@@ -25,6 +25,9 @@
     <Filter Include="Class\Camera">
       <UniqueIdentifier>{62e56917-c224-428e-b484-5a70bb8aaec6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\Helper">
+      <UniqueIdentifier>{f0dfc5f6-4547-4601-b18b-2b0609777d0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -108,6 +111,12 @@
     <ClInclude Include="Class\Camera\VirtualCamera.h">
       <Filter>Class\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Helper\LogHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\StringHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -169,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="Class\Camera\VirtualCamera.cpp">
       <Filter>Class\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Helper\LogHelper.cpp">
+      <Filter>Class\Helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

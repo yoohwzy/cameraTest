@@ -152,6 +152,12 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
 	radio->SetCheck(1);
 
+	//创建系统日志
+	LogHelper::LogFileName = LogHelper::GetNowLogFileName();
+	CString log;
+	log.Format(L"%s 系统启动", LogHelper::LogFileName);
+	LogHelper::Log(log);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
