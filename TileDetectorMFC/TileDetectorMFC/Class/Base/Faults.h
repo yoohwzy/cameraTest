@@ -53,7 +53,11 @@ public:
 		cv::Point position;//位置
 		double diameter;//直径（毫米）
 	};
-
+	//人工标记
+	struct MarkPen
+	{
+		cv::Rect markposition;//位置
+	};
 
 
 
@@ -99,6 +103,7 @@ public:
 	vector<Hole> Holes;//凹点
 	vector<Scratch> Scratchs;//划痕
 	vector<SomethingBig> SomethingBigs;//巨大缺陷，一遇到就判断为不合格品
+	vector<MarkPen> MarkPens;//人工标记
 private:
 	double milliMeterPerPix_X = 0;//x轴每像素对应多少毫米
 	double milliMeterPerPix_Y = 0;//y轴每像素对应多少毫米

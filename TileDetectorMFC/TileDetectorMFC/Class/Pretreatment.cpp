@@ -9,7 +9,7 @@ using namespace cv;
 int kItemsToProduce = 9;   // How many items we plan to produce.
 int m = 0;
 vector<Point3f> repoint;
-Mat MidImg, ThImg, CMidImg,PMidImg;
+Mat MidImg, ThImg, LMidImg, PMidImg;
 vector<vector<cv::Point>> needContour;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
 vector<vector<cv::Point>> ecliptours;
@@ -74,7 +74,7 @@ int otsuThreshold(Mat &frame, MatND hist)//局部二值化的阈值选取
 	return threshold;
 }
 
-Mat Grow(Mat &image, Point seedpoint,double th_v)//区域生长
+Mat Grow(Mat &image, Point seedpoint, double th_v)//区域生长
 {
 	Mat HyImg = image.clone();
 	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
@@ -146,7 +146,7 @@ Mat Grow(Mat &image, Point seedpoint,double th_v)//区域生长
 					dataDT[growpoint.x] = 255;
 				}
 			}
-			
+
 			if (dataD[growpoint.x - 1] < th_v)
 			{
 				if (dataDT[growpoint.x - 1] == 0 && dataD[growpoint.x - 1] - data[growpoint.x] <= 2)
@@ -217,15 +217,15 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Point pt7 = Point(box.x, box.y);
 		Point pt8 = Point(box.x + box.width, box.y + box.height);
 		Point pt_ROI_a = Point(0, 0);
-		Point pt_ROI_b = Point(PMidImg.cols/2 - 1, PMidImg.rows/5 - 1);//截取原始点
+		Point pt_ROI_b = Point(PMidImg.cols / 2 - 1, PMidImg.rows / 5 - 1);//截取原始点
 
 		if (pt7.x - 10 * box.width > 0)
 			pt_ROI_a.x = pt7.x - 10 * box.width;
 		if (pt7.y - 10 * box.height > 0)
 			pt_ROI_a.y = pt7.y - 10 * box.height;
-		if (pt8.x + 10 * box.width < MidImg.cols/2 - 1)
+		if (pt8.x + 10 * box.width < MidImg.cols / 2 - 1)
 			pt_ROI_b.x = pt8.x + 10 * box.width;
-		if (pt8.y + 10 * box.height < MidImg.rows/5 - 1)
+		if (pt8.y + 10 * box.height < MidImg.rows / 5 - 1)
 			pt_ROI_b.y = pt8.y + 10 * box.height;
 
 		Point centermark = 0.5 * (pt7 + pt8) - pt_ROI_a;//在boxImg中待检测连通域的中心标记
@@ -322,10 +322,11 @@ void Pretreatment::ProducerTask() // 生产者任务
 {
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
 	Mat DilateImg = getStructuringElement(MORPH_RECT, Size(3, 3));
-
+	if (_faults->MarkPens.size() != 0)
+		bitwise_and(MidImg, Mask_result_big, MidImg);
 	Mat cirlceImg(160, 160, CV_8UC1, Scalar(0));
 	ellipse(cirlceImg, Point(80, 80), Size(40, 30), 90.0, 0, 360, Scalar(255), -1, 8);//画椭圆
-    cv::findContours(cirlceImg, ecliptours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
+	cv::findContours(cirlceImg, ecliptours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
 
 	Mat ThImgROI, MidImgROI;
 	Point Thpt = Point(0, 0);
@@ -396,8 +397,8 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
-	Mat CannyImg,BlurImg;
-	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_AREA);
+	Mat CannyImg, BlurImg;
+	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
 	bilateralFilter(CannyImg, BlurImg, 5, 10, 2);
 	Canny(BlurImg, BlurImg, 5, 20);
 
@@ -416,6 +417,8 @@ void Pretreatment::linedetect()
 	bigcontours.insert(bigcontours.end(), dilatecontours.begin(), dilatecontours.begin() + move_n);
 	drawContours(dilateImg, bigcontours, -1, Scalar(255), -1);
 
+	if (_faults->MarkPens.size() != 0)
+		bitwise_and(dilateImg, Mask_result_small, dilateImg);
 
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	vector<vector<Point>> Linecontours;
@@ -427,7 +430,7 @@ void Pretreatment::linedetect()
 	int m = 0, linenumall = 0, linenum = 0;
 	for (size_t i = 10; i < bigcontours.size(); i++)
 	{
-		
+
 		cannyrect = boundingRect(bigcontours[i]);
 		Mat waitImg = dilateImg(Rect(cannyrect));
 		if (cannyrect.width < 50 && cannyrect.height < 50)
@@ -436,9 +439,9 @@ void Pretreatment::linedetect()
 		if (matchlinepro> 1.0)
 			continue;
 		Faults::Scratch scratch;
-		scratch.position.x = 4*cannyrect.x + 2*cannyrect.width + recImg.x;
-		scratch.position.y = 4*cannyrect.y + 2*cannyrect.height + recImg.y;
-		scratch.length = (cannyrect.width >cannyrect.height) ? 2*cannyrect.width : 2*cannyrect.height;
+		scratch.position.x = 4 * cannyrect.x + 2 * cannyrect.width + recImg.x;
+		scratch.position.y = 4 * cannyrect.y + 2 * cannyrect.height + recImg.y;
+		scratch.length = (cannyrect.width >cannyrect.height) ? 2 * cannyrect.width : 2 * cannyrect.height;
 		//if (scratch.length < 35)
 		//	continue;
 		_faults->Scratchs.push_back(scratch);
@@ -456,7 +459,7 @@ Pretreatment::~Pretreatment()
 void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 {
 	_faults = faults;
-	
+
 	if (image.channels() == 3)//判断是否为彩图
 		cvtColor(image, image, CV_RGB2GRAY);
 
@@ -473,12 +476,54 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	recImg.height -= 800;
 	MidImg = image(Rect(recImg));
 
+
+	Mat MaskImg, Mask2CannyImg;
+	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(255));
+	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
+	resize(MidImg, MaskImg, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
+	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
+	Canny(MaskImg, MaskImg, 40, 50);
+	vector<vector<Point>> Maskcontours;
+	findContours(MaskImg, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	if (Maskcontours.size() != 0)
+	{
+		partial_sort(Maskcontours.begin(), Maskcontours.begin() + 1, Maskcontours.end(), SortBysize);
+		if (Maskcontours.front().size() > 30)
+		{
+			for (size_t i = 0; i < Maskcontours.size(); i++)
+			{
+				if (Maskcontours[i].size() > 30)
+				{
+					Rect mask_rect = boundingRect(Maskcontours[i]);
+					mask_rect.x *= 4;
+					mask_rect.y *= 4;
+					mask_rect.width *= 4;
+					mask_rect.height *= 4;
+					rectangle(Mask_result_small, mask_rect, Scalar(0), -1);
+					mask_rect.x *= 4;
+					mask_rect.y *= 4;
+					mask_rect.width *= 4;
+					mask_rect.height *= 4;
+					rectangle(Mask_result_big, mask_rect, Scalar(0), -1);
+					Faults::MarkPen markpen;
+					mask_rect.x += recImg.x;
+					mask_rect.y += recImg.y;
+					markpen.markposition = mask_rect;
+					_faults->MarkPens.push_back(markpen);
+				}
+			}
+		}
+
+
+	}
+
 	PMidImg = MidImg.clone();
+	LMidImg = MidImg.clone();
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
 	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
-	
+
 	producer.join();
 	consumer.join();
 	line.join();
