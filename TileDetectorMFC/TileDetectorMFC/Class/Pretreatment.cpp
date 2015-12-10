@@ -554,7 +554,6 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
 	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
-
 	producer.join();
 	consumer.join();
 	line.join();
