@@ -1,8 +1,10 @@
-#include <iostream>
-#include <fstream>
-#include "opencv2/highgui/highgui.hpp"
+#include "..//opencv2//opencv.hpp"
+#include "..//opencv//highgui.h"
+#include "..//opencv//ml.h"
 #include "opencv2/stitching/stitcher.hpp"
 #include <opencv2/imgproc/imgproc.hpp>
+#include <iostream>
+#include <fstream>
 #include <queue>
 #include <mutex>
 #include <thread>

@@ -2,9 +2,12 @@
 #include "Judgement.h"
 
 
-using namespace std;
 using namespace cv;
+using namespace std;
 
+
+#undef max
+#undef min
 
 int kItemsToProduce = 9;   // How many items we plan to produce.
 int m = 0;
@@ -20,6 +23,18 @@ vector<vector<cv::Point>> dilateneedcontours;
 bool SortBysize(const vector<Point>v1, const vector<Point>v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致  
 {
 	return v1.size() > v2.size();//降序排列  
+}
+
+void CreateLookupTable(Mat& table)
+{
+	table.create(1, 256, CV_8UC1);
+
+	uchar *p = table.data;
+	p[0] = 255;
+	for (int i = 1; i < 256; ++i)
+	{
+		p[i] = i;
+	}
 }
 
 Point barycenter1(vector<Point> contoursi)//计算轮廓重心
@@ -323,7 +338,16 @@ void Pretreatment::ProducerTask() // 生产者任务
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
 	Mat DilateImg = getStructuringElement(MORPH_RECT, Size(3, 3));
 	if (_faults->MarkPens.size() != 0)
-		bitwise_and(MidImg, Mask_result_big, MidImg);
+	{
+		double t = (double)cv::getTickCount();
+		cv::max(MidImg, Mask_result_big, MidImg);
+		/*bitwise_and(MidImg, Mask_result_big, MidImg);
+		Mat table;
+		CreateLookupTable(table);
+		LUT(MidImg, table, MidImg);*/
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		cout << t << endl;
+	}
 	Mat cirlceImg(160, 160, CV_8UC1, Scalar(0));
 	ellipse(cirlceImg, Point(80, 80), Size(40, 30), 90.0, 0, 360, Scalar(255), -1, 8);//画椭圆
 	cv::findContours(cirlceImg, ecliptours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
@@ -398,8 +422,8 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 void Pretreatment::linedetect()
 {
 	Mat CannyImg, BlurImg;
-	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
-	bilateralFilter(CannyImg, BlurImg, 5, 10, 2);
+	resize(LMidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
+	bilateralFilter(CannyImg, BlurImg, 6, 12, 3);
 	Canny(BlurImg, BlurImg, 5, 20);
 
 	vector<vector<cv::Point>> dilatecontours;
@@ -418,7 +442,12 @@ void Pretreatment::linedetect()
 	drawContours(dilateImg, bigcontours, -1, Scalar(255), -1);
 
 	if (_faults->MarkPens.size() != 0)
+	{
 		bitwise_and(dilateImg, Mask_result_small, dilateImg);
+		bigcontours.clear();
+		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	}
+		
 
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	vector<vector<Point>> Linecontours;
@@ -428,11 +457,13 @@ void Pretreatment::linedetect()
 	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
 	int m = 0, linenumall = 0, linenum = 0;
-	for (size_t i = 10; i < bigcontours.size(); i++)
+	for (size_t i = 0; i < bigcontours.size(); i++)
 	{
 
 		cannyrect = boundingRect(bigcontours[i]);
 		Mat waitImg = dilateImg(Rect(cannyrect));
+		if (!countNonZero(waitImg))
+			continue;
 		if (cannyrect.width < 50 && cannyrect.height < 50)
 			continue;
 		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I1, 0);
@@ -478,7 +509,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 
 	Mat MaskImg, Mask2CannyImg;
-	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(255));
+	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
 	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
 	resize(MidImg, MaskImg, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
 	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
@@ -504,7 +535,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 					mask_rect.y *= 4;
 					mask_rect.width *= 4;
 					mask_rect.height *= 4;
-					rectangle(Mask_result_big, mask_rect, Scalar(0), -1);
+					rectangle(Mask_result_big, mask_rect, Scalar(255), -1);
 					Faults::MarkPen markpen;
 					mask_rect.x += recImg.x;
 					mask_rect.y += recImg.y;
