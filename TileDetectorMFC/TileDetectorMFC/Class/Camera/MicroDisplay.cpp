@@ -51,6 +51,15 @@ void MicroDisplay::Capture()
 		else
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
 		_gb->AddFrame(OriginalImage);
+
+		//同步速度，保证10000行图像1秒采完
+		//若不加循环，则0.45秒采完
+		//23000 0.995
+		//24000 1.0255
+		//26000 1.0546
+		for (int i = 0; i < 36000; i++)
+			;
+
 		fcount++;
 	}
 	release();

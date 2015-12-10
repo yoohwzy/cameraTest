@@ -12,6 +12,8 @@
 #include "Controller/TiggerWatcherAndGrabber.h"
 #include "Controller/Consumer.h"
 
+#include "Class\Helper\StringHelper.h"
+
 #include "SettingDlg.h"
 
 

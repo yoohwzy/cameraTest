@@ -41,12 +41,12 @@ static void printf_globle(const char *c)
 	}
 
 
-	if (FILE_LOG)
-	{
-		ofstream of(FILE_NAME,ios::app);
-		string str(c);
-		of << str;
-	}
+	//if (FILE_LOG)
+	//{
+	//	ofstream of(FILE_NAME,ios::app);
+	//	string str(c);
+	//	of << str;
+	//}
 }
 //将信息输出到console
 static void printf_globle(string str)

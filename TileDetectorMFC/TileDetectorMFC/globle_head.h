@@ -25,6 +25,7 @@ using namespace std;
 
 
 #include "Class/Base/SettingHelper.h"
+#include "Class\Helper\LogHelper.h"
 //Í·ÎÄ¼şEND
 
 
