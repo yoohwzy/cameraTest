@@ -25,18 +25,6 @@ bool SortBysize(const vector<Point>v1, const vector<Point>v2)//◊¢“‚£∫±æ∫Ø ˝µƒ≤Œ 
 	return v1.size() > v2.size();//Ωµ–Ú≈≈¡–  
 }
 
-void CreateLookupTable(Mat& table)
-{
-	table.create(1, 256, CV_8UC1);
-
-	uchar *p = table.data;
-	p[0] = 255;
-	for (int i = 1; i < 256; ++i)
-	{
-		p[i] = i;
-	}
-}
-
 Point barycenter1(vector<Point> contoursi)//º∆À„¬÷¿™÷ÿ–ƒ
 {
 	Moments m = moments(contoursi);
@@ -447,7 +435,7 @@ void Pretreatment::linedetect()
 		bigcontours.clear();
 		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	}
-		
+
 
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	vector<vector<Point>> Linecontours;
@@ -526,15 +514,15 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 				if (Maskcontours[i].size() > 30)
 				{
 					Rect mask_rect = boundingRect(Maskcontours[i]);
-					mask_rect.x *= 4;
-					mask_rect.y *= 4;
-					mask_rect.width *= 4;
-					mask_rect.height *= 4;
+					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
+					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
+					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_small.cols) ? 4 * mask_rect.width + 32 : Mask_result_small.cols;
+					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_small.rows) ? 4 * mask_rect.height + 32 : Mask_result_small.rows;
 					rectangle(Mask_result_small, mask_rect, Scalar(0), -1);
-					mask_rect.x *= 4;
-					mask_rect.y *= 4;
-					mask_rect.width *= 4;
-					mask_rect.height *= 4;
+					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
+					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
+					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_big.cols) ? 4 * mask_rect.width + 32 : Mask_result_big.cols;;
+					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_big.rows) ? 4 * mask_rect.height + 32 : Mask_result_big.rows;;
 					rectangle(Mask_result_big, mask_rect, Scalar(255), -1);
 					Faults::MarkPen markpen;
 					mask_rect.x += recImg.x;
