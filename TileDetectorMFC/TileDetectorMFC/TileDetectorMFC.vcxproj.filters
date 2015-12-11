@@ -28,6 +28,9 @@
     <Filter Include="Class\Helper">
       <UniqueIdentifier>{f0dfc5f6-4547-4601-b18b-2b0609777d0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\IOCard">
+      <UniqueIdentifier>{9dc9f68d-3d2b-43c6-aff1-743be07d3cad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -122,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="Class\Helper\TimeHelper.h">
       <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\mc100USBCard.h">
+      <Filter>Class\IOCard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

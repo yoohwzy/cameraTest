@@ -15,8 +15,9 @@
 #include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
 
+#include "../Class/IOCard/mc100USBCard.h"
+
 #include <thread>
-#include "../mc100.h"
 
 class TiggerWatcherAndGrabber
 {
@@ -43,22 +44,16 @@ public:
 	cv::Mat OriginalImage;
 	//三行叠加后的图像
 	cv::Mat Image;
+	GrabbingBuffer *gb = NULL;
 private:
 	HWND hwnd;
-	GrabbingBuffer *gb = NULL;
 	E2VCamera *e2v = NULL;
 	std::thread *t_watcher = NULL;
 
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
 	bool BeManualTiggered = false;
-	bool BeAutoTiggered()
-	{ 
-		if (mc100_open(0) >= 0)
-			return mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1;
-		else
-			return false;
-	};
+	mc100USBCard mc100;
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;

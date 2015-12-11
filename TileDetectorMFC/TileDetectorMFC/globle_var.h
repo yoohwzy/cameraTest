@@ -3,6 +3,8 @@
 //#include "Class\BufferStorage.h"
 #include "Class\Base\SettingHelper.h"
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
 
 //@description	此处声明全局变量，全局类，以及相关函数
 //@author VShawn

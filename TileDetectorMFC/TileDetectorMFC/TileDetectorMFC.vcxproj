@@ -123,6 +123,7 @@
     <ClInclude Include="Class\Helper\LogHelper.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
     <ClInclude Include="Class\Helper\TimeHelper.h" />
+    <ClInclude Include="Class\IOCard\mc100USBCard.h" />
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\Pretreatment.h" />

@@ -23,8 +23,8 @@ public:
 	EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults);
 	~EdgeInnerDetctor();
 private:
-	Block *block;
-	Faults *faults;
+	Block *block =  NULL;
+	Faults *faults = NULL;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
 
 	double getFrechetDistance(vector<double> lineA, vector<double> lineB);

@@ -1,8 +1,6 @@
 #pragma once
 #include "globle_var.h"
 
-#include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
 using namespace std;
 
 globle_var::globle_var()

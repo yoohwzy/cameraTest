@@ -46,6 +46,10 @@ public:
 	//三合一图像
 	cv::Mat Image;
 
+	void Start(){
+		WriteIndex = 0;
+		ReadIndex = 0;
+	};
 	//从摄像头采入一帧,返回是否停止采集
 	bool AddFrame(cv::Mat& frame);
 	//将三行叠加一行。

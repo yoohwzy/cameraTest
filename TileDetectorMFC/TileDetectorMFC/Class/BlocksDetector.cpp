@@ -257,6 +257,8 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 		}
 	}
 
+	if ((*targetBorder).size() < 5)
+		return false;
 
 	//拟合直线，判断可疑点
 	cv::Vec4f line4f;

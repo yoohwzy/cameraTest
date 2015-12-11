@@ -32,7 +32,14 @@ bool GrabbingBuffer::AddFrame(cv::Mat& frame)
 		cv::cvtColor(frame, frame, CV_GRAY2BGR);
 	}
 	cv::Mat oneFrame = OriginalImage(cv::Rect(0, WriteIndex, _width, 1));
-	oneFrame = frame;
+	
+	frame.copyTo(oneFrame);
+	//for (size_t i = 0; i < _width; i++)
+	//{
+	//	oneFrame.ptr<uchar>(0)[i * 3 + 0] = frame.ptr<uchar>(0)[i * 3 + 0];
+	//	oneFrame.ptr<uchar>(0)[i * 3 + 1] = frame.ptr<uchar>(0)[i * 3 + 1];
+	//	oneFrame.ptr<uchar>(0)[i * 3 + 2] = frame.ptr<uchar>(0)[i * 3 + 2];
+	//}
 	//指向下一行
 	++WriteIndex;
 	if (WriteIndex >= _frameCount)
@@ -44,30 +51,56 @@ bool GrabbingBuffer::AddFrame(cv::Mat& frame)
 void GrabbingBuffer::ThreeInOne(int lineIndex)
 {
 	//防止越界
-	if (lineIndex < 0 || lineIndex >= _frameCount)
+	if (lineIndex < 2 || lineIndex >= _frameCount)
 		return;
 
 	cv::Mat frame = OriginalImage(cv::Rect(0, lineIndex, _width, 1));
 	//N张图像叠加
-	cv::Mat oneFrame = Image(cv::Rect(0, lineIndex, _width, 1));
-	oneFrame += frame;
-	if (lineIndex == 0)//补偿第一第二行没得到叠加的情况
+	cv::Mat thisFrame = Image(cv::Rect(0, lineIndex, _width, 1));
+	cv::Mat thisFrame_1 = Image(cv::Rect(0, lineIndex - 1, _width, 1));
+	cv::Mat thisFrame_2 = Image(cv::Rect(0, lineIndex - 2, _width, 1));
+
+
+	frame.copyTo(thisFrame);
+	thisFrame_1 += frame;
+	thisFrame_2 += frame;
+
+	if ((lineIndex + 1) == _frameCount)
 	{
-		oneFrame += frame;
-	}
-	if (lineIndex == 1)//补偿第一第二行没得到叠加的情况
-	{
-		oneFrame += frame;
-	}
-	if (lineIndex + 1 < _frameCount)
-	{
-		oneFrame = Image(cv::Rect(0, lineIndex + 1, _width, 1));
-		oneFrame += frame;
-	}
-	if (lineIndex + 2 < _frameCount)
-	{
-		oneFrame = Image(cv::Rect(0, lineIndex + 2, _width, 1));
-		oneFrame += frame;
+		thisFrame += frame;
+		thisFrame += frame;
 	}
 	frame.release();
 }
+
+//OLD EDUTION
+//void GrabbingBuffer::ThreeInOne(int lineIndex)
+//{
+//	//防止越界
+//	if (lineIndex < 2 || lineIndex >= _frameCount)
+//		return;
+//
+//	cv::Mat frame = OriginalImage(cv::Rect(0, lineIndex, _width, 1));
+//	//N张图像叠加
+//	cv::Mat oneFrame = Image(cv::Rect(0, lineIndex, _width, 1));
+//	frame.copyTo(oneFrame);
+//	if (lineIndex == 0)//补偿第一第二行没得到叠加的情况
+//	{
+//		oneFrame += frame;
+//	}
+//	if (lineIndex == 1)//补偿第一第二行没得到叠加的情况
+//	{
+//		oneFrame += frame;
+//	}
+//	if (lineIndex + 1 < _frameCount)
+//	{
+//		oneFrame = Image(cv::Rect(0, lineIndex + 1, _width, 1));
+//		oneFrame += frame;
+//	}
+//	if (lineIndex + 2 < _frameCount)
+//	{
+//		oneFrame = Image(cv::Rect(0, lineIndex + 2, _width, 1));
+//		oneFrame += frame;
+//	}
+//	frame.release();
+//}

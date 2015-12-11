@@ -25,6 +25,7 @@ Measurer::Measurer()
 
 Measurer::~Measurer()
 {
+	b = NULL;
 }
 
 void Measurer::PincushionCalibration(cv::Mat calibrationImg)

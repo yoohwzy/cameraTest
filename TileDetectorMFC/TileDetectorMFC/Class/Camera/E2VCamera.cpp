@@ -53,20 +53,19 @@ void E2VCamera::Capture(GrabbingBuffer *gb)
 		else
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
 		gb->AddFrame(OriginalImage);
-		t1 = ((double)cv::getTickCount() - t1) * 1000 / cv::getTickFrequency();
+		t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
 
 
 		//µÈ´ýÂú_GrubbingTimeMicroSecondPer1f
 		if (t1 < _GrubbingTimeMicroSecondPer1f)
 		{
 			double t2 = (double)cv::getTickCount();
-			double tickCountSpan = (_GrubbingTimeMicroSecondPer1f - t1) * cv::getTickFrequency() / 1000;
+			double tickCountSpan = (_GrubbingTimeMicroSecondPer1f - t1) * cv::getTickFrequency() / 1000000;
 			while (((double)cv::getTickCount() - t2) < tickCountSpan)
 			{
-				stringstream ss;
-				ss << ((double)cv::getTickCount() - t2) << " " << tickCountSpan << endl;
-				printf_globle(ss.str());
-				
+				//stringstream ss;
+				//ss << ((double)cv::getTickCount() - t2) << " " << tickCountSpan << endl;
+				//printf_globle(ss.str());
 			}
 		}
 		fcount++;

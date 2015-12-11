@@ -19,7 +19,11 @@ class EdgeDetector
 public:
 
 	EdgeDetector(Mat&, Block *_block,Faults *_faults);
-	~EdgeDetector(){};
+	~EdgeDetector()
+	{
+		block = NULL;
+		faults = NULL;
+	};
 	void start();
 	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
@@ -28,8 +32,8 @@ public:
 
 
 private:
-	Block *block;
-	Faults *faults;
+	Block *block = NULL;
+	Faults *faults = NULL;
 	// 边缘点集合到拟合直线的距离，距离存在向量Distance中
 	void DistanceDetector_set(vector<Point> Boundary_Point_temp, Vec4f FitLine, vector<float> &Distance);
 	// 边缘点到拟合直线的距离

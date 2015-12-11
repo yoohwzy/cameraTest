@@ -64,17 +64,19 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 	printf_globle("配置为【相机&采集卡】模式！\n");
 
 	/**********************初始化采集卡***********************/
-	if (mc100_open(0) >= 0)
-	{
+	//if (mc100_open(0) >= 0)
+	//{
+	//	printf_globle("打开采集卡0成功！\n");
+	//	mc100_write_port(0, MC100_PORTA, 0x00);
+	//}
+	//else
+	//{
+	//	printf_globle("打开采集卡0失败！\n");
+	//}
+	if(mc100.init(0))
 		printf_globle("打开采集卡0成功！\n");
-		mc100_write_port(0, MC100_PORTA, 0x00);
-	}
 	else
-	{
 		printf_globle("打开采集卡0失败！\n");
-	}
-	//MicroDisplay::TestCam();
-
 
 	if (e2v != NULL)
 		delete e2v;
@@ -133,60 +135,68 @@ void TiggerWatcherAndGrabber::watcherThread()
 {
 	while (IsWatching)
 	{
-		if (!IsGrabbing && (BeManualTiggered || BeAutoTiggered()))
+		if (!IsGrabbing && (BeManualTiggered || mc100.GetTrailingEdgePORTA()))
 		{
+			IsGrabbing = true;
+
+#ifdef OUTPUT_TO_CONSOLE
 			double t = (double)cv::getTickCount();
 			stringstream ss;
-
 			if (BeManualTiggered)
 			{
 				printf_globle("手动触发\n");
-				BeManualTiggered = false;
 			}
 			else
 				printf_globle("触发器触发\n");
+#endif
+
+			if (BeManualTiggered)
+				BeManualTiggered = false;
 
 			GrabbingIndex += 1;
+			if (GrabbingIndex > 1000000) GrabbingIndex = 1;
 
-			if (GrabbingIndex > 10000000) GrabbingIndex = 1;
+#ifdef OUTPUT_TO_CONSOLE
 
 			ss << GrabbingIndex << " " << "producer: Start" << endl;
 			printf_globle(ss.str());
 			ss.str("");
-
-			IsGrabbing = true;
 
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			ss << GrabbingIndex << " " << "twag Inint(ms):" << t << endl;
 			printf_globle(ss.str());
 			ss.str("");
 
-
+#endif
 
 			if (globle_var::TiggerWaitTimeMS > 0)
 			{
+#ifdef OUTPUT_TO_CONSOLE
 				ss << GrabbingIndex << " " << "TiggerWaitTimeMS: " << globle_var::TiggerWaitTimeMS << endl;
 				printf_globle(ss.str());
 				ss.str("");
 				t = (double)cv::getTickCount();
+#endif
 
 				//触发后，等待砖进入拍摄区。
 				Sleep(globle_var::TiggerWaitTimeMS);
 
+#ifdef OUTPUT_TO_CONSOLE
 				t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 				stringstream ss;
 				ss << GrabbingIndex << " " << "Sleep real(ms):" << t << endl;
 				printf_globle(ss.str());
+#endif
 			}
 
 
-			//std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
-			//std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
-			//t_3in1.join();
-			//t_capture.join();
+			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
+			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
+			t_3in1.join();
+			t_capture.join();
 
-			capture();
-			threeInOne();
+			//capture();
+			//threeInOne();
 
 			//图片获取完成，复制到全局变量，并删除s
 			//OriginalImage.release();
@@ -220,14 +230,15 @@ void TiggerWatcherAndGrabber::watcherThread()
 }
 void TiggerWatcherAndGrabber::capture()
 {
+
+#ifdef OUTPUT_TO_CONSOLE
 	double t = (double)cv::getTickCount();
 	printf_globle("  capture(); START \r\n");
+#endif
+
+	gb->Start();
 	if (!USING_VIRTUAL_CAMERA)
 	{
-		//MicroDisplay *md = new MicroDisplay(gb, globle_var::FrameCount, globle_var::Width);
-		//md->Capture();
-		//delete md;
-
 		e2v->Capture(gb);
 	}
 	else
@@ -236,21 +247,24 @@ void TiggerWatcherAndGrabber::capture()
 		vc->Capture();
 		delete vc;
 	}
+
+
+#ifdef OUTPUT_TO_CONSOLE
 	//采样计时
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	stringstream ss;
 	ss << GrabbingIndex << " " << "capture();  END" << endl << globle_var::Width << "x" << globle_var::FrameCount << "：" << t << "  End  at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
+#endif
 }
 //图片合成
 void TiggerWatcherAndGrabber::threeInOne()
 {
-	stringstream ss;
-	ss << GrabbingIndex << " " << "ThreeInOne：Start at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	printf_globle(ss.str());
-	ss.str("");
-
+#ifdef OUTPUT_TO_CONSOLE
 	double t = (double)cv::getTickCount();
+#endif
+
+
 	for (gb->ReadIndex = 0; gb->ReadIndex < globle_var::FrameCount; gb->ReadIndex++)
 	{
 		//尚未写入缓存，等待
@@ -260,8 +274,13 @@ void TiggerWatcherAndGrabber::threeInOne()
 		}
 		gb->ThreeInOne(gb->ReadIndex);
 	}
+
+
+
+#ifdef OUTPUT_TO_CONSOLE
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	ss << GrabbingIndex << " " << "ThreeInOne：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
+#endif
 }

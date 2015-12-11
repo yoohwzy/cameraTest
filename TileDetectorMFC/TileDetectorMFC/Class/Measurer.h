@@ -13,7 +13,7 @@
 class Measurer
 {
 private:
-	Block *b;
+	Block *b = NULL;
 
 
 

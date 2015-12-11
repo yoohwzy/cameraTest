@@ -428,5 +428,6 @@ void EdgeInnerDetctor::processAndSaveData(vector<cv::Mat> reduceList, vector<cv:
 
 EdgeInnerDetctor::~EdgeInnerDetctor()
 {
-
+	block = NULL;
+	faults = NULL;
 }
