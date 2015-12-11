@@ -158,6 +158,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	log.Format(L"%s 系统启动", LogHelper::LogFileName);
 	LogHelper::Log(log);
 
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -251,6 +252,7 @@ void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
+	m_Info = _T("");
 	//运行消费者进程处理图像
 	if (consumer != NULL && consumer->IsProcessing == false)
 	{
@@ -264,6 +266,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	}
 	if (consumer != NULL)
 		delete consumer;
+
+
 	consumer = new Consumer(this->GetSafeHwnd());
 	consumer->GrabbingIndex = twag->GrabbingIndex;
 	IsConsumerProcessing = true;
@@ -271,10 +275,10 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 
 
 
-	if (twag->Image.cols > 0)
-	{
-		DrawPicToHDC(twag->Image, IDC_PIC_Sample);
-	}
+	//if (twag->Image.cols > 0)
+	//{
+	//	DrawPicToHDC(twag->Image, IDC_PIC_Sample);
+	//}
 
 
 	CString msg;
@@ -325,6 +329,21 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM l
 //lParam 表示错误类型
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 {
+	IsConsumerProcessing = false;
+
+	if (!twag->ManualTigger())
+	{
+		//MessageBox(L"当前无法触发！");
+		printf_globle("当前无法触发!\n");
+	}
+	else
+	{
+		m_Info = _T("");
+		UpdateData(false);
+	}
+
+	return 0;
+
 	CString msg;
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
 	m_Info += msg;
@@ -340,7 +359,17 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			m_Info += str;
 			for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 10);
+				cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+			}
+		}
+		if (consumer->faults.BrokenCorners.size() > 0)
+		{
+			CString str;
+			str.Format(_T("%d 存在%d处崩角缺陷，洋红标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenCorners.size());
+			m_Info += str;
+			for (size_t i = 0; i < consumer->faults.BrokenCorners.size(); i++)
+			{
+				cv::circle(img_on_show, consumer->faults.BrokenCorners[i].position, consumer->faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
 			}
 		}
 		if (consumer->faults.SomethingBigs.size() > 0)
@@ -425,6 +454,20 @@ void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 	cimg.DrawToHDC(hDC, &rect); // 将图片绘制到显示控件的指定区域内
 	ReleaseDC(pDC);
 }
+void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC)
+{
+	IplImage image(img); //原始图像
+	if (hDC == NULL)
+	{
+		pDC = GetDlgItem(ID)->GetDC();
+		hDC = pDC->GetSafeHdc();
+	}
+	CRect rect;
+	GetDlgItem(ID)->GetClientRect(&rect);
+	CvvImage cimg;
+	cimg.CopyOf(&image); // 复制图片
+	cimg.DrawToHDC(hDC, &rect); // 将图片绘制到显示控件的指定区域内
+}
 
 
 
@@ -435,7 +478,6 @@ void CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered()
 	else
 		twag->StopWatch();
 }
-
 
 
 
@@ -519,6 +561,7 @@ void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
 	}
 	else
 	{
+
 	}
 }
 
@@ -602,17 +645,16 @@ void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 				}
 				else//放大显示
 				{
-
 					int startx = x - zoom_width / 2;
 					int starty = y - zoom_height / 2;
 
 					//防止越界
 					if (startx < 0)startx = 0;
 					if (starty < 0)starty = 0;
-					if (img_on_show.cols - startx < zoom_width)
-						startx = img_on_show.cols - startx;
-					if (img_on_show.rows - starty < zoom_height)
-						starty = img_on_show.rows - starty;
+					if (startx + zoom_width > img_on_show.cols)
+						startx = img_on_show.cols - zoom_width;
+					if (starty + zoom_height > img_on_show.rows)
+						starty = img_on_show.rows - zoom_height;
 					//ROI
 					cv::Mat roi = img_on_show(cv::Rect(startx, starty, zoom_width, zoom_height));
 					DrawPicToHDC(roi, IDC_PIC_Sample);

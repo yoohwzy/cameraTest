@@ -34,6 +34,8 @@ public:
 			delete twag;
 		if (consumer != NULL)
 			delete consumer;
+		if (pDC != NULL)
+			ReleaseDC(pDC);
 	};
 // 对话框数据
 	enum { IDD = IDD_TILEDETECTORMFC_DIALOG };
@@ -62,8 +64,9 @@ public:
 	afx_msg LRESULT OnMsgPostMsg(WPARAM wParam, LPARAM lParam);
 private:
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
-
-
+	void DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC);
+	HDC hDC = NULL;
+	CDC *pDC = NULL;
 
 	afx_msg void OnBnClickedBtnStart();
 	afx_msg void OnBnClickedCbCanbetiggered();

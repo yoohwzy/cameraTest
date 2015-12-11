@@ -301,7 +301,10 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 	}
 #endif
 
-
+	targetBorder = NULL;
+	tmptargetList = NULL;
+	alltargetList = NULL;
+	line = NULL;
 	return true;
 }
 
@@ -453,30 +456,21 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 		cv::cvtColor(img(cv::Rect(xstart, start.y, width, 1)), oneLineGray, CV_BGR2GRAY);
 
 	int elementCount = oneLineGray.cols;//每行元素数
-	uchar* linehead = oneLineGray.ptr<uchar>(0);//每行的起始地址
 	int ret = -1;
 	int diff = SUM_THRESHOD;
-	uchar* lineheadO;
 
-
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
-	{
-		lineheadO = drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0);//每行的起始地址
-	}
-#endif
 
 	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
 	{
 		int leftsum = 0;
 		for (size_t ii = i; ii > i - sumcount; ii--)
 		{
-			leftsum += linehead[ii];
+			leftsum += oneLineGray.ptr<uchar>(0)[ii];
 		}
 		int rightsum = 0;
 		for (size_t ii = i + 1; ii <= i + sumcount; ii++)
 		{
-			rightsum += linehead[ii];
+			rightsum += oneLineGray.ptr<uchar>(0)[ii];
 		}
 		int c = 0;
 		if (isLeft)
@@ -488,9 +482,9 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 #ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
-			lineheadO[i * 3 + 1] = 255;//填充绿色，表示扫描范围
-			lineheadO[i * 3 + 0] = 0;//填充绿色，表示扫描范围
-			lineheadO[i * 3 + 2] = 0;//填充绿色，表示扫描范围
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 1] = 255;//填充绿色，表示扫描范围
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 0] = 0;//填充绿色，表示扫描范围
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 2] = 0;//填充绿色，表示扫描范围
 		}
 #endif
 		if (c > diff)
@@ -500,9 +494,9 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 #ifdef OUTPUT_DEBUG_INFO
 			if (OUTPUT_DEBUG_INFO)
 			{
-				lineheadO[i * 3] = 255;//填充蓝色表示diff超过阈值
-				lineheadO[i * 3 + 1] = 0;
-				lineheadO[i * 3 + 2] = 0;
+				drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3] = 255;//填充蓝色表示diff超过阈值
+				drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 1] = 0;
+				drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 2] = 0;
 			}
 #endif
 		}
@@ -512,9 +506,9 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 #ifdef OUTPUT_DEBUG_INFO
 		if (OUTPUT_DEBUG_INFO)
 		{
-			lineheadO[ret * 3 + 2] = 255;//填充红色
-			lineheadO[ret * 3 + 1] = 0;
-			lineheadO[ret * 3 + 0] = 0;
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[ret * 3 + 2] = 255;//填充红色
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[ret * 3 + 1] = 0;
+			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[ret * 3 + 0] = 0;
 		}
 #endif
 		ret += xstart;

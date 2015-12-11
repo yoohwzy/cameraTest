@@ -28,6 +28,8 @@ public:
 	{
 		if (block == NULL)
 			delete block;
+		if (m != NULL)
+			delete m;
 	};
 	Block *block;
 
@@ -52,7 +54,6 @@ public:
 	bool StartNewProces(cv::Mat img);
 	//为定标处理一次
 	bool StartNewProces4Calibraion(cv::Mat img);
-
 
 
 	static string GetErrorDescription(int subtype)

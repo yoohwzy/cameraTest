@@ -14,7 +14,6 @@ class BlocksDetector
 {
 
 public:
-	//BlocksDetector(BufferStorage *ss, MicroDisplayInit *mdii);
 	BlocksDetector(cv::Mat& Img);
 	~BlocksDetector();
 

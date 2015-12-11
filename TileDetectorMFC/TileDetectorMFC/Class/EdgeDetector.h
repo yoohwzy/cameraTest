@@ -17,14 +17,14 @@ class EdgeDetector
 {
 	
 public:
-	
+
 	EdgeDetector(Mat&, Block *_block,Faults *_faults);
-	~EdgeDetector();
+	~EdgeDetector(){};
 	void start();
 	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
 
-	
+
 
 
 private:
@@ -82,5 +82,7 @@ private:
 	int t1 = 0, t2 = 0;
 	int Tabel = 0;
 
+	//调整ROI区域范围，防止越界
+	void RectAdjust(cv::Mat img,int& x, int& y, int& width, int& height);
 };
 

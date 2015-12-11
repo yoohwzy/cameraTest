@@ -9,7 +9,8 @@
 #include "../globle_var.h"
 
 
-#include "../Class/Camera/MicroDisplay.h"
+#include "../Class/Camera/E2VCamera.h"
+//#include "../Class/Camera/MicroDisplay.h"
 #include "../Class/Camera/VirtualCamera.h"
 #include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
@@ -45,7 +46,7 @@ public:
 private:
 	HWND hwnd;
 	GrabbingBuffer *gb = NULL;
-	
+	E2VCamera *e2v = NULL;
 	std::thread *t_watcher = NULL;
 
 	bool USING_VIRTUAL_CAMERA = false;

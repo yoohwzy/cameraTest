@@ -118,6 +118,9 @@ void Consumer::processingThread()
 		ss.str("");
 		t = (double)cv::getTickCount();
 	}
+
+
+
 	//若没有则初始化定标
 	if (!IsCalibration && m == NULL)
 	{
@@ -144,6 +147,11 @@ void Consumer::processingThread()
 		ss.str("");
 	}
 
+	
+
+	//IsProcessing = false;
+	//sendMsg(0, 0);
+	//return;
 
 
 	//定标分支
