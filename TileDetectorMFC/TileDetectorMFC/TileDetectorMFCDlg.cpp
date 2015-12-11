@@ -329,20 +329,18 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM l
 //lParam 表示错误类型
 LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 {
-	IsConsumerProcessing = false;
-
-	if (!twag->ManualTigger())
-	{
-		//MessageBox(L"当前无法触发！");
-		printf_globle("当前无法触发!\n");
-	}
-	else
-	{
-		m_Info = _T("");
-		UpdateData(false);
-	}
-
-	return 0;
+	//IsConsumerProcessing = false;
+	//if (!twag->ManualTigger())
+	//{
+	//	//MessageBox(L"当前无法触发！");
+	//	printf_globle("当前无法触发!\n");
+	//}
+	//else
+	//{
+	//	m_Info = _T("");
+	//	UpdateData(false);
+	//}
+	//return 0;
 
 	CString msg;
 	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);

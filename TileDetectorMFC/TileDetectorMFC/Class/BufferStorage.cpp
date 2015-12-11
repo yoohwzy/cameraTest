@@ -32,7 +32,7 @@ bool GrabbingBuffer::AddFrame(cv::Mat& frame)
 		cv::cvtColor(frame, frame, CV_GRAY2BGR);
 	}
 	cv::Mat oneFrame = OriginalImage(cv::Rect(0, WriteIndex, _width, 1));
-	oneFrame += frame;
+	oneFrame = frame;
 	//指向下一行
 	++WriteIndex;
 	if (WriteIndex >= _frameCount)

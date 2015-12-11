@@ -6,6 +6,9 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	hwnd = _hwnd;
 	Init(virtualImg);
 
+
+	gb = new GrabbingBuffer(globle_var::FrameCount, globle_var::Width);
+
 	/*读取定标图片 定标*/
 	//BlocksDetector bd_Standard = BlocksDetector(cv::imread("A9划痕凹点_x3二值化.jpg"));
 	//bd_Standard.Start();
@@ -18,10 +21,11 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 }
 TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
 {
-	//if (!USING_VIRTUAL_CAMERA)
-	//{
-	//	MicroDisplayInit::Release(globle_var::_mdi);
-	//}
+	if (gb != NULL)
+	{
+		delete gb;
+		gb = NULL;
+	}
 	if (e2v != NULL)
 	{
 		delete e2v;
@@ -144,10 +148,6 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 			GrabbingIndex += 1;
 
-			if (gb != NULL)
-				delete gb;
-			gb = new GrabbingBuffer(globle_var::FrameCount, globle_var::Width);
-
 			if (GrabbingIndex > 10000000) GrabbingIndex = 1;
 
 			ss << GrabbingIndex << " " << "producer: Start" << endl;
@@ -194,8 +194,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 			OriginalImage = gb->OriginalImage.clone();
 			Image = gb->Image.clone();
 
-			delete gb;
-			gb = NULL;
+
 
 			if (!IsCalibration)
 			{
