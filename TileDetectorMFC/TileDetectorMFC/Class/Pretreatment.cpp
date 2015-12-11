@@ -25,18 +25,6 @@ bool SortBysize(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊıµÄ²ÎÊ
 	return v1.size() > v2.size();//½µĞòÅÅÁĞ  
 }
 
-void CreateLookupTable(Mat& table)
-{
-	table.create(1, 256, CV_8UC1);
-
-	uchar *p = table.data;
-	p[0] = 255;
-	for (int i = 1; i < 256; ++i)
-	{
-		p[i] = i;
-	}
-}
-
 Point barycenter1(vector<Point> contoursi)//¼ÆËãÂÖÀªÖØĞÄ
 {
 	Moments m = moments(contoursi);
@@ -377,14 +365,11 @@ void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
 			vector<vector<cv::Point>> decontours;
 
 			cv::findContours(ThImgROI, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-			vector<double> listnum;
 			for (size_t k = 0; k < decontours.size(); k++)
 			{
 				if (decontours[k].size() > 8)
 				{
 					double matchextent = matchShapes(decontours[k], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//±È½Ï´ı¼ì²âÈ±ÏİµÄĞÎÌ¬
-					listnum.push_back(matchextent);
-
 					if (matchextent < 1.0)
 					{
 						needContour.push_back(decontours[k]);
@@ -407,7 +392,6 @@ void Pretreatment::ConsumerTask() // Ïû·ÑÕßÈÎÎñ
 	static int cnt = 1;
 	while (1) {
 		int item = ConsumeItem(&gItemRepository); // Ïû·ÑÒ»¸ö²úÆ·.
-		/*std::cout << "Consume the " << item << "^th item" << std::endl;*/
 		if (++item == kItemsToProduce) break; // Èç¹û²úÆ·Ïû·Ñ¸öÊıÎª kItemsToProduce, ÔòÍË³ö.
 	}
 }
@@ -447,7 +431,7 @@ void Pretreatment::linedetect()
 		bigcontours.clear();
 		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	}
-		
+
 
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	vector<vector<Point>> Linecontours;
@@ -526,21 +510,25 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 				if (Maskcontours[i].size() > 30)
 				{
 					Rect mask_rect = boundingRect(Maskcontours[i]);
-					mask_rect.x *= 4;
-					mask_rect.y *= 4;
-					mask_rect.width *= 4;
-					mask_rect.height *= 4;
+					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
+					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
+					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_small.cols) ? 4 * mask_rect.width + 32 : Mask_result_small.cols;
+					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_small.rows) ? 4 * mask_rect.height + 32 : Mask_result_small.rows;
 					rectangle(Mask_result_small, mask_rect, Scalar(0), -1);
-					mask_rect.x *= 4;
-					mask_rect.y *= 4;
-					mask_rect.width *= 4;
-					mask_rect.height *= 4;
+					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
+					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
+					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_big.cols) ? 4 * mask_rect.width + 32 : Mask_result_big.cols;;
+					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_big.rows) ? 4 * mask_rect.height + 32 : Mask_result_big.rows;;
 					rectangle(Mask_result_big, mask_rect, Scalar(255), -1);
 					Faults::MarkPen markpen;
 					mask_rect.x += recImg.x;
 					mask_rect.y += recImg.y;
 					markpen.markposition = mask_rect;
-					_faults->MarkPens.push_back(markpen);
+					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
+					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
+					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//¼ì²â¸Ã±ê¼ÇÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãĞ±ÎóÅĞ
+						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
+							_faults->MarkPens.push_back(markpen);
 				}
 			}
 		}
