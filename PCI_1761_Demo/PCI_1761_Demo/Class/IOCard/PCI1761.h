@@ -22,9 +22,6 @@ public:
 		{
 			instantDiCtrl->Dispose();
 			instantDiCtrl = NULL;
-		}
-		if (instantDoCtrl != NULL)
-		{
 			instantDoCtrl->Dispose();
 			instantDoCtrl = NULL;
 		}
@@ -114,6 +111,9 @@ public:
 	//设置继电器状态 true 常闭 false 常开
 	void SetR(int ID, bool status)
 	{
+		if (!hasOpened)
+			return;
+
 		if (status)
 			bufferForR = bufferForR | 0x01 << ID;
 		else
