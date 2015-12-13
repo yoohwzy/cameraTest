@@ -16,6 +16,7 @@
 #include "../Class/Base/Block.h"
 
 #include "../Class/IOCard/mc100USBCard.h"
+#include "../Class/IOCard/PCI1761.h"
 
 #include <thread>
 
@@ -53,7 +54,8 @@ private:
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
 	bool BeManualTiggered = false;
-	mc100USBCard mc100;
+	//mc100USBCard mc100;
+	PCI1761 pci1761;
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;

@@ -31,6 +31,7 @@ TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
 		delete e2v;
 		e2v = NULL;
 	}
+
 	printf_globle("TiggerWatcherAndGrabber unload!\n");
 }
 
@@ -63,21 +64,17 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 	USING_VIRTUAL_CAMERA = false;
 	printf_globle("配置为【相机&采集卡】模式！\n");
 
-	/**********************初始化采集卡***********************/
-	//if (mc100_open(0) >= 0)
-	//{
-	//	printf_globle("打开采集卡0成功！\n");
-	//	mc100_write_port(0, MC100_PORTA, 0x00);
-	//}
+	/**********************初始化IO卡***********************/
+	//if (mc100.init())
+	//	printf_globle("打开mc100成功！\n");
 	//else
-	//{
-	//	printf_globle("打开采集卡0失败！\n");
-	//}
-	if(mc100.init(0))
-		printf_globle("打开采集卡0成功！\n");
+	//	printf_globle("打开mc100失败！\n");
+	if (pci1761.init())
+		printf_globle("打开pci1761成功！\n");
 	else
-		printf_globle("打开采集卡0失败！\n");
+		printf_globle("打开pci1761失败！\n");
 
+	/**********************初始化采集卡*********************/
 	if (e2v != NULL)
 		delete e2v;
 	e2v = new E2VCamera(globle_var::FrameCount, globle_var::Width);
@@ -135,7 +132,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 {
 	while (IsWatching)
 	{
-		if (!IsGrabbing && (BeManualTiggered || mc100.GetTrailingEdgePORTA()))
+		if (!IsGrabbing && (BeManualTiggered || pci1761.GetRisingEdgeIDI(7) ))
 		{
 			IsGrabbing = true;
 

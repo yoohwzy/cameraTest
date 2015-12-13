@@ -11,7 +11,7 @@ public:
 			mc100_close(0);
 	};
 
-	bool init(unsigned int id)
+	bool init(unsigned int id = 0)
 	{
 		if (hasOpened)
 			return hasOpened;
@@ -33,9 +33,9 @@ public:
 			return false;
 
 		bool now = mc100_check_pin(0, (MC100_PORTA << 4) | 0) == 1;
-		bool laset = lastSignalPORTA;
+		bool last = lastSignalPORTA;
 		lastSignalPORTA = now;
-		if (lastSignalPORTA == false && now == true)
+		if (last == false && now == true)
 		{
 			Sleep(1);
 			if (mc100_check_pin(0, (MC100_PORTA << 4) | 0) == 1)
@@ -50,9 +50,9 @@ public:
 			return false;
 
 		bool now = mc100_check_pin(0, (MC100_PORTA << 4) | 0) == 1;
-		bool laset = lastSignalPORTA;
+		bool last = lastSignalPORTA;
 		lastSignalPORTA = now;
-		if (lastSignalPORTA == true && now == false)
+		if (last == true && now == false)
 		{
 			Sleep(1);
 			if (mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1)

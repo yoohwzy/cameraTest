@@ -129,6 +129,15 @@
     <ClInclude Include="Class\IOCard\mc100USBCard.h">
       <Filter>Class\IOCard</Filter>
     </ClInclude>
+    <ClInclude Include="Class\IOCard\bdaqctrl.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\compatibility.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
