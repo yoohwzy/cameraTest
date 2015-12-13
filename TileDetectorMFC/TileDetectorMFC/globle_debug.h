@@ -100,4 +100,4 @@ static void MD_ErrorMessageWait(Fg_Struct *fg)
 	ExitWithError(err_str);
 }
 
-//#define OUTPUT_TO_CONSOLE
+#define OUTPUT_TO_CONSOLE

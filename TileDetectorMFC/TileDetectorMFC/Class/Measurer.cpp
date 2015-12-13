@@ -3,10 +3,11 @@
 
 Measurer::Measurer(Block *_b, int TileStandardWidth, int TileStandardHeight)
 {
-	b = _b;
+	p_block = _b;
 	tileStandardWidth_mm = TileStandardWidth;
 	tileStandardHeight_mm = TileStandardHeight;
 	ObserveCalibration();
+	_b = NULL;
 }
 Measurer::Measurer()
 {
@@ -23,10 +24,6 @@ Measurer::Measurer()
 	fin >> MilliMeterPerPix_Width >> MilliMeterPerPix_Height >> MilliMeterPerPix_Diagonal;
 }
 
-Measurer::~Measurer()
-{
-	b = NULL;
-}
 
 void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 {
@@ -48,9 +45,8 @@ void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 	int height = calibrationGrayImg.rows >200 ? 200 : calibrationGrayImg.rows;
 	for (int i = 0; i < height; i++)
 	{
-		uchar* linehead = calibrationGrayImg.ptr<uchar>(i);//每行的起始地址
 		for (int j = 0; j < calibrationGrayImg.cols; j++)
-				colssum[j] += linehead[j];
+			colssum[j] += calibrationGrayImg.ptr<uchar>(i)[j];
 	}
 	//求一阶导
 	vector<int> colssum_diff;
@@ -82,10 +78,10 @@ void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 
 
 	int a = Xs.size() / 2;
-	int b = a + 1;
+	int p_block = a + 1;
 	//确定中间间距长度（作为校正用的标准长度）
-	int standard_length = Xs[b] - Xs[a];
-	//std::cout << "a = " << a << " b = " << b << endl;
+	int standard_length = Xs[p_block] - Xs[a];
+	//std::cout << "a = " << a << " p_block = " << p_block << endl;
 
 
 	//确认实际点应该所处的位置
@@ -99,9 +95,9 @@ void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 			Xs_standard[i] = Xs_standard[i + 1] - standard_length;
 		}
 	}
-	for (int i = b; i < Xs.size(); i++)
+	for (int i = p_block; i < Xs.size(); i++)
 	{
-		if (i == b)
+		if (i == p_block)
 			Xs_standard[i] = Xs[i];
 		else
 		{
@@ -119,17 +115,17 @@ void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 		int aa1 = Xs_standard[i];
 		int aa2 = Xs_standard[i + 1];
 		double k = standard_length / (double)(a2 - a1);
-		double b = aa2 - k * a2;
+		double p_block = aa2 - k * a2;
 		if ((i + 1) == (Xs.size() - 1))
 			a2 = 4095;
 		for (int j = a1; j <= a2; j++)
 		{
-			double xx = k * j + b;
+			double xx = k * j + p_block;
 			map[j] = xx;
 		}
 	}
 	//无需校正
-	for (int i = Xs[a]; i < Xs[b]; i++)
+	for (int i = Xs[a]; i < Xs[p_block]; i++)
 	{
 		map[i] = i;
 	}
@@ -143,10 +139,10 @@ void Measurer::PincushionCalibration(cv::Mat calibrationImg)
 		int aa1 = Xs_standard[i];
 		int aa2 = Xs_standard[i + 1];
 		double k = standard_length / (double)(a2 - a1);
-		double b = aa2 - k * a2;
+		double p_block = aa2 - k * a2;
 		for (int j = aa1; j < aa2; j++)
 		{
-			double x = (j - b) / k;
+			double x = (j - p_block) / k;
 			map_anti[j] = x;
 		}
 	}
@@ -177,12 +173,11 @@ void Measurer::PincushionImgAdjust(cv::Mat& Img)
 
 	for (int i = 0; i < calibrat.rows; i++)
 	{
-		uchar* linehead = calibrat.ptr<uchar>(i);//每行的起始地址
 		for (int j = 0; j < calibrat.cols; j++)
 		{
-			linehead[j*3 +0] = 0;
-			linehead[j*3+1] = 0;
-			linehead[j*3+2] = 0;
+			calibrat.ptr<uchar>(i)[j * 3 + 0] = 0;
+			calibrat.ptr<uchar>(i)[j * 3 + 1] = 0;
+			calibrat.ptr<uchar>(i)[j * 3 + 2] = 0;
 		}
 	}
 
@@ -190,8 +185,6 @@ void Measurer::PincushionImgAdjust(cv::Mat& Img)
 	int elementCount = calibrat.cols;//每行元素数
 	for (int i = 0; i < image_rows; i++)
 	{
-		uchar* linehead = calibrat.ptr<uchar>(i);//每行的起始地址
-		uchar* oldhead = img.ptr<uchar>(i);//每行的起始地址
 		for (int j = 0; j < elementCount; j++)
 		{
 			if (PincushionMap_Anti[j] < 0)
@@ -204,9 +197,9 @@ void Measurer::PincushionImgAdjust(cv::Mat& Img)
 				double percent2 = 1 - percent1;
 				if (pos1 >= 4096 && pos2 >= 4096)
 					continue;
-				linehead[j * 3 + 0] = oldhead[pos1 * 3 + 0] * percent1 + oldhead[pos2 * 3 + 0] * percent2;
-				linehead[j * 3 + 1] = oldhead[pos1 * 3 + 1] * percent1 + oldhead[pos2 * 3 + 1] * percent2;
-				linehead[j * 3 + 2] = oldhead[pos1 * 3 + 2] * percent1 + oldhead[pos2 * 3 + 2] * percent2;
+				calibrat.ptr<uchar>(i)[j * 3 + 0] = img.ptr<uchar>(i)[pos1 * 3 + 0] * percent1 + img.ptr<uchar>(i)[pos2 * 3 + 0] * percent2;
+				calibrat.ptr<uchar>(i)[j * 3 + 1] = img.ptr<uchar>(i)[pos1 * 3 + 1] * percent1 + img.ptr<uchar>(i)[pos2 * 3 + 1] * percent2;
+				calibrat.ptr<uchar>(i)[j * 3 + 2] = img.ptr<uchar>(i)[pos1 * 3 + 2] * percent1 + img.ptr<uchar>(i)[pos2 * 3 + 2] * percent2;
 			}
 		}
 	}
@@ -217,11 +210,11 @@ void Measurer::PincushionImgAdjust(cv::Mat& Img)
 
 void Measurer::ObserveCalibration()
 {
-	int width = b->imageWidth;
+	int width = p_block->imageWidth;
 	int max = 0;
-	for (int i = 0; i < b->imageWidth; i++)
+	for (int i = 0; i < p_block->imageWidth; i++)
 	{
-		int v = (*b).UpLine.k*(i - (*b).UpLine.x0);
+		int v = (*p_block).UpLine.k*(i - (*p_block).UpLine.x0);
 		if (v > max)
 			max = v;
 		RowAdjust.push_back(v);
@@ -232,10 +225,10 @@ void Measurer::ObserveCalibration()
 	}
 
 	//此处为复制，非指针
-	A_Standard = (*b).A;
-	B_Standard = (*b).B;
-	C_Standard = (*b).C;
-	D_Standard = (*b).D;
+	A_Standard = (*p_block).A;
+	B_Standard = (*p_block).B;
+	C_Standard = (*p_block).C;
+	D_Standard = (*p_block).D;
 
 	//矫正ABCD四点
 	A_Standard.y = A_Standard.y - RowAdjust[A_Standard.x];
@@ -264,17 +257,15 @@ void Measurer::ObserveCalibration()
 void Measurer::ObserveImgAdjust(cv::Mat& Img)
 {
 	cv::Mat oldimg = Img.clone();
-	for (int i = 0; i < b->imageHeight; i++)
+	for (int i = 0; i < p_block->imageHeight; i++)
 	{
-		uchar* linehead = Img.ptr<uchar>(i);//每行的起始地址
-		for (int j = 0; j < b->imageWidth; j++)
+		for (int j = 0; j < p_block->imageWidth; j++)
 		{
-			if ((i + RowAdjust[j]) < 0 || (i + RowAdjust[j]) >= b->imageHeight)
+			if ((i + RowAdjust[j]) < 0 || (i + RowAdjust[j]) >= p_block->imageHeight)
 				continue;
-			uchar* linehead_tmp = oldimg.ptr<uchar>(i + RowAdjust[j]);//每行的起始地址
-			linehead[j * 3 + 0] = linehead_tmp[j * 3 + 0];
-			linehead[j * 3 + 1] = linehead_tmp[j * 3 + 1];
-			linehead[j * 3 + 2] = linehead_tmp[j * 3 + 2];
+			Img.ptr<uchar>(i)[j * 3 + 0] = oldimg.ptr<uchar>(i + RowAdjust[j])[j * 3 + 0];
+			Img.ptr<uchar>(i)[j * 3 + 1] = oldimg.ptr<uchar>(i + RowAdjust[j])[j * 3 + 1];
+			Img.ptr<uchar>(i)[j * 3 + 2] = oldimg.ptr<uchar>(i + RowAdjust[j])[j * 3 + 2];
 		}
 	}
 }
@@ -333,11 +324,13 @@ void Measurer::CaculteSize(Block *_b)
 	
 
 	//余弦定理
-	//	cosa＝（b ^ 2 + c ^ 2 - a ^ 2) / 2bc
-	//	cosb＝（a ^ 2 + c ^ 2 - b ^ 2) / 2ac
-	//	cosc＝（a ^ 2 + b ^ 2 - c ^ 2) / 2ab
+	//	cosa＝（p_block ^ 2 + c ^ 2 - a ^ 2) / 2bc
+	//	cosb＝（a ^ 2 + c ^ 2 - p_block ^ 2) / 2ac
+	//	cosc＝（a ^ 2 + p_block ^ 2 - c ^ 2) / 2ab
 	angleA = ANGLE(acos((AB_Len_Square + AD_Len_Square - BD_Len_Square) / (2 * AB_Len*AD_Len)));
 	angleB = ANGLE(acos((AB_Len_Square + BC_Len_Square - AC_Len_Square) / (2 * AB_Len*BC_Len)));
-	angleC = ANGLE(acos((CD_Len_Square + BC_Len_Square - BD_Len_Square) / (2 * CD_Len*CB_Len)));
+	angleC = ANGLE(acos((CD_Len_Square + BC_Len_Square - BD_Len_Square) / (2 * CD_Len*BC_Len)));
 	angleD = ANGLE(acos((CD_Len_Square + AD_Len_Square - AC_Len_Square) / (2 * CD_Len*AD_Len)));
+
+	_b = NULL;
 }

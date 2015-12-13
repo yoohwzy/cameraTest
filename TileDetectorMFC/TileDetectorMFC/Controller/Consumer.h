@@ -21,19 +21,24 @@
 class Consumer
 {
 public:
-	Consumer(HWND _hwnd){
-		hwnd = _hwnd;
-	}
+	Consumer(HWND _hwnd);
 	~Consumer()
 	{
-		if (block == NULL)
-			delete block;
-		if (m != NULL)
-			delete m;
+		if (p_block == NULL)
+		{
+			delete p_block;
+			p_block = NULL;
+		}
+		if (p_measurer != NULL)
+		{
+			delete p_measurer;
+			p_measurer = NULL;
+		}
+		hwnd = NULL;
 	};
-	Block *block;
 
 
+public:
 	int GrabbingIndex = 0;
 
 	Faults faults;
@@ -48,7 +53,6 @@ public:
 	//是否正在处理
 	bool IsProcessing = false;
 
-	Measurer *m = NULL;
 
 	//传入照片，开始一场新的处理，若上一轮处理还未完成，返回false
 	bool StartNewProces(cv::Mat img);
@@ -68,7 +72,9 @@ public:
 	}
 
 private:
-	HWND hwnd;
+	Block *p_block = NULL;
+	Measurer *p_measurer = NULL;
+	HWND hwnd = NULL;//父窗口句柄
 	void processingThread();
 	void sendMsg(int type, int subtype);
 };

@@ -183,6 +183,8 @@ string SettingHelper::getSectionName(Key key)
 		return "GRAB";
 	case SettingHelper::TIGGER_WaitTime:
 		return "TIGGER";
+	case SettingHelper::TIGGER_HoldTime:
+		return "TIGGER";
 	default:
 		break;
 	}
@@ -200,6 +202,8 @@ string SettingHelper::getKeyName(Key key)
 		return "GRAB_ColorType";
 	case SettingHelper::TIGGER_WaitTime:
 		return "TIGGER_WaitTime";
+	case SettingHelper::TIGGER_HoldTime:
+		return "TIGGER_HoldTime";
 	default:
 		break;
 	}

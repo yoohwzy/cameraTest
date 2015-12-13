@@ -2,6 +2,11 @@
 
 #include "Consumer.h"
 
+
+Consumer::Consumer(HWND _hwnd){
+	hwnd = _hwnd;
+	_hwnd = NULL;
+};
 bool Consumer::StartNewProces(cv::Mat img)
 {
 	if (img.rows == 0 || img.cols == 0)
@@ -18,10 +23,10 @@ bool Consumer::StartNewProces(cv::Mat img)
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
 
 
+	p_block = new Block(globle_var::Width, globle_var::FrameCount);
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
 
-	block = new Block(globle_var::Width, globle_var::FrameCount);
 	return true;
 }
 bool Consumer::StartNewProces4Calibraion(cv::Mat img)
@@ -39,7 +44,7 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 	if (originalImg.channels() == 3)
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
 
-	block = new Block(globle_var::Width, globle_var::FrameCount);
+	p_block = new Block(globle_var::Width, globle_var::FrameCount);
 	IsCalibration = true;
 	processingThread();
 	return true;
@@ -51,12 +56,15 @@ void Consumer::processingThread()
 	faults.Clear();
 	IsProcessing = true;
  
-
+	//IsProcessing = false;
+	//sendMsg(0, 0);
+	//return;
 
 	stringstream ss;
 	ss << GrabbingIndex << " " << "customer：Start at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
+
 
 	////获取二值化图像
 	//Processor::Binaryzation(DetectedImg);
@@ -87,7 +95,9 @@ void Consumer::processingThread()
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖
-		if (!bd.Start() || !bd.StartUP_DOWN(BlocksDetector::Up) || !bd.StartUP_DOWN(BlocksDetector::Down))
+		if (!bd.Start() ||
+			!bd.StartUP_DOWN(BlocksDetector::Up) || 
+			!bd.StartUP_DOWN(BlocksDetector::Down))
 		{
 			IsProcessing = false;
 			sendMsg(0, 1);
@@ -97,13 +107,13 @@ void Consumer::processingThread()
 		//ss << "bd.Start() && bd.StartUP_DOWN(BlocksDetector::Up) &&	bd.StartUP_DOWN(BlocksDetector::Down)" << endl;
 
 
-		block->UpLine = bd.UpLine;
-		block->DownLine = bd.DownLine;
-		block->LeftLine = bd.LeftLine;
-		block->RightLine = bd.RightLine;
+		p_block->UpLine = bd.UpLine;
+		p_block->DownLine = bd.DownLine;
+		p_block->LeftLine = bd.LeftLine;
+		p_block->RightLine = bd.RightLine;
 
 
-		if (!block->Lines2ABCD())
+		if (!p_block->Lines2ABCD())
 		{
 			IsProcessing = false;
 			sendMsg(0, 2);
@@ -111,7 +121,7 @@ void Consumer::processingThread()
 			return;
 		}
 
-		//ss << "block->ABCD()" << endl;
+		//ss << "p_block->ABCD()" << endl;
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 		printf_globle(ss.str());
@@ -122,18 +132,22 @@ void Consumer::processingThread()
 
 
 	//若没有则初始化定标
-	if (!IsCalibration && m == NULL)
+	if (!IsCalibration && p_measurer == NULL)
 	{
-		m = new Measurer(block, 300, 600);
-		m->ObserveCalibration();
+		p_measurer = new Measurer(p_block, 300, 600);
+		p_measurer->ObserveCalibration();
 	}
 	
+
+
+
+
 
 
 	//瓷砖精确定位  &&  崩边检测
 	if (2 == 2)
 	{
-		EdgeDetector ed = EdgeDetector(grayImg, block, &faults);
+		EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
 		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -147,8 +161,6 @@ void Consumer::processingThread()
 		ss.str("");
 	}
 
-	
-
 	//IsProcessing = false;
 	//sendMsg(0, 0);
 	//return;
@@ -161,8 +173,8 @@ void Consumer::processingThread()
 		IsCalibration = false;
 
 		t = (double)cv::getTickCount();
-		m = new Measurer(block, 300, 600);
-		m->ObserveCalibration();
+		p_measurer = new Measurer(p_block, 300, 600);
+		p_measurer->ObserveCalibration();
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		ss << GrabbingIndex << " " << "标定：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 		printf_globle(ss.str());
@@ -171,7 +183,7 @@ void Consumer::processingThread()
 	else//缺陷检测分支
 	{
 		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, block, &faults);
+		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
 		if (faults.SomethingBigs.size() > 0)
@@ -193,7 +205,7 @@ void Consumer::processingThread()
 			t = (double)cv::getTickCount();
 			ss << "瓷砖内部缺陷检测 开始" << endl;
 			Pretreatment p;
-			p.pretreatment(grayImg, block, &faults);
+			p.pretreatment(grayImg, p_block, &faults);
 
 			ss << GrabbingIndex << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
 			ss << GrabbingIndex << " " << "内部有凹点：" << faults.Holes.size() << endl;

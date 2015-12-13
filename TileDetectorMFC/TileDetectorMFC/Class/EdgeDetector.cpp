@@ -3,19 +3,20 @@
 
 EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
 {
-	block = _block;
-	faults = _faults;
-
+	p_block = _block;
+	p_faults = _faults;
+	_block = NULL;
+	_faults = NULL;
 	src = img;
 
 
-	A = block->A;
+	A = p_block->A;
 
-	B = block->B;
+	B = p_block->B;
 
-	C = block->C;
+	C = p_block->C;
 
-	D = block->D;
+	D = p_block->D;
 
 	xleft = (A.x - abs(A.x - D.x) - 100 > 0 ? (A.x - abs(A.x - D.x) - 100) : 0);
 	yleft = A.y - 100 < 0 ? 0 : A.y - 100;
@@ -135,16 +136,16 @@ void EdgeDetector::start()
 	// 求出四个交点A\B\C\D
 	vector<Point> Point_of_Intersection;
 	PointOfIntersection(line_, Point_of_Intersection);
-	block->A = Point_of_Intersection[3];
-	block->B = Point_of_Intersection[2];
-	block->C = Point_of_Intersection[1];
-	block->D = Point_of_Intersection[0];
+	p_block->A = Point_of_Intersection[3];
+	p_block->B = Point_of_Intersection[2];
+	p_block->C = Point_of_Intersection[1];
+	p_block->D = Point_of_Intersection[0];
 
 	vector<Point> corner;
-	corner.push_back(block->A);
-	corner.push_back(block->D);
-	corner.push_back(block->C);
-	corner.push_back(block->B);
+	corner.push_back(p_block->A);
+	corner.push_back(p_block->D);
+	corner.push_back(p_block->C);
+	corner.push_back(p_block->B);
 
 	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	cout << "求出四个交点time=" << t << "\t";*/
@@ -166,13 +167,13 @@ void EdgeDetector::start()
 	int aa1 = 0, bb1 = 0, cc1 = 0, dd1 = 0;
 
 	// 瓷砖向右歪斜
-	if ((block->A).y > (block->B).y)
+	if ((p_block->A).y > (p_block->B).y)
 	{
 		aa1 = ROI_Contours[0].size();	bb1 = ROI_Contours[1].size();	cc = 0;	dd = 0;
 		for (int i = 0; i < 50; i++)
 		{
 			int t0 = abs(Contours[0][i].x - Contours[0][i + 1].x);
-			int t1 = abs(Contours[0][i].x - (block->A).x);
+			int t1 = abs(Contours[0][i].x - (p_block->A).x);
 			if (t1 < 30){
 				aa = i;		break;
 			}
@@ -183,7 +184,7 @@ void EdgeDetector::start()
 		for (int i = 0; i < 50; i++)
 		{
 			int t0 = abs(Contours[1][i].y - Contours[1][i + 1].y);
-			int t1 = abs(Contours[1][i].y - (block->D).y);
+			int t1 = abs(Contours[1][i].y - (p_block->D).y);
 			if (t1 < 30){
 				bb = i;	break;
 			}
@@ -194,8 +195,8 @@ void EdgeDetector::start()
 		for (int i = ROI_Contours[2].size() - 2; i > ROI_Contours[2].size() - 50; i--)
 		{
 			int t0 = abs(Contours[2][i].x - Contours[2][i + 1].x);
-			int t1 = abs(Contours[2][i].x - (block->C).x);
-			if (abs(Contours[2][i].x - (block->C).x) < 30)	{
+			int t1 = abs(Contours[2][i].x - (p_block->C).x);
+			if (abs(Contours[2][i].x - (p_block->C).x) < 30)	{
 				cc1 = i;		break;
 			}
 			else
@@ -207,7 +208,7 @@ void EdgeDetector::start()
 		for (int i = ROI_Contours[3].size() - 2; i > ROI_Contours[3].size() - 50; i--)
 		{
 			int t0 = abs(Contours[3][i].y - Contours[3][i + 1].y);
-			int t1 = abs(Contours[3][i].y - (block->B).y);
+			int t1 = abs(Contours[3][i].y - (p_block->B).y);
 			if (t1 < 30){
 				dd1 = i;	break;
 			}
@@ -222,7 +223,7 @@ void EdgeDetector::start()
 		aa = 0; bb = 0;	cc1 = ROI_Contours[2].size();	dd1 = ROI_Contours[3].size();
 		for (int i = ROI_Contours[0].size() - 2; i > ROI_Contours[0].size() - 50; i--)
 		{
-			if (abs(Contours[0][i].x - (block->D).x) < 30){
+			if (abs(Contours[0][i].x - (p_block->D).x) < 30){
 				aa1 = i;		break;
 			}
 			else
@@ -231,14 +232,14 @@ void EdgeDetector::start()
 
 		for (int i = ROI_Contours[1].size() - 2; i > ROI_Contours[1].size() - 50; i--)
 		{
-			if (abs(Contours[1][i].y - (block->C).y) < 30){ bb1 = i;		break; }
+			if (abs(Contours[1][i].y - (p_block->C).y) < 30){ bb1 = i;		break; }
 			else
 				if (i == ROI_Contours[1].size() - 49)	bb1 = ROI_Contours[1].size() - 49;
 		}
 
 		for (int i = 0; i <50; i++)
 		{
-			if (abs(Contours[2][i].x - (block->B).x) < 30)	{
+			if (abs(Contours[2][i].x - (p_block->B).x) < 30)	{
 				cc = i;		break;
 			}
 			else
@@ -249,7 +250,7 @@ void EdgeDetector::start()
 
 		for (int i = 0; i <50; i++)
 		{
-			if (abs(Contours[3][i].y - (block->A).y)<30)	{
+			if (abs(Contours[3][i].y - (p_block->A).y)<30)	{
 				dd = i;		break;
 			}
 			else
@@ -353,7 +354,7 @@ void EdgeDetector::start()
 								bc.width = edge_deep;
 							}
 							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
-							faults->BrokenCorners.push_back(bc);
+							p_faults->BrokenCorners.push_back(bc);
 							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
 							break;
 						}
@@ -374,7 +375,7 @@ void EdgeDetector::start()
 								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
 							}
 
-							faults->BrokenEdges.push_back(be);
+							p_faults->BrokenEdges.push_back(be);
 							cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
 							break;
 						}
@@ -693,10 +694,10 @@ void EdgeDetector::Merge_Defects(vector<Point3f> &Defects)
 
 void EdgeDetector::Blocks_Defects(vector<Mat> roi, vector<Vec4f> line_1, vector<Mat> &Blocks, vector<Point3f> &local_)
 {
-	int ylA = (block->A).y - yleft, ylD = (block->D).y - yleft;
-	int xdD = (block->D).x - xdown, xdC = (block->C).x - xdown;
-	int yrB = (block->B).y - yright, yrC = (block->C).y - yright;
-	int xuA = (block->A).x - xup, xuB = (block->B).x - xup;
+	int ylA = (p_block->A).y - yleft, ylD = (p_block->D).y - yleft;
+	int xdD = (p_block->D).x - xdown, xdC = (p_block->C).x - xdown;
+	int yrB = (p_block->B).y - yright, yrC = (p_block->C).y - yright;
+	int xuA = (p_block->A).x - xup, xuB = (p_block->B).x - xup;
 	int st = 0, st1 = 0;
 	int fir = 0, las = 0, p = 0;
 	int xp = 0, yp = 0;

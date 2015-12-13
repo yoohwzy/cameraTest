@@ -30,12 +30,21 @@ public:
 	CTileDetectorMFCDlg(CWnd* pParent = NULL);	// 标准构造函数
 	~CTileDetectorMFCDlg()
 	{
-		if (twag != NULL)
-			delete twag;
-		if (consumer != NULL)
-			delete consumer;
-		if (pDC != NULL)
-			ReleaseDC(pDC);
+		if (p_twag != NULL)
+		{
+			delete p_twag;
+			p_twag = NULL;
+		}
+		if (p_consumer != NULL)
+		{
+			delete p_consumer;
+			p_consumer = NULL;
+		}
+		if (p_DC != NULL)
+		{
+			ReleaseDC(p_DC);
+			p_DC = NULL;
+		}
 	};
 // 对话框数据
 	enum { IDD = IDD_TILEDETECTORMFC_DIALOG };
@@ -43,8 +52,8 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
-	TiggerWatcherAndGrabber *twag = NULL;
-	Consumer *consumer = NULL;
+	TiggerWatcherAndGrabber *p_twag = NULL;
+	Consumer *p_consumer = NULL;
 
 // 实现
 protected:
@@ -66,7 +75,7 @@ private:
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
 	void DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC);
 	HDC hDC = NULL;
-	CDC *pDC = NULL;
+	CDC *p_DC = NULL;
 
 	afx_msg void OnBnClickedBtnStart();
 	afx_msg void OnBnClickedCbCanbetiggered();
@@ -97,4 +106,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	int img_index;
 };

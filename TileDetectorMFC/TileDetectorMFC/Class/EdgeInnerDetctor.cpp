@@ -7,15 +7,17 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 		image = img.clone();
 	else
 		cv::cvtColor(img, image, CV_RGB2GRAY);
-	block = _block;
-	faults = _faults;
+	p_block = _block;
+	p_faults = _faults;
+	_block = NULL;
+	_faults = NULL;
 
 
-	block->ABCD2Lines();
-	/*cv::line(image, block->A, block->GetPonintByY(3000, &block->LeftLine), cv::Scalar(255));
-	cv::line(image, block->A, block->GetPonintByX(3000, &block->UpLine), cv::Scalar(255));
-	cv::line(image, block->D, block->GetPonintByX(3000, &block->DownLine), cv::Scalar(255));
-	cv::line(image, block->C, block->GetPonintByY(3000, &block->RightLine), cv::Scalar(255));*/
+	p_block->ABCD2Lines();
+	/*cv::line(image, p_block->A, p_block->GetPonintByY(3000, &p_block->LeftLine), cv::Scalar(255));
+	cv::line(image, p_block->A, p_block->GetPonintByX(3000, &p_block->UpLine), cv::Scalar(255));
+	cv::line(image, p_block->D, p_block->GetPonintByX(3000, &p_block->DownLine), cv::Scalar(255));
+	cv::line(image, p_block->C, p_block->GetPonintByY(3000, &p_block->RightLine), cv::Scalar(255));*/
 
 
 
@@ -26,16 +28,16 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 		vector<cv::Point3f> points;
 
 		//上边界
-		int startX = block->A.x + 30;
-		int endX = block->B.x - 30;
+		int startX = p_block->A.x + 30;
+		int endX = p_block->B.x - 30;
 		int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
 		for (int x = startX; x < endX; x += inc, index++)
 		{
 			cv::Mat tmpROI;
 			if ((x + inc) > endX)
-				tmpROI = image(cv::Rect(x, block->GetPonintByX(x, &block->UpLine).y, (endX - x), 200)).clone();
+				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, (endX - x), 200)).clone();
 			else
-				tmpROI = image(cv::Rect(x, block->GetPonintByX(x, &block->UpLine).y, inc, 200)).clone();
+				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc, 200)).clone();
 			cv::Mat reduceImg;
 
 			cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
@@ -59,7 +61,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 
 			reduceImg.convertTo(reduceImg, CV_64F);
 			reduceList.push_back(reduceImg);
-			points.push_back(cv::Point3f(x, block->GetPonintByX(x, &block->UpLine).y, inc / 2));
+			points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc / 2));
 		}
 		processAndSaveData(reduceList, points, "U\\上");
 	}
@@ -69,14 +71,14 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 		vector<cv::Mat> reduceList;
 		vector<cv::Point3f> points;
 		//下边界
-		int startX = block->D.x + 30;
-		int endX = block->C.x - 30;
+		int startX = p_block->D.x + 30;
+		int endX = p_block->C.x - 30;
 		int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
 		for (int x = startX; x < endX; x += inc, index++)
 		{
-			cv::Mat tmpROI = image(cv::Rect(x, block->GetPonintByX(x, &block->DownLine).y - 200, inc, 200)).clone();
+			cv::Mat tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, inc, 200)).clone();
 			if ((x + inc) > endX)
-				tmpROI = image(cv::Rect(x, block->GetPonintByX(x, &block->DownLine).y - 200, (endX - x), 200)).clone();
+				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, (endX - x), 200)).clone();
 			cv::Mat reduceImg;
 
 			cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
@@ -100,7 +102,7 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 
 			reduceImg.convertTo(reduceImg, CV_64F);
 			reduceList.push_back(reduceImg);
-			points.push_back(cv::Point3f(x, block->GetPonintByX(x, &block->DownLine).y, inc / 2));
+			points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->DownLine).y, inc / 2));
 		}
 		processAndSaveData(reduceList, points, "D\\下");
 	}
@@ -115,14 +117,14 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 	vector<vector<double>> reduceList;
 	vector<vector<double>> differList;
 	//左边界
-	int startY = block->A.y + 100;
-	int endY = block->D.y - 100;
+	int startY = p_block->A.y + 100;
+	int endY = p_block->D.y - 100;
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-	cv::Mat tmpROI = image(cv::Rect(block->GetPonintByY(y, &block->LeftLine).x, y, 200, inc)).clone();
+	cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, inc)).clone();
 	if ((y + inc) > endY)
-	tmpROI = image(cv::Rect(block->GetPonintByY(y, &block->LeftLine).x, y, 200, (endY - y))).clone();
+	tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, (endY - y))).clone();
 	cv::Mat reduceImg;
 
 	cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
@@ -167,15 +169,15 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 	vector<vector<double>> reduceList;
 	vector<vector<double>> differList;
 	//右边界
-	int startY = block->A.y + 100;
-	int endY = block->D.y - 100;
+	int startY = p_block->A.y + 100;
+	int endY = p_block->D.y - 100;
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-	cv::Point p = block->GetPonintByY(y, &block->RightLine);
-	cv::Mat tmpROI = image(cv::Rect(block->GetPonintByY(y, &block->RightLine).x - 200, y, 200, inc)).clone();
+	cv::Point p = p_block->GetPonintByY(y, &p_block->RightLine);
+	cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, inc)).clone();
 	if ((y + inc) > endY)
-	tmpROI = image(cv::Rect(block->GetPonintByY(y, &block->RightLine).x - 200, y, 200, (endY - y))).clone();
+	tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, (endY - y))).clone();
 	cv::Mat reduceImg;
 
 	cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
@@ -397,7 +399,7 @@ void EdgeInnerDetctor::processAndSaveData(vector<cv::Mat> reduceList, vector<cv:
 			sb.position.x = points[i].x;
 			sb.position.y = points[i].y;
 			sb.diameter = points[i].z;
-			faults->SomethingBigs.push_back(sb);
+			p_faults->SomethingBigs.push_back(sb);
 		}
 	}
 
@@ -423,11 +425,3 @@ void EdgeInnerDetctor::processAndSaveData(vector<cv::Mat> reduceList, vector<cv:
 #endif
 	}
 
-
-
-
-EdgeInnerDetctor::~EdgeInnerDetctor()
-{
-	block = NULL;
-	faults = NULL;
-}

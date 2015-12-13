@@ -95,3 +95,5 @@ Debug
 /FeatureFinder/FeatureFinder/samples
 /FeatureFinder/FeatureFinder/特征样本库
 *.suo
+/TileDetectorMFC/TileDetectorMFC/VirtualCameras/*.jpg
+/TileDetectorMFC/TileDetectorMFC/Samples/*.jpg

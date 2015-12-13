@@ -117,12 +117,12 @@ void TiggerWatcherAndGrabber::StopWatch()
 }
 bool TiggerWatcherAndGrabber::ManualTigger()
 {
-	if (IsGrabbing || !IsWatching)
+	if (IsGrabbing)
 	{
 		printf_globle("IsGrabbing = 1\n");
 		return false;
 	}
-	if (IsGrabbing || !IsWatching)
+	if (!IsWatching)
 	{
 		printf_globle("IsWatching = 0\n");
 		return false;
@@ -206,6 +206,8 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 
 
+			IsGrabbing = false;
+
 			if (!IsCalibration)
 			{
 				if (hwnd != NULL)
@@ -213,7 +215,6 @@ void TiggerWatcherAndGrabber::watcherThread()
 					PostMessage(hwnd, WM_USER + 100, 0, 0);
 				}
 				//标记生产者工作结束
-				IsGrabbing = false;
 			}
 			else//若是标定环境，则停止监控
 			{
@@ -278,6 +279,7 @@ void TiggerWatcherAndGrabber::threeInOne()
 
 
 #ifdef OUTPUT_TO_CONSOLE
+	stringstream ss;
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	ss << GrabbingIndex << " " << "ThreeInOne：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());

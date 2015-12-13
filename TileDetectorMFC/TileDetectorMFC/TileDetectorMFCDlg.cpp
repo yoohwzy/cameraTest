@@ -59,6 +59,7 @@ END_MESSAGE_MAP()
 CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CTileDetectorMFCDlg::IDD, pParent)
 , m_Info(_T(""))
 , m_VirtualCamera(_T(""))
+, img_index(0)
 {
 	printf_globle("");
 	if (FILE_LOG)
@@ -71,6 +72,7 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_TB_INFO, m_Info);
 	DDX_Text(pDX, IDC_TB_VirtualCamera, m_VirtualCamera);
+	DDX_Text(pDX, IDC_LABLE_IMG_Index, img_index);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -134,16 +136,16 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 
 
-	twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
-	consumer = new Consumer(this->GetSafeHwnd());
+	p_twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
+	p_consumer = new Consumer(this->GetSafeHwnd());
 
 	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
 	{
-		twag->StartWatch();
+		p_twag->StartWatch();
 	}
 	else
 	{
-		twag->StopWatch();
+		p_twag->StopWatch();
 	}
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
@@ -232,7 +234,7 @@ HCURSOR CTileDetectorMFCDlg::OnQueryDragIcon()
 
 void CTileDetectorMFCDlg::BtnScan_OnBnClicked()
 {
-	if (!twag->ManualTigger())
+	if (!p_twag->ManualTigger())
 	{
 		//MessageBox(L"当前无法触发！");
 		printf_globle("当前无法触发!\n");
@@ -248,89 +250,42 @@ void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 	m_Info = _T("");
 	m_Info += _T("开始等待标准砖进入...\r\n");
 	UpdateData(false);
-	twag->StartWatchWithCalibration();
+	p_twag->StartWatchWithCalibration();
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
+
+
 	m_Info = _T("");
 	//运行消费者进程处理图像
-	if (consumer != NULL && consumer->IsProcessing == false)
+	if (p_consumer != NULL && p_consumer->IsProcessing == false)
 	{
-		delete consumer;
-		consumer = NULL;
+		delete p_consumer;
+		p_consumer = NULL;
 	}
 	else if (IsConsumerProcessing)
 	{
 		printf_globle("算法太慢，上一轮运算尚未结束！");
 		return 0;
 	}
-	if (consumer != NULL)
-		delete consumer;
-
-
-	consumer = new Consumer(this->GetSafeHwnd());
-	consumer->GrabbingIndex = twag->GrabbingIndex;
-	IsConsumerProcessing = true;
-	consumer->StartNewProces(twag->Image);
-
-
-
-	//if (twag->Image.cols > 0)
-	//{
-	//	DrawPicToHDC(twag->Image, IDC_PIC_Sample);
-	//}
-
-
-	CString msg;
-	msg.Format(_T("%d 采图完成！\r\n"), twag->GrabbingIndex);
-	m_Info += msg;
-	UpdateData(false);
-	 
-
-
-	//保存底片
-	if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	if (p_consumer != NULL)
 	{
-		CString msg;
-		msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
-		m_Info += msg;
-		stringstream ss;
-		UpdateData(false);
-		ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
-		cv::imwrite(ss.str(), twag->OriginalImage);
-
-		m_Info += _T("保存完成\r\n");
-		UpdateData(false);
+		delete p_consumer;
+		p_consumer = NULL;
 	}
-	twag->OriginalImage.release();
-	return 1;
-}
-LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
-{
 
-	////运行消费者进程处理图像
-
-	//if (consumer->IsProcessing)
+	//if (!p_twag->ManualTigger())
 	//{
-	//	printf_globle("算法太慢，上一轮运算尚未结束！");
-	//	return 0;
+	//	printf_globle("当前无法触发!\n");
+	//}
+	//return 0;
+
+	//if (p_twag->Image.cols > 0)
+	//{
+	//	DrawPicToHDC(p_twag->Image, IDC_PIC_Sample);
 	//}
 
-	//delete consumer;
-	//consumer = new Consumer(this->GetSafeHwnd());
-	//consumer->GrabbingIndex = twag->GrabbingIndex;
-
-	//consumer->StartNewProces4Calibraion(twag->Image);
-	//m_Info += _T("定标采图完成！\r\n");
-	//UpdateData(false);
-	return 1;
-}
-//wParam = 0表示检测完成，1表示有错误
-//lParam 表示错误类型
-LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
-{
-	//IsConsumerProcessing = false;
-	//if (!twag->ManualTigger())
+	//if (!p_twag->ManualTigger())
 	//{
 	//	//MessageBox(L"当前无法触发！");
 	//	printf_globle("当前无法触发!\n");
@@ -342,100 +297,167 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 	//}
 	//return 0;
 
+	p_consumer = new Consumer(this->GetSafeHwnd());
+	p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
+	IsConsumerProcessing = true;
+	p_consumer->StartNewProces(p_twag->Image);
+
+	//delete p_consumer;
+	//p_consumer = NULL;
+	//IsConsumerProcessing = false;
+	//if (!p_twag->ManualTigger())
+	//{
+	//	printf_globle("当前无法触发!\n");
+	//}
+	//return 0;
+
+
 	CString msg;
-	msg.Format(_T("%d 处理完成！\r\n"), consumer->GrabbingIndex);
+	msg.Format(_T("%d 采图完成！\r\n"), p_twag->GrabbingIndex);
+	m_Info += msg;
+	UpdateData(false);
+	 
+
+
+	//保存底片
+	if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	{
+		CString msg;
+		msg.Format(_T("正在保存底片%d！\r\n"), p_twag->GrabbingIndex);
+		m_Info += msg;
+		stringstream ss;
+		UpdateData(false);
+		ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
+		cv::imwrite(ss.str(), p_twag->OriginalImage);
+
+		m_Info += _T("保存完成\r\n");
+		UpdateData(false);
+	}
+	p_twag->OriginalImage.release();
+	return 1;
+}
+LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
+{
+	////运行消费者进程处理图像
+
+	//if (p_consumer->IsProcessing)
+	//{
+	//	printf_globle("算法太慢，上一轮运算尚未结束！");
+	//	return 0;
+	//}
+
+	//delete p_consumer;
+	//p_consumer = new Consumer(this->GetSafeHwnd());
+	//p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
+
+	//p_consumer->StartNewProces4Calibraion(p_twag->Image);
+	//m_Info += _T("定标采图完成！\r\n");
+	//UpdateData(false);
+	return 1;
+}
+//wParam = 0表示检测完成，1表示有错误
+//lParam 表示错误类型
+LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
+{
+	IsConsumerProcessing = false;
+
+
+	//printf_globle("OnMsgProcessingEnd\n");
+	//if (!p_twag->ManualTigger())
+	//{
+	//	printf_globle("当前无法触发!\n");
+	//}
+	//return 0;
+
+	CString msg;
+	msg.Format(_T("%d 处理完成！\r\n"), p_consumer->GrabbingIndex);
 	m_Info += msg;
 
 	if (wParam == 0)
 	{
 		img_on_show.release();
-		img_on_show = consumer->originalImg.clone();
-		if (consumer->faults.BrokenEdges.size() > 0)
+		img_on_show = p_consumer->originalImg.clone();
+		if (p_consumer->faults.BrokenEdges.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenEdges.size());
+			str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.BrokenEdges.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.BrokenEdges.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.BrokenEdges.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.BrokenEdges[i].position, consumer->faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+				cv::circle(img_on_show, p_consumer->faults.BrokenEdges[i].position, p_consumer->faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
 			}
 		}
-		if (consumer->faults.BrokenCorners.size() > 0)
+		if (p_consumer->faults.BrokenCorners.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处崩角缺陷，洋红标出。\r\n"), consumer->GrabbingIndex, consumer->faults.BrokenCorners.size());
+			str.Format(_T("%d 存在%d处崩角缺陷，洋红标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.BrokenCorners.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.BrokenCorners.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.BrokenCorners.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.BrokenCorners[i].position, consumer->faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
+				cv::circle(img_on_show, p_consumer->faults.BrokenCorners[i].position, p_consumer->faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
 			}
 		}
-		if (consumer->faults.SomethingBigs.size() > 0)
+		if (p_consumer->faults.SomethingBigs.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.SomethingBigs.size());
+			str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.SomethingBigs.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.SomethingBigs.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.SomethingBigs.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.SomethingBigs[i].position, consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
+				cv::circle(img_on_show, p_consumer->faults.SomethingBigs[i].position, p_consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
 			}
 		}
-		if (consumer->faults.Scratchs.size() > 0)
+		if (p_consumer->faults.Scratchs.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Scratchs.size());
+			str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.Scratchs.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.Scratchs.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.Scratchs.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.Scratchs[i].position, consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
+				cv::circle(img_on_show, p_consumer->faults.Scratchs[i].position, p_consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
 			}
 		}
-		if (consumer->faults.Holes.size() > 0)
+		if (p_consumer->faults.Holes.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.Holes.size());
+			str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.Holes.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.Holes.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.Holes.size(); i++)
 			{
-				cv::circle(img_on_show, consumer->faults.Holes[i].position, consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+				cv::circle(img_on_show, p_consumer->faults.Holes[i].position, p_consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
 			}
 		}
-		if (consumer->faults.MarkPens.size() > 0)
+		if (p_consumer->faults.MarkPens.size() > 0)
 		{
 			CString str;
-			str.Format(_T("%d 存在%d处人工标记，橙色标出。\r\n"), consumer->GrabbingIndex, consumer->faults.MarkPens.size());
+			str.Format(_T("%d 存在%d处人工标记，橙色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.MarkPens.size());
 			m_Info += str;
-			for (size_t i = 0; i < consumer->faults.MarkPens.size(); i++)
+			for (size_t i = 0; i < p_consumer->faults.MarkPens.size(); i++)
 			{
-				cv::rectangle(img_on_show, consumer->faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
+				cv::rectangle(img_on_show, p_consumer->faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
 			}
 		}
-		UpdateData(false);
-
+		img_index = p_twag->GrabbingIndex;
 		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+		UpdateData(false);
 	}
 	else
 	{
 		m_Info += Consumer::GetErrorDescription(subtype).c_str();
 		UpdateData(false);
 	}
-	delete consumer;
-	consumer = NULL;
+	delete p_consumer;
+	p_consumer = NULL;
 
 	IsConsumerProcessing = false;
 
 	//cv::imwrite("result.jpg", img_on_show);
 
-	//if (!twag->ManualTigger())
+	//if (!p_twag->ManualTigger())
 	//{
-	//	//MessageBox(L"当前无法触发！");
 	//	printf_globle("当前无法触发!\n");
 	//}
-	//else
-	//{
-	//	m_Info = _T("");
-	//	UpdateData(false);
-	//}
+	//return 0;
 
 
 	return 1;
@@ -443,22 +465,22 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
 	IplImage image(img); //原始图像
-	CDC *pDC = GetDlgItem(ID)->GetDC();
-	HDC hDC = pDC->GetSafeHdc();
+	CDC *p_DC = GetDlgItem(ID)->GetDC();
+	HDC hDC = p_DC->GetSafeHdc();
 	CRect rect;
 	GetDlgItem(ID)->GetClientRect(&rect);
 	CvvImage cimg;
 	cimg.CopyOf(&image); // 复制图片
 	cimg.DrawToHDC(hDC, &rect); // 将图片绘制到显示控件的指定区域内
-	ReleaseDC(pDC);
+	ReleaseDC(p_DC);
 }
 void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC)
 {
 	IplImage image(img); //原始图像
 	if (hDC == NULL)
 	{
-		pDC = GetDlgItem(ID)->GetDC();
-		hDC = pDC->GetSafeHdc();
+		p_DC = GetDlgItem(ID)->GetDC();
+		hDC = p_DC->GetSafeHdc();
 	}
 	CRect rect;
 	GetDlgItem(ID)->GetClientRect(&rect);
@@ -472,9 +494,9 @@ void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC)
 void CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered()
 {
 	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-		twag->StartWatch();
+		p_twag->StartWatch();
 	else
-		twag->StopWatch();
+		p_twag->StopWatch();
 }
 
 
@@ -500,23 +522,23 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 	if (globle_var::VirtualCameraFileName != "" && m_VirtualCamera == "")
 	{
 		globle_var::VirtualCameraFileName = strtmp;
-		twag->StopWatch();
-		twag->Switch2Real();
+		p_twag->StopWatch();
+		p_twag->Switch2Real();
 		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-			twag->StartWatch();
+			p_twag->StartWatch();
 		printf_globle("开始使用真实相机.\r\n\r\n");
 	}
 	else if ((globle_var::VirtualCameraFileName == "" && m_VirtualCamera != "") || (globle_var::VirtualCameraFileName != strtmp))
 	{
 		globle_var::VirtualCameraFileName = strtmp;
-		twag->StopWatch();
-		if (!twag->Switch2Virtual(strtmp))
+		p_twag->StopWatch();
+		if (!p_twag->Switch2Virtual(strtmp))
 		{
 			MessageBox(L"虚拟相机文件不存在！");
 			return;
 		}
 		if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
-			twag->StartWatch();
+			p_twag->StartWatch();
 		printf_globle("开始使用虚拟相机.\r\n\r\n");
 	}
 }
@@ -527,15 +549,15 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 //void CTileDetectorMFCDlg::OnBnClickedBtnSavePic()
 //{
 //	/*CString msg;
-//	msg.Format(_T("正在保存底片%d！\r\n"), twag->GrabbingIndex);
+//	msg.Format(_T("正在保存底片%d！\r\n"), p_twag->GrabbingIndex);
 //	m_Info += msg;
 //	stringstream ss;
 //	UpdateData(false);
-//	ss << "samples/" << twag->GrabbingIndex << "_o原图.jpg";
+//	ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
 //	cv::imwrite(ss.str(), globle_var::ImageBuffer);
 //
 //	ss.str("");
-//	ss << "samples/" << twag->GrabbingIndex << "_x3.jpg";
+//	ss << "samples/" << p_twag->GrabbingIndex << "_x3.jpg";
 //	cv::imwrite(ss.str(), globle_var::ImageBufferX3);
 //
 //	m_Info += _T("保存完成\r\n");
@@ -547,15 +569,15 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
 {
 	SettingDlg sd;
-	twag->StopWatch();
+	p_twag->StopWatch();
 
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CanBeTiggered);
 	pBtn->SetCheck(FALSE);
 
 	if (sd.DoModal() == IDOK)
 	{
-		delete twag;
-		twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
+		delete p_twag;
+		p_twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
 	}
 	else
 	{

@@ -52,13 +52,13 @@ public:
 	cv::Point D;
 
 	vector < cv::Point > LeftBorder;
-	Line LeftLine;
+	Block::Line LeftLine;
 	vector < cv::Point > RightBorder;
-	Line RightLine;
+	Block::Line RightLine;
 	vector < cv::Point > UpBorder;
-	Line UpLine;
+	Block::Line UpLine;
 	vector < cv::Point > DownBorder;
-	Line DownLine;
+	Block::Line DownLine;
 
 private:
 	cv::Mat img;
@@ -97,7 +97,7 @@ private:
 	int GetEdgeHorizontalApproach(cv::Point start, cv::Point end, int range, BorderType bt, cv::Point Target);
 	int GetEdgeHorizontal(cv::Point start, int range, bool isUp);
 	//判断某点是否在某条线上。
-	bool IsPointNearline(Line line, cv::Point point);
+	bool IsPointNearline(Block::Line line, cv::Point point);
 
 
 

@@ -196,7 +196,7 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 	vector<cv::Point> *targetBorder;
 	vector<cv::Point> *tmptargetList;
 	vector<cv::Point> *alltargetList;
-	Line *line;
+	Block::Line *line;
 	if (bt == BlocksDetector::Up)
 	{
 		targetBorder = &UpBorder;
@@ -602,7 +602,7 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 	}
 	return ret;
 }
-bool BlocksDetector::IsPointNearline(Line line, cv::Point point)
+bool BlocksDetector::IsPointNearline(Block::Line line, cv::Point point)
 {
 	const int threshold = 10;
 	int x = point.x;
