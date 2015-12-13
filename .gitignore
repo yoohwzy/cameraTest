@@ -97,3 +97,5 @@ Debug
 *.suo
 /TileDetectorMFC/TileDetectorMFC/VirtualCameras/*.jpg
 /TileDetectorMFC/TileDetectorMFC/Samples/*.jpg
+/生成图像样本/生成图像样本/samples/*.jpg
+/生成图像样本/生成图像样本/*.jpg
