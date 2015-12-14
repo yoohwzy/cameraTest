@@ -105,9 +105,6 @@
     <ClInclude Include="SettingDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Base\SettingHelper.h">
-      <Filter>Class\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Camera\MicroDisplay.h">
       <Filter>Class\Camera</Filter>
     </ClInclude>
@@ -137,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="Class\IOCard\PCI1761.h">
       <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\SettingHelper.h">
+      <Filter>Class\Helper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -188,9 +188,6 @@
     <ClCompile Include="SettingDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Class\Base\SettingHelper.cpp">
-      <Filter>Class\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Class\BlocksDetector.cpp">
       <Filter>Class</Filter>
     </ClCompile>
@@ -205,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="Class\Camera\E2VCamera.cpp">
       <Filter>Class\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Helper\SettingHelper.cpp">
+      <Filter>Class\Helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

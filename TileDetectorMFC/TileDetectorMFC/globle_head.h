@@ -20,7 +20,7 @@ using namespace std;
 #include "opencv2/highgui/highgui.hpp"
 
 
-#include "Class/Base/SettingHelper.h"
+#include "Class/Helper/SettingHelper.h"
 #include "Class/Helper/LogHelper.h"
 //Í·ÎÄ¼þEND
 

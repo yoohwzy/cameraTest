@@ -1,7 +1,6 @@
 #pragma once
 
-//#include "Class\BufferStorage.h"
-#include "Class\Base\SettingHelper.h"
+#include "Class\Helper\SettingHelper.h"
 
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
