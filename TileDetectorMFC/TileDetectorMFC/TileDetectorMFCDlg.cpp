@@ -153,8 +153,6 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	radio->SetCheck(1);
 
 	//创建系统日志
-	LogHelper::LogFileName = LogHelper::GetNowLogFileName();
-	LogHelper::Log(LogHelper::LogFileName);
 	LogHelper::Log("系统启动\r\n");
 
 
@@ -370,6 +368,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 	msg.Format(_T("%d 处理完成！\r\n"), p_consumer->GrabbingIndex);
 	m_Info += msg;
 
+	CString clog = L"\r\n";
 	if (wParam == 0)
 	{
 		img_on_show.release();
@@ -379,6 +378,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处崩边缺陷，红色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.BrokenEdges.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.BrokenEdges.size(); i++)
 			{
 				cv::circle(img_on_show, p_consumer->faults.BrokenEdges[i].position, p_consumer->faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
@@ -389,6 +389,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处崩角缺陷，洋红标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.BrokenCorners.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.BrokenCorners.size(); i++)
 			{
 				cv::circle(img_on_show, p_consumer->faults.BrokenCorners[i].position, p_consumer->faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
@@ -399,6 +400,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.SomethingBigs.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.SomethingBigs.size(); i++)
 			{
 				cv::circle(img_on_show, p_consumer->faults.SomethingBigs[i].position, p_consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
@@ -409,6 +411,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处划痕缺陷，绿色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.Scratchs.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.Scratchs.size(); i++)
 			{
 				cv::circle(img_on_show, p_consumer->faults.Scratchs[i].position, p_consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
@@ -419,6 +422,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处凹点缺陷，黄色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.Holes.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.Holes.size(); i++)
 			{
 				cv::circle(img_on_show, p_consumer->faults.Holes[i].position, p_consumer->faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
@@ -429,14 +433,15 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			CString str;
 			str.Format(_T("%d 存在%d处人工标记，橙色标出。\r\n"), p_consumer->GrabbingIndex, p_consumer->faults.MarkPens.size());
 			m_Info += str;
+			clog += str;
 			for (size_t i = 0; i < p_consumer->faults.MarkPens.size(); i++)
 			{
 				cv::rectangle(img_on_show, p_consumer->faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
 			}
 		}
+		UpdateData(false);
 		img_index = p_twag->GrabbingIndex;
 		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
-		UpdateData(false);
 	}
 	else
 	{
@@ -447,6 +452,9 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 	p_consumer = NULL;
 
 	IsConsumerProcessing = false;
+	clog += "\r\n";
+	LogHelper::Log(clog);
+
 
 	//cv::imwrite("result.jpg", img_on_show);
 

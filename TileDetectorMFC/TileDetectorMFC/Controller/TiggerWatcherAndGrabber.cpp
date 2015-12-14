@@ -156,7 +156,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 			if (GrabbingIndex > 1000000) GrabbingIndex = 1;
 
 			t_span = ((double)cv::getTickCount() - t_span) / cv::getTickFrequency();
-			ss << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span<<"秒" << endl;
+			ss << endl << endl << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span << "秒" << endl;
 			printf_globle(ss.str());
 			LogHelper::Log(ss.str());
 			ss.str("");
@@ -171,19 +171,13 @@ void TiggerWatcherAndGrabber::watcherThread()
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			ss << GrabbingIndex << " " << "twag Inint(ms):" << t << endl;
 			printf_globle(ss.str());
+			LogHelper::Log(ss.str());
 			ss.str("");
 
 #endif
 
 			if (globle_var::TiggerWaitTimeMS > 0)
 			{
-#ifdef OUTPUT_TO_CONSOLE
-				ss << GrabbingIndex << " " << "TiggerWaitTimeMS: " << globle_var::TiggerWaitTimeMS << endl;
-				printf_globle(ss.str());
-				ss.str("");
-				t = (double)cv::getTickCount();
-#endif
-
 				//触发后，等待砖进入拍摄区。
 				Sleep(globle_var::TiggerWaitTimeMS);
 
@@ -231,7 +225,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 		}
 		else
 		{
-			Sleep(2);
+			Sleep(5);
 		}
 	}
 }

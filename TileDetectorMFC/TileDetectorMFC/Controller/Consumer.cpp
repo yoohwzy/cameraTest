@@ -52,6 +52,10 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 
 void Consumer::processingThread()
 {
+	double t_consumer = (double)cv::getTickCount();
+
+
+
 	//Çå¿Õ
 	faults.Clear();
 	IsProcessing = true;
@@ -218,24 +222,11 @@ void Consumer::processingThread()
 		}
 	}
 
-
-
-	#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
-		{
-			//std::thread t_write1(WriteImg, "samples/00drowDebugDetectLR.jpg", bd.drowDebugDetectLR);
-			//t_write1.detach();
-			//std::thread t_write2(WriteImg, "samples/01drowDebugDetectUD.jpg", bd.drowDebugDetectUD);
-			//t_write2.detach();
-			//std::thread t_write3(WriteImg, "samples/02drowDebugResult.jpg", bd.drowDebugResult);
-			//t_write3.detach();
-		}
-	#endif
-
-
-	ss << GrabbingIndex << " " << "customer£ºEnd at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	t_consumer = ((double)cv::getTickCount() - t_consumer) / cv::getTickFrequency();
+	ss << GrabbingIndex << " " << "customer£º" << t_consumer << " End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 	ss.str("");
+
 
 
 	IsProcessing = false;

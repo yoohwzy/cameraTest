@@ -23,8 +23,9 @@ public:
 	//将信息写入记录
 	static void Log(string logFileName, string content)
 	{
+		string time = getNowTime();
 		stringstream ss;
-		ss << GetTodayDirectory();
+		ss << getTodayDirectory();
 		ss << "\\";
 		ss << logFileName;
 
@@ -32,7 +33,7 @@ public:
 			return;
 
 		ofstream of(ss.str(), ios::app);
-		of << GetNowTime();
+		of << time;
 		of << content;
 	};
 	static void Log(string logFileName, CString ccontent)
@@ -48,30 +49,35 @@ public:
 		Log(LogFileName, StringHelper::CString2String(ccontent));
 	};
 
-	static string GetNowLogFileName()
-	{
-		SYSTEMTIME st;
-		CString strTime;
-		GetLocalTime(&st);
-		strTime.Format(L"%2d_%2d_%2d.log", st.wHour, st.wMinute, st.wSecond);
-		//LogFileName = StringHelper::CString2String(strTime);
-		return StringHelper::CString2String(strTime);
-	}
 
 
 	static string LogFileName;
 	static bool Enable;
 private:
 	static string LogNowDir;
+	static int hour;//文件记录时间，每小时换一个txt写入记录，以免log文件过大。
+
+
+
+
+	static string getNowLogFileName()
+	{
+		SYSTEMTIME st;
+		CString strTime;
+		GetLocalTime(&st);
+		strTime.Format(L"%02d_%02d_%02d.log", st.wHour, st.wMinute, st.wSecond);
+		//LogFileName = StringHelper::CString2String(strTime);
+		return StringHelper::CString2String(strTime);
+	}
 	//获得今天的日志应写入哪一文件夹
-	static string GetTodayDirectory()
+	static string getTodayDirectory()
 	{
 		//if (LogNowDir != "")
 		//	return LogNowDir;
 		SYSTEMTIME st;
 		CString m_strFolderPath;// , strTime;
 		GetLocalTime(&st);
-		m_strFolderPath.Format(L"LOG\\%4d-%2d-%2d", st.wYear, st.wMonth, st.wDay);
+		m_strFolderPath.Format(L"LOG\\%04d-%02d-%02d", st.wYear, st.wMonth, st.wDay);
 		//strTime.Format(L"%2d:%2d:%2d", st.wHour, st.wMinute, st.wSecond);
 
 		LogHelper::Enable = true;
@@ -86,13 +92,18 @@ private:
 		return LogNowDir;
 	};
 	//获得当前系统时间 XX:XX:XX
-	static string GetNowTime()
+	static string getNowTime()
 	{
 		SYSTEMTIME st;
 		CString strTime;
 		GetLocalTime(&st);
-		strTime.Format(L"%2d:%2d:%2d  ", st.wHour, st.wMinute, st.wSecond);
-
+		strTime.Format(L"%02d:%02d:%02d  ", st.wHour, st.wMinute, st.wSecond);
+		int mhour = st.wHour;
+		if (mhour != hour)
+		{
+			hour = mhour;
+			LogFileName = getNowLogFileName();
+		}
 		return StringHelper::CString2String(strTime);
 	};
 };
