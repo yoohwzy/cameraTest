@@ -183,7 +183,10 @@
     <Image Include="res\TileDetectorMFC.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Adsapi32.lib" />
     <Library Include="mc100.lib" />
+    <Library Include="odbc32.lib" />
+    <Library Include="odbccp32.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -229,5 +229,14 @@
     <Library Include="mc100.lib">
       <Filter>资源文件</Filter>
     </Library>
+    <Library Include="Adsapi32.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="odbc32.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="odbccp32.lib">
+      <Filter>资源文件</Filter>
+    </Library>
   </ItemGroup>
 </Project>
