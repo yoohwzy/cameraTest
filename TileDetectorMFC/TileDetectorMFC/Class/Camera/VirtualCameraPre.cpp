@@ -53,9 +53,9 @@ void VirtualCameraPre::Capture(GrabbingBuffer *gb)
 	}
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	t *= 1000;
-	//int sleep = _frameCount / 10000 * 1000 - (int)t;
-	//if (sleep > 10)
-	//	Sleep(sleep);
+	int sleep = _frameCount / 10000 * 1000 - (int)t;
+	if (sleep > 10)
+		Sleep(sleep);
 
 	gb = NULL;
 }

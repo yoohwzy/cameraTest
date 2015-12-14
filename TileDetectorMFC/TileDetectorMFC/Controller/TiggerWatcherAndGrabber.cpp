@@ -119,17 +119,6 @@ void TiggerWatcherAndGrabber::StopWatch()
 }
 bool TiggerWatcherAndGrabber::ManualTigger()
 {
-	if (IsGrabbing)
-	{
-		printf_globle("IsGrabbing = 1\n");
-		return false;
-	}
-	if (!IsWatching)
-	{
-		printf_globle("IsWatching = 0\n");
-		return false;
-	}
-
 	BeManualTiggered = true;
 	return true;
 }
@@ -139,9 +128,19 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 	while (IsWatching)
 	{
-		if (!IsGrabbing && (BeManualTiggered || pci1761.GetRisingEdgeIDI(7) ))
+		if ((BeManualTiggered || pci1761.GetRisingEdgeIDI(7)))
 		{
+			if (IsGrabbing)
+			{
+				printf_globle("上一块砖仍在拍摄，无法触发！\n");
+				LogHelper::Log("上一块砖仍在拍摄，无法触发！\n");
+				if (BeManualTiggered)
+					BeManualTiggered = false;
+				continue;
+			}
+
 			IsGrabbing = true;
+
 
 #ifdef OUTPUT_TO_CONSOLE
 			double t = (double)cv::getTickCount();
@@ -160,73 +159,23 @@ void TiggerWatcherAndGrabber::watcherThread()
 			GrabbingIndex += 1;
 			if (GrabbingIndex > 1000000) GrabbingIndex = 1;
 
+			stringstream ssss;
 			t_span = ((double)cv::getTickCount() - t_span) / cv::getTickFrequency();
-			ss << endl << endl << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span << "秒" << endl;
-			printf_globle(ss.str());
-			LogHelper::Log(ss.str());
-			ss.str("");
+			ssss << endl << endl << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span << "秒" << endl;
+#ifdef OUTPUT_TO_CONSOLE
+			printf_globle(ssss.str());
+#endif
+			LogHelper::Log(ssss.str());
+
+
+
 			t_span = (double)cv::getTickCount();//用于计算两次触发间隔
-
-#ifdef OUTPUT_TO_CONSOLE
-
-			ss << GrabbingIndex << " " << "producer: Start" << endl;
-			printf_globle(ss.str());
-			ss.str("");
-
-			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << GrabbingIndex << " " << "twag Inint(ms):" << t << endl;
-			printf_globle(ss.str());
-			LogHelper::Log(ss.str());
-			ss.str("");
-
-#endif
-
-			if (globle_var::TiggerWaitTimeMS > 0)
-			{
-				//触发后，等待砖进入拍摄区。
-				Sleep(globle_var::TiggerWaitTimeMS);
-
-#ifdef OUTPUT_TO_CONSOLE
-				t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-				stringstream ss;
-				ss << GrabbingIndex << " " << "Sleep real(ms):" << t << endl;
-				printf_globle(ss.str());
-#endif
-			}
 
 
 			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
 			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
-			t_3in1.join();
-			t_capture.join();
-
-			//capture();
-			//threeInOne();
-
-			//图片获取完成，复制到全局变量，并删除s
-			//OriginalImage.release();
-			//Image.release();
-			OriginalImage = p_gb->OriginalImage.clone();
-			Image = p_gb->Image.clone();
-
-
-
-			IsGrabbing = false;
-
-			if (!IsCalibration)
-			{
-				if (hwnd != NULL)
-				{
-					PostMessage(hwnd, WM_USER + 100, 0, 0);
-				}
-				//标记生产者工作结束
-			}
-			else//若是标定环境，则停止监控
-			{
-				IsCalibration = false;
-				StopWatch();
-				PostMessage(hwnd, WM_USER + 102, 0, 0);//定标、采集结束处理程序
-			}
+			t_3in1.detach();
+			t_capture.detach();
 		}
 		else
 		{
@@ -234,6 +183,21 @@ void TiggerWatcherAndGrabber::watcherThread()
 		}
 	}
 }
+
+//#ifdef OUTPUT_TO_CONSOLE
+//
+//			ss << GrabbingIndex << " " << "producer: Start" << endl;
+//			printf_globle(ss.str());
+//			ss.str("");
+//
+//			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+//			ss << GrabbingIndex << " " << "twag Inint(ms):" << t << endl;
+//			printf_globle(ss.str());
+//			LogHelper::Log(ss.str());
+//			ss.str("");
+//
+//#endif
+
 void TiggerWatcherAndGrabber::capture()
 {
 
@@ -241,6 +205,18 @@ void TiggerWatcherAndGrabber::capture()
 	double t = (double)cv::getTickCount();
 	printf_globle("  capture(); START \r\n");
 #endif
+	if (globle_var::TiggerWaitTimeMS > 0)
+	{
+		//触发后，等待砖进入拍摄区。
+		Sleep(globle_var::TiggerWaitTimeMS);
+
+#ifdef OUTPUT_TO_CONSOLE
+		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+		stringstream ss;
+		ss << GrabbingIndex << " " << "Sleep real(ms):" << t << endl;
+		printf_globle(ss.str());
+#endif
+	}
 
 	p_gb->Start();
 	if (!USING_VIRTUAL_CAMERA)
@@ -260,7 +236,7 @@ void TiggerWatcherAndGrabber::capture()
 	ss << GrabbingIndex << " " << "capture();  END" << endl << globle_var::Width << "x" << globle_var::FrameCount << "：" << t << "  End  at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
 #endif
-}
+} 
 //图片合成
 void TiggerWatcherAndGrabber::threeInOne()
 {
@@ -288,4 +264,27 @@ void TiggerWatcherAndGrabber::threeInOne()
 	printf_globle(ss.str());
 	ss.str("");
 #endif
+
+
+
+	OriginalImage = p_gb->OriginalImage.clone();
+	Image = p_gb->Image.clone();
+
+
+	IsGrabbing = false;
+
+	if (!IsCalibration)
+	{
+		if (hwnd != NULL)
+		{
+			PostMessage(hwnd, WM_USER + 100, 0, 0);
+		}
+		//标记生产者工作结束
+	}
+	else//若是标定环境，则停止监控
+	{
+		IsCalibration = false;
+		StopWatch();
+		PostMessage(hwnd, WM_USER + 102, 0, 0);//定标、采集结束处理程序
+	}
 }
