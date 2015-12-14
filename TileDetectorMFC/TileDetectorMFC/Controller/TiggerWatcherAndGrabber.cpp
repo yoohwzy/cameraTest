@@ -130,6 +130,8 @@ bool TiggerWatcherAndGrabber::ManualTigger()
 }
 void TiggerWatcherAndGrabber::watcherThread()
 {
+	double t_span = (double)cv::getTickCount();//用于计算两次触发间隔
+
 	while (IsWatching)
 	{
 		if (!IsGrabbing && (BeManualTiggered || pci1761.GetRisingEdgeIDI(7) ))
@@ -152,6 +154,13 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 			GrabbingIndex += 1;
 			if (GrabbingIndex > 1000000) GrabbingIndex = 1;
+
+			t_span = ((double)cv::getTickCount() - t_span) / cv::getTickFrequency();
+			ss << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span<<"秒" << endl;
+			printf_globle(ss.str());
+			LogHelper::Log(ss.str());
+			ss.str("");
+			t_span = (double)cv::getTickCount();//用于计算两次触发间隔
 
 #ifdef OUTPUT_TO_CONSOLE
 

@@ -62,8 +62,6 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , img_index(0)
 {
 	printf_globle("");
-	if (FILE_LOG)
-		ofstream of(FILE_NAME);
 }
 
 
@@ -156,9 +154,8 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	//创建系统日志
 	LogHelper::LogFileName = LogHelper::GetNowLogFileName();
-	CString log;
-	log.Format(L"%s 系统启动", LogHelper::LogFileName);
-	LogHelper::Log(log);
+	LogHelper::Log(LogHelper::LogFileName);
+	LogHelper::Log("系统启动\r\n");
 
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE

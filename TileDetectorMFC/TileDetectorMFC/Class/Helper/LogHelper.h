@@ -27,9 +27,13 @@ public:
 		ss << GetTodayDirectory();
 		ss << "\\";
 		ss << logFileName;
+
+		if (!Enable)
+			return;
+
 		ofstream of(ss.str(), ios::app);
-		string str(content);
-		of << str;
+		of << GetNowTime();
+		of << content;
 	};
 	static void Log(string logFileName, CString ccontent)
 	{
@@ -50,6 +54,7 @@ public:
 		CString strTime;
 		GetLocalTime(&st);
 		strTime.Format(L"%2d_%2d_%2d.log", st.wHour, st.wMinute, st.wSecond);
+		//LogFileName = StringHelper::CString2String(strTime);
 		return StringHelper::CString2String(strTime);
 	}
 
@@ -57,14 +62,17 @@ public:
 	static string LogFileName;
 	static bool Enable;
 private:
-
+	static string LogNowDir;
+	//获得今天的日志应写入哪一文件夹
 	static string GetTodayDirectory()
 	{
+		//if (LogNowDir != "")
+		//	return LogNowDir;
 		SYSTEMTIME st;
-		CString m_strFolderPath, strTime;
+		CString m_strFolderPath;// , strTime;
 		GetLocalTime(&st);
 		m_strFolderPath.Format(L"LOG\\%4d-%2d-%2d", st.wYear, st.wMonth, st.wDay);
-		strTime.Format(L"%2d:%2d:%2d", st.wHour, st.wMinute, st.wSecond);
+		//strTime.Format(L"%2d:%2d:%2d", st.wHour, st.wMinute, st.wSecond);
 
 		LogHelper::Enable = true;
 		if (!PathIsDirectory(m_strFolderPath))
@@ -74,6 +82,17 @@ private:
 				LogHelper::Enable = false;
 			}
 		}
-		return StringHelper::CString2String(m_strFolderPath);
+		LogNowDir = StringHelper::CString2String(m_strFolderPath);
+		return LogNowDir;
+	};
+	//获得当前系统时间 XX:XX:XX
+	static string GetNowTime()
+	{
+		SYSTEMTIME st;
+		CString strTime;
+		GetLocalTime(&st);
+		strTime.Format(L"%2d:%2d:%2d  ", st.wHour, st.wMinute, st.wSecond);
+
+		return StringHelper::CString2String(strTime);
 	};
 };

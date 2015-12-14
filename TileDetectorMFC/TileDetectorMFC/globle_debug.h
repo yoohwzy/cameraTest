@@ -14,8 +14,6 @@ using namespace std;
 
 //开启控制台，用于输出信息
 static bool CONSOLE_OPEN = true;
-static bool FILE_LOG = true;
-static string FILE_NAME = "log.log";
 
 
 #include <fgrab_struct.h>
@@ -39,14 +37,6 @@ static void printf_globle(const char *c)
 	{
 		FreeConsole();
 	}
-
-
-	//if (FILE_LOG)
-	//{
-	//	ofstream of(FILE_NAME,ios::app);
-	//	string str(c);
-	//	of << str;
-	//}
 }
 //将信息输出到console
 static void printf_globle(string str)
