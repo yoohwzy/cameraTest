@@ -7,7 +7,7 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	Init(virtualImg);
 
 
-	gb = new GrabbingBuffer(globle_var::FrameCount, globle_var::Width);
+	p_gb = new GrabbingBuffer(globle_var::FrameCount, globle_var::Width);
 
 	/*读取定标图片 定标*/
 	//BlocksDetector bd_Standard = BlocksDetector(cv::imread("A9划痕凹点_x3二值化.jpg"));
@@ -19,22 +19,6 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	//printf_globle("定标完成\n");
 	printf_globle("TiggerWatcherAndGrabber loaded!\n");
 }
-TiggerWatcherAndGrabber::~TiggerWatcherAndGrabber()
-{
-	if (gb != NULL)
-	{
-		delete gb;
-		gb = NULL;
-	}
-	if (e2v != NULL)
-	{
-		delete e2v;
-		e2v = NULL;
-	}
-
-	printf_globle("TiggerWatcherAndGrabber unload!\n");
-}
-
 
 void TiggerWatcherAndGrabber::Init(string virtualImg)
 {
@@ -51,14 +35,37 @@ void TiggerWatcherAndGrabber::Init(string virtualImg)
 }
 bool TiggerWatcherAndGrabber::Switch2Virtual(string virtualImg)
 {
-	_virtualImg = virtualImg;
+	if (p_e2v != NULL)
+	{
+		delete p_e2v;
+		p_e2v = NULL;
+	}
+	if (p_vc != NULL)
+	{
+		delete p_vc;
+		p_vc = NULL;
+	}
+
+
 	IsGrabbing = false;
 	USING_VIRTUAL_CAMERA = true;
 	printf_globle("配置为【虚拟相机】模式！\n");
-	return VirtualCamera::TestCam(virtualImg);
+	p_vc = new VirtualCameraPre(globle_var::FrameCount, globle_var::Width, virtualImg);
+	return VirtualCameraPre::TestCam(virtualImg);
 }
 bool TiggerWatcherAndGrabber::Switch2Real()
 {
+	if (p_e2v != NULL)
+	{
+		delete p_e2v;
+		p_e2v = NULL;
+	}
+	if (p_vc != NULL)
+	{
+		delete p_vc;
+		p_vc = NULL;
+	}
+
 	IsGrabbing = false;
 
 	USING_VIRTUAL_CAMERA = false;
@@ -75,9 +82,7 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 		printf_globle("打开pci1761失败！\n");
 
 	/**********************初始化采集卡*********************/
-	if (e2v != NULL)
-		delete e2v;
-	e2v = new E2VCamera(globle_var::FrameCount, globle_var::Width);
+	p_e2v = new E2VCamera(globle_var::FrameCount, globle_var::Width);
 	return true;
 }
 
@@ -86,12 +91,12 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 
 void TiggerWatcherAndGrabber::StartWatch()
 {
-	if (!IsWatching && t_watcher == NULL)
+	if (!IsWatching && p_t_watcher == NULL)
 	{
 		IsWatching = true;
-		//std::thread t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-		t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-		t_watcher->detach();
+		//std::thread p_t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+		p_t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+		p_t_watcher->detach();
 		printf_globle("StartWatch：开始监控触发信号\n");
 	}
 	else{
@@ -110,7 +115,7 @@ void TiggerWatcherAndGrabber::StopWatch()
 	printf_globle("停止监控触发信号\n");
 	IsWatching = false;
 	Sleep(50);
-	t_watcher = NULL;
+	p_t_watcher = NULL;
 }
 bool TiggerWatcherAndGrabber::ManualTigger()
 {
@@ -201,8 +206,8 @@ void TiggerWatcherAndGrabber::watcherThread()
 			//图片获取完成，复制到全局变量，并删除s
 			//OriginalImage.release();
 			//Image.release();
-			OriginalImage = gb->OriginalImage.clone();
-			Image = gb->Image.clone();
+			OriginalImage = p_gb->OriginalImage.clone();
+			Image = p_gb->Image.clone();
 
 
 
@@ -237,16 +242,14 @@ void TiggerWatcherAndGrabber::capture()
 	printf_globle("  capture(); START \r\n");
 #endif
 
-	gb->Start();
+	p_gb->Start();
 	if (!USING_VIRTUAL_CAMERA)
 	{
-		e2v->Capture(gb);
+		p_e2v->Capture(p_gb);
 	}
 	else
 	{
-		VirtualCamera *vc = new VirtualCamera(gb, globle_var::FrameCount, globle_var::Width, _virtualImg);
-		vc->Capture();
-		delete vc;
+		p_vc->Capture(p_gb);
 	}
 
 
@@ -266,14 +269,14 @@ void TiggerWatcherAndGrabber::threeInOne()
 #endif
 
 
-	for (gb->ReadIndex = 0; gb->ReadIndex < globle_var::FrameCount; gb->ReadIndex++)
+	for (p_gb->ReadIndex = 0; p_gb->ReadIndex < globle_var::FrameCount; p_gb->ReadIndex++)
 	{
 		//尚未写入缓存，等待
-		while (gb->ReadIndex + gb->NinOne >= gb->WriteIndex && gb->WriteIndex < globle_var::FrameCount)
+		while (p_gb->ReadIndex + p_gb->NinOne >= p_gb->WriteIndex && p_gb->WriteIndex < globle_var::FrameCount)
 		{
 			Sleep(10);
 		}
-		gb->ThreeInOne(gb->ReadIndex);
+		p_gb->ThreeInOne(p_gb->ReadIndex);
 	}
 
 

@@ -138,6 +138,9 @@
     <ClInclude Include="Class\Helper\SettingHelper.h">
       <Filter>Class\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Camera\VirtualCameraPre.h">
+      <Filter>Class\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -205,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="Class\Helper\SettingHelper.cpp">
       <Filter>Class\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\VirtualCameraPre.cpp">
+      <Filter>Class\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -117,6 +117,7 @@
     <ClInclude Include="Class\Camera\E2VCamera.h" />
     <ClInclude Include="Class\Camera\MicroDisplay.h" />
     <ClInclude Include="Class\Camera\VirtualCamera.h" />
+    <ClInclude Include="Class\Camera\VirtualCameraPre.h" />
     <ClInclude Include="Class\EdgeDetector.h" />
     <ClInclude Include="Class\EdgeInnerDetctor.h" />
     <ClInclude Include="Class\Helper\LogHelper.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Class\Camera\E2VCamera.cpp" />
     <ClCompile Include="Class\Camera\MicroDisplay.cpp" />
     <ClCompile Include="Class\Camera\VirtualCamera.cpp" />
+    <ClCompile Include="Class\Camera\VirtualCameraPre.cpp" />
     <ClCompile Include="Class\EdgeDetector.cpp" />
     <ClCompile Include="Class\EdgeInnerDetctor.cpp" />
     <ClCompile Include="Class\Helper\LogHelper.cpp" />

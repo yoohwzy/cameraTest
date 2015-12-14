@@ -16,13 +16,6 @@
 class E2VCamera
 {
 public:
-/*	//初始化采集参数
-	//1.采集行数
-	//2.采集宽度
-	//3.采集卡编号Logical number of the board.（默认为0）
-	//4.采集卡Port口号，PORT_A(默认) OR PORT_B
-	E2VCamera(GrabbingBuffer *gb, int frameCount, int width, int boardID = 0, int Camport = PORT_A);*/
-
 	//初始化采集参数
 	//1.采集行数
 	//2.采集宽度
