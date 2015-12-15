@@ -197,6 +197,10 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
 			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
+
+			auto tn = t_capture.native_handle();
+			SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
+
 			t_3in1.join();
 			t_capture.join();
 
