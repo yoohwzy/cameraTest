@@ -275,9 +275,21 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//}
 	//return 0;
 
-	//if (p_twag->Image.cols > 0)
+	//if (p_twag->GrabbingIndex == 2)
 	//{
-	//	DrawPicToHDC(p_twag->Image, IDC_PIC_Sample);
+	//	stringstream ss;
+	//	ss << p_twag->GrabbingIndex;
+	//	cv::namedWindow(ss.str(), 0);
+	//	cv::imshow(ss.str(), p_twag->Image);
+	//	cv::imwrite("2.jpg", p_twag->Image);
+	//	cv::imwrite("2o.jpg", p_twag->OriginalImage);
+	//	cv::waitKey(0);
+	//}
+
+	//cv::Mat img = p_twag->Image.clone();
+	//if (img.cols > 0)
+	//{
+	//	DrawPicToHDC(img, IDC_PIC_Sample);
 	//}
 
 	//if (!p_twag->ManualTigger())
@@ -295,6 +307,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	p_consumer = new Consumer(this->GetSafeHwnd());
 	p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
 	IsConsumerProcessing = true;
+	p_consumer->oo = p_twag->OriginalImage.clone();
 	p_consumer->StartNewProces(p_twag->Image);
 
 	//delete p_consumer;
@@ -307,28 +320,28 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//return 0;
 
 
-	CString msg;
-	msg.Format(_T("%d 采图完成！\r\n"), p_twag->GrabbingIndex);
-	m_Info += msg;
-	UpdateData(false);
+	//CString msg;
+	//msg.Format(_T("%d 采图完成！\r\n"), p_twag->GrabbingIndex);
+	//m_Info += msg;
+	//UpdateData(false);
 	 
 
 
-	//保存底片
-	if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
-	{
-		CString msg;
-		msg.Format(_T("正在保存底片%d！\r\n"), p_twag->GrabbingIndex);
-		m_Info += msg;
-		stringstream ss;
-		UpdateData(false);
-		ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
-		cv::imwrite(ss.str(), p_twag->OriginalImage);
+	////保存底片
+	//if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	//{
+	//	CString msg;
+	//	msg.Format(_T("正在保存底片%d！\r\n"), p_twag->GrabbingIndex);
+	//	m_Info += msg;
+	//	stringstream ss;
+	//	UpdateData(false);
+	//	ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
+	//	cv::imwrite(ss.str(), p_twag->OriginalImage);
 
-		m_Info += _T("保存完成\r\n");
-		UpdateData(false);
-	}
-	p_twag->OriginalImage.release();
+	//	m_Info += _T("保存完成\r\n");
+	//	UpdateData(false);
+	//}
+	//p_twag->OriginalImage.release();
 	return 1;
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingCalibrationEnd(WPARAM wParam, LPARAM lParam)
@@ -356,6 +369,17 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 {
 	IsConsumerProcessing = false;
 
+	if (p_consumer->GrabbingIndex == 2)
+	{
+		stringstream ss;
+		ss << p_consumer->GrabbingIndex;
+		cv::namedWindow(ss.str(), 0);
+		cv::imshow(ss.str(), p_consumer->originalImg);
+		cv::imwrite("2.jpg", p_consumer->originalImg);
+		cv::imwrite("2o.jpg", p_consumer->oo);
+		cv::waitKey(0);
+	}
+	return 0;
 
 	//printf_globle("OnMsgProcessingEnd\n");
 	//if (!p_twag->ManualTigger())

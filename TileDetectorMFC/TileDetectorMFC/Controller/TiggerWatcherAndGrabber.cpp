@@ -235,7 +235,9 @@ void TiggerWatcherAndGrabber::capture()
 	stringstream ss;
 	ss << GrabbingIndex << " " << "capture();  END" << endl << globle_var::Width << "x" << globle_var::FrameCount << "£º" << t << "  End  at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
 	printf_globle(ss.str());
+	ss.str("");
 #endif
+
 } 
 //Í¼Æ¬ºÏ³É
 void TiggerWatcherAndGrabber::threeInOne()
@@ -270,6 +272,14 @@ void TiggerWatcherAndGrabber::threeInOne()
 	OriginalImage = p_gb->OriginalImage.clone();
 	Image = p_gb->Image.clone();
 
+	//if (GrabbingIndex == 2)
+	//{
+
+	//	ss << GrabbingIndex;
+	//	cv::namedWindow(ss.str(), 0);
+	//	cv::imshow(ss.str(), Image);
+	//	cv::waitKey(0);
+	//}
 
 	IsGrabbing = false;
 

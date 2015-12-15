@@ -45,6 +45,7 @@ public:
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;
 	//vector<cv::Point3f> InnerFaults;
+	cv::Mat oo;
 	cv::Mat originalImg;
 	cv::Mat grayImg;
 
