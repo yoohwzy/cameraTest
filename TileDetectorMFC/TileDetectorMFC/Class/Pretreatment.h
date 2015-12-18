@@ -41,10 +41,12 @@ private:
 	vector<Point> locationpoints;
 	vector<vector<Point>> CneedContours;
 	vector<vector<vector<Point>>> Warehousecontours;
-	Mat Mask_result_big, Mask_result_small;
+	Mat Mask_result_big, Mask_result_small,CannyImg, BlurImg;;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
+	void img2clone();
+	void img2zoom();
 	void linedetect();
 	void ProduceItem(ItemRepository *ir, int item);
 	void ProducerTask();
