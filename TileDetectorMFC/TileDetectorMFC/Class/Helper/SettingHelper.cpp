@@ -181,6 +181,10 @@ string SettingHelper::getSectionName(Key key)
 		return "GRAB";
 	case SettingHelper::GRAB_ColorType:
 		return "GRAB";
+	case SettingHelper::GRAB_TimeMS:
+		return "GRAB";
+	case SettingHelper::grab_frameTimeUS:
+		return "GRAB";
 	case SettingHelper::TIGGER_WaitTime:
 		return "TIGGER";
 	case SettingHelper::TIGGER_HoldTime:
@@ -200,8 +204,12 @@ string SettingHelper::getKeyName(Key key)
 		return "GRAB_Width";
 	case SettingHelper::GRAB_ColorType:
 		return "GRAB_ColorType";
+	case SettingHelper::GRAB_TimeMS:
+		return "GRAB_TimeMS[≈ƒ…„ ±≥§∫¡√Î]";
+	case SettingHelper::grab_frameTimeUS:
+		return "grab_frameTimeUS[÷°≥§Œ¢√Î]";
 	case SettingHelper::TIGGER_WaitTime:
-		return "TIGGER_WaitTime";
+		return "TIGGER_WaitTime[¥•∑¢∫Ûµ»¥˝∫¡√Î]";
 	case SettingHelper::TIGGER_HoldTime:
 		return "TIGGER_HoldTime";
 	default:

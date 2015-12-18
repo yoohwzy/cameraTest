@@ -19,18 +19,15 @@ public:
 	//初始化采集参数
 	//1.采集行数
 	//2.采集宽度
-	//3.色彩模式 枚举 RGB OR GRAY
-	//4.采集卡编号Logical number of the board.（默认为0）
-	//5.采集卡Port口号，PORT_A(默认) OR PORT_B
-	E2VCamera(int frameCount, int width, int colorType = RGB, int boardID = 0, int Camport = PORT_A);
+	//3.每帧时长（微秒）要求大于30
+	//4.色彩模式 枚举 RGB OR GRAY
+	//5.采集卡编号Logical number of the board.（默认为0）
+	//6.采集卡Port口号，PORT_A(默认) OR PORT_B
+	E2VCamera(int frameCount, int width, int frameTimeUS, int colorType = RGB, int boardID = 0, int Camport = PORT_A);
 	~E2VCamera();
 
 	//开始采图
 	void Capture(GrabbingBuffer *gb);
-
-
-	//测试采集卡-相机功能是否正常，若有错直接报错退出！
-	static bool TestCam();
 
 
 	enum ColorType
@@ -46,6 +43,7 @@ private:
 	int _width = 0;					//每帧宽度
 	const int _frameHeight = 1;		//每帧高度
 	int _frameCount = 0;			//总共帧数
+	int _frameTimeUS = 0;			//每帧时长（微秒）
 
 	int nBoard = 0;					//采集卡编号
 	int camPort = PORT_A;			//采集卡Port
@@ -81,14 +79,4 @@ private:
 	//检测MD采集卡是否有错误
 	//报错->退出
 	void errorMessageWait();
-
-
-
-
-
-
-	//10000帧图像应多少微秒采集
-	const int _GrubbingTimeMicroSecondPer10000f = 1000000;
-	//1帧图像采集用时
-	const int _GrubbingTimeMicroSecondPer1f = 100;
 };

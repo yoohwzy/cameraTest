@@ -16,7 +16,9 @@ bool globle_var::InitSetting(bool isload)
 {
 	Width = 4096;
 	ColorType = RGB;
-	FrameCount = 12000;
+	FrameCount = 10000;
+	FrameTimeUS = 100;
+	GrabTimeMS = FrameTimeUS * FrameCount / 1000;
 
 	if (isload)
 	{
@@ -76,3 +78,5 @@ string globle_var::VirtualCameraFileName = "";
 int globle_var::Width = 0;					//每帧宽度
 int globle_var::FrameCount = 0;				//总共帧数
 int globle_var::ColorType = globle_var::RGB;				//采图颜色模式
+int globle_var::FrameTimeUS = 10;
+int globle_var::GrabTimeMS = 10;

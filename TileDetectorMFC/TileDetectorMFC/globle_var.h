@@ -30,10 +30,10 @@ public:
 
 	static int Width;					//每帧宽度
 	static const int FrameHeight = 1;		//每帧高度
-	static int FrameCount;			//总共帧数
+	static int FrameCount;				//总共帧数
+	static int FrameTimeUS;				//拍摄单帧时长
+	static int GrabTimeMS;				//采集一块砖用时（毫秒）
 	static int ColorType;				//采图颜色模式
-
-
 
 
 

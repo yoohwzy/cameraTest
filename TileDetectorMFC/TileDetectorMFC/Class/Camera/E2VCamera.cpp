@@ -1,14 +1,15 @@
 #include "E2VCamera.h"
 
 
-E2VCamera::E2VCamera(int frameCount, int width, int colorType, int boardID, int Camport)
+E2VCamera::E2VCamera(int frameCount, int width, int frameTimeUS, int colorType, int boardID, int Camport)
 {
 	_width = width;
 	_frameCount = frameCount;
+	_frameTimeUS = frameTimeUS;
 	_colorType = colorType;
 	nBoard = boardID;
 	camPort = Camport;
-
+	
 	init_fg();
 
 	//caculateForTimes();
@@ -56,11 +57,11 @@ void E2VCamera::Capture(GrabbingBuffer *gb)
 		t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
 
 
-		//µÈ´ýÂú_GrubbingTimeMicroSecondPer1f
-		if (t1 < _GrubbingTimeMicroSecondPer1f)
+		//µÈ´ýÂú_frameTimeUS
+		if (t1 < _frameTimeUS)
 		{
 			double t2 = (double)cv::getTickCount();
-			double tickCountSpan = (_GrubbingTimeMicroSecondPer1f - t1) * cv::getTickFrequency() / 1000000;
+			double tickCountSpan = (_frameTimeUS - t1) * cv::getTickFrequency() / 1000000;
 			while (((double)cv::getTickCount() - t2) < tickCountSpan)
 			{
 				//stringstream ss;
@@ -72,17 +73,6 @@ void E2VCamera::Capture(GrabbingBuffer *gb)
 	}
 
 	Fg_stopAcquireEx(fg, camPort, memHandle, 0);
-}
-
-
-
-
-bool E2VCamera::TestCam()
-{
-	E2VCamera *md = new E2VCamera(NULL, 1, 100);
-	md->test();
-	delete md;
-	return true;
 }
 
 
