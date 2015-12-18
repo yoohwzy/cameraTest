@@ -82,7 +82,7 @@ bool TiggerWatcherAndGrabber::Switch2Real()
 		printf_globle("打开pci1761失败！\n");
 
 	/**********************初始化采集卡*********************/
-	p_e2v = new E2VCamera(globle_var::FrameCount, globle_var::Width);
+	p_e2v = new E2VCamera(globle_var::FrameCount, globle_var::Width, globle_var::FrameTimeUS);
 	return true;
 }
 

@@ -1,12 +1,14 @@
 #pragma once
 
-#include <windows.h>
+#include <afxwin.h>
+//#include <windows.h>
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <tchar.h>
 #include <winnt.h>
 
+#include "StringHelper.h"
 using namespace std;
 class SettingHelper
 {
@@ -26,7 +28,8 @@ public:
 
 	SettingHelper();
 	~SettingHelper();
-	static void Init(Key key);
+	//初始化INI文件，即删除原来的
+	static void Init();
 
 	//保存一个设置到ini文件
 	static void AddKey(Key key, int value);

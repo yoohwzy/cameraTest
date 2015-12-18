@@ -9,23 +9,16 @@ SettingHelper::SettingHelper()
 SettingHelper::~SettingHelper()
 {
 }
-//void SettingHelper::Init(Key key)
-//{
-//
-//	switch (key)
-//	{
-//	case SettingHelper::GRAB_MaxPics:
-//		break;
-//	case SettingHelper::GRAB_Width:
-//		break;
-//	case SettingHelper::GRAB_ColorType:
-//		break;
-//	case SettingHelper::TIGGER_WaitTime:
-//		break;
-//	default:
-//		break;
-//	}
-//}
+void SettingHelper::Init()
+{
+	try{
+		remove(StringHelper::LPWSTR2String(path).c_str());
+	}
+	catch (exception e)
+	{
+
+	}
+}
 
 
 void SettingHelper::AddKey(Key key, int value)
@@ -205,11 +198,11 @@ string SettingHelper::getKeyName(Key key)
 	case SettingHelper::GRAB_ColorType:
 		return "GRAB_ColorType";
 	case SettingHelper::GRAB_TimeMS:
-		return "GRAB_TimeMS[≈ƒ…„ ±≥§∫¡√Î]";
+		return "GRAB_TimeMS";
 	case SettingHelper::grab_frameTimeUS:
-		return "grab_frameTimeUS[÷°≥§Œ¢√Î]";
+		return "grab_frameTimeUS";
 	case SettingHelper::TIGGER_WaitTime:
-		return "TIGGER_WaitTime[¥•∑¢∫Ûµ»¥˝∫¡√Î]";
+		return "TIGGER_WaitTime";
 	case SettingHelper::TIGGER_HoldTime:
 		return "TIGGER_HoldTime";
 	default:

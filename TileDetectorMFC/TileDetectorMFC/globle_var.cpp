@@ -27,9 +27,11 @@ bool globle_var::InitSetting(bool isload)
 			SettingHelper::GetKeyString(SettingHelper::GRAB_ColorType, str) &&
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_MaxPics, FrameCount) &&
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_Width, Width) &&
+			SettingHelper::GetKeyInt(SettingHelper::grab_frameTimeUS, FrameTimeUS) &&
 			SettingHelper::GetKeyInt(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS)
 			)
 		{
+			GrabTimeMS = FrameTimeUS * FrameCount / 1000;
 			if (str == "RGB")
 				ColorType = RGB;
 			else
@@ -60,7 +62,8 @@ void globle_var::SaveSetting()
 	SettingHelper::AddKey(SettingHelper::GRAB_MaxPics, FrameCount);
 	SettingHelper::AddKey(SettingHelper::GRAB_Width, Width);
 	SettingHelper::AddKey(SettingHelper::GRAB_ColorType, ColorType == globle_var::RGB ? "RGB" : "Gray");
-
+	SettingHelper::AddKey(SettingHelper::grab_frameTimeUS, FrameTimeUS);
+	SettingHelper::AddKey(SettingHelper::GRAB_TimeMS, GrabTimeMS);
 	SettingHelper::AddKey(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS);
 }
 

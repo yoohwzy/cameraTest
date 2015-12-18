@@ -25,6 +25,17 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 	DECLARE_MESSAGE_MAP()
+
+private:
+	int frameTimeUS = 0;
+	void calculateFrameTime()
+	{
+		UpdateData(true);
+		frameTimeUS = set_grabTime * 1000 / set_grabFrameCount;
+		CString c;
+		c.Format(L"%d", frameTimeUS);
+		SetDlgItemText(IDC_Lable_FrameTime, c);
+	}
 public:
 	afx_msg void OnBnClickedSave();
 	// 采集参数，总采集行数
@@ -37,4 +48,8 @@ public:
 	int set_TiggerWaitTimeMS;
 	afx_msg void OnBnClickedCancel();
 	virtual BOOL OnInitDialog();
+	int set_grabTime;
+	afx_msg void OnEnKillfocusTbGrabtime();
+	afx_msg void OnEnChangeTbGrabframecount();
+	afx_msg void OnEnChangeTbGrabtime();
 };

@@ -115,7 +115,6 @@
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
     <ClInclude Include="Class\Camera\E2VCamera.h" />
-    <ClInclude Include="Class\Camera\MicroDisplay.h" />
     <ClInclude Include="Class\Camera\VirtualCamera.h" />
     <ClInclude Include="Class\Camera\VirtualCameraPre.h" />
     <ClInclude Include="Class\EdgeDetector.h" />
@@ -151,7 +150,6 @@
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
     <ClCompile Include="Class\Camera\E2VCamera.cpp" />
-    <ClCompile Include="Class\Camera\MicroDisplay.cpp" />
     <ClCompile Include="Class\Camera\VirtualCamera.cpp" />
     <ClCompile Include="Class\Camera\VirtualCameraPre.cpp" />
     <ClCompile Include="Class\EdgeDetector.cpp" />
