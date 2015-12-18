@@ -28,6 +28,9 @@
     <Filter Include="Class\Helper">
       <UniqueIdentifier>{f0dfc5f6-4547-4601-b18b-2b0609777d0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\IOCard">
+      <UniqueIdentifier>{9dc9f68d-3d2b-43c6-aff1-743be07d3cad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -102,12 +105,6 @@
     <ClInclude Include="SettingDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Base\SettingHelper.h">
-      <Filter>Class\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Class\Camera\MicroDisplay.h">
-      <Filter>Class\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Camera\VirtualCamera.h">
       <Filter>Class\Camera</Filter>
     </ClInclude>
@@ -116,6 +113,30 @@
     </ClInclude>
     <ClInclude Include="Class\Helper\StringHelper.h">
       <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\E2VCamera.h">
+      <Filter>Class\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\TimeHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\mc100USBCard.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\bdaqctrl.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\compatibility.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\SettingHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\VirtualCameraPre.h">
+      <Filter>Class\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,20 +188,23 @@
     <ClCompile Include="SettingDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Class\Base\SettingHelper.cpp">
-      <Filter>Class\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Class\BlocksDetector.cpp">
       <Filter>Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\Camera\MicroDisplay.cpp">
-      <Filter>Class\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Class\Camera\VirtualCamera.cpp">
       <Filter>Class\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Class\Helper\LogHelper.cpp">
       <Filter>Class\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\E2VCamera.cpp">
+      <Filter>Class\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Helper\SettingHelper.cpp">
+      <Filter>Class\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\VirtualCameraPre.cpp">
+      <Filter>Class\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -203,6 +227,15 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="mc100.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="Adsapi32.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="odbc32.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="odbccp32.lib">
       <Filter>资源文件</Filter>
     </Library>
   </ItemGroup>

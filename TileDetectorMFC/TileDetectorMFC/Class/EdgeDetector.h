@@ -9,7 +9,6 @@ using namespace std;
 #include "Base/Block.h"
 #include "Base\Faults.h"
 
-/*2015年12月1日*/
 
 using namespace cv;
 
@@ -17,19 +16,23 @@ class EdgeDetector
 {
 	
 public:
-	
+
 	EdgeDetector(Mat&, Block *_block,Faults *_faults);
-	~EdgeDetector();
+	~EdgeDetector()
+	{
+		p_block = NULL;
+		p_faults = NULL;
+	};
 	void start();
 	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
 
-	
+
 
 
 private:
-	Block *block;
-	Faults *faults;
+	Block *p_block = NULL;
+	Faults *p_faults = NULL;
 	// 边缘点集合到拟合直线的距离，距离存在向量Distance中
 	void DistanceDetector_set(vector<Point> Boundary_Point_temp, Vec4f FitLine, vector<float> &Distance);
 	// 边缘点到拟合直线的距离
@@ -82,5 +85,7 @@ private:
 	int t1 = 0, t2 = 0;
 	int Tabel = 0;
 
+	//调整ROI区域范围，防止越界
+	void RectAdjust(cv::Mat img,int& x, int& y, int& width, int& height);
 };
 

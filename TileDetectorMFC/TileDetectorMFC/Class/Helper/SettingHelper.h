@@ -1,12 +1,14 @@
 #pragma once
 
-#include <windows.h>
+#include <afxwin.h>
+//#include <windows.h>
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <tchar.h>
 #include <winnt.h>
 
+#include "StringHelper.h"
 using namespace std;
 class SettingHelper
 {
@@ -16,14 +18,18 @@ public:
 		GRAB_MaxPics,
 		GRAB_Width,
 		GRAB_ColorType,
-		TIGGER_WaitTime
+		GRAB_TimeMS,//拍摄时长（毫秒）
+		grab_frameTimeUS,//一帧的拍摄时长（微秒）只读
+		TIGGER_WaitTime,//触发后，延时多少毫妙开始采样
+		TIGGER_HoldTime //触发不应期，完成采样后，多少毫秒内无法再次触发采样
 	};
 
 
 
 	SettingHelper();
 	~SettingHelper();
-	static void Init(Key key);
+	//初始化INI文件，即删除原来的
+	static void Init();
 
 	//保存一个设置到ini文件
 	static void AddKey(Key key, int value);

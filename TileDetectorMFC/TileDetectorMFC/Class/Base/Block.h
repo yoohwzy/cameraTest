@@ -3,20 +3,24 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
 
-struct Line
-{
-	int x0;
-	int y0;
-	double k;
-	double dx;
-	double dy;
-};
+
 //用于存储瓷砖在图像中的位置信息
 class Block
 {
 public:
 	Block(int _imageWidth, int _imageHeight);
-	~Block();
+	~Block()
+	{
+		
+	};
+	struct Line
+	{
+		int x0;
+		int y0;
+		double k;
+		double dx;
+		double dy;
+	};
 
 	cv::Point A, B, C, D;
 
@@ -32,7 +36,6 @@ public:
 
 	cv::Point GetPonintByX(int x, Line *l);
 	cv::Point GetPonintByY(int y, Line *l);
-
 
 	int imageWidth = 0;
 	int imageHeight = 0;

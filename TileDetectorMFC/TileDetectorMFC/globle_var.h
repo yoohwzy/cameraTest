@@ -1,8 +1,9 @@
 #pragma once
 
-//#include "Class\BufferStorage.h"
-#include "Class\Base\SettingHelper.h"
+#include "Class\Helper\SettingHelper.h"
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
 
 //@description	此处声明全局变量，全局类，以及相关函数
 //@author VShawn
@@ -29,10 +30,10 @@ public:
 
 	static int Width;					//每帧宽度
 	static const int FrameHeight = 1;		//每帧高度
-	static int FrameCount;			//总共帧数
+	static int FrameCount;				//总共帧数
+	static int FrameTimeUS;				//拍摄单帧时长
+	static int GrabTimeMS;				//采集一块砖用时（毫秒）
 	static int ColorType;				//采图颜色模式
-
-
 
 
 

@@ -1,8 +1,6 @@
 #pragma once
 #include "globle_var.h"
 
-#include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
 using namespace std;
 
 globle_var::globle_var()
@@ -18,7 +16,9 @@ bool globle_var::InitSetting(bool isload)
 {
 	Width = 4096;
 	ColorType = RGB;
-	FrameCount = 12000;
+	FrameCount = 10000;
+	FrameTimeUS = 100;
+	GrabTimeMS = FrameTimeUS * FrameCount / 1000;
 
 	if (isload)
 	{
@@ -27,9 +27,11 @@ bool globle_var::InitSetting(bool isload)
 			SettingHelper::GetKeyString(SettingHelper::GRAB_ColorType, str) &&
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_MaxPics, FrameCount) &&
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_Width, Width) &&
+			SettingHelper::GetKeyInt(SettingHelper::grab_frameTimeUS, FrameTimeUS) &&
 			SettingHelper::GetKeyInt(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS)
 			)
 		{
+			GrabTimeMS = FrameTimeUS * FrameCount / 1000;
 			if (str == "RGB")
 				ColorType = RGB;
 			else
@@ -60,7 +62,8 @@ void globle_var::SaveSetting()
 	SettingHelper::AddKey(SettingHelper::GRAB_MaxPics, FrameCount);
 	SettingHelper::AddKey(SettingHelper::GRAB_Width, Width);
 	SettingHelper::AddKey(SettingHelper::GRAB_ColorType, ColorType == globle_var::RGB ? "RGB" : "Gray");
-
+	SettingHelper::AddKey(SettingHelper::grab_frameTimeUS, FrameTimeUS);
+	SettingHelper::AddKey(SettingHelper::GRAB_TimeMS, GrabTimeMS);
 	SettingHelper::AddKey(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS);
 }
 
@@ -78,3 +81,5 @@ string globle_var::VirtualCameraFileName = "";
 int globle_var::Width = 0;					//每帧宽度
 int globle_var::FrameCount = 0;				//总共帧数
 int globle_var::ColorType = globle_var::RGB;				//采图颜色模式
+int globle_var::FrameTimeUS = 10;
+int globle_var::GrabTimeMS = 10;

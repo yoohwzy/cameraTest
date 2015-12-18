@@ -8,10 +8,6 @@
 
 
 //头文件
-#include <fgrab_struct.h>
-#include <fgrab_prototyp.h>
-#include <fgrab_define.h>
-#include <SisoDisplay.h>
 
 
 #include <string>
@@ -24,8 +20,8 @@ using namespace std;
 #include "opencv2/highgui/highgui.hpp"
 
 
-#include "Class/Base/SettingHelper.h"
-#include "Class\Helper\LogHelper.h"
+#include "Class/Helper/SettingHelper.h"
+#include "Class/Helper/LogHelper.h"
 //头文件END
 
 

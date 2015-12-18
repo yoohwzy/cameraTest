@@ -14,7 +14,11 @@ class VirtualCamera
 public:
 	//初始化虚拟相机，若图片文件不存在，报错并退出。
 	VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, string imgname, int colorType = RGB);
-	~VirtualCamera();
+	~VirtualCamera()
+	{
+		buffer.release();
+		p_gb = NULL;
+	};
 
 
 	void Capture();
@@ -29,7 +33,7 @@ public:
 	};
 private:
 	cv::Mat buffer;
-	GrabbingBuffer *_gb;
+	GrabbingBuffer *p_gb;
 
 	// 采图颜色模式
 	int _colorType = 1;

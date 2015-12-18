@@ -14,8 +14,6 @@ using namespace std;
 
 //开启控制台，用于输出信息
 static bool CONSOLE_OPEN = true;
-static bool FILE_LOG = true;
-static string FILE_NAME = "log.log";
 
 
 #include <fgrab_struct.h>
@@ -39,14 +37,6 @@ static void printf_globle(const char *c)
 	{
 		FreeConsole();
 	}
-
-
-	//if (FILE_LOG)
-	//{
-	//	ofstream of(FILE_NAME,ios::app);
-	//	string str(c);
-	//	of << str;
-	//}
 }
 //将信息输出到console
 static void printf_globle(string str)
@@ -66,7 +56,7 @@ static void printf_globle(stringstream ss)
 
 
 
-#define OUTPUT_DEBUG_INFO 0
+//#define OUTPUT_DEBUG_INFO 0
 
 
 
@@ -75,7 +65,8 @@ static void printf_globle(stringstream ss)
 
 
 
-#include <windows.h>
+#include <afxwin.h>
+//#include <windows.h>
 //当发生不可逆转的错误时，调用本程序报错，退出。
 static void ExitWithError(std::string errorInfo,int errorCode = 1){
 	printf_globle(errorInfo);
@@ -100,3 +91,4 @@ static void MD_ErrorMessageWait(Fg_Struct *fg)
 	ExitWithError(err_str);
 }
 
+#define OUTPUT_TO_CONSOLE

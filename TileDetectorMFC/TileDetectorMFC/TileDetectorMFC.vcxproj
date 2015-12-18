@@ -112,15 +112,21 @@
   <ItemGroup>
     <ClInclude Include="Class\Base\Block.h" />
     <ClInclude Include="Class\Base\Faults.h" />
-    <ClInclude Include="Class\Base\SettingHelper.h" />
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
-    <ClInclude Include="Class\Camera\MicroDisplay.h" />
+    <ClInclude Include="Class\Camera\E2VCamera.h" />
     <ClInclude Include="Class\Camera\VirtualCamera.h" />
+    <ClInclude Include="Class\Camera\VirtualCameraPre.h" />
     <ClInclude Include="Class\EdgeDetector.h" />
     <ClInclude Include="Class\EdgeInnerDetctor.h" />
     <ClInclude Include="Class\Helper\LogHelper.h" />
+    <ClInclude Include="Class\Helper\SettingHelper.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
+    <ClInclude Include="Class\Helper\TimeHelper.h" />
+    <ClInclude Include="Class\IOCard\bdaqctrl.h" />
+    <ClInclude Include="Class\IOCard\compatibility.h" />
+    <ClInclude Include="Class\IOCard\mc100USBCard.h" />
+    <ClInclude Include="Class\IOCard\PCI1761.h" />
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\Pretreatment.h" />
@@ -141,14 +147,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class\Base\Block.cpp" />
-    <ClCompile Include="Class\Base\SettingHelper.cpp" />
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
-    <ClCompile Include="Class\Camera\MicroDisplay.cpp" />
+    <ClCompile Include="Class\Camera\E2VCamera.cpp" />
     <ClCompile Include="Class\Camera\VirtualCamera.cpp" />
+    <ClCompile Include="Class\Camera\VirtualCameraPre.cpp" />
     <ClCompile Include="Class\EdgeDetector.cpp" />
     <ClCompile Include="Class\EdgeInnerDetctor.cpp" />
     <ClCompile Include="Class\Helper\LogHelper.cpp" />
+    <ClCompile Include="Class\Helper\SettingHelper.cpp" />
     <ClCompile Include="Class\Judgement.cpp" />
     <ClCompile Include="Class\Measurer.cpp" />
     <ClCompile Include="Class\Pretreatment.cpp" />
@@ -176,7 +183,10 @@
     <Image Include="res\TileDetectorMFC.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Adsapi32.lib" />
     <Library Include="mc100.lib" />
+    <Library Include="odbc32.lib" />
+    <Library Include="odbccp32.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

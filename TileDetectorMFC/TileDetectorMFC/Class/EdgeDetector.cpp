@@ -1,7 +1,393 @@
 #include "EdgeDetector.h"
 #include "Processor.h"
 
+EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
+{
+	p_block = _block;
+	p_faults = _faults;
+	_block = NULL;
+	_faults = NULL;
+	src = img;
 
+
+	A = p_block->A;
+
+	B = p_block->B;
+
+	C = p_block->C;
+
+	D = p_block->D;
+
+	xleft = (A.x - abs(A.x - D.x) - 100 > 0 ? (A.x - abs(A.x - D.x) - 100) : 0);
+	yleft = A.y - 100 < 0 ? 0 : A.y - 100;
+	left_height = D.y - A.y + 200;
+	left_width = 2 * abs(A.x - D.x) + 200;
+	RectAdjust(img, xleft, yleft, left_width, left_height);
+
+	xright = B.x - abs(B.x - C.x) - 100;
+	yright = B.y - 100;
+	right_height = C.y - B.y + 200;
+	right_width = min(2 * abs(B.x - C.x) + 200, 4096 - B.x + abs(B.x - C.x));
+	RectAdjust(img, xright, yright, right_width, right_height);
+
+	xup = A.x - 100;
+	yup = (A.y - abs(A.y - B.y) - 100 > 0 ? (A.y - abs(A.y - B.y) - 100) : 0);
+	up_width = B.x - A.x + 200;
+	up_height = 2 * abs(A.y - B.y) + 200;
+	RectAdjust(img, xup, yup, up_width, up_height);
+
+	xdown = D.x - 100;
+	ydown = D.y - abs(D.y - C.y) - 100;
+	down_width = C.x - D.x + 200;
+	down_height = min(2 * abs(D.y - C.y) + 200, 11000 - D.y + abs(D.y - C.y));
+	RectAdjust(img, xdown, ydown, down_width, down_height);
+
+	src(Rect(xleft, yleft, left_width, left_height)).copyTo(leftROI);
+	if (leftROI.channels() == 3)
+		cvtColor(leftROI, leftROI, CV_BGR2GRAY);
+	src(Rect(xright, yright, right_width, right_height)).copyTo(rightROI);
+	if (rightROI.channels() == 3)
+		cvtColor(rightROI, rightROI, CV_BGR2GRAY);
+	src(Rect(xup, yup, up_width, up_height)).copyTo(upROI);
+	if (upROI.channels() == 3)
+		cvtColor(upROI, upROI, CV_BGR2GRAY);
+	src(Rect(xdown, ydown, down_width, down_height)).copyTo(downROI);
+	if (downROI.channels() == 3)
+		cvtColor(downROI, downROI, CV_BGR2GRAY);
+
+
+	Mat leftROI1, rightROI1, upROI1, downROI1;
+	leftROI.copyTo(leftROI1);
+	rightROI.copyTo(rightROI1);
+	upROI.copyTo(upROI1);
+	downROI.copyTo(downROI1);
+	/*leftROI=src(Rect(xleft, yleft, left_width, left_height));
+	rightROI=src(Rect(xright, yright, right_width, right_height));
+	upROI=src(Rect(xup, yup, up_width, up_height));
+	downROI=src(Rect(xdown, ydown, down_width, down_height));*/
+
+	/*imwrite("C:\\Users\\43597_000\\Desktop\\leftroi.jpg", leftROI);
+	imwrite("C:\\Users\\43597_000\\Desktop\\rightroi.jpg", rightROI);
+	imwrite("C:\\Users\\43597_000\\Desktop\\uproi.jpg", upROI);
+	imwrite("C:\\Users\\43597_000\\Desktop\\downroi.jpg", downROI);*/
+
+	ROI.push_back(leftROI);
+	ROI.push_back(downROI);
+	ROI.push_back(rightROI);
+	ROI.push_back(upROI);
+
+	ROI1.push_back(leftROI1);
+	ROI1.push_back(downROI1);
+	ROI1.push_back(rightROI1);
+	ROI1.push_back(upROI1);
+
+
+}
+
+void EdgeDetector::start()
+{
+	/*double t2 = (double)cv::getTickCount();
+
+	double t = (double)cv::getTickCount();*/
+	// 预处理
+	for (int i = 0; i < ROI.size(); i++)
+	{
+		Dynamic_range(ROI[i]);
+	}
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "预处理time=" << t << "\t";
+
+	t = (double)cv::getTickCount();*/
+	// 获取边缘
+	vector<vector<Point>> Contours;// 原图的边缘坐标
+	vector<vector<Point>> ROI_Contours; // ROI上的边缘坐标
+	Find_contours(ROI, Contours, ROI_Contours); // 找到的边缘对应于原图和ROI分别保存
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "获取边缘time=" << t << "\t";
+
+
+	t = (double)cv::getTickCount();*/
+	// 取边缘样点用于拟合
+	vector<vector<Point>> Fit_contours; // 存储样点用于拟合
+
+	for (int i = 0; i < ROI_Contours.size(); i++)
+	{
+		vector<Point> tm;
+		for (int j = 50; j < ROI_Contours[i].size() - 50; j = j + 50) // 每隔50个点取一个
+		{
+			tm.push_back(ROI_Contours[i][j]);
+		}
+		Fit_contours.push_back(tm);
+	}
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "取边缘样点用于拟合time=" << t << "\t";
+
+
+	t = (double)cv::getTickCount();*/
+	// 边缘直线拟合
+	vector<Vec4f> line_;   // 拟合后原图上的直线
+	vector<Vec4f> line_roi; // 拟合后roi上的直线
+	Vec4f Fit_Line;
+	FitLine(Fit_contours, line_, line_roi, Fit_Line);	 // 直线拟合
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "边缘直线拟合time=" << t << "\t";
+
+	t = (double)cv::getTickCount();*/
+	// 求出四个交点A\B\C\D
+	vector<Point> Point_of_Intersection;
+	PointOfIntersection(line_, Point_of_Intersection);
+	p_block->A = Point_of_Intersection[3];
+	p_block->B = Point_of_Intersection[2];
+	p_block->C = Point_of_Intersection[1];
+	p_block->D = Point_of_Intersection[0];
+
+	vector<Point> corner;
+	corner.push_back(p_block->A);
+	corner.push_back(p_block->D);
+	corner.push_back(p_block->C);
+	corner.push_back(p_block->B);
+
+	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	cout << "求出四个交点time=" << t << "\t";*/
+
+	/*Mat image1(src.size(), src.type(),Scalar(0));
+	for (int i = 0; i < Contours.size(); i++)
+	{
+	for (int j = 0; j < Contours[i].size(); j++)
+	{
+	image1.at<uchar>(Contours[i][j]) = 255;
+	}
+	}*/
+
+
+	/*t = (double)cv::getTickCount();*/
+	// 崩边检测
+	int starter = 0, ender = 0; // 一个边缘点集合的起始点和结束点
+	int aa = 0, bb = 0, cc = 0, dd = 0;
+	int aa1 = 0, bb1 = 0, cc1 = 0, dd1 = 0;
+
+	// 瓷砖向右歪斜
+	if ((p_block->A).y > (p_block->B).y)
+	{
+		aa1 = ROI_Contours[0].size();	bb1 = ROI_Contours[1].size();	cc = 0;	dd = 0;
+		for (int i = 0; i < 50; i++)
+		{
+			int t0 = abs(Contours[0][i].x - Contours[0][i + 1].x);
+			int t1 = abs(Contours[0][i].x - (p_block->A).x);
+			if (t1 < 30){
+				aa = i;		break;
+			}
+			else
+				if (i == 49)	aa = 49;
+		}
+
+		for (int i = 0; i < 50; i++)
+		{
+			int t0 = abs(Contours[1][i].y - Contours[1][i + 1].y);
+			int t1 = abs(Contours[1][i].y - (p_block->D).y);
+			if (t1 < 30){
+				bb = i;	break;
+			}
+			else
+				if (i == 49)	bb = 49;
+		}
+
+		for (int i = ROI_Contours[2].size() - 2; i > ROI_Contours[2].size() - 50; i--)
+		{
+			int t0 = abs(Contours[2][i].x - Contours[2][i + 1].x);
+			int t1 = abs(Contours[2][i].x - (p_block->C).x);
+			if (abs(Contours[2][i].x - (p_block->C).x) < 30)	{
+				cc1 = i;		break;
+			}
+			else
+				if (i == ROI_Contours[2].size() - 49)
+					cc1 = ROI_Contours[2].size() - 49;
+		}
+
+
+		for (int i = ROI_Contours[3].size() - 2; i > ROI_Contours[3].size() - 50; i--)
+		{
+			int t0 = abs(Contours[3][i].y - Contours[3][i + 1].y);
+			int t1 = abs(Contours[3][i].y - (p_block->B).y);
+			if (t1 < 30){
+				dd1 = i;	break;
+			}
+			else
+				if (i == ROI_Contours[3].size() - 49)
+					dd1 = ROI_Contours[3].size() - 49;
+		}
+	}
+
+	else  // 瓷砖向左歪斜
+	{
+		aa = 0; bb = 0;	cc1 = ROI_Contours[2].size();	dd1 = ROI_Contours[3].size();
+		for (int i = ROI_Contours[0].size() - 2; i > ROI_Contours[0].size() - 50; i--)
+		{
+			if (abs(Contours[0][i].x - (p_block->D).x) < 30){
+				aa1 = i;		break;
+			}
+			else
+				if (i == ROI_Contours[0].size() - 49)	aa1 = ROI_Contours[0].size() - 49;
+		}
+
+		for (int i = ROI_Contours[1].size() - 2; i > ROI_Contours[1].size() - 50; i--)
+		{
+			if (abs(Contours[1][i].y - (p_block->C).y) < 30){ bb1 = i;		break; }
+			else
+				if (i == ROI_Contours[1].size() - 49)	bb1 = ROI_Contours[1].size() - 49;
+		}
+
+		for (int i = 0; i <50; i++)
+		{
+			if (abs(Contours[2][i].x - (p_block->B).x) < 30)	{
+				cc = i;		break;
+			}
+			else
+				if (i == 49)
+					cc = 49;
+		}
+
+
+		for (int i = 0; i <50; i++)
+		{
+			if (abs(Contours[3][i].y - (p_block->A).y)<30)	{
+				dd = i;		break;
+			}
+			else
+				if (i == 49)
+					dd = 49;
+		}
+	}
+
+
+	// 崩边检测
+	for (int index = 0; index < ROI_Contours.size(); index++)
+	{
+		int xp = 0, yp = 0;
+		int st = 0, et = ROI_Contours[index].size();;
+		switch (index)
+		{
+		case 0:	st = aa;	 et = aa1;	xp = xleft;	yp = yleft;	break;
+		case 1:	st = bb;	 et = bb1;	xp = xdown;	yp = ydown;	break;
+		case 2:	st = cc;     et = cc1;	xp = xright;	yp = yright;	break;
+		case 3:	st = dd;	 et = dd1;	xp = xup;	yp = yup;	break;
+		}
+
+
+
+		for (int i = st; i < et; i += simple)  // 间隔simple个点采样检测
+		{
+			int tt = ROI_Contours[index][i].x;
+			int tt1 = ROI_Contours[index][i].y;
+			starter = st;	ender = 0;
+			int dist = DistanceDetector(ROI_Contours[index][i], line_roi[index]);
+			if (dist >= distance_threld)
+			{
+				if (i < st + 20)
+					starter = 0;
+				else
+					starter = i - 19;
+				if (starter > ROI_Contours[index].size() - 30)
+					ender = ROI_Contours[index].size() - 1;
+				else
+					for (int q = i + 5; q < ROI_Contours[index].size(); q += 5)
+					{
+						int dist = DistanceDetector(ROI_Contours[index][q], line_roi[index]);
+						if (dist < distance_threld)
+						{
+							ender = q + 20;
+							i = q + 20;
+							if (i>ROI_Contours[index].size() - 7)
+							{
+								i = ROI_Contours[index].size() - 1;
+								ender = ROI_Contours[index].size() - 1;
+							}
+							break;
+						}
+					}
+				if ((ender - starter > 39 + distance_threld) || (starter == st) || (ender == ROI_Contours[index].size() - 1))
+				{
+					/////////////////////////////////////////////////////////////////
+					//cv::circle(ROI[index], ROI_Contours[index][starter + (ender - starter) / 2], (ender - starter) / 2, Scalar(255));
+					/////////////////////////////////////////////////////////////////
+					int flag = 0;
+					int edge_deep = 0;
+					for (int a = starter; a < ender; a++)
+					{
+						int dist = DistanceDetector(ROI_Contours[index][a], line_roi[index]);
+						if (edge_deep < dist)
+							edge_deep = dist;
+						if (dist >= distance_threld)
+						{
+							int tt = ROI_Contours[index][a].x;
+							int tt1 = ROI_Contours[index][a].y;
+							flag++;
+						}
+					}
+
+					if (flag > Edge_threld)
+					{
+						flag = 0;
+						// 边角判别
+						Point location;
+						location.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
+						location.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
+						int length = (ender - starter);
+
+						int current = index;
+						int next = index + 1;
+						if (next == 4) next = 0;
+						double corner_distance_fir = sqrt(pow((location.x - corner[index].x), 2) + pow((location.y - corner[index].y), 2)) - length / 2;
+						double corner_distance_sec = sqrt(pow((location.x - corner[next].x), 2) + pow((location.y - corner[next].y), 2)) - length / 2;
+						if (corner_distance_fir < 10 || corner_distance_sec < 10)
+						{
+							Faults::BrokenCorner bc;
+							bc.position = location;
+							if (current % 2)
+							{
+								bc.width = length;
+								bc.length = edge_deep;
+							}
+							else
+							{
+								bc.length = length;
+								bc.width = edge_deep;
+							}
+							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
+							p_faults->BrokenCorners.push_back(bc);
+							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
+							break;
+						}
+						else
+						{
+							Faults::BrokenEdge be;
+							/*Faults fs;*/
+							be.position.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
+							be.position.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
+							if (index % 2)
+							{
+								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_X())*/;
+								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_Y())*/;
+							}
+							else
+							{
+								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_Y())*/;
+								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
+							}
+
+							p_faults->BrokenEdges.push_back(be);
+							cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//cout << "崩边检测time=" << t << endl;
+	//cout << "start time= " << ((double)cv::getTickCount() - t2) / cv::getTickFrequency() << endl;
+}
 void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B)
 {
 	if (EdgeIndex % 2)
@@ -71,10 +457,10 @@ void EdgeDetector::PointOfIntersection(vector<Vec4f>FitLine_Aggregate, vector<Po
 
 int EdgeDetector::Distamce_MaxTabel(vector<float> Distance)
 {
-	float Temp = 0;
+	float Temp = -1;
 	for (int DistanceIndex = 0; DistanceIndex < Distance.size(); DistanceIndex++)
 	{
-		if (Temp < Distance[DistanceIndex])
+		if (Temp <= Distance[DistanceIndex])
 		{
 			Temp = Distance[DistanceIndex];
 			Tabel = DistanceIndex;
@@ -308,10 +694,10 @@ void EdgeDetector::Merge_Defects(vector<Point3f> &Defects)
 
 void EdgeDetector::Blocks_Defects(vector<Mat> roi, vector<Vec4f> line_1, vector<Mat> &Blocks, vector<Point3f> &local_)
 {
-	int ylA = (block->A).y - yleft, ylD = (block->D).y - yleft;
-	int xdD = (block->D).x - xdown, xdC = (block->C).x - xdown;
-	int yrB = (block->B).y - yright, yrC = (block->C).y - yright;
-	int xuA = (block->A).x - xup, xuB = (block->B).x - xup;
+	int ylA = (p_block->A).y - yleft, ylD = (p_block->D).y - yleft;
+	int xdD = (p_block->D).x - xdown, xdC = (p_block->C).x - xdown;
+	int yrB = (p_block->B).y - yright, yrC = (p_block->C).y - yright;
+	int xuA = (p_block->A).x - xup, xuB = (p_block->B).x - xup;
 	int st = 0, st1 = 0;
 	int fir = 0, las = 0, p = 0;
 	int xp = 0, yp = 0;
@@ -405,379 +791,42 @@ void EdgeDetector::Blocks_Defects(vector<Mat> roi, vector<Vec4f> line_1, vector<
 
 }
 
-EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
+
+
+void EdgeDetector::RectAdjust(cv::Mat img,int &x, int& y, int& width, int& height)
 {
-	block = _block;
-	faults = _faults;
+	int imgwidth = img.size().width;
+	int imgheight = img.size().height;
+	if (x < 0)
+	{
+		x = 0;
+	}
+	else if (x >= imgwidth)
+	{
+		x = imgwidth - width - 1;
+	}
 
-	src = img;
+	if (y < 0)
+	{
+		y = 0;
+	}
+	else if (y >= imgheight)
+	{
+		y = imgheight - height - 1;
+	}
 
+	if (x + width > imgwidth)
+	{
+		x = (imgwidth - width);
+	}
 
-	A = block->A;
-
-	B = block->B;
-
-	C = block->C;
-
-	D = block->D;
-
-	xleft = (A.x - abs(A.x - D.x) - 100>0 ? (A.x - abs(A.x - D.x) - 100) : 0), yleft = A.y - 100, left_height = D.y - A.y + 200, left_width = 2 * abs(A.x - D.x) + 200;
-	xright = B.x - abs(B.x - C.x) - 100, yright = B.y - 100, right_height = C.y - B.y + 200, right_width = min(2 * abs(B.x - C.x) + 200, 4096 - B.x + abs(B.x - C.x));
-	xup = A.x - 100, yup = (A.y - abs(A.y - B.y) - 100>0 ? (A.y - abs(A.y - B.y) - 100) : 0), up_width = B.x - A.x + 200, up_height = 2 * abs(A.y - B.y) + 200;
-	xdown = D.x - 100, ydown = D.y - abs(D.y - C.y) - 100, down_width = C.x - D.x + 200, down_height = min(2 * abs(D.y - C.y) + 200, 11000 - D.y + abs(D.y - C.y));
-
-	src(Rect(xleft, yleft, left_width, left_height)).copyTo(leftROI);
-	if (leftROI.channels() == 3)
-		cvtColor(leftROI, leftROI, CV_BGR2GRAY);
-	src(Rect(xright, yright, right_width, right_height)).copyTo(rightROI);
-	if (rightROI.channels() == 3)
-		cvtColor(rightROI, rightROI, CV_BGR2GRAY);
-	src(Rect(xup, yup, up_width, up_height)).copyTo(upROI);
-	if (upROI.channels() == 3)
-		cvtColor(upROI, upROI, CV_BGR2GRAY);
-	src(Rect(xdown, ydown, down_width, down_height)).copyTo(downROI);
-	if (downROI.channels() == 3)
-		cvtColor(downROI, downROI, CV_BGR2GRAY);
-
-
-	Mat leftROI1, rightROI1, upROI1, downROI1;
-	leftROI.copyTo(leftROI1);
-	rightROI.copyTo(rightROI1);
-	upROI.copyTo(upROI1);
-	downROI.copyTo(downROI1);
-	/*leftROI=src(Rect(xleft, yleft, left_width, left_height));
-	rightROI=src(Rect(xright, yright, right_width, right_height));
-	upROI=src(Rect(xup, yup, up_width, up_height));
-	downROI=src(Rect(xdown, ydown, down_width, down_height));*/
-
-	/*imwrite("C:\\Users\\43597_000\\Desktop\\leftroi.jpg", leftROI);
-	imwrite("C:\\Users\\43597_000\\Desktop\\rightroi.jpg", rightROI);
-	imwrite("C:\\Users\\43597_000\\Desktop\\uproi.jpg", upROI);
-	imwrite("C:\\Users\\43597_000\\Desktop\\downroi.jpg", downROI);*/
-
-	ROI.push_back(leftROI);
-	ROI.push_back(downROI);
-	ROI.push_back(rightROI);
-	ROI.push_back(upROI);
-
-	ROI1.push_back(leftROI1);
-	ROI1.push_back(downROI1);
-	ROI1.push_back(rightROI1);
-	ROI1.push_back(upROI1);
-
-
-}
-
-EdgeDetector::~EdgeDetector()
-{
-
+	if (y + height > imgheight)
+	{
+		y = (imgheight - height);
+	}
 }
 
 
-void EdgeDetector::start()
-{
-	/*double t2 = (double)cv::getTickCount();
 
-	double t = (double)cv::getTickCount();*/
-	// 预处理
-	for (int i = 0; i < ROI.size(); i++)
-	{
-		Dynamic_range(ROI[i]);  
-	}
-	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "预处理time=" << t << "\t";
-
-	t = (double)cv::getTickCount();*/
-	// 获取边缘
-	vector<vector<Point>> Contours;// 原图的边缘坐标
-	vector<vector<Point>> ROI_Contours; // ROI上的边缘坐标
-	Find_contours(ROI, Contours, ROI_Contours); // 找到的边缘对应于原图和ROI分别保存
-	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "获取边缘time=" << t << "\t";
-
-
-	t = (double)cv::getTickCount();*/
-	// 取边缘样点用于拟合
-	vector<vector<Point>> Fit_contours; // 存储样点用于拟合
-
-	for (int i = 0; i < ROI_Contours.size(); i++)
-	{
-		vector<Point> tm;
-		for (int j = 50; j < ROI_Contours[i].size() - 50; j = j + 50) // 每隔50个点取一个
-		{
-			tm.push_back(ROI_Contours[i][j]);
-		}
-		Fit_contours.push_back(tm);
-	}
-	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "取边缘样点用于拟合time=" << t << "\t";
-
-
-	t = (double)cv::getTickCount();*/
-	// 边缘直线拟合
-	vector<Vec4f> line_;   // 拟合后原图上的直线
-	vector<Vec4f> line_roi; // 拟合后roi上的直线
-	Vec4f Fit_Line;
-	FitLine(Fit_contours, line_, line_roi, Fit_Line);	 // 直线拟合
-	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "边缘直线拟合time=" << t << "\t";
-
-	t = (double)cv::getTickCount();*/
-	// 求出四个交点A\B\C\D
-	vector<Point> Point_of_Intersection;
-	PointOfIntersection(line_, Point_of_Intersection);
-	block->A = Point_of_Intersection[3];
-	block->B = Point_of_Intersection[2];
-	block->C = Point_of_Intersection[1];
-	block->D = Point_of_Intersection[0];
-	
-	vector<Point> corner;
-	corner.push_back(block->A);
-	corner.push_back(block->D);
-	corner.push_back(block->C);
-	corner.push_back(block->B);
-
-	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	cout << "求出四个交点time=" << t << "\t";*/
-
-	/*Mat image1(src.size(), src.type(),Scalar(0));
-	for (int i = 0; i < Contours.size(); i++)
-	{
-		for (int j = 0; j < Contours[i].size(); j++)
-		{
-			image1.at<uchar>(Contours[i][j]) = 255;
-		}
-	}*/
-
-	
-	/*t = (double)cv::getTickCount();*/
-	// 崩边检测
-	int starter = 0, ender = 0; // 一个边缘点集合的起始点和结束点
-	int aa = 0, bb = 0, cc = 0, dd = 0;
-	int aa1 = 0, bb1 = 0, cc1 = 0, dd1 = 0;
-
-	// 瓷砖向右歪斜
-	if ((block->A).y > (block->B).y)
-	{
-		aa1 = ROI_Contours[0].size();	bb1 = ROI_Contours[1].size();	cc = 0;	dd = 0;
-		for (int i = 0; i < 50; i++)
-		{
-			int t0 = abs(Contours[0][i].x - Contours[0][i + 1].x);
-			int t1 = abs(Contours[0][i].x - (block->A).x);
-			if (t1 < 30){
-				aa = i;		break;
-			}
-			else
-			if (i == 49)	aa = 49;
-		}
-
-		for (int i = 0; i < 50; i++)
-		{
-			int t0 = abs(Contours[1][i].y - Contours[1][i + 1].y);
-			int t1 = abs(Contours[1][i].y - (block->D).y);
-			if (t1 < 30){
-				bb = i;	break;
-			}
-			else
-			if (i == 49)	bb = 49;
-		}
-
-		for (int i = ROI_Contours[2].size() - 2; i > ROI_Contours[2].size() - 50; i--)
-		{
-			int t0 = abs(Contours[2][i].x - Contours[2][i + 1].x);
-			int t1 = abs(Contours[2][i].x - (block->C).x);
-			if (abs(Contours[2][i].x - (block->C).x) < 30)	{
-				cc1 = i;		break;
-			}
-			else
-			if (i == ROI_Contours[2].size() - 49)
-				cc1 = ROI_Contours[2].size() - 49;
-		}
-
-
-		for (int i = ROI_Contours[3].size() - 2; i > ROI_Contours[3].size() - 50; i--)
-		{
-			int t0 = abs(Contours[3][i].y - Contours[3][i + 1].y);
-			int t1 = abs(Contours[3][i].y - (block->B).y);
-			if (t1 < 30){
-				dd1 = i;	break;
-			}
-			else
-			if (i == ROI_Contours[3].size() - 49)
-				dd1 = ROI_Contours[3].size() - 49;
-		}
-	}
-
-	else  // 瓷砖向左歪斜
-	{
-		aa = 0; bb = 0;	cc1 = ROI_Contours[2].size();	dd1 = ROI_Contours[3].size();
-		for (int i = ROI_Contours[0].size() - 2; i > ROI_Contours[0].size() - 50; i--)
-		{
-			if (abs(Contours[0][i].x - (block->D).x) < 30){
-				aa1 = i;		break;
-			}
-			else
-			if (i == ROI_Contours[0].size() - 49)	aa1 = ROI_Contours[0].size() - 49;
-		}
-
-		for (int i = ROI_Contours[1].size() - 2; i > ROI_Contours[1].size() - 50; i--)
-		{
-			if (abs(Contours[1][i].y - (block->C).y) < 30){ bb1 = i;		break; }
-			else
-			if (i == ROI_Contours[1].size() - 49)	bb1 = ROI_Contours[1].size() - 49;
-		}
-
-		for (int i = 0; i <50; i++)
-		{
-			if (abs(Contours[2][i].x - (block->B).x) < 30)	{
-				cc = i;		break;
-			}
-			else
-			if (i == 49)
-				cc = 49;
-		}
-
-
-		for (int i = 0; i <50; i++)
-		{
-			if (abs(Contours[3][i].y - (block->A).y)<30)	{
-				dd = i;		break;
-			}
-			else
-			if (i == 49)
-				dd = 49;
-		}
-	}
-
-
-	// 崩边检测
-	for (int index = 0; index < ROI_Contours.size(); index++)
-	{
-		int xp = 0, yp = 0;
-		int st = 0, et = ROI_Contours[index].size();;
-		switch (index)
-		{
-		case 0:	st = aa;	 et = aa1;	xp = xleft;	yp = yleft;	break;
-		case 1:	st = bb;	 et = bb1;	xp = xdown;	yp = ydown;	break;
-		case 2:	st = cc;     et = cc1;	xp = xright;	yp = yright;	break;
-		case 3:	st = dd;	 et = dd1;	xp = xup;	yp = yup;	break;
-		}
-
-		
-
-		for (int i = st; i < et; i += simple)  // 间隔simple个点采样检测
-		{
-			int tt = ROI_Contours[index][i].x;
-			int tt1 = ROI_Contours[index][i].y;
-			starter = st;	ender = 0;
-			int dist = DistanceDetector(ROI_Contours[index][i], line_roi[index]);
-			if (dist >= distance_threld)
-			{
-				if (i < st + 20)
-					starter = 0;
-				else
-					starter = i - 19;
-				if (starter > ROI_Contours[index].size() - 30)
-					ender = ROI_Contours[index].size() - 1;
-				else
-				for (int q = i + 5; q < ROI_Contours[index].size(); q += 5)
-				{
-					int dist = DistanceDetector(ROI_Contours[index][q], line_roi[index]);
-					if (dist < distance_threld)
-					{
-						ender = q + 20;
-						i = q + 20;
-						if (i>ROI_Contours[index].size() - 7)
-						{
-							i = ROI_Contours[index].size() - 1;
-							ender = ROI_Contours[index].size() - 1;
-						}
-						break;
-					}
-				}
-				if ((ender - starter > 39 + distance_threld) || (starter == st) || (ender == ROI_Contours[index].size() - 1))
-				{
-					/////////////////////////////////////////////////////////////////
-					//cv::circle(ROI[index], ROI_Contours[index][starter + (ender - starter) / 2], (ender - starter) / 2, Scalar(255));
-					/////////////////////////////////////////////////////////////////
-					int flag = 0;
-					int edge_deep = 0;
-					for (int a = starter; a < ender; a++)
-					{
-						int dist = DistanceDetector(ROI_Contours[index][a], line_roi[index]);
-						if (edge_deep < dist)
-							edge_deep = dist;
-						if (dist >= distance_threld)
-						{
-							int tt = ROI_Contours[index][a].x;
-							int tt1 = ROI_Contours[index][a].y;
-							flag++;
-						}
-					}
-
-					if (flag > Edge_threld)
-					{
-						flag = 0;
-						// 边角判别
-						Point location;
-						location.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
-						location.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
-						int length = (ender - starter);
-
-						int current = index;
-						int next = index + 1;
-						if (next == 4) next = 0;
-						double corner_distance_fir = sqrt(pow((location.x - corner[index].x), 2) + pow((location.y - corner[index].y), 2)) - length / 2;
-						double corner_distance_sec = sqrt(pow((location.x - corner[next].x), 2) + pow((location.y - corner[next].y), 2)) - length / 2;
-						if (corner_distance_fir < 10 || corner_distance_sec < 10)
-						{
-							Faults::BrokenCorner bc;
-							bc.position = location;
-							if (current % 2)
-							{
-								bc.width = length;
-								bc.length = edge_deep;
-							}
-							else
-							{
-								bc.length = length;
-								bc.width = edge_deep;
-							}
-							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
-							faults->BrokenCorners.push_back(bc);
-							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
-							break;
-						}
-						else
-						{
-							Faults::BrokenEdge be;
-							/*Faults fs;*/
-							be.position.x = ROI_Contours[index][starter + (ender - starter) / 2].x + xp;
-							be.position.y = ROI_Contours[index][starter + (ender - starter) / 2].y + yp;
-							if (index % 2)
-							{
-								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_X())*/;
-								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_Y())*/;
-							}
-
-							else
-							{
-								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_Y())*/;
-								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
-							}
-
-							faults->BrokenEdges.push_back(be);
-							cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	//cout << "崩边检测time=" << t << endl;
-	//cout << "start time= " << ((double)cv::getTickCount() - t2) / cv::getTickFrequency() << endl;
-}
 
 

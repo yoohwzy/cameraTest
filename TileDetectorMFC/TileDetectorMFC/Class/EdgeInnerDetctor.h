@@ -21,10 +21,14 @@ class EdgeInnerDetctor
 {
 public:
 	EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults);
-	~EdgeInnerDetctor();
+	~EdgeInnerDetctor()
+	{
+		p_block = NULL;
+		p_faults = NULL;
+	};
 private:
-	Block *block;
-	Faults *faults;
+	Block *p_block =  NULL;
+	Faults *p_faults = NULL;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
 
 	double getFrechetDistance(vector<double> lineA, vector<double> lineB);

@@ -1,23 +1,25 @@
-#include "MicroDisplay.h"
+#include "E2VCamera.h"
 
 
-MicroDisplay::MicroDisplay(GrabbingBuffer *gb, int frameCount, int width, int colorType, int boardID, int Camport)
+E2VCamera::E2VCamera(int frameCount, int width, int frameTimeUS, int colorType, int boardID, int Camport)
 {
 	_width = width;
 	_frameCount = frameCount;
+	_frameTimeUS = frameTimeUS;
 	_colorType = colorType;
-	_gb = gb;
 	nBoard = boardID;
 	camPort = Camport;
+	
+	init_fg();
+
+	//caculateForTimes();
 }
-MicroDisplay::~MicroDisplay()
+E2VCamera::~E2VCamera()
 {
 	release();
 }
-void MicroDisplay::Capture()
+void E2VCamera::Capture(GrabbingBuffer *gb)
 {
-	init_fg();
-
 	//acquire one image per subbuffer
 	//1.fg
 	//2.采集卡口
@@ -33,10 +35,11 @@ void MicroDisplay::Capture()
 	frameindex_t last_pic_nr = 0;
 	frameindex_t cur_pic_nr;
 
-
 	cv::Mat OriginalImage;
+	//printf_globle("while (fcount < frameCount)");
 	while (fcount < _frameCount)
 	{
+		double t1 = (double)cv::getTickCount();//采图用时 微秒
 		cur_pic_nr = Fg_getLastPicNumberBlockingEx(fg, last_pic_nr + 1, camPort, 100, memHandle);
 		if (cur_pic_nr < 0)
 		{
@@ -50,30 +53,26 @@ void MicroDisplay::Capture()
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8U, bytePtr);
 		else
 			OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
-		_gb->AddFrame(OriginalImage);
+		gb->AddFrame(OriginalImage);
+		t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
 
-		//同步速度，保证10000行图像1秒采完
-		//若不加循环，则0.45秒采完
-		//23000 0.995
-		//24000 1.0255
-		//26000 1.0546
-		for (int i = 0; i < 36000; i++)
-			;
 
+		//等待满_frameTimeUS
+		if (t1 < _frameTimeUS)
+		{
+			double t2 = (double)cv::getTickCount();
+			double tickCountSpan = (_frameTimeUS - t1) * cv::getTickFrequency() / 1000000;
+			while (((double)cv::getTickCount() - t2) < tickCountSpan)
+			{
+				//stringstream ss;
+				//ss << ((double)cv::getTickCount() - t2) << " " << tickCountSpan << endl;
+				//printf_globle(ss.str());
+			}
+		}
 		fcount++;
 	}
-	release();
-}
 
-
-
-
-bool MicroDisplay::TestCam()
-{
-	MicroDisplay *md = new MicroDisplay(NULL, 1, 100);
-	md->test();
-	delete md;
-	return true;
+	Fg_stopAcquireEx(fg, camPort, memHandle, 0);
 }
 
 
@@ -81,13 +80,13 @@ bool MicroDisplay::TestCam()
 
 
 /**********************私有*********************/
-void MicroDisplay::test()
+void E2VCamera::test()
 {
 	init_fg();
 	release();
 }
 
-void MicroDisplay::init_fg()
+void E2VCamera::init_fg()
 {
 	// 初始化FG
 	// Initialization of the microEnable frame grabber
@@ -146,7 +145,7 @@ void MicroDisplay::init_fg()
 }
 
 
-int MicroDisplay::createDiplayBuffer()
+int E2VCamera::createDiplayBuffer()
 {
 	int format = 0;
 	Fg_getParameter(fg, FG_FORMAT, &format, camPort);
@@ -181,7 +180,7 @@ int MicroDisplay::createDiplayBuffer()
 	return dispId0;
 }
 
-void MicroDisplay::memoryAllocation()
+void E2VCamera::memoryAllocation()
 {
 	// Memory allocation
 	int format = 0;
@@ -203,7 +202,7 @@ void MicroDisplay::memoryAllocation()
 	}
 }
 
-void MicroDisplay::release()
+void E2VCamera::release()
 {
 	if (memHandle != NULL)
 	{
@@ -218,7 +217,7 @@ void MicroDisplay::release()
 }
 
 //报错->退出
-void MicroDisplay::errorMessageWait()
+void E2VCamera::errorMessageWait()
 {
 	int error = Fg_getLastErrorNumber(fg);
 	const char*	err_str = Fg_getLastErrorDescription(fg);
@@ -229,7 +228,7 @@ void MicroDisplay::errorMessageWait()
 
 
 #pragma region 调试用函数
-int MicroDisplay::getNrOfBoards()
+int E2VCamera::getNrOfBoards()
 {
 	int nrOfBoards = 0;
 	char buffer[256];
@@ -243,7 +242,7 @@ int MicroDisplay::getNrOfBoards()
 	return nrOfBoards;
 
 }
-int MicroDisplay::getBoardInfo()
+int E2VCamera::getBoardInfo()
 {
 	int boardType;
 	int i = 0;

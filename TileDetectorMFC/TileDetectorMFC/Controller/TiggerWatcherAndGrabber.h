@@ -9,20 +9,42 @@
 #include "../globle_var.h"
 
 
-#include "../Class/Camera/MicroDisplay.h"
-#include "../Class/Camera/VirtualCamera.h"
+#include "../Class/Camera/E2VCamera.h"
+#include "../Class/Camera/VirtualCameraPre.h"
+//#include "../Class/Camera/MicroDisplay.h"
+//#include "../Class/Camera/VirtualCamera.h"
 #include "../Class/BufferStorage.h"
 #include "../Class/Base/Block.h"
 
+#include "../Class/IOCard/mc100USBCard.h"
+#include "../Class/IOCard/PCI1761.h"
+
 #include <thread>
-#include "../mc100.h"
 
 class TiggerWatcherAndGrabber
 {
 public:
 	//参数1 MFC窗口句柄 参数2 虚拟相机照片名称
 	TiggerWatcherAndGrabber(HWND _hwnd = NULL,string virtualImg = "");
-	~TiggerWatcherAndGrabber();
+	~TiggerWatcherAndGrabber()
+	{
+		if (p_gb != NULL)
+		{
+			delete p_gb;
+			p_gb = NULL;
+		}
+		if (p_e2v != NULL)
+		{
+			delete p_e2v;
+			p_e2v = NULL;
+		}
+		if (p_vc != NULL)
+		{
+			delete p_vc;
+			p_vc = NULL;
+		}
+		printf_globle("TiggerWatcherAndGrabber unload!\n");
+	};
 
 	void StartWatch();
 	//开始一次定标，完成后自动停止
@@ -42,27 +64,23 @@ public:
 	cv::Mat OriginalImage;
 	//三行叠加后的图像
 	cv::Mat Image;
+	GrabbingBuffer *p_gb = NULL;
 private:
 	HWND hwnd;
-	GrabbingBuffer *gb = NULL;
-	
-	std::thread *t_watcher = NULL;
+	E2VCamera *p_e2v = NULL;
+	VirtualCameraPre *p_vc = NULL;
+
+	std::thread *p_t_watcher = NULL;
 
 	bool USING_VIRTUAL_CAMERA = false;
 	//手动触发标志
 	bool BeManualTiggered = false;
-	bool BeAutoTiggered()
-	{ 
-		if (mc100_open(0) >= 0)
-			return mc100_check_pin(0, (MC100_PORTA << 4) | 0) != 1;
-		else
-			return false;
-	};
+	//mc100USBCard mc100;
+	PCI1761 pci1761;
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;
 	
-	string _virtualImg = "";//虚拟相机文件名
 
 	void watcherThread();
 	//采图进程

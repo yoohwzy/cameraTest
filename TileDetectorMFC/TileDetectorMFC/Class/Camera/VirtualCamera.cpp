@@ -6,7 +6,7 @@ VirtualCamera::VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, stri
 	_width = width;
 	_frameCount = frameCount;
 	_colorType = colorType;
-	_gb = gb;
+	p_gb = gb;
 
 	stringstream ss;
 	if (imgname.find(":\\", 0) == std::string::npos)
@@ -35,10 +35,6 @@ VirtualCamera::VirtualCamera(GrabbingBuffer *gb, int frameCount, int width, stri
 		cv::resize(buffer, buffer, cv::Size(_width, _frameCount));
 	}
 }
-VirtualCamera::~VirtualCamera()
-{
-	buffer.release();
-}
 void VirtualCamera::Capture()
 {
 	//cv::Mat OriginalImage;
@@ -53,7 +49,7 @@ void VirtualCamera::Capture()
 	while (fcount < _frameCount)
 	{
 		OriginalImage = buffer(cv::Rect(0, fcount, _width, _frameHeight));
-		_gb->AddFrame(OriginalImage);
+		p_gb->AddFrame(OriginalImage);
 		fcount++;
 	}
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

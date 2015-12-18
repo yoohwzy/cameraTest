@@ -8,10 +8,6 @@ Block::Block(int _imageWidth, int _imageHeight)
 }
 
 
-Block::~Block()
-{
-}
-
 bool Block::Lines2ABCD()
 {
 	//A
@@ -100,6 +96,7 @@ cv::Point Block::GetPonintByX(int x, Line *l)
 	p.x = x;
 	p.y = (int)(l->k*(x - l->x0)) + l->y0;
 
+	l = NULL;
 	return p;
 }
 cv::Point Block::GetPonintByY(int y, Line *l)
@@ -109,5 +106,6 @@ cv::Point Block::GetPonintByY(int y, Line *l)
 	p.y = y;
 	p.x = (double)(y - l->y0) / l->k + l->x0;
 
+	l = NULL;
 	return p;
 }
