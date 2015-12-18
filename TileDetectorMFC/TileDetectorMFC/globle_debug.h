@@ -65,7 +65,8 @@ static void printf_globle(stringstream ss)
 
 
 
-#include <windows.h>
+#include <afxwin.h>
+//#include <windows.h>
 //当发生不可逆转的错误时，调用本程序报错，退出。
 static void ExitWithError(std::string errorInfo,int errorCode = 1){
 	printf_globle(errorInfo);
