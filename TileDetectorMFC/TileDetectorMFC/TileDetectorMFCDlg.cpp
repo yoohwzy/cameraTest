@@ -328,6 +328,20 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		m_Info += _T("保存完成\r\n");
 		UpdateData(false);
 	}
+
+
+	//异步保存底片
+	//int index = p_twag->GrabbingIndex;
+	//cv::Mat img = p_twag->OriginalImage.clone();
+	//if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	//{
+	//	thread t_saveimg = thread([index,img]{
+	//		stringstream ss;
+	//		ss << "samples/" << index << "_o原图.jpg";
+	//		cv::imwrite(ss.str(), img);
+	//	});
+	//	t_saveimg.detach();
+	//}
 	p_twag->OriginalImage.release();
 	return 1;
 }
