@@ -15,19 +15,22 @@ using namespace Automation::BDaq;
 class PCI1761
 {
 public:
-	PCI1761(){};
+	PCI1761(){ entityCount++; };
 	~PCI1761(){
 		Sleep(50);
-
-		if (PCI1761::instantDiCtrl != NULL)
+		entityCount--;
+		if (entityCount == 0)
 		{
-			PCI1761::instantDiCtrl->Dispose();
-			PCI1761::instantDiCtrl = NULL;
-		}
-		if (PCI1761::instantDoCtrl != NULL)
-		{
-			PCI1761::instantDoCtrl->Dispose();
-			PCI1761::instantDoCtrl = NULL;
+			if (PCI1761::instantDiCtrl != NULL)
+			{
+				PCI1761::instantDiCtrl->Dispose();
+				PCI1761::instantDiCtrl = NULL;
+			}
+			if (PCI1761::instantDoCtrl != NULL)
+			{
+				PCI1761::instantDoCtrl->Dispose();
+				PCI1761::instantDoCtrl = NULL;
+			}
 		}
 	};
 
@@ -151,6 +154,7 @@ public:
 
 
 private:
+	static int entityCount;//有几个实例在运行，只有为0时才释放1761句柄
 	static bool hasOpened;
 
 	static InstantDiCtrl *instantDiCtrl;//Create a 'InstantDiCtrl' for DI function.
