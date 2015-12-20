@@ -12,7 +12,6 @@ using namespace Automation::BDaq;
 #define  deviceDescription  L"PCI-1761,BID#0"
 #endif 
 
-
 class PCI1761
 {
 public:
@@ -142,16 +141,16 @@ public:
 
 
 private:
+	static bool hasOpened;
 
+	static InstantDiCtrl *instantDiCtrl;//Create a 'InstantDiCtrl' for DI function.
+	static InstantDoCtrl *instantDoCtrl;//Create a instantDoCtrl for DO function.
 	const int readPort = 0;
-	bool hasOpened = false;
 
 	byte lastSignalIDI_RisingEdge = 0;
 	byte lastSignalIDI_TrailingEdge = 0;
 
 	byte bufferForR = 0;
-	InstantDiCtrl * instantDiCtrl = NULL;//Create a 'InstantDiCtrl' for DI function.
-	InstantDoCtrl * instantDoCtrl = NULL;//Create a instantDoCtrl for DO function.
 
 
 	//»ñÈ¡IDI XµÄ×´Ì¬

@@ -131,6 +131,7 @@
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\Pretreatment.h" />
     <ClInclude Include="Class\Processor.h" />
+    <ClInclude Include="Controller\ArmController.h" />
     <ClInclude Include="Controller\Consumer.h" />
     <ClInclude Include="Controller\TiggerWatcherAndGrabber.h" />
     <ClInclude Include="CvvImage.h" />
@@ -156,10 +157,12 @@
     <ClCompile Include="Class\EdgeInnerDetctor.cpp" />
     <ClCompile Include="Class\Helper\LogHelper.cpp" />
     <ClCompile Include="Class\Helper\SettingHelper.cpp" />
+    <ClCompile Include="Class\IOCard\PCI1761.cpp" />
     <ClCompile Include="Class\Judgement.cpp" />
     <ClCompile Include="Class\Measurer.cpp" />
     <ClCompile Include="Class\Pretreatment.cpp" />
     <ClCompile Include="Class\Processor.cpp" />
+    <ClCompile Include="Controller\ArmController.cpp" />
     <ClCompile Include="Controller\Consumer.cpp" />
     <ClCompile Include="Controller\TiggerWatcherAndGrabber.cpp" />
     <ClCompile Include="CvvImage.cpp" />

@@ -138,6 +138,9 @@
     <ClInclude Include="Class\Camera\VirtualCameraPre.h">
       <Filter>Class\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Controller\ArmController.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -205,6 +208,12 @@
     </ClCompile>
     <ClCompile Include="Class\Camera\VirtualCameraPre.cpp">
       <Filter>Class\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\IOCard\PCI1761.cpp">
+      <Filter>Class\IOCard</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\ArmController.cpp">
+      <Filter>Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
