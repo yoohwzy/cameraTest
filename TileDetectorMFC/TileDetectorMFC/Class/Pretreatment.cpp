@@ -85,7 +85,7 @@ Mat Grow(Mat &image, Point seedpoint, double th_v)//区域生长
 	seedq.push_back(seedpoint);
 	while (!seedq.empty())
 	{
-		Point growpoint = seedq.back();
+		Point growpoint = seedq[seedq.size()-1];
 		seedq.pop_back();
 		uchar* data = HyImg.ptr<uchar>(growpoint.y);//灰度图本行首地址
 		uchar* dataT = SameImg.ptr<uchar>(growpoint.y);//二值图本行首地址
@@ -405,11 +405,6 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
-	Mat CannyImg, BlurImg;
-	resize(LMidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
-	bilateralFilter(CannyImg, BlurImg, 6, 12, 3);
-	Canny(BlurImg, BlurImg, 5, 20);
-
 	vector<vector<cv::Point>> dilatecontours;
 	findContours(BlurImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
@@ -448,10 +443,28 @@ void Pretreatment::linedetect()
 		Mat waitImg = dilateImg(Rect(cannyrect));
 		if (!countNonZero(waitImg))
 			continue;
-		if (cannyrect.width < 50 && cannyrect.height < 50)
+		if ((cannyrect.width < 50 && cannyrect.height < 50) || cannyrect.width < 20 || cannyrect.height < 20)
 			continue;
 		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I1, 0);
 		if (matchlinepro> 1.0)
+			continue;
+		Mat I_rows_L = waitImg(Range(0, 1), Range(10, int(waitImg.cols*0.5)));//第一行左
+		Mat I_rows_R = waitImg(Range(0, 1), Range(int(waitImg.cols*0.5), waitImg.cols-10));//第一行右
+
+		Mat II_rows_L = waitImg(Range(waitImg.rows-1, waitImg.rows), Range(10, int(waitImg.cols*0.5)));//最后一行左
+		Mat II_rows_R = waitImg(Range(waitImg.rows-1, waitImg.rows), Range(int(waitImg.cols*0.5), waitImg.cols-10));//最后一行右
+
+		Mat I_cols_U = waitImg(Range(10, int(waitImg.rows*0.5)), Range(0, 1));//第一列上
+		Mat I_cols_D = waitImg(Range(int(waitImg.rows*0.5), waitImg.rows-10), Range(0, 1));//第一列下
+		Mat II_cols_U = waitImg(Range(10, int(waitImg.rows*0.5)), Range(waitImg.cols-1, waitImg.cols));//最后一列上
+		Mat II_cols_D = waitImg(Range(int(waitImg.rows*0.5), waitImg.rows-10), Range(waitImg.cols-1, waitImg.cols));//最后一列下
+		if (countNonZero(I_rows_L) != 0 && countNonZero(I_cols_U) != 0)
+			continue;
+		if (countNonZero(I_rows_R) != 0 && countNonZero(II_cols_U) != 0)
+			continue;
+		if (countNonZero(II_rows_L) != 0 && countNonZero(I_cols_D) != 0)
+			continue;
+		if (countNonZero(II_rows_R) != 0 && countNonZero(II_cols_D) != 0)
 			continue;
 		Faults::Scratch scratch;
 		scratch.position.x = 4 * cannyrect.x + 2 * cannyrect.width + recImg.x;
@@ -463,6 +476,18 @@ void Pretreatment::linedetect()
 	}
 }
 
+void Pretreatment::img2clone()
+{
+	PMidImg = MidImg.clone();
+	//LMidImg = PMidImg.clone();
+}
+
+void Pretreatment::img2zoom()
+{
+	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
+	bilateralFilter(CannyImg, BlurImg, 6, 12, 3);
+	Canny(BlurImg, BlurImg, 5, 20);
+}
 
 
 
@@ -491,11 +516,15 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	recImg.height -= 800;
 	MidImg = image(Rect(recImg));
 
+	std::thread imgzoom(std::mem_fn(&Pretreatment::img2zoom), this);
 
 	Mat MaskImg, Mask2CannyImg;
 	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
 	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
 	resize(MidImg, MaskImg, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
+
+	std::thread imgclone(std::mem_fn(&Pretreatment::img2clone), this);
+
 	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
 	Canny(MaskImg, MaskImg, 40, 50);
 	vector<vector<Point>> Maskcontours;
@@ -535,16 +564,21 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 
 	}
+	imgclone.join();
 
-	PMidImg = MidImg.clone();
-	LMidImg = MidImg.clone();
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
+
+	imgzoom.join();
+
 	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
+	/*auto tn = line.native_handle();
+	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
 	producer.join();
-	consumer.join();
 	line.join();
+	consumer.join();
+
 	needContour.clear();
 	dilateneedcontours.clear();
 	CneedContours.clear();
