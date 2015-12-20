@@ -178,9 +178,11 @@ string SettingHelper::getSectionName(Key key)
 		return "GRAB";
 	case SettingHelper::grab_frameTimeUS:
 		return "GRAB";
-	case SettingHelper::TIGGER_WaitTime:
+	case SettingHelper::TIGGER_CaptureWaitTime:
 		return "TIGGER";
 	case SettingHelper::TIGGER_HoldTime:
+		return "TIGGER";
+	case SettingHelper::TIGGER_ActionWaitTime:
 		return "TIGGER";
 	default:
 		break;
@@ -201,10 +203,12 @@ string SettingHelper::getKeyName(Key key)
 		return "GRAB_TimeMS";
 	case SettingHelper::grab_frameTimeUS:
 		return "grab_frameTimeUS";
-	case SettingHelper::TIGGER_WaitTime:
-		return "TIGGER_WaitTime";
+	case SettingHelper::TIGGER_CaptureWaitTime:
+		return "TIGGER_CaptureWaitTime";
 	case SettingHelper::TIGGER_HoldTime:
 		return "TIGGER_HoldTime";
+	case SettingHelper::TIGGER_ActionWaitTime:
+		return "TIGGER_ActionWaitTime";
 	default:
 		break;
 	}

@@ -100,3 +100,4 @@ Debug
 /生成图像样本/生成图像样本/samples/*.jpg
 /生成图像样本/生成图像样本/*.jpg
 /ModuleTest
+/TileDetectorMFC/TileDetectorMFC/*.aps

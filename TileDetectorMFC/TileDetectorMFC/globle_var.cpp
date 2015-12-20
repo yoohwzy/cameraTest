@@ -28,7 +28,8 @@ bool globle_var::InitSetting(bool isload)
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_MaxPics, FrameCount) &&
 			SettingHelper::GetKeyInt(SettingHelper::GRAB_Width, Width) &&
 			SettingHelper::GetKeyInt(SettingHelper::grab_frameTimeUS, FrameTimeUS) &&
-			SettingHelper::GetKeyInt(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS)
+			SettingHelper::GetKeyInt(SettingHelper::TIGGER_CaptureWaitTime, TiggerCaptureWaitTimeMS) &&
+			SettingHelper::GetKeyInt(SettingHelper::TIGGER_ActionWaitTime, TiggerActionWaitTimeMS)
 			)
 		{
 			GrabTimeMS = FrameTimeUS * FrameCount / 1000;
@@ -64,7 +65,8 @@ void globle_var::SaveSetting()
 	SettingHelper::AddKey(SettingHelper::GRAB_ColorType, ColorType == globle_var::RGB ? "RGB" : "Gray");
 	SettingHelper::AddKey(SettingHelper::grab_frameTimeUS, FrameTimeUS);
 	SettingHelper::AddKey(SettingHelper::GRAB_TimeMS, GrabTimeMS);
-	SettingHelper::AddKey(SettingHelper::TIGGER_WaitTime, TiggerWaitTimeMS);
+	SettingHelper::AddKey(SettingHelper::TIGGER_CaptureWaitTime, TiggerCaptureWaitTimeMS);
+	SettingHelper::AddKey(SettingHelper::TIGGER_ActionWaitTime, TiggerActionWaitTimeMS);
 }
 
 
@@ -75,7 +77,8 @@ void globle_var::SaveSetting()
 
 
 //BufferStorage globle_var::s = BufferStorage(FrameCount, Width);
-int globle_var::TiggerWaitTimeMS = 400;
+int globle_var::TiggerCaptureWaitTimeMS = 400;
+int globle_var::TiggerActionWaitTimeMS = 0;
 string globle_var::VirtualCameraFileName = "";
 
 int globle_var::Width = 0;					//Ã¿Ö¡¿í¶È

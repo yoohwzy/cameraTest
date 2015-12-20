@@ -181,10 +181,10 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 #endif
 
-			if (globle_var::TiggerWaitTimeMS > 0)
+			if (globle_var::TiggerCaptureWaitTimeMS > 0)
 			{
 				//触发后，等待砖进入拍摄区。
-				Sleep(globle_var::TiggerWaitTimeMS);
+				Sleep(globle_var::TiggerCaptureWaitTimeMS);
 
 #ifdef OUTPUT_TO_CONSOLE
 				t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();

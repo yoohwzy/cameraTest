@@ -20,8 +20,9 @@ public:
 		GRAB_ColorType,
 		GRAB_TimeMS,//拍摄时长（毫秒）
 		grab_frameTimeUS,//一帧的拍摄时长（微秒）只读
-		TIGGER_WaitTime,//触发后，延时多少毫妙开始采样
-		TIGGER_HoldTime //触发不应期，完成采样后，多少毫秒内无法再次触发采样
+		TIGGER_CaptureWaitTime,//触发后，延时多少毫妙开始采样
+		TIGGER_HoldTime, //触发不应期，完成采样后，多少毫秒内无法再次触发采样
+		TIGGER_ActionWaitTime //计算出需要机械臂动作后，等待多少毫秒机械臂才启动
 	};
 
 

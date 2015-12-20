@@ -24,7 +24,9 @@ public:
 
 
 	//触发器触发后 延时多少毫秒开始采集
-	static int TiggerWaitTimeMS;
+	static int TiggerCaptureWaitTimeMS;
+	//机械臂触发延时
+	static int TiggerActionWaitTimeMS;
 	//虚拟相机底片文件名，为""时使用真实相机
 	static string VirtualCameraFileName;
 

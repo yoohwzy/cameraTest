@@ -45,7 +45,9 @@ public:
 	// 采图时颜色类型 "RGB" or "Gray" 区分大小写
 	CString set_grabRGBType;
 	// 触发器触发后，等待多少毫秒再开始采集
-	int set_TiggerWaitTimeMS;
+	int set_TiggerCaptureWaitTimeMS;
+	// 机械臂延时
+	int set_TriggerActionWaitTime;
 	afx_msg void OnBnClickedCancel();
 	virtual BOOL OnInitDialog();
 	int set_grabTime;

@@ -16,8 +16,9 @@ SettingDlg::SettingDlg(CWnd* pParent /*=NULL*/)
 	, set_grabFrameCount(0)
 	, set_grabWidth(0)
 	, set_grabRGBType(_T(""))
-	, set_TiggerWaitTimeMS(0)
+	, set_TiggerCaptureWaitTimeMS(0)
 	, set_grabTime(0)
+	, set_TriggerActionWaitTime(0)
 {
 
 }
@@ -40,8 +41,10 @@ BOOL SettingDlg::OnInitDialog()
 	set_grabFrameCount = globle_var::FrameCount;
 	set_grabWidth = globle_var::Width;
 	set_grabRGBType = globle_var::ColorType == globle_var::RGB ? "RGB" : "Gray";
-	set_TiggerWaitTimeMS = globle_var::TiggerWaitTimeMS;
+	set_TiggerCaptureWaitTimeMS = globle_var::TiggerCaptureWaitTimeMS;
+	set_TriggerActionWaitTime = globle_var::TiggerActionWaitTimeMS;
 	set_grabTime = globle_var::GrabTimeMS;
+
 	UpdateData(false);
 	calculateFrameTime();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -60,9 +63,11 @@ void SettingDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, set_grabFrameCount, 1, 20000);
 	DDX_Text(pDX, IDC_TB_GrabWidth, set_grabWidth);
 	DDX_CBString(pDX, IDC_DDL_GrabRGBType, set_grabRGBType);
-	DDX_Text(pDX, IDC_TB_TiggerWaitMS, set_TiggerWaitTimeMS);
+	DDX_Text(pDX, IDC_TB_TiggerWaitMS, set_TiggerCaptureWaitTimeMS);
 	DDX_Text(pDX, IDC_TB_GrabTime, set_grabTime);
 	DDV_MinMaxInt(pDX, set_grabTime, 1, 20000);
+	DDX_Text(pDX, IDC_TB_TiggerActionWaitMS, set_TriggerActionWaitTime);
+	DDV_MinMaxInt(pDX, set_TriggerActionWaitTime, 0, 100000);
 }
 
 
@@ -83,7 +88,8 @@ void SettingDlg::OnBnClickedSave()
 	UpdateData(true);
 	//¸ü¸ÄÉèÖÃ
 	globle_var::SetGrabSetting(set_grabRGBType == "RGB" ? "RGB" : "Gray", set_grabFrameCount, set_grabWidth);
-	globle_var::TiggerWaitTimeMS = set_TiggerWaitTimeMS;
+	globle_var::TiggerCaptureWaitTimeMS = set_TiggerCaptureWaitTimeMS;
+	globle_var::TiggerActionWaitTimeMS = set_TriggerActionWaitTime;
 	globle_var::GrabTimeMS = set_grabTime;
 	globle_var::FrameTimeUS = frameTimeUS;
 
