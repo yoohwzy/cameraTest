@@ -86,6 +86,17 @@ END_MESSAGE_MAP()
 void SettingDlg::OnBnClickedSave()
 {
 	UpdateData(true);
+	int flag = IDIGNORE;
+
+	if (set_grabFrameCount != globle_var::FrameCount ||
+		set_grabWidth != globle_var::Width ||
+		frameTimeUS != globle_var::FrameTimeUS
+		)
+	{
+		flag = IDRETRY;
+	}
+
+
 	//更改设置
 	globle_var::SetGrabSetting(set_grabRGBType == "RGB" ? "RGB" : "Gray", set_grabFrameCount, set_grabWidth);
 	globle_var::TiggerCaptureWaitTimeMS = set_TiggerCaptureWaitTimeMS;
@@ -96,7 +107,7 @@ void SettingDlg::OnBnClickedSave()
 	//存入ini
 	globle_var::SaveSetting();
 
-	EndDialog(IDOK);
+	EndDialog(flag);
 }
 
 
