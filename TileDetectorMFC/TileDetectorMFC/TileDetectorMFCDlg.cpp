@@ -148,8 +148,8 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	UpdateData(false);
 
-	CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
-	radio->SetCheck(1);
+	//CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
+	//radio->SetCheck(1);
 
 	//创建系统日志
 	LogHelper::Log("系统启动\r\n");
@@ -601,7 +601,7 @@ void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CanBeTiggered);
 	pBtn->SetCheck(FALSE);
 
-	if (sd.DoModal() == IDOK)
+	if (sd.DoModal() == IDRETRY)
 	{
 		delete p_twag;
 		p_twag = new TiggerWatcherAndGrabber(this->GetSafeHwnd(), globle_var::VirtualCameraFileName);
