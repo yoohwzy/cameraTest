@@ -141,6 +141,9 @@
     <ClInclude Include="Controller\ArmController.h">
       <Filter>Controller</Filter>
     </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761IO.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">

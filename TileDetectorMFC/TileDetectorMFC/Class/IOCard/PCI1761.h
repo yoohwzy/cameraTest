@@ -17,15 +17,17 @@ class PCI1761
 public:
 	PCI1761(){};
 	~PCI1761(){
-		if (instantDiCtrl != NULL)
+		Sleep(50);
+
+		if (PCI1761::instantDiCtrl != NULL)
 		{
-			instantDiCtrl->Dispose();
-			instantDiCtrl = NULL;
+			PCI1761::instantDiCtrl->Dispose();
+			PCI1761::instantDiCtrl = NULL;
 		}
-		if (instantDoCtrl != NULL)
+		if (PCI1761::instantDoCtrl != NULL)
 		{
-			instantDoCtrl->Dispose();
-			instantDoCtrl = NULL;
+			PCI1761::instantDoCtrl->Dispose();
+			PCI1761::instantDoCtrl = NULL;
 		}
 	};
 
@@ -37,13 +39,13 @@ public:
 		ErrorCode ret = Success;
 		// Step 1: Create a 'InstantDiCtrl' for DI function.
 		// Step 1: Create a instantDoCtrl for DO function.
-		instantDiCtrl = AdxInstantDiCtrlCreate();
-		instantDoCtrl = AdxInstantDoCtrlCreate();
+		PCI1761::instantDiCtrl = AdxInstantDiCtrlCreate();
+		PCI1761::instantDoCtrl = AdxInstantDoCtrlCreate();
 		DeviceInformation devInfo(deviceDescription);
-		ret = instantDiCtrl->setSelectedDevice(devInfo);
+		ret = PCI1761::instantDiCtrl->setSelectedDevice(devInfo);
 		if (BioFailed(ret))
 			return false;
-		ret = instantDoCtrl->setSelectedDevice(devInfo);
+		ret = PCI1761::instantDoCtrl->setSelectedDevice(devInfo);
 		if (BioFailed(ret))
 			return false;
 
@@ -75,8 +77,8 @@ public:
 		char x = 0x01 << ID;
 
 
-		bool last = (lastSignalIDI_RisingEdge & x) != 0x00;
-		bool now = GetIDI(ID, lastSignalIDI_RisingEdge);
+		bool last = (PCI1761::lastSignalIDI_RisingEdge & x) != 0x00;
+		bool now = GetIDI(ID, PCI1761::lastSignalIDI_RisingEdge);
 
 		if (last == false && now == true)
 		{
@@ -95,8 +97,8 @@ public:
 
 		char x = 0x01 << ID;
 
-		bool last = (lastSignalIDI_TrailingEdge & x) != 0x00;
-		bool now = GetIDI(ID, lastSignalIDI_TrailingEdge);
+		bool last = (PCI1761::lastSignalIDI_TrailingEdge & x) != 0x00;
+		bool now = GetIDI(ID, PCI1761::lastSignalIDI_TrailingEdge);
 
 		if (last == true && now == false)
 		{
@@ -114,7 +116,7 @@ public:
 	void SetR(int ID, bool status)
 	{
 		if (status)
-			bufferForR = bufferForR | 0x01 << ID;
+			PCI1761::bufferForR = PCI1761::bufferForR | 0x01 << ID;
 		else
 		{
 			byte x = 0;
@@ -131,20 +133,20 @@ public:
 			default:
 				return;
 			}
-			bufferForR = bufferForR & x;
+			PCI1761::bufferForR = PCI1761::bufferForR & x;
 		}
 		byte  bufferForWriting[64] = { 0 };//the first element is used for start port
-		bufferForWriting[0] = bufferForR;
-		instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
+		bufferForWriting[0] = PCI1761::bufferForR;
+		PCI1761::instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
 	}
 	//设置继电器R0-7的状态
 	//输入0xFF表示全开，0x00全闭
 	void SetR(byte status)
 	{
-		bufferForR = status;
+		PCI1761::bufferForR = status;
 		byte  bufferForWriting[64] = { 0 };//the first element is used for start port
-		bufferForWriting[0] = bufferForR;
-		instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
+		bufferForWriting[0] = PCI1761::bufferForR;
+		PCI1761::instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
 	}
 
 
@@ -155,10 +157,10 @@ private:
 	static InstantDoCtrl *instantDoCtrl;//Create a instantDoCtrl for DO function.
 	const int readPort = 0;
 
-	byte lastSignalIDI_RisingEdge = 0;
-	byte lastSignalIDI_TrailingEdge = 0;
+	static byte lastSignalIDI_RisingEdge;
+	static byte lastSignalIDI_TrailingEdge;
 
-	byte bufferForR = 0;
+	static byte bufferForR ;
 
 
 	//获取IDI X的状态

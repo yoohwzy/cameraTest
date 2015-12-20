@@ -127,6 +127,7 @@
     <ClInclude Include="Class\IOCard\compatibility.h" />
     <ClInclude Include="Class\IOCard\mc100USBCard.h" />
     <ClInclude Include="Class\IOCard\PCI1761.h" />
+    <ClInclude Include="Class\IOCard\PCI1761IO.h" />
     <ClInclude Include="Class\Judgement.h" />
     <ClInclude Include="Class\Measurer.h" />
     <ClInclude Include="Class\Pretreatment.h" />

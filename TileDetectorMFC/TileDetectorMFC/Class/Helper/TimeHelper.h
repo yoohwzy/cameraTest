@@ -13,7 +13,7 @@ public:
 	{
 		SYSTEMTIME st;
 		GetLocalTime(&st);
-		if (AddMilliseconds = 0)
+		if (AddMilliseconds == 0)
 			return st;
 
 		CTime ct = CTime(st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);

@@ -125,7 +125,6 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	// TODO:  在此添加额外的初始化代码
 
 
-
 	//读取参数
 	globle_var::InitSetting(true);
 	globle_var::VirtualCameraFileName = "1杂质凹点A.jpg";
@@ -249,7 +248,12 @@ void CTileDetectorMFCDlg::OnBnClickedBtnCalibration()
 }
 LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 {
-
+	//if (p_twag->GrabbingIndex % 2 == 0)
+	//{
+	//	cv::namedWindow("1", 0);
+	//	cv::imshow("1", p_twag->Image);
+	//	cv::waitKey(0);
+	//}
 
 	m_Info = _T("");
 	//运行消费者进程处理图像
