@@ -137,7 +137,15 @@ public:
 		bufferForWriting[0] = bufferForR;
 		instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
 	}
-
+	//设置继电器R0-7的状态
+	//输入0xFF表示全开，0x00全闭
+	void SetR(byte status)
+	{
+		bufferForR = status;
+		byte  bufferForWriting[64] = { 0 };//the first element is used for start port
+		bufferForWriting[0] = bufferForR;
+		instantDoCtrl->Write(0, 1, bufferForWriting);		//ret = instantDoCtrl->Write(startPort, portCount, bufferForWriting);
+	}
 
 
 private:

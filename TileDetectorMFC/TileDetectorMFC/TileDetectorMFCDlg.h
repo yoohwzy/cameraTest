@@ -11,11 +11,11 @@
 //#include "Controller/Contoller.h"
 #include "Controller/TiggerWatcherAndGrabber.h"
 #include "Controller/Consumer.h"
+#include "Controller/ArmController.h"
 
 #include "Class\Helper\StringHelper.h"
 
 #include "SettingDlg.h"
-
 
 #define WM_MSG_POSTMSG (WM_USER + 99)
 #define WM_MSG_GRABBING_END (WM_USER + 100)
@@ -54,6 +54,7 @@ public:
 
 	TiggerWatcherAndGrabber *p_twag = NULL;
 	Consumer *p_consumer = NULL;
+	ArmController arm;
 
 // й╣ож
 protected:

@@ -96,8 +96,10 @@ void TiggerWatcherAndGrabber::StartWatch()
 		IsWatching = true;
 		//std::thread p_t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
 		p_t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
+
 		p_t_watcher->detach();
 		printf_globle("StartWatch：开始监控触发信号\n");
+
 	}
 	else{
 		printf_globle("StartWatch：正在监控，不能重复监控操作。\n");

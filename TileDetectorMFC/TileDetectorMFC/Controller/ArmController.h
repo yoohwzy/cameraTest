@@ -1,4 +1,6 @@
 #pragma once
+#include <afxwin.h>
+
 #include <thread>
 #include "../Class/IOCard/PCI1761.h"
 #include "../Class/Helper/TimeHelper.h"
@@ -16,10 +18,12 @@ public:
 		//ExitThread(h);
 		CloseHandle(h);
 	}
-	////
-	//void StartWork();
+	//添加一次机械臂执行，返回false表示该机械臂不存在
+	//1.机械臂编号0-7
+	//2.在何时触发（时间戳）
+	bool AddAction(int ArmNum, SYSTEMTIME ct);
 	//存储需要执行机械臂1动作的时间戳，每次执行完将该条出栈
-	vector<queue<int>> TriggerTimestamps;
+	vector<queue<SYSTEMTIME>> TriggerTimestamps;
 private:
 	const int armCount = 1;//有几条机械臂
 	thread t_watch;
