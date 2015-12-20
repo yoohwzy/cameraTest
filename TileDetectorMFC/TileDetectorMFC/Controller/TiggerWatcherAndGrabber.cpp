@@ -183,21 +183,6 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 #endif
 
-			if (globle_var::TiggerCaptureWaitTimeMS > 0)
-			{
-#ifdef OUTPUT_TO_CONSOLE
-				t = (double)cv::getTickCount();
-#endif
-				//触发后，等待砖进入拍摄区。
-				Sleep(globle_var::TiggerCaptureWaitTimeMS);
-
-#ifdef OUTPUT_TO_CONSOLE
-				t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-				stringstream ss;
-				ss << GrabbingIndex << " " << "Sleep real(ms):" << t << endl;
-				printf_globle(ss.str());
-#endif
-			}
 
 
 			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
@@ -239,7 +224,8 @@ void TiggerWatcherAndGrabber::watcherThread()
 		}
 		else
 		{
-			Sleep(10);
+			//Sleep(10);
+			std::this_thread::sleep_for(chrono::milliseconds(10));
 		}
 	}
 }
@@ -250,6 +236,28 @@ void TiggerWatcherAndGrabber::capture()
 	double t = (double)cv::getTickCount();
 	printf_globle("  capture(); START \r\n");
 #endif
+
+	if (globle_var::TiggerCaptureWaitTimeMS > 0)
+	{
+#ifdef OUTPUT_TO_CONSOLE
+		double tSleep = (double)cv::getTickCount();
+#endif
+		//触发后，等待砖进入拍摄区。
+		//Sleep(globle_var::TiggerCaptureWaitTimeMS);
+		std::this_thread::sleep_for(chrono::milliseconds(globle_var::TiggerCaptureWaitTimeMS));
+
+#ifdef OUTPUT_TO_CONSOLE
+		tSleep = ((double)cv::getTickCount() - tSleep) * 1000 / cv::getTickFrequency();
+		stringstream ss;
+		ss << GrabbingIndex << " " << "Sleep real(ms):" << tSleep << endl;
+		printf_globle(ss.str());
+#endif
+	}
+
+
+
+
+
 
 	p_gb->Start();
 	if (!USING_VIRTUAL_CAMERA)
@@ -283,7 +291,8 @@ void TiggerWatcherAndGrabber::threeInOne()
 		//尚未写入缓存，等待
 		while (p_gb->ReadIndex + p_gb->NinOne >= p_gb->WriteIndex && p_gb->WriteIndex < globle_var::FrameCount)
 		{
-			Sleep(10);
+			//Sleep(10);
+			std::this_thread::sleep_for(chrono::milliseconds(10));
 		}
 		p_gb->ThreeInOne(p_gb->ReadIndex);
 	}
