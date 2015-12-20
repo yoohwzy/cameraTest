@@ -36,18 +36,21 @@ private:
 	} gItemRepository; // 产品库全局变量, 生产者和消费者操作该变量.
 
 	typedef struct ItemRepository ItemRepository;
-	int size;	
+	int size;
 	Faults *_faults;
 	vector<Point> locationpoints;
 	vector<vector<Point>> CneedContours;
 	vector<vector<vector<Point>>> Warehousecontours;
-	Mat Mask_result_big, Mask_result_small,CannyImg, BlurImg;;
+	vector<vector<Point>> Linecontours;
+	vector<vector<cv::Point>> ecliptours;
+	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg;;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
 	void img2clone();
 	void img2zoom();
 	void linedetect();
+	void tem_2plate();
 	void ProduceItem(ItemRepository *ir, int item);
 	void ProducerTask();
 	int ConsumeItem(ItemRepository *ir);
