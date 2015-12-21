@@ -38,6 +38,7 @@ private:
 	typedef struct ItemRepository ItemRepository;
 	int size;
 	Faults *_faults;
+	vector<Point> Containpoints;
 	vector<Point> locationpoints;
 	vector<vector<Point>> CneedContours;
 	vector<vector<vector<Point>>> Warehousecontours;

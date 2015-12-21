@@ -423,7 +423,6 @@ void Pretreatment::linedetect()
 		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	}
 
-	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
 	int m = 0, linenumall = 0, linenum = 0;
 	for (size_t i = 0; i < bigcontours.size(); i++)
@@ -532,6 +531,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	Canny(MaskImg, MaskImg, 40, 50);
 	vector<vector<Point>> Maskcontours;
 	findContours(MaskImg, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	imgclone.join();
 	if (Maskcontours.size() != 0)
 	{
 		partial_sort(Maskcontours.begin(), Maskcontours.begin() + 1, Maskcontours.end(), SortBysize);
@@ -558,6 +558,73 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 					markpen.markposition = mask_rect;
 					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
 					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
+					int mark_continue = 1;
+					if (!Containpoints.empty())
+					{
+						while (1)//判断是否出现存在包含关系的矩形框，若存在取范围较大的
+						{
+							if (pointPolygonTest(Containpoints, 0.5*(outpoint_a + outpoint_b), 0) == 0)
+							{
+								if (pointPolygonTest(Containpoints, outpoint_a, 0) == 1)
+								{
+									_faults->MarkPens.pop_back();
+									break;
+								}
+								else
+								{
+									mark_continue = 0;
+									break;
+								}		
+							}
+							if (pointPolygonTest(Containpoints, 0.5*(outpoint_b + outpoint_c), 0) == 0)
+							{
+								if (pointPolygonTest(Containpoints, outpoint_b, 0) == 1)
+								{
+									_faults->MarkPens.pop_back();
+									break;
+								}
+								else
+								{
+									mark_continue = 0;
+									break;
+								}
+							}
+							if (pointPolygonTest(Containpoints, 0.5*(outpoint_c + outpoint_d), 0) == 0)
+							{
+								if (pointPolygonTest(Containpoints, outpoint_c, 0) == 1)
+								{
+									_faults->MarkPens.pop_back();
+									break;
+								}
+								else
+								{
+									mark_continue = 0;
+									break;
+								}
+							}
+							if (pointPolygonTest(Containpoints, 0.5*(outpoint_d + outpoint_a), 0) == 0)
+							{
+								if (pointPolygonTest(Containpoints, outpoint_d, 0) == 1)
+								{
+									_faults->MarkPens.pop_back();
+									break;
+								}
+								else
+								{
+									mark_continue = 0;
+									break;
+								}
+							}
+							break;
+						}
+					}
+					if (mark_continue == 0)
+						continue;
+					Containpoints.clear();
+					Containpoints.push_back(outpoint_a);
+					Containpoints.push_back(outpoint_b);
+					Containpoints.push_back(outpoint_c);
+					Containpoints.push_back(outpoint_d);
 					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//检测该标记是否在瓷砖上，防止瓷砖倾斜误判
 						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
 							_faults->MarkPens.push_back(markpen);
@@ -565,7 +632,6 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 			}
 		}
 	}
-	imgclone.join();
 	imgzoom.join();
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
