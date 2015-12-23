@@ -89,13 +89,11 @@ void Consumer::processingThread()
 
 
 	double t = 0;
-	cv::Mat DetectedImg = originalImg;
-
 
 	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
-		BlocksDetector bd = BlocksDetector(DetectedImg);
+		BlocksDetector bd = BlocksDetector(grayImg);
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖
@@ -116,14 +114,19 @@ void Consumer::processingThread()
 		p_block->LeftLine = bd.LeftLine;
 		p_block->RightLine = bd.RightLine;
 
+		//p_block->Lines2ABCD();
 
-		if (!p_block->Lines2ABCD())
-		{
-			IsProcessing = false;
-			sendMsg(0, 2);
-			printf_globle(Consumer::GetErrorDescription(2));
-			return;
-		}
+		//if (!p_block->Lines2ABCD())
+		//{
+		//	line(originalImg, p_block->A, p_block->B, cv::Scalar(0, 255, 0), 5);
+		//	line(originalImg, p_block->A, p_block->D, cv::Scalar(255, 0, 0), 5);
+		//	line(originalImg, p_block->C, p_block->B, cv::Scalar(255, 255, 0), 5);
+		//	line(originalImg, p_block->C, p_block->D, cv::Scalar(0, 255, 255), 5);
+		//	IsProcessing = false;
+		//	sendMsg(0, 2);
+		//	printf_globle(Consumer::GetErrorDescription(2));
+		//	return;
+		//}
 
 		//ss << "p_block->ABCD()" << endl;
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -136,11 +139,11 @@ void Consumer::processingThread()
 
 
 	//若没有则初始化定标
-	if (!IsCalibration && p_measurer == NULL)
-	{
-		p_measurer = new Measurer(p_block, 300, 600);
-		p_measurer->ObserveCalibration();
-	}
+	//if (!IsCalibration && p_measurer == NULL)
+	//{
+	//	p_measurer = new Measurer(p_block, 300, 600);
+	//	p_measurer->ObserveCalibration();
+	//}
 	
 
 
@@ -149,21 +152,21 @@ void Consumer::processingThread()
 
 
 	//瓷砖精确定位  &&  崩边检测
-	if (2 == 2)
-	{
-		EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
-		ed.start();
+	//if (2 == 2)
+	//{
+	//	EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
+	//	ed.start();
 
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		t = (double)cv::getTickCount();
-		if (faults.BrokenEdges.size() > 0)
-		{
-			ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << faults.BrokenEdges.size() << endl;
-		}
-		printf_globle(ss.str());
-		ss.str("");
-	}
+	//	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	//	ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+	//	t = (double)cv::getTickCount();
+	//	if (faults.BrokenEdges.size() > 0)
+	//	{
+	//		ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << faults.BrokenEdges.size() << endl;
+	//	}
+	//	printf_globle(ss.str());
+	//	ss.str("");
+	//}
 
 	//IsProcessing = false;
 	//sendMsg(0, 0);
@@ -186,20 +189,20 @@ void Consumer::processingThread()
 	}
 	else//缺陷检测分支
 	{
-		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		//t = (double)cv::getTickCount();
+		//EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
+		//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
-		if (faults.SomethingBigs.size() > 0)
-		{
-			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
-			printf_globle(ss.str());
-			ss.str("");
-		}
+		//if (faults.SomethingBigs.size() > 0)
+		//{
+		//	ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
+		//	printf_globle(ss.str());
+		//	ss.str("");
+		//}
 
-		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		printf_globle(ss.str());
-		ss.str("");
+		//ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		//printf_globle(ss.str());
+		//ss.str("");
 
 
 

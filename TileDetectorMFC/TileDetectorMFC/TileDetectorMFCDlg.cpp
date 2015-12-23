@@ -127,7 +127,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	//读取参数
 	globle_var::InitSetting(true);
-	globle_var::VirtualCameraFileName = "1杂质凹点A.jpg";
+	globle_var::VirtualCameraFileName = "3_o原图.jpg";
 
 	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
 
@@ -295,12 +295,13 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//	UpdateData(false);
 	//}
 	//return 0;
-
-	p_consumer = new Consumer(this->GetSafeHwnd());
-	p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
-	IsConsumerProcessing = true;
-	p_consumer->StartNewProces(p_twag->Image);
-
+	if (IsDlgButtonChecked(IDC_CB_RUN_CONSUMER) == BST_CHECKED)
+	{
+		p_consumer = new Consumer(this->GetSafeHwnd());
+		p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
+		IsConsumerProcessing = true;
+		p_consumer->StartNewProces(p_twag->Image);
+	}
 	//delete p_consumer;
 	//p_consumer = NULL;
 	//IsConsumerProcessing = false;

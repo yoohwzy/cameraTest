@@ -6,6 +6,7 @@
 
 #include "Base\Block.h"
 
+//#define BD_OUTPUT_DEBUG_INFO 1
 
 //@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
 //@author VShawn
@@ -38,7 +39,7 @@ public:
 	//bool ABCD();
 
 
-#ifdef OUTPUT_DEBUG_INFO
+#ifdef BD_OUTPUT_DEBUG_INFO
 	//检测过程中的图片
 	cv::Mat drowDebugDetectLR;
 	cv::Mat drowDebugDetectUD;
@@ -110,7 +111,7 @@ private:
 	 
 
 
-
+	const int WHITE_THRESHOD = 5 * 3;
 
 	 
 
@@ -126,7 +127,7 @@ private:
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
 	const int ORANGE_MARGIN_ROW = 400;
 	//默认的，对一个左右多少范围内进行扫描，宽度为ORANGE_RANGE_ROW+ORANGE_RANGE_ROW
-	const int ORANGE_RANGE_ROW = 300;
+	const int ORANGE_RANGE_ROW = 400;
 
 	//隔几列采样一次
 	const int COL_SPAN = 100;

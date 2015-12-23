@@ -51,12 +51,22 @@ bool GrabbingBuffer::AddFrame(cv::Mat& frame)
 void GrabbingBuffer::ThreeInOne(int lineIndex)
 {
 	//防止越界
-	if (lineIndex < 2 || lineIndex >= _frameCount)
+	if (lineIndex < 0 || lineIndex >= _frameCount)
 		return;
-
 	cv::Mat frame = OriginalImage(cv::Rect(0, lineIndex, _width, 1));
-	//N张图像叠加
 	cv::Mat thisFrame = Image(cv::Rect(0, lineIndex, _width, 1));
+	if (lineIndex == 0)
+	{
+		frame.copyTo(thisFrame);
+		thisFrame += frame;
+		return;
+	}
+	if (lineIndex == 1)
+	{
+		frame.copyTo(thisFrame);
+		return;
+	}
+	//N张图像叠加
 	cv::Mat thisFrame_1 = Image(cv::Rect(0, lineIndex - 1, _width, 1));
 	cv::Mat thisFrame_2 = Image(cv::Rect(0, lineIndex - 2, _width, 1));
 
@@ -67,10 +77,13 @@ void GrabbingBuffer::ThreeInOne(int lineIndex)
 
 	if ((lineIndex + 1) == _frameCount)
 	{
+		thisFrame_1 += frame;
 		thisFrame += frame;
 		thisFrame += frame;
 	}
-	frame.release();
+
+
+	//frame.release();
 }
 
 //OLD EDUTION
