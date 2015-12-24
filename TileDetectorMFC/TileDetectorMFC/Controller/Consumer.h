@@ -65,7 +65,7 @@ public:
 		switch (subtype)
 		{
 		case 1:return "Î´¼ì²âµ½´É×©";
-		case 2:return "Î´¼ì²âµ½ÍêÕûµÄ´É×©";
+		case 2:return "´É×©°Ú·Å×ËÌ¬´íÎó";
 		default:
 			return "";
 		}

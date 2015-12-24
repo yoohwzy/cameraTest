@@ -59,13 +59,13 @@ bool Block::Lines2ABCD()
 		D.y = (k2*y1 - k1*y2 + k1*k2*(x2 - x1)) / (k2 - k1);
 	}
 
-	if (A.x <= 0 || A.x >= (imageWidth - 1) || A.y <= 0 || A.y >= (imageHeight - 1))
+	if (A.x < 0 || A.x > (imageWidth - 1) || A.y < 0 || A.y > (imageHeight - 1))
 		return false;
-	if (B.x <= 0 || B.x >= (imageWidth - 1) || B.y <= 0 || B.y >= (imageHeight - 1))
+	if (B.x < 0 || B.x > (imageWidth - 1) || B.y < 0 || B.y > (imageHeight - 1))
 		return false;
-	if (C.x <= 0 || C.x >= (imageWidth - 1) || C.y <= 0 || C.y >= (imageHeight - 1))
+	if (C.x < 0 || C.x > (imageWidth - 1) || C.y < 0 || C.y > (imageHeight - 1))
 		return false;
-	if (D.x <= 0 || D.x >= (imageWidth - 1) || D.y <= 0 || D.y >= (imageHeight - 1))
+	if (D.x < 0 || D.x > (imageWidth - 1) || D.y < 0 || D.y > (imageHeight - 1))
 		return false;
 	return true;
 }

@@ -114,19 +114,19 @@ void Consumer::processingThread()
 		p_block->LeftLine = bd.LeftLine;
 		p_block->RightLine = bd.RightLine;
 
-		//p_block->Lines2ABCD();
 
-		//if (!p_block->Lines2ABCD())
-		//{
-		//	line(originalImg, p_block->A, p_block->B, cv::Scalar(0, 255, 0), 5);
-		//	line(originalImg, p_block->A, p_block->D, cv::Scalar(255, 0, 0), 5);
-		//	line(originalImg, p_block->C, p_block->B, cv::Scalar(255, 255, 0), 5);
-		//	line(originalImg, p_block->C, p_block->D, cv::Scalar(0, 255, 255), 5);
-		//	IsProcessing = false;
-		//	sendMsg(0, 2);
-		//	printf_globle(Consumer::GetErrorDescription(2));
-		//	return;
-		//}
+		//判断各点坐标是否小于0或大于宽度
+		if (!p_block->Lines2ABCD())
+		{
+			line(originalImg, p_block->A, p_block->B, cv::Scalar(0, 255, 0), 5);
+			line(originalImg, p_block->A, p_block->D, cv::Scalar(255, 0, 0), 5);
+			line(originalImg, p_block->C, p_block->B, cv::Scalar(255, 255, 0), 5);
+			line(originalImg, p_block->C, p_block->D, cv::Scalar(0, 255, 255), 5);
+			IsProcessing = false;
+			sendMsg(0, 2);
+			printf_globle(Consumer::GetErrorDescription(2));
+			return;
+		}
 
 		//ss << "p_block->ABCD()" << endl;
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

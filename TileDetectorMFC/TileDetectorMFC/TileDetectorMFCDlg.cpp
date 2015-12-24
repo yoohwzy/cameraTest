@@ -255,6 +255,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//	cv::waitKey(0);
 	//}
 
+
+	cv::Mat originalclone = p_twag->OriginalImage.clone();
 	m_Info = _T("");
 	//运行消费者进程处理图像
 	if (p_consumer != NULL && p_consumer->IsProcessing == false)
@@ -279,10 +281,14 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//}
 	//return 0;
 
-	//if (p_twag->Image.cols > 0)
-	//{
-	//	DrawPicToHDC(p_twag->Image, IDC_PIC_Sample);
-	//}
+	if (p_twag->Image.cols > 0)
+	{
+		img_on_show.release();
+		img_on_show = p_twag->Image.clone();
+		img_index = p_twag->GrabbingIndex;
+		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+		UpdateData(false);
+	}
 
 	//if (!p_twag->ManualTigger())
 	//{
@@ -295,6 +301,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//	UpdateData(false);
 	//}
 	//return 0;
+
+
 	if (IsDlgButtonChecked(IDC_CB_RUN_CONSUMER) == BST_CHECKED)
 	{
 		p_consumer = new Consumer(this->GetSafeHwnd());
@@ -302,6 +310,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		IsConsumerProcessing = true;
 		p_consumer->StartNewProces(p_twag->Image);
 	}
+
 	//delete p_consumer;
 	//p_consumer = NULL;
 	//IsConsumerProcessing = false;
@@ -311,11 +320,6 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//}
 	//return 0;
 
-
-	CString msg;
-	msg.Format(_T("%d 采图完成！\r\n"), p_twag->GrabbingIndex);
-	m_Info += msg;
-	UpdateData(false);
 	 
 
 
@@ -328,7 +332,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		stringstream ss;
 		UpdateData(false);
 		ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
-		cv::imwrite(ss.str(), p_twag->OriginalImage);
+		cv::imwrite(ss.str(), originalclone);
 
 		m_Info += _T("保存完成\r\n");
 		UpdateData(false);
@@ -462,9 +466,9 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 				cv::rectangle(img_on_show, p_consumer->faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
 			}
 		}
-		UpdateData(false);
-		img_index = p_twag->GrabbingIndex;
+		img_index = p_consumer->GrabbingIndex;
 		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+		UpdateData(false);
 	}
 	else
 	{
