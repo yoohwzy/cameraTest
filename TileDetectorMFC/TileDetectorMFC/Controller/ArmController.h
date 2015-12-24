@@ -14,9 +14,11 @@ public:
 	ArmController();
 	~ArmController()
 	{
+		stopFlag = true;
 		auto h = t_watch.native_handle();
+		Sleep(150);
 		//ExitThread(h);
-		CloseHandle(h);
+		//CloseHandle(h);
 	}
 	//添加一次机械臂执行，返回false表示该机械臂不存在
 	//1.机械臂编号0-7
@@ -28,7 +30,7 @@ private:
 	const int armCount = 1;//有几条机械臂
 	thread t_watch;
 	PCI1761 pci1761;
-
+	bool stopFlag = false;
 	//时间不断地走，当走到有触发的时刻即触发并出栈
 	void tickTick();
 
