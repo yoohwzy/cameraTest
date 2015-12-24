@@ -152,25 +152,22 @@ void Consumer::processingThread()
 
 
 	//瓷砖精确定位  &&  崩边检测
-	//if (2 == 2)
-	//{
-	//	EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
-	//	ed.start();
+	if (2 == 2)
+	{
+		EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
+		ed.start();
 
-	//	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	//	ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	//	t = (double)cv::getTickCount();
-	//	if (faults.BrokenEdges.size() > 0)
-	//	{
-	//		ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << faults.BrokenEdges.size() << endl;
-	//	}
-	//	printf_globle(ss.str());
-	//	ss.str("");
-	//}
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		ss << GrabbingIndex << " " << "EdgeDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
+		if (faults.BrokenEdges.size() > 0)
+		{
+			ss << GrabbingIndex << " " << "边缘有缺陷，数量：" << faults.BrokenEdges.size() << endl;
+		}
+		printf_globle(ss.str());
+		ss.str("");
+	}
 
-	//IsProcessing = false;
-	//sendMsg(0, 0);
-	//return;
 
 
 	//定标分支
@@ -189,20 +186,20 @@ void Consumer::processingThread()
 	}
 	else//缺陷检测分支
 	{
-		//t = (double)cv::getTickCount();
-		//EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
-		//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		t = (double)cv::getTickCount();
+		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
-		//if (faults.SomethingBigs.size() > 0)
-		//{
-		//	ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
-		//	printf_globle(ss.str());
-		//	ss.str("");
-		//}
+		if (faults.SomethingBigs.size() > 0)
+		{
+			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
+			printf_globle(ss.str());
+			ss.str("");
+		}
 
-		//ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		//printf_globle(ss.str());
-		//ss.str("");
+		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		printf_globle(ss.str());
+		ss.str("");
 
 
 
