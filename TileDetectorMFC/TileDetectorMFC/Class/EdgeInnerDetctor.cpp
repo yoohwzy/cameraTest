@@ -41,11 +41,17 @@ void EdgeInnerDetctor::doUp()
 	int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
 	for (int x = startX; x < endX; x += inc, index++)
 	{
+		int y = p_block->GetPonintByX(x, &p_block->UpLine).y;
+		if (y < 0)
+			y = 0;
+		if (y >= image.rows)
+			y = image.rows - 1;
+
 		cv::Mat tmpROI;
 		if ((x + inc) > endX)
-			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, (endX - x), 200)).clone();
+			tmpROI = image(cv::Rect(x, y, (endX - x), 200)).clone();
 		else
-			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc, 200)).clone();
+			tmpROI = image(cv::Rect(x, y, inc, 200)).clone();
 		cv::Mat reduceImg;
 
 		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
@@ -84,9 +90,17 @@ void EdgeInnerDetctor::doDown()
 	int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
 	for (int x = startX; x < endX; x += inc, index++)
 	{
-		cv::Mat tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, inc, 200)).clone();
+		int y = p_block->GetPonintByX(x, &p_block->DownLine).y;
+		if (y < 0)
+			y = 0;
+		if (y >= image.rows)
+			y = image.rows - 1;
+
+		cv::Mat tmpROI;
 		if ((x + inc) > endX)
-			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, (endX - x), 200)).clone();
+			tmpROI = image(cv::Rect(x, y - 200, (endX - x), 200)).clone();
+		else
+			tmpROI = image(cv::Rect(x, y - 200, inc, 200)).clone();
 		cv::Mat reduceImg;
 
 		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
@@ -125,9 +139,15 @@ void EdgeInnerDetctor::doLeft()
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-		cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, inc)).clone();
+		int x = p_block->GetPonintByY(y, &p_block->LeftLine).x;
+		if (x < 0) 
+			x = 0;
+		cv::Mat tmpROI;
 		if ((y + inc) > endY)
-			tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, (endY - y))).clone();
+			tmpROI = image(cv::Rect(x, y, 200, (endY - y))).clone();
+		else
+			tmpROI = image(cv::Rect(x, y, 200, inc)).clone();
+
 		cv::Mat reduceImg;
 
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
@@ -167,10 +187,14 @@ void EdgeInnerDetctor::doRight()
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-		cv::Point p = p_block->GetPonintByY(y, &p_block->RightLine);
-		cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, inc)).clone();
+		int x = p_block->GetPonintByY(y, &p_block->RightLine).x;
+		if (x < 0)
+			x = 0;
+		cv::Mat tmpROI;
 		if ((y + inc) > endY)
-			tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, (endY - y))).clone();
+			tmpROI = image(cv::Rect(x - 200, y, 200, (endY - y))).clone();
+		else
+			tmpROI = image(cv::Rect(x - 200, y, 200, inc)).clone();
 		cv::Mat reduceImg;
 
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);

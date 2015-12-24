@@ -55,7 +55,8 @@ private:
 	void FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &line_, vector<Vec4f> &line_roi, Vec4f &Fit_Line);
 
 	Mat src;
-	vector<Mat> ROI, ROI1;
+	vector<Mat> ROI;
+	//vector<Mat> ROI1;
 	// ±ßÔµROI
 	Mat leftROI, upROI, rightROI, downROI;
 	Point A, B, C, D;
