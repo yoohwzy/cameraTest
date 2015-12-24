@@ -3,10 +3,11 @@
 
 EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 {
-	if (img.channels() == 1)
-		image = img.clone();
-	else
-		cv::cvtColor(img, image, CV_RGB2GRAY);
+	image = img;
+	//if (img.channels() == 1)
+	//	image = img.clone();
+	//else
+	//	cv::cvtColor(img, image, CV_RGB2GRAY);
 	p_block = _block;
 	p_faults = _faults;
 	_block = NULL;
@@ -14,208 +15,191 @@ EdgeInnerDetctor::EdgeInnerDetctor(cv::Mat &img, Block *_block, Faults *_faults)
 
 
 	p_block->ABCD2Lines();
-	/*cv::line(image, p_block->A, p_block->GetPonintByY(3000, &p_block->LeftLine), cv::Scalar(255));
-	cv::line(image, p_block->A, p_block->GetPonintByX(3000, &p_block->UpLine), cv::Scalar(255));
-	cv::line(image, p_block->D, p_block->GetPonintByX(3000, &p_block->DownLine), cv::Scalar(255));
-	cv::line(image, p_block->C, p_block->GetPonintByY(3000, &p_block->RightLine), cv::Scalar(255));*/
 
 
+	thread t_up = thread(std::mem_fn(&EdgeInnerDetctor::doUp), this);
+	thread t_down = thread(std::mem_fn(&EdgeInnerDetctor::doDown), this);
+	t_up.join();
+	t_down.join();
 
-	if (1 == 1)
-	{
-		int index = 0;
-		vector<cv::Mat> reduceList;
-		vector<cv::Point3f> points;
-
-		//上边界
-		int startX = p_block->A.x + 30;
-		int endX = p_block->B.x - 30;
-		int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
-		for (int x = startX; x < endX; x += inc, index++)
-		{
-			cv::Mat tmpROI;
-			if ((x + inc) > endX)
-				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, (endX - x), 200)).clone();
-			else
-				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc, 200)).clone();
-			cv::Mat reduceImg;
-
-			cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
-			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+	thread t_Left = thread(std::mem_fn(&EdgeInnerDetctor::doLeft), this);
+	thread t_Right = thread(std::mem_fn(&EdgeInnerDetctor::doRight), this);
+	t_Left.join();
+	t_Right.join();
+}
 
 
-#ifdef WRITEIMG
-			//保存图片
-			char num[10];
-			sprintf(num, "%03d", index);
-			string strnum(num);
-			stringstream ss;
-			ss << "EdgeInner\\U\\上_" << strnum << "_reduce.jpg";
-			cv::imwrite(ss.str(), reduceImg);
-			ss.str("");
-			ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
-			cv::imwrite(ss.str(), tmpROI);
-#endif
-			tmpROI.release();
-
-			reduceImg.convertTo(reduceImg, CV_64F);
-			reduceList.push_back(reduceImg);
-			points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc / 2));
-		}
-		processAndSaveData(reduceList, points, "U\\上");
-	}
-	if (2 == 2)
-	{
-		int index = 0;
-		vector<cv::Mat> reduceList;
-		vector<cv::Point3f> points;
-		//下边界
-		int startX = p_block->D.x + 30;
-		int endX = p_block->C.x - 30;
-		int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
-		for (int x = startX; x < endX; x += inc, index++)
-		{
-			cv::Mat tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, inc, 200)).clone();
-			if ((x + inc) > endX)
-				tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, (endX - x), 200)).clone();
-			cv::Mat reduceImg;
-
-			cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-			cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
-			cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
-
-#ifdef WRITEIMG
-			//保存图片
-			char num[10];
-			sprintf(num, "%03d", index);
-			string strnum(num);
-			stringstream ss;
-			ss << "EdgeInner\\D\\下_" << strnum << "_reduce.jpg";
-			cv::imwrite(ss.str(), reduceImg);
-			ss.str("");
-			ss << "EdgeInner\\D\\下_" << strnum << ".jpg";
-			cv::imwrite(ss.str(), tmpROI);
-#endif
-
-			tmpROI.release();
-
-			reduceImg.convertTo(reduceImg, CV_64F);
-			reduceList.push_back(reduceImg);
-			points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->DownLine).y, inc / 2));
-		}
-		processAndSaveData(reduceList, points, "D\\下");
-	}
-
-
-	/*
-
-
-	if (3 == 3)
-	{
+void EdgeInnerDetctor::doUp()
+{
 	int index = 0;
-	vector<vector<double>> reduceList;
-	vector<vector<double>> differList;
+	vector<cv::Mat> reduceList;
+	vector<cv::Point3f> points;
+
+	//上边界
+	int startX = p_block->A.x + 30;
+	int endX = p_block->B.x - 30;
+	int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
+	for (int x = startX; x < endX; x += inc, index++)
+	{
+		cv::Mat tmpROI;
+		if ((x + inc) > endX)
+			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, (endX - x), 200)).clone();
+		else
+			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc, 200)).clone();
+		cv::Mat reduceImg;
+
+		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
+		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+
+
+#ifdef SAVE_IMG
+		//保存图片
+		char num[10];
+		sprintf(num, "%03d", index);
+		string strnum(num);
+		stringstream ss;
+		ss << "EdgeInner\\U\\上_" << strnum << "_reduce.jpg";
+		cv::imwrite(ss.str(), reduceImg);
+		ss.str("");
+		ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
+		cv::imwrite(ss.str(), tmpROI);
+#endif
+		tmpROI.release();
+
+		reduceImg.convertTo(reduceImg, CV_64F);
+		reduceList.push_back(reduceImg);
+		points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->UpLine).y, inc));
+	}
+	processAndSaveData(reduceList, points, "U\\上");
+}
+void EdgeInnerDetctor::doDown()
+{
+	int index = 0;
+	vector<cv::Mat> reduceList;
+	vector<cv::Point3f> points;
+	//下边界
+	int startX = p_block->D.x + 30;
+	int endX = p_block->C.x - 30;
+	int inc = (float)(endX - startX) / 30 + 0.5;//范围增量
+	for (int x = startX; x < endX; x += inc, index++)
+	{
+		cv::Mat tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, inc, 200)).clone();
+		if ((x + inc) > endX)
+			tmpROI = image(cv::Rect(x, p_block->GetPonintByX(x, &p_block->DownLine).y - 200, (endX - x), 200)).clone();
+		cv::Mat reduceImg;
+
+		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
+		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+
+#ifdef SAVE_IMG
+		//保存图片
+		char num[10];
+		sprintf(num, "%03d", index);
+		string strnum(num);
+		stringstream ss;
+		ss << "EdgeInner\\D\\下_" << strnum << "_reduce.jpg";
+		cv::imwrite(ss.str(), reduceImg);
+		ss.str("");
+		ss << "EdgeInner\\D\\下_" << strnum << ".jpg";
+		cv::imwrite(ss.str(), tmpROI);
+#endif
+
+		tmpROI.release();
+
+		reduceImg.convertTo(reduceImg, CV_64F);
+		reduceList.push_back(reduceImg);
+		points.push_back(cv::Point3f(x, p_block->GetPonintByX(x, &p_block->DownLine).y, inc));
+	}
+	processAndSaveData(reduceList, points, "D\\下");
+}
+void EdgeInnerDetctor::doLeft()
+{
+	int index = 0;
+	vector<cv::Mat> reduceList;
+	vector<cv::Point3f> points;
 	//左边界
 	int startY = p_block->A.y + 100;
 	int endY = p_block->D.y - 100;
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-	cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, inc)).clone();
-	if ((y + inc) > endY)
-	tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, (endY - y))).clone();
-	cv::Mat reduceImg;
+		cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, inc)).clone();
+		if ((y + inc) > endY)
+			tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, 200, (endY - y))).clone();
+		cv::Mat reduceImg;
 
-	cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
-	cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols/2, reduceImg.rows));//宽缩减为一半
-	cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
+		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
-	#ifdef WRITEIMG
-	//保存图片
-	char num[10];
-	sprintf(num, "%03d", index);
-	string strnum(num);
-	stringstream ss;
-	ss << "EdgeInner\\L\\左_" << strnum << "_reduce.jpg";
-	cv::imwrite(ss.str(), reduceImg);
-	ss.str("");
-	ss << "EdgeInner\\L\\左_" << strnum << ".jpg";
-	cv::imwrite(ss.str(), tmpROI);
-	#endif
+#ifdef SAVE_IMG
+		//保存图片
+		char num[10];
+		sprintf(num, "%03d", index);
+		string strnum(num);
+		stringstream ss;
+		ss << "EdgeInner\\L\\左_" << strnum << "_reduce.jpg";
+		cv::imwrite(ss.str(), reduceImg);
+		ss.str("");
+		ss << "EdgeInner\\L\\左_" << strnum << ".jpg";
+		cv::imwrite(ss.str(), tmpROI);
+#endif
 
-	tmpROI.release();
+		tmpROI.release();
 
-	vector<double> reduceMat;
-	vector<double> diffMat;
+		reduceImg.convertTo(reduceImg, CV_64F);
+		reduceList.push_back(reduceImg);
+		points.push_back(cv::Point3f(p_block->GetPonintByY(y, &p_block->LeftLine).x, y, inc));
 
-	for (int j = 0; j < reduceImg.cols - 1; j++)
-	{
-	reduceMat.push_back(reduceImg.ptr<uchar>(0)[j]);
-	int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j];
-	diffMat.push_back(different);
 	}
-
-	reduceList.push_back(reduceMat);
-	differList.push_back(diffMat);
-	}
-	processAndSaveData(reduceList, differList, "L\\左");
-	}
-
-
-	if (4 == 4)
-	{
+	processAndSaveData(reduceList, points, "L\\左");
+}
+void EdgeInnerDetctor::doRight()
+{
 	int index = 0;
-	vector<vector<double>> reduceList;
-	vector<vector<double>> differList;
+	vector<cv::Mat> reduceList;
+	vector<cv::Point3f> points;
 	//右边界
 	int startY = p_block->A.y + 100;
 	int endY = p_block->D.y - 100;
 	int inc = (float)(endY - startY) / 60 + 0.5;//范围增量
 	for (int y = startY; y < endY; y += inc, index++)
 	{
-	cv::Point p = p_block->GetPonintByY(y, &p_block->RightLine);
-	cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, inc)).clone();
-	if ((y + inc) > endY)
-	tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, (endY - y))).clone();
-	cv::Mat reduceImg;
+		cv::Point p = p_block->GetPonintByY(y, &p_block->RightLine);
+		cv::Mat tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, inc)).clone();
+		if ((y + inc) > endY)
+			tmpROI = image(cv::Rect(p_block->GetPonintByY(y, &p_block->RightLine).x - 200, y, 200, (endY - y))).clone();
+		cv::Mat reduceImg;
 
-	cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
-	cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
-	cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
+		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
 
-	#ifdef WRITEIMG
-	//保存图片
-	char num[10];
-	sprintf(num, "%03d", index);
-	string strnum(num);
-	stringstream ss;
-	ss << "EdgeInner\\R\\右_" << strnum << "_reduce.jpg";
-	cv::imwrite(ss.str(), reduceImg);
-	ss.str("");
-	ss << "EdgeInner\\R\\右_" << strnum << ".jpg";
-	cv::imwrite(ss.str(), tmpROI);
-	#endif
+#ifdef SAVE_IMG
+		//保存图片
+		char num[10];
+		sprintf(num, "%03d", index);
+		string strnum(num);
+		stringstream ss;
+		ss << "EdgeInner\\R\\右_" << strnum << "_reduce.jpg";
+		cv::imwrite(ss.str(), reduceImg);
+		ss.str("");
+		ss << "EdgeInner\\R\\右_" << strnum << ".jpg";
+		cv::imwrite(ss.str(), tmpROI);
+#endif
 
-	tmpROI.release();
+		tmpROI.release();
 
-	vector<double> reduceMat;
-	vector<double> diffMat;
-
-	for (int j = 0; j < reduceImg.cols - 1; j++)
-	{
-	reduceMat.push_back(reduceImg.ptr<uchar>(0)[j]);
-	int different = reduceImg.ptr<uchar>(0)[j + 1] - reduceImg.ptr<uchar>(0)[j];
-	diffMat.push_back(different);
+		reduceImg.convertTo(reduceImg, CV_64F);
+		reduceList.push_back(reduceImg);
+		points.push_back(cv::Point3f(p_block->GetPonintByY(y, &p_block->RightLine).x, y, inc));
 	}
-
-	reduceList.push_back(reduceMat);
-	differList.push_back(diffMat);
-	}
-	processAndSaveData(reduceList, differList, "R\\右");
-	}
-	*/
+	processAndSaveData(reduceList, points, "R\\右");
 }
+
+
 
 double EdgeInnerDetctor::getFrechetDistance(vector<double> lineA, vector<double> lineB)
 {
@@ -290,7 +274,7 @@ double EdgeInnerDetctor::getFrechetDistance(cv::Mat lineA, cv::Mat lineB)
 	//计算初始距离
 	double tmpDist = -1;
 	//左移、右移N次距离
-	for (int offset = 0; offset < 1; offset++)
+	for (int offset = 0; offset < 10; offset++)
 	{
 		tmpDist = -1;
 		int x2 = offset;
@@ -308,7 +292,7 @@ double EdgeInnerDetctor::getFrechetDistance(cv::Mat lineA, cv::Mat lineB)
 			if (lineA.rows == 1 && lineB.rows == 1)
 			{
 				y1 = (double)lineA.ptr<double>(0)[x1];
-				y2 = (double)lineA.ptr<double>(0)[x2];
+				y2 = (double)lineB.ptr<double>(0)[x2];
 			}
 			else
 			{
@@ -404,24 +388,27 @@ void EdgeInnerDetctor::processAndSaveData(vector<cv::Mat> reduceList, vector<cv:
 	}
 
 
-#ifdef WRITEIMG
+#ifdef SAVE_IMG
 	stringstream ss;
 	ss << "EdgeInner\\" << prefix << "预测弗雷歇距离.txt";
 	ofstream of_DiffFrechetDist(ss.str(), ios::out);
+	of_DiffFrechetDist << "L2R,";
 	for (int i = 0; i < reduceList.size(); i++)
 	{
 		of_DiffFrechetDist << distancesL2R[i] << ",";
 	}
 	of_DiffFrechetDist << "\r\n";
+	of_DiffFrechetDist << "R2L,";
 	for (int i = 0; i < reduceList.size(); i++)
 	{
 		of_DiffFrechetDist << distancesR2L[i] << ",";
 	}
 	of_DiffFrechetDist << "\r\n";
+	of_DiffFrechetDist << "加权距离,";
 	for (int i = 0; i < reduceList.size(); i++)
 	{
 		of_DiffFrechetDist << distances[i] << ",";
 	}
 #endif
-	}
+}
 
