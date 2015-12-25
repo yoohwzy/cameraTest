@@ -24,6 +24,62 @@ bool SortBysize(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊ
 	return v1.size() > v2.size();//½µÐòÅÅÁÐ  
 }
 
+bool WhetherLine(Mat &oneImg,Mat &G_Img,bool cor,bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
+{
+	vector<Point> maxV_white_Points;
+	if (countNonZero(oneImg) >= 2)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
+	{
+		if (cor == 1)
+		{
+			for (int i = 0; i < oneImg.cols - 1; i++)
+			{
+				if (oneImg.at<uchar>(0, i) == 255 && oneImg.at<uchar>(0, i + 1) == 0)
+					maxV_white_Points.push_back(Point(i + 0.2*oneImg.cols, 0));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < oneImg.rows - 1; i++)
+			{
+				if (oneImg.at<uchar>(i, 0) == 255 && oneImg.at<uchar>(i + 1, 0) == 0)
+					maxV_white_Points.push_back(Point(0, i + 0.2*oneImg.rows));
+			}
+		}
+	}
+	Mat Ataxon, Ltaxon, Rtaxon;
+	for (int i = 0; i < maxV_white_Points.size(); i++)
+	{
+		Point maxV_white_Point = maxV_white_Points[i];
+		if (cor == 1 && boe == 0)//µÚÒ»ÐÐ
+		{
+			Ataxon = G_Img(Rect(Point(maxV_white_Point.x - 2, 0), Point(maxV_white_Point.x + 2, 4)));//°üº¬¸ÃµãµÄÈ«4*4·¶Î§
+			Ltaxon = G_Img(Rect(Point(maxV_white_Point.x - 2, 0), Point(maxV_white_Point.x, 4)));//°üº¬¸ÃµãµÄ×ó2*4·¶Î§
+			Rtaxon = G_Img(Rect(Point(maxV_white_Point.x, 0), Point(maxV_white_Point.x + 2, 4)));//°üº¬¸ÃµãµÄÓÒ2*4·¶Î§
+		}
+		else if (cor == 1 && boe == 1)//×îºóÒ»ÐÐ
+		{
+			Ataxon = G_Img(Rect(Point(maxV_white_Point.x - 2, G_Img.rows - 5), Point(maxV_white_Point.x + 2, G_Img.rows - 1)));
+			Ltaxon = G_Img(Rect(Point(maxV_white_Point.x - 2, G_Img.rows - 5), Point(maxV_white_Point.x, G_Img.rows - 1)));
+			Rtaxon = G_Img(Rect(Point(maxV_white_Point.x, G_Img.rows - 5), Point(maxV_white_Point.x + 2, G_Img.rows - 1)));
+		}
+		else if (cor == 0 && boe == 0)//µÚÒ»ÁÐ
+		{
+			Ataxon = G_Img(Rect(Point(0, maxV_white_Point.y - 2), Point(4, maxV_white_Point.y + 2)));
+			Ltaxon = G_Img(Rect(Point(0, maxV_white_Point.y - 2), Point(4, maxV_white_Point.y)));
+			Rtaxon = G_Img(Rect(Point(0, maxV_white_Point.y), Point(4, maxV_white_Point.y + 2)));
+		}
+		else if (cor == 0 && boe == 1)//×îºóÒ»ÁÐ
+		{
+			Ataxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y - 2), Point(G_Img.cols - 1, maxV_white_Point.y + 2)));
+			Ltaxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y - 2), Point(G_Img.cols - 1, maxV_white_Point.y)));
+			Rtaxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y), Point(G_Img.cols - 1, maxV_white_Point.y + 2)));
+		}
+		if (countNonZero(Ataxon) != countNonZero(Ltaxon) && countNonZero(Ataxon) != countNonZero(Rtaxon))//µ±±ß½çÉÏµãµÄ×ó°üº¬²»µÈÓÚÈ«°üº¬ÇÒÓÒ°üº¬²»µÈÓÚÈ«°üº¬Ê±¿ÉÖª¸Ãµã²»ÊÇ¶Ëµã
+			return 1;
+	}
+	return 0;
+}
+
 Point barycenter1(vector<Point> contoursi)//¼ÆËãÂÖÀªÖØÐÄ
 {
 	Moments m = moments(contoursi);
@@ -438,31 +494,36 @@ void Pretreatment::linedetect()
 		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I1, 0);
 		if (matchlinepro> 1.0)
 			continue;
-		Mat fingerprint_Img = CannyImg(Rect(cannyrect));
-		threshold(fingerprint_Img, fingerprint_Img, 20, 255, 0);
-		if (countNonZero(fingerprint_Img) >= 0.4 * fingerprint_Img.cols * fingerprint_Img.rows)
+		Mat fingerprint_Img = CannyImg(Rect(cannyrect));//·ÀÖ¹Ö¸ÎÆÎó¼ì
+		LUT(fingerprint_Img, lookUpTable, fingerprint_Img);
+		threshold(fingerprint_Img, fingerprint_Img, CannyImg.at<uchar>(bigcontours[i][0]), 255, 0);
+		if (countNonZero(fingerprint_Img) <= 0.6 * fingerprint_Img.cols * fingerprint_Img.rows)
 			continue;
-		//Mat I_rows_L = waitImg(Range(0, 1), Range(int(waitImg.cols*0.1), int(waitImg.cols*0.5)));//µÚÒ»ÐÐ×ó
-		//Mat I_rows_R = waitImg(Range(0, 1), Range(int(waitImg.cols*0.5), int(waitImg.cols*0.9)));//µÚÒ»ÐÐÓÒ
-
-		//Mat II_rows_L = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.1), int(waitImg.cols*0.5)));//×îºóÒ»ÐÐ×ó
-		//Mat II_rows_R = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.5), int(waitImg.cols*0.9)));//×îºóÒ»ÐÐÓÒ
-
-		//Mat I_cols_U = waitImg(Range(int(waitImg.rows*0.1), int(waitImg.rows*0.5)), Range(0, 1));//µÚÒ»ÁÐÉÏ
-		//Mat I_cols_D = waitImg(Range(int(waitImg.rows*0.5), int(waitImg.rows*0.9)), Range(0, 1));//µÚÒ»ÁÐÏÂ
-		//Mat II_cols_U = waitImg(Range(int(waitImg.rows*0.1), int(waitImg.rows*0.5)), Range(waitImg.cols - 1, waitImg.cols));//×îºóÒ»ÁÐÉÏ
-		//Mat II_cols_D = waitImg(Range(int(waitImg.rows*0.5), int(waitImg.rows*0.9)), Range(waitImg.cols - 1, waitImg.cols));//×îºóÒ»ÁÐÏÂ
-		Mat I_rows = waitImg(Range(0, 1), Range(int(waitImg.cols*0.1), int(waitImg.cols*0.9)));//µÚÒ»ÐÐ
-		Mat II_rows = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.1), int(waitImg.cols*0.9)));//×îºóÒ»ÐÐ
-		Mat I_cols = waitImg(Range(int(waitImg.rows*0.1), int(waitImg.rows*0.9)), Range(0, 1));//µÚÒ»ÁÐ
-		Mat II_cols = waitImg(Range(int(waitImg.rows*0.1), int(waitImg.rows*0.9)), Range(waitImg.cols - 1, waitImg.cols));//×îºóÒ»ÁÐ
-		if (countNonZero(I_rows) != 0 && countNonZero(I_cols) != 0)
-			continue;
-		if (countNonZero(I_rows) != 0 && countNonZero(II_cols) != 0)
-			continue;
-		if (countNonZero(II_rows) != 0 && countNonZero(I_cols) != 0)
-			continue;
-		if (countNonZero(II_rows) != 0 && countNonZero(II_cols) != 0)
+		Mat I_rows = waitImg(Range(0, 1), Range(int(waitImg.cols*0.2), int(waitImg.cols*0.8)));//µÚÒ»ÐÐ
+		Mat II_rows = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.2), int(waitImg.cols*0.8)));//×îºóÒ»ÐÐ
+		Mat I_cols = waitImg(Range(int(waitImg.rows*0.2), int(waitImg.rows*0.8)), Range(0, 1));//µÚÒ»ÁÐ
+		Mat II_cols = waitImg(Range(int(waitImg.rows*0.2), int(waitImg.rows*0.8)), Range(waitImg.cols - 1, waitImg.cols));//×îºóÒ»ÁÐ
+		if (countNonZero(I_rows) != 0)
+		{
+			if (WhetherLine(I_rows, waitImg,1,0))
+				continue;
+		}
+		if (countNonZero(I_cols) != 0)
+		{
+			if (WhetherLine(I_cols, waitImg, 0,0))
+				continue;
+		}
+		if (countNonZero(II_rows) != 0)
+		{
+			if (WhetherLine(II_rows, waitImg,1,1))
+				continue;
+		}
+		if (countNonZero(II_cols) != 0)
+		{
+			if (WhetherLine(II_cols, waitImg,0,1))
+				continue;
+		}
+		if (countNonZero(I_rows) && countNonZero(I_cols) && countNonZero(II_rows) && countNonZero(II_cols))
 			continue;
 		Faults::Scratch scratch;
 		scratch.position.x = 4 * cannyrect.x + 2 * cannyrect.width + recImg.x;
@@ -491,6 +552,13 @@ void Pretreatment::tem_2plate()//Ä£°åÂÖÀªÆ¥ÅäÔ¤´¦ÀíÏß³Ì
 void Pretreatment::img2clone()//´ý´¦Àí´óÍ¼¸´ÖÆÏß³Ì
 {
 	PMidImg = MidImg.clone();
+	lookUpTable = Mat(1, 256, CV_8U);
+	uchar* p = lookUpTable.data;
+	p[0] = 255;
+	for (int j = 1; j < 256; j++)
+	{
+		p[j] = j;
+	}
 	//LMidImg = PMidImg.clone();
 }
 
@@ -534,7 +602,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 		else
 			recImg.width -= 100;
 	}
-	else if (recImg.x + recImg.width == image.cols && recImg.x > 0)
+	else if (recImg.x + recImg.width >= image.cols && recImg.x > 0)
 		recImg.width -= 100;
 
 	if (recImg.y + recImg.height < image.rows && recImg.y + recImg.height > 800)
@@ -544,7 +612,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 		else
 			recImg.height -= 400;
 	}
-	else if (recImg.y + recImg.height == image.rows && recImg.y > 0)
+	else if (recImg.y + recImg.height >= image.rows && recImg.y > 0)
 		recImg.height -= 400;
 
 	MidImg = image(Rect(recImg));
@@ -589,6 +657,45 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 					markpen.markposition = mask_rect;
 					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
 					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
+					int out_mark = 0;
+					while (1)//±ê¼ÇÖØ¸´¿òÈ¡ÅÐ¶Ï
+					{
+						if (in_or_out.size() == 0)
+							break;
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_a + outpoint_b), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_b + outpoint_c), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_c + outpoint_d), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_d + outpoint_a), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						break;
+					}
+					if (out_mark == 1)
+					{
+						if (pointPolygonTest(in_or_out, outpoint_a, 0) == 1)
+							_faults->MarkPens.pop_back();
+						else
+							continue;
+					}
+					in_or_out.clear();
+					in_or_out.push_back(outpoint_a);
+					in_or_out.push_back(outpoint_b);
+					in_or_out.push_back(outpoint_c);
+					in_or_out.push_back(outpoint_d);
 					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//¼ì²â¸Ã±ê¼ÇÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãÐ±ÎóÅÐ
 						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
 							_faults->MarkPens.push_back(markpen);
