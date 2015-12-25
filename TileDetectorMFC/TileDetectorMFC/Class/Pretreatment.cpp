@@ -290,7 +290,19 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Mat ready_boxImg = PMidImg(Rect(pt_ROI_a + locationpoint, pt_ROI_b + locationpoint));//截取连通域外界矩形面积25倍大的区域
 		Scalar avgmean;
 		avgmean = mean(ready_boxImg);
-		Mat growImg = Grow(ready_boxImg, centermark, avgmean[0] - 5);//区域生长
+		double min_v = 0.0, max_v = 0.0, input_th_v = avgmean[0] - 5;
+		minMaxLoc(ready_boxImg, &min_v, &max_v);
+		if (avgmean[0] - min_v > 10)
+		{
+			if (max_v - min_v > 20)
+				input_th_v = avgmean[0] - 5;
+			else
+				input_th_v = avgmean[0] - 7;
+		}
+		else
+			input_th_v = (min_v + 3 > 0.5*(min_v + avgmean[0])) ? 0.5*(min_v + avgmean[0]) : min_v + 3;
+
+		Mat growImg = Grow(ready_boxImg, centermark, input_th_v);//区域生长
 
 		int whitenum = countNonZero(growImg);
 		Mat growtemp = growImg.clone();
@@ -298,7 +310,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		/*erode(growtemp, growtemp,Mat(),Point(-1,-1),2);*/
 		vector<vector<cv::Point>> tempttours;
 		findContours(growtemp, tempttours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		if (tempttours.size() == 0 || countNonZero(growImg) <= 2)
+		if (tempttours.size() == 0 || countNonZero(growImg) <= 4)
 		{
 			continue;
 		}
@@ -329,9 +341,20 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		{
 			continue;
 		}
+		Mat biggerImg;
+		vector<vector<Point>> biggercontours;
+		resize(growImg, biggerImg, Size(growImg.cols *1.2, growImg.rows * 1.2), 0, 0, INTER_LINEAR);
+		findContours(biggerImg, biggercontours, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		Mat mask_point_Img(biggerImg.size(),CV_8U,Scalar(0));
+		Mat mask_point_ImgROI = mask_point_Img(Rect(Point(growImg.cols*0.1, growImg.rows*0.1), Point(growImg.cols*1.1, growImg.rows*1.1)));
+		drawContours(mask_point_Img, biggercontours, -1, Scalar(255), -1);
+		drawContours(mask_point_ImgROI, tempttours, -1, Scalar(0), -1);
+
 		Mat ano_boxImg = ready_boxImg.clone();
-		double min_v = 0.0;
-		minMaxLoc(ano_boxImg, &min_v);
+		Scalar mount;
+		mount = mean(ano_boxImg, mask_point_ImgROI);//分析环状区域的平均灰度值
+		if (mount[0] < 0.95*avgmean[0])
+			continue;
 		if (2 * min_v > avgmean[0])
 			continue;
 		bitwise_and(ano_boxImg, growImg, ano_boxImg);
@@ -361,7 +384,13 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			hole.diameter = growT_RECT.height;
 		else
 			hole.diameter = growT_RECT.height;
-		_faults->Holes.push_back(hole);
+		Point hole_torect_a(hole.position.x - 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
+		Point hole_torect_b(hole.position.x - 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
+		Point hole_torect_c(hole.position.x + 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
+		Point hole_torect_d(hole.position.x + 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
+		if (pointPolygonTest(pointlist, hole_torect_a, 0) == 1 && pointPolygonTest(pointlist, hole_torect_b, 0) == 1)//检测该凹点是否在瓷砖内部，防止瓷砖倾斜误判
+			if (pointPolygonTest(pointlist, hole_torect_c, 0) == 1 && pointPolygonTest(pointlist, hole_torect_d, 0) == 1)
+				_faults->Holes.push_back(hole);
 
 	}
 	(ir->read_position)++; // 读取位置后移
@@ -708,13 +737,12 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
+	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
 	producer.join();
 	line.join();
 	consumer.join();
-
 	needContour.clear();
 	dilateneedcontours.clear();
 	CneedContours.clear();
