@@ -90,10 +90,10 @@ void EdgeDetector::start()
 
 	double t = (double)cv::getTickCount();*/
 	// 预处理
-	for (int i = 0; i < ROI.size(); i++)
-	{
-		Dynamic_range(ROI[i]);
-	}
+	//for (int i = 0; i < ROI.size(); i++)
+	//{
+	//	Dynamic_range(ROI[i]);
+	//}
 	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	cout << "预处理time=" << t << "\t";
 

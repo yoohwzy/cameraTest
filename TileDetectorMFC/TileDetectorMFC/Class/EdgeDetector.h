@@ -70,7 +70,7 @@ private:
 	int xdown = 0, ydown = 0, down_height = 0, down_width = 0;
 
 	// 点到拟合直线的距离阈值
-	int distance_threld = 6;
+	int distance_threld = 20;
 	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
 	int Edge_threld = 8;
 	// 容忍度阈值
