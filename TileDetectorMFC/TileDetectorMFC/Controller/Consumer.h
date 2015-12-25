@@ -41,6 +41,8 @@ public:
 public:
 	int GrabbingIndex = 0;
 	int ConsumerThreshod = 0;
+	int ConsumerLedStartX = 0;
+	int ConsumerLedEndX = 4095;
 	Faults faults;
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;

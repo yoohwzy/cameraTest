@@ -85,7 +85,7 @@ void Consumer::processingThread()
 	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
-		BlocksDetector bd = BlocksDetector(threshodImg);
+		BlocksDetector bd = BlocksDetector(threshodImg, ConsumerLedStartX, ConsumerLedEndX);
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖

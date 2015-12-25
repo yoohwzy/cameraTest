@@ -110,4 +110,10 @@ public:
 	int img_index;
 	int consumerThreshod;
 	afx_msg void OnEnChangeTbThreshod();
+	// 光照范围起始X坐标
+	int consumerLedStartX;
+	// 光照范围结束X坐标
+	int consumerLedEndX;
+	afx_msg void OnEnChangeTbLedFrom();
+	afx_msg void OnEnChangeTbLedTo();
 };

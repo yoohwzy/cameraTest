@@ -2,18 +2,22 @@
 
 
 
-BlocksDetector::BlocksDetector(cv::Mat& Img)
+BlocksDetector::BlocksDetector(cv::Mat& Img, int _ledStartX, int _ledEndX)
 {
+	ledStartX = _ledStartX;
+	ledEndX = _ledEndX;
 	img = Img;
+
+
 	//初始化左边缘检测参数
 	leftY = 0;//在第几行检测
-	leftX = ORANGE_MARGIN_ROW;//检测的中点
+	leftX = ledStartX + ORANGE_RANGE_ROW;//检测的中点
 	leftRnage = ORANGE_RANGE_ROW;//在中点周围多少像素内检测
 	leftNoneCount = 0;//连续没有找到边缘的数量。
 	leftNeedReFind = false;//对该行是否需要扩大range重新搜索
 
 	rightY = 0;//在第几行检测
-	rightX = img.cols - ORANGE_MARGIN_ROW;;//检测的中点
+	rightX = ledEndX - ORANGE_RANGE_ROW;;//检测的中点
 	rightRnage = ORANGE_RANGE_ROW;//在中点周围多少像素内检测
 	rightNoneCount = 0;//连续没有找到边缘的数量。
 	rightNeedReFind = false;//对该行是否需要扩大range重新搜索
@@ -48,7 +52,6 @@ bool BlocksDetector::Start()
 {
 	printf_globle("BlocksDetector::Start()!\r\n");
 
-	A = B = C = D = cv::Point(0, 0);
 
 	if (1 == 1)//用IF隔离局部代码
 	{
@@ -470,13 +473,14 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 	//检测算法
 	cv::Mat oneLineGray;
 	int xstart = start.x - range;
-	if (xstart < 0)
-	{
-		xstart = 0;
-	}
+
+	if (xstart < ledStartX)
+		xstart = ledStartX;
 	int width = range + range;
-	if ((width + xstart) >img.cols - 1)
-		width = img.cols - 1 - xstart;
+	if ((width + xstart) > ledEndX)
+		xstart = ledEndX - width;
+
+
 	if (img.channels() == 1)
 		oneLineGray = img(cv::Rect(xstart, start.y, width, 1));
 	else

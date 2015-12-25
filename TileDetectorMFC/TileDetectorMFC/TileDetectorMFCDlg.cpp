@@ -61,6 +61,8 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , m_VirtualCamera(_T(""))
 , img_index(0)
 , consumerThreshod(0)
+, consumerLedStartX(0)
+, consumerLedEndX(0)
 {
 	printf_globle("");
 }
@@ -74,6 +76,10 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_LABLE_IMG_Index, img_index);
 	DDX_Text(pDX, IDC_TB_THRESHOD, consumerThreshod);
 	DDV_MinMaxInt(pDX, consumerThreshod, 0, 255);
+	DDX_Text(pDX, IDC_TB_LED_FROM, consumerLedStartX);
+	DDV_MinMaxInt(pDX, consumerLedStartX, 0, 4094);
+	DDX_Text(pDX, IDC_TB_LED_TO, consumerLedEndX);
+	DDV_MinMaxInt(pDX, consumerLedEndX, 1, 4095);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -92,6 +98,8 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
 	ON_EN_CHANGE(IDC_TB_THRESHOD, &CTileDetectorMFCDlg::OnEnChangeTbThreshod)
+	ON_EN_CHANGE(IDC_TB_LED_FROM, &CTileDetectorMFCDlg::OnEnChangeTbLedFrom)
+	ON_EN_CHANGE(IDC_TB_LED_TO, &CTileDetectorMFCDlg::OnEnChangeTbLedTo)
 END_MESSAGE_MAP()
 
 
@@ -151,6 +159,8 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
 	consumerThreshod = 5;
+	consumerLedStartX = 0;
+	consumerLedEndX = 4095;
 
 	UpdateData(false);
 
@@ -308,6 +318,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		p_consumer = new Consumer(this->GetSafeHwnd());
 		p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
 		p_consumer->ConsumerThreshod = consumerThreshod;
+		p_consumer->ConsumerLedStartX = consumerLedStartX;
+		p_consumer->ConsumerLedEndX = consumerLedEndX;
 		IsConsumerProcessing = true;
 		p_consumer->StartNewProces(p_twag->Image);
 	}
@@ -754,6 +766,18 @@ void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 
 
 void CTileDetectorMFCDlg::OnEnChangeTbThreshod()
+{
+	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbLedFrom()
+{
+	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbLedTo()
 {
 	UpdateData(true);
 }

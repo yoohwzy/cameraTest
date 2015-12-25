@@ -15,7 +15,7 @@ class BlocksDetector
 {
 
 public:
-	BlocksDetector(cv::Mat& Img);
+	BlocksDetector(cv::Mat& Img, int _ledStartX = 0, int _ledEndX = 4095);
 	~BlocksDetector();
 
 	enum BorderType{
@@ -46,11 +46,6 @@ public:
 	cv::Mat drowDebugResult;
 #endif
 
-	//拟合直线求出的焦点ABCD
-	cv::Point A;
-	cv::Point B;
-	cv::Point C;
-	cv::Point D;
 
 	vector < cv::Point > LeftBorder;
 	Block::Line LeftLine;
@@ -63,7 +58,8 @@ public:
 
 private:
 	cv::Mat img;
-
+	int ledStartX = 0;
+	int ledEndX = 4095;
 	vector<cv::Point> tmpLeftList;
 	vector<cv::Point> allLeftList;//记录所有找到的点，预测用
 	vector<cv::Point> tmpRightList;
