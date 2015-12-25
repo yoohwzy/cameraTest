@@ -15,15 +15,18 @@ bool Consumer::StartNewProces(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	//if (IsProcessing) return false;
+	printf_globle("if (img.rows == 0 || img.cols == 0)\r\n");
 
 	//将采集到的图像保存一份副本，并灰度化
 	//originalImg.release();
 	originalImg = img.clone();
-	if (originalImg.channels() == 3)
-		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
-
 	printf_globle("Consumer Img Clone\r\n");
+	if (originalImg.channels() == 3)
+	{
+		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
+		printf_globle("Consumer cvtColor\r\n");
+	}
+
 
 	p_block = new Block(globle_var::Width, globle_var::FrameCount);
 	printf_globle("Consumer new Block\r\n");

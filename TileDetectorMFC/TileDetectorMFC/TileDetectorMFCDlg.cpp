@@ -411,6 +411,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 	m_Info += msg;
 
 	CString clog = L"\r\n";
+	img_index = p_consumer->GrabbingIndex;
 	if (wParam == 0)
 	{
 		img_on_show.release();
@@ -494,16 +495,17 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 		UpdateData(false);
 	}
 
-	img_index = p_consumer->GrabbingIndex;
 	line(img_on_show, p_consumer->p_block->A, p_consumer->p_block->B, cv::Scalar(0, 255, 0), 2);
 	line(img_on_show, p_consumer->p_block->A, p_consumer->p_block->D, cv::Scalar(255, 0, 0), 2);
 	line(img_on_show, p_consumer->p_block->C, p_consumer->p_block->B, cv::Scalar(255, 255, 0), 2);
 	line(img_on_show, p_consumer->p_block->C, p_consumer->p_block->D, cv::Scalar(0, 255, 255), 2);
 	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
 
-	delete p_consumer;
-	p_consumer = NULL;
-
+	if (p_consumer != NULL)
+	{
+		delete p_consumer;
+		p_consumer = NULL;
+	}
 	IsConsumerProcessing = false;
 	clog += "\r\n";
 	LogHelper::Log(clog);
