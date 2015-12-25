@@ -34,6 +34,8 @@ public:
 	//根据ABCD四个点算出四个边
 	bool ABCD2Lines();
 
+	void ABCDAdjust();
+
 	cv::Point GetPonintByX(int x, Line *l);
 	cv::Point GetPonintByY(int y, Line *l);
 
