@@ -5,7 +5,7 @@
 
 Consumer::Consumer(HWND _hwnd){
 	hwnd = _hwnd;
-	_hwnd = NULL;
+	//_hwnd = NULL;
 };
 bool Consumer::StartNewProces(cv::Mat img)
 {
@@ -15,7 +15,7 @@ bool Consumer::StartNewProces(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (IsProcessing) return false;
+	//if (IsProcessing) return false;
 
 	//将采集到的图像保存一份副本，并灰度化
 	//originalImg.release();
@@ -23,8 +23,10 @@ bool Consumer::StartNewProces(cv::Mat img)
 	if (originalImg.channels() == 3)
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
 
+	printf_globle("Consumer Img Clone\r\n");
 
 	p_block = new Block(globle_var::Width, globle_var::FrameCount);
+	printf_globle("Consumer new Block\r\n");
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
 
@@ -37,7 +39,7 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (IsProcessing) return false;
+	//if (IsProcessing) return false;
 
 	//将采集到的图像保存一份副本，并灰度化
 	originalImg.release();
