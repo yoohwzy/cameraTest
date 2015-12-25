@@ -40,7 +40,7 @@ public:
 
 public:
 	int GrabbingIndex = 0;
-
+	int ConsumerThreshod = 0;
 	Faults faults;
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;
@@ -71,8 +71,9 @@ public:
 		}
 	}
 
-private:
 	Block *p_block = NULL;
+
+private:
 	Measurer *p_measurer = NULL;
 	HWND hwnd = NULL;//¸¸´°¿Ú¾ä±ú
 	void processingThread();
