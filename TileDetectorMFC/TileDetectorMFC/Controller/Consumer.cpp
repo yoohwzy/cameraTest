@@ -5,25 +5,31 @@
 
 Consumer::Consumer(HWND _hwnd){
 	hwnd = _hwnd;
-	_hwnd = NULL;
+	//_hwnd = NULL;
 };
 bool Consumer::StartNewProces(cv::Mat img)
 {
+	printf_globle("Consumer StartNewProces\r\n");
 	if (img.rows == 0 || img.cols == 0)
 	{
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (IsProcessing) return false;
+	printf_globle("if (img.rows == 0 || img.cols == 0)\r\n");
 
 	//将采集到的图像保存一份副本，并灰度化
-	originalImg.release();
+	//originalImg.release();
 	originalImg = img.clone();
+	printf_globle("Consumer Img Clone\r\n");
 	if (originalImg.channels() == 3)
+	{
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
+		printf_globle("Consumer cvtColor\r\n");
+	}
 
 
 	p_block = new Block(globle_var::Width, globle_var::FrameCount);
+	printf_globle("Consumer new Block\r\n");
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
 
@@ -36,7 +42,7 @@ bool Consumer::StartNewProces4Calibraion(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	if (IsProcessing) return false;
+	//if (IsProcessing) return false;
 
 	//将采集到的图像保存一份副本，并灰度化
 	originalImg.release();
@@ -56,8 +62,7 @@ void Consumer::processingThread()
 
 
 
-	//清空
-	faults.Clear();
+	//faults.Clear();
 	IsProcessing = true;
  
 	//IsProcessing = false;
@@ -71,38 +76,38 @@ void Consumer::processingThread()
 
 
 	////获取二值化图像
-	//Processor::Binaryzation(DetectedImg);
-
-	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	//ss << GrabbingIndex << " " << "Binaryzation：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	//printf_globle(ss.str());
-	//ss.str("");
-	//t = (double)cv::getTickCount();
-
-	//Processor::Gaussian_Blur(DetectedImg);
-
-	//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	//ss << GrabbingIndex << " " << "Gaussian_Blur：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	//printf_globle(ss.str());
-	//ss.str("");
-	//t = (double)cv::getTickCount();
+	if (grayImg.cols == 0)
+	{
+		printf_globle("Img Empty!\r\n");
+	}
+	cv::Mat threshodImg;
+	cv::threshold(grayImg, threshodImg, ConsumerThreshod, 255, 0);
+	cv::Mat threshodImgHight;
+	cv::threshold(grayImg, threshodImgHight, ConsumerThreshodHight, 255, 0);
 
 
 	double t = 0;
-	cv::Mat DetectedImg = originalImg;
-
 
 	//瓷砖粗定位
 	if (1 == 1)//使用if隔绝局部变量
 	{
-		BlocksDetector bd = BlocksDetector(DetectedImg);
+		BlocksDetector bd = BlocksDetector(threshodImg, ConsumerLedStartX, ConsumerLedEndX);
 
 		t = (double)cv::getTickCount();
 		//BlocksDetector加入判断是否检测到完整瓷砖
-		if (!bd.Start() ||
-			!bd.StartUP_DOWN(BlocksDetector::Up) || 
-			!bd.StartUP_DOWN(BlocksDetector::Down))
+		bool left_right = bd.Start();
+		bool up = bd.StartUP_DOWN(BlocksDetector::Up);
+		bool down = bd.StartUP_DOWN(BlocksDetector::Down);
+		if (!left_right ||
+			!up ||
+			!down)
 		{
+			if (!left_right)
+				printf_globle("左右未找到\r\n");
+			else if (!up)
+				printf_globle("上未找到\r\n");
+			else if (!down)
+				printf_globle("下未找到\r\n");
 			IsProcessing = false;
 			sendMsg(0, 1);
 			printf_globle(Consumer::GetErrorDescription(1));
@@ -117,12 +122,19 @@ void Consumer::processingThread()
 		p_block->RightLine = bd.RightLine;
 
 
+		//判断各点坐标是否小于0或大于宽度
 		if (!p_block->Lines2ABCD())
 		{
-			IsProcessing = false;
-			sendMsg(0, 2);
-			printf_globle(Consumer::GetErrorDescription(2));
-			return;
+			printf_globle("瓷砖有边角位于图片外\r\n");
+			p_block->ABCDAdjust();
+			//line(originalImg, p_block->A, p_block->B, cv::Scalar(0, 255, 0), 5);
+			//line(originalImg, p_block->A, p_block->D, cv::Scalar(255, 0, 0), 5);
+			//line(originalImg, p_block->C, p_block->B, cv::Scalar(255, 255, 0), 5);
+			//line(originalImg, p_block->C, p_block->D, cv::Scalar(0, 255, 255), 5);
+			//IsProcessing = false;
+			//sendMsg(0, 2);
+			//printf_globle(Consumer::GetErrorDescription(2));
+			//return;
 		}
 
 		//ss << "p_block->ABCD()" << endl;
@@ -136,11 +148,11 @@ void Consumer::processingThread()
 
 
 	//若没有则初始化定标
-	if (!IsCalibration && p_measurer == NULL)
-	{
-		p_measurer = new Measurer(p_block, 300, 600);
-		p_measurer->ObserveCalibration();
-	}
+	//if (!IsCalibration && p_measurer == NULL)
+	//{
+	//	p_measurer = new Measurer(p_block, 300, 600);
+	//	p_measurer->ObserveCalibration();
+	//}
 	
 
 
@@ -151,7 +163,14 @@ void Consumer::processingThread()
 	//瓷砖精确定位  &&  崩边检测
 	if (2 == 2)
 	{
-		EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
+		Block tmpb = Block(p_block->imageWidth, p_block->imageHeight);
+		tmpb.LeftLine = p_block->LeftLine;
+		tmpb.RightLine = p_block->RightLine;
+		tmpb.UpLine = p_block->UpLine;
+		tmpb.DownLine = p_block->DownLine;
+		tmpb.Lines2ABCD();
+		EdgeDetector ed = EdgeDetector(threshodImgHight, &tmpb, &faults);
+		//EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
 		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -165,9 +184,6 @@ void Consumer::processingThread()
 		ss.str("");
 	}
 
-	//IsProcessing = false;
-	//sendMsg(0, 0);
-	//return;
 
 
 	//定标分支
@@ -186,20 +202,20 @@ void Consumer::processingThread()
 	}
 	else//缺陷检测分支
 	{
-		t = (double)cv::getTickCount();
-		EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		//t = (double)cv::getTickCount();
+		//EdgeInnerDetctor eid = EdgeInnerDetctor(grayImg, p_block, &faults);
+		//t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
-		if (faults.SomethingBigs.size() > 0)
-		{
-			ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
-			printf_globle(ss.str());
-			ss.str("");
-		}
+		//if (faults.SomethingBigs.size() > 0)
+		//{
+		//	ss << GrabbingIndex << " " << "上下边内部有缺陷，数量：" << faults.SomethingBigs.size() << endl;
+		//	printf_globle(ss.str());
+		//	ss.str("");
+		//}
 
-		ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		printf_globle(ss.str());
-		ss.str("");
+		//ss << GrabbingIndex << " " << "EdgeInnerDetctor：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		//printf_globle(ss.str());
+		//ss.str("");
 
 
 

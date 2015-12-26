@@ -56,7 +56,6 @@ static void printf_globle(stringstream ss)
 
 
 
-//#define OUTPUT_DEBUG_INFO 0
 
 
 

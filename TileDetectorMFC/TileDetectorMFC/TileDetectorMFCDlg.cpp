@@ -60,6 +60,9 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , m_Info(_T(""))
 , m_VirtualCamera(_T(""))
 , img_index(0)
+, consumerThreshod(0)
+, consumerLedStartX(0)
+, consumerLedEndX(0)
 {
 	printf_globle("");
 }
@@ -71,6 +74,12 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_TB_INFO, m_Info);
 	DDX_Text(pDX, IDC_TB_VirtualCamera, m_VirtualCamera);
 	DDX_Text(pDX, IDC_LABLE_IMG_Index, img_index);
+	DDX_Text(pDX, IDC_TB_THRESHOD, consumerThreshod);
+	DDV_MinMaxInt(pDX, consumerThreshod, 0, 255);
+	DDX_Text(pDX, IDC_TB_LED_FROM, consumerLedStartX);
+	DDV_MinMaxInt(pDX, consumerLedStartX, 0, 4094);
+	DDX_Text(pDX, IDC_TB_LED_TO, consumerLedEndX);
+	DDV_MinMaxInt(pDX, consumerLedEndX, 1, 4095);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -88,6 +97,9 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
+	ON_EN_CHANGE(IDC_TB_THRESHOD, &CTileDetectorMFCDlg::OnEnChangeTbThreshod)
+	ON_EN_CHANGE(IDC_TB_LED_FROM, &CTileDetectorMFCDlg::OnEnChangeTbLedFrom)
+	ON_EN_CHANGE(IDC_TB_LED_TO, &CTileDetectorMFCDlg::OnEnChangeTbLedTo)
 END_MESSAGE_MAP()
 
 
@@ -127,7 +139,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	//读取参数
 	globle_var::InitSetting(true);
-	globle_var::VirtualCameraFileName = "1杂质凹点A.jpg";
+	globle_var::VirtualCameraFileName = "1_o原图.jpg";
 
 	m_VirtualCamera = globle_var::VirtualCameraFileName.c_str();
 
@@ -145,6 +157,10 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 		p_twag->StopWatch();
 	}
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
+
+	consumerThreshod = 5;
+	consumerLedStartX = 0;
+	consumerLedEndX = 4095;
 
 	UpdateData(false);
 
@@ -255,6 +271,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//	cv::waitKey(0);
 	//}
 
+
+	cv::Mat originalclone = p_twag->OriginalImage.clone();
 	m_Info = _T("");
 	//运行消费者进程处理图像
 	if (p_consumer != NULL && p_consumer->IsProcessing == false)
@@ -279,10 +297,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//}
 	//return 0;
 
-	//if (p_twag->Image.cols > 0)
-	//{
-	//	DrawPicToHDC(p_twag->Image, IDC_PIC_Sample);
-	//}
+
 
 	//if (!p_twag->ManualTigger())
 	//{
@@ -295,12 +310,26 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//	UpdateData(false);
 	//}
 	//return 0;
+	
 
-	p_consumer = new Consumer(this->GetSafeHwnd());
-	p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
-	IsConsumerProcessing = true;
-	p_consumer->StartNewProces(p_twag->Image);
-
+	UpdateData(true);
+	if (IsDlgButtonChecked(IDC_CB_RUN_CONSUMER) == BST_CHECKED)
+	{
+		p_consumer = new Consumer(this->GetSafeHwnd());
+		p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
+		p_consumer->ConsumerThreshod = consumerThreshod;
+		p_consumer->ConsumerLedStartX = consumerLedStartX;
+		p_consumer->ConsumerLedEndX = consumerLedEndX;
+		IsConsumerProcessing = true;
+		p_consumer->StartNewProces(p_twag->Image);
+	}
+	else if (p_twag->Image.cols > 0)
+	{
+		img_on_show.release();
+		img_on_show = p_twag->Image.clone();
+		img_index = p_twag->GrabbingIndex;
+		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+	}
 	//delete p_consumer;
 	//p_consumer = NULL;
 	//IsConsumerProcessing = false;
@@ -310,11 +339,6 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	//}
 	//return 0;
 
-
-	CString msg;
-	msg.Format(_T("%d 采图完成！\r\n"), p_twag->GrabbingIndex);
-	m_Info += msg;
-	UpdateData(false);
 	 
 
 
@@ -327,7 +351,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		stringstream ss;
 		UpdateData(false);
 		ss << "samples/" << p_twag->GrabbingIndex << "_o原图.jpg";
-		cv::imwrite(ss.str(), p_twag->OriginalImage);
+		cv::imwrite(ss.str(), originalclone);
 
 		m_Info += _T("保存完成\r\n");
 		UpdateData(false);
@@ -384,9 +408,10 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 
 	CString msg;
 	msg.Format(_T("%d 处理完成！\r\n"), p_consumer->GrabbingIndex);
-	m_Info += msg;
+	m_Info = msg;
 
 	CString clog = L"\r\n";
+	img_index = p_consumer->GrabbingIndex;
 	if (wParam == 0)
 	{
 		img_on_show.release();
@@ -462,17 +487,25 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			}
 		}
 		UpdateData(false);
-		img_index = p_twag->GrabbingIndex;
-		DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+
 	}
 	else
 	{
 		m_Info += Consumer::GetErrorDescription(subtype).c_str();
 		UpdateData(false);
 	}
-	delete p_consumer;
-	p_consumer = NULL;
 
+	line(img_on_show, p_consumer->p_block->A, p_consumer->p_block->B, cv::Scalar(0, 255, 0), 2);
+	line(img_on_show, p_consumer->p_block->A, p_consumer->p_block->D, cv::Scalar(255, 0, 0), 2);
+	line(img_on_show, p_consumer->p_block->C, p_consumer->p_block->B, cv::Scalar(255, 255, 0), 2);
+	line(img_on_show, p_consumer->p_block->C, p_consumer->p_block->D, cv::Scalar(0, 255, 255), 2);
+	DrawPicToHDC(img_on_show, IDC_PIC_Sample);
+
+	if (p_consumer != NULL)
+	{
+		delete p_consumer;
+		p_consumer = NULL;
+	}
 	IsConsumerProcessing = false;
 	clog += "\r\n";
 	LogHelper::Log(clog);
@@ -731,4 +764,22 @@ void CTileDetectorMFCDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 			img_big_flag = false;//标记不放大图像
 		}
 	}
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbThreshod()
+{
+	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbLedFrom()
+{
+	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbLedTo()
+{
+	UpdateData(true);
 }

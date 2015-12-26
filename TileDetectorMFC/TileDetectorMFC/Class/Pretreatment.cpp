@@ -27,14 +27,14 @@ bool SortBysize(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊ
 bool WhetherLine(Mat &oneImg,Mat &G_Img,bool cor,bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
 {
 	vector<Point> maxV_white_Points;
-	if (countNonZero(oneImg) >= 2)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
+	if (countNonZero(oneImg) >= 1)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
 	{
 		if (cor == 1)
 		{
 			for (int i = 0; i < oneImg.cols - 1; i++)
 			{
 				if (oneImg.at<uchar>(0, i) == 255 && oneImg.at<uchar>(0, i + 1) == 0)
-					maxV_white_Points.push_back(Point(i + 0.2*oneImg.cols, 0));
+					maxV_white_Points.push_back(Point(i + 0.2*G_Img.cols, 0));
 			}
 		}
 		else
@@ -42,7 +42,7 @@ bool WhetherLine(Mat &oneImg,Mat &G_Img,bool cor,bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ
 			for (int i = 0; i < oneImg.rows - 1; i++)
 			{
 				if (oneImg.at<uchar>(i, 0) == 255 && oneImg.at<uchar>(i + 1, 0) == 0)
-					maxV_white_Points.push_back(Point(0, i + 0.2*oneImg.rows));
+					maxV_white_Points.push_back(Point(0, i + 0.2*G_Img.rows));
 			}
 		}
 	}
@@ -119,6 +119,8 @@ int otsuThreshold(Mat &frame, MatND hist)//¾Ö²¿¶þÖµ»¯µÄãÐÖµÑ¡È¡
 
 	}
 	Point max = Point(0, 0);
+	if (grayVlist.size() == 0)
+		return frame.at<uchar>(0, 0);
 	for (int i = 0; i < grayVlist.size(); i++)
 	{
 		int j = grayVlist[i].size();
@@ -320,24 +322,24 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		{
 			continue;
 		}
-		int k = 1;
-		Mat oneImg;
-		if (growImg.rows>growImg.cols)
-		{
-			oneImg = growImg(Range(1, 1), Range::all());
-		}
-		else
-		{
-			oneImg = growImg(Range::all(), Range(1, 1));
-			k = 0;
-		}
-		reduce(growImg, oneImg, k, CV_REDUCE_AVG);
-		double maxV_white;
-		minMaxLoc(oneImg, NULL, &maxV_white);
-		int white_range = countNonZero(oneImg);
-		maxV_white = (k == 1) ? growImg.rows * maxV_white : growImg.cols * maxV_white;
-		maxV_white /= 255;
-		if (1.5*whitenum / white_range > maxV_white || 2 * whitenum < growT_RECT.width*growT_RECT.height)
+		//int k = 1;
+		//Mat oneImg;
+		//if (growT_RECT.height>growT_RECT.width)
+		//{
+		//	oneImg = growImg(Range(1, 1), Range::all());
+		//}
+		//else
+		//{
+		//	oneImg = growImg(Range::all(), Range(1, 1));
+		//	k = 0;
+		//}
+		//reduce(growImg, oneImg, k, CV_REDUCE_AVG);
+		//double maxV_white;
+		//minMaxLoc(oneImg, NULL, &maxV_white);
+		//int white_range = countNonZero(oneImg);
+		//maxV_white = (k == 1) ? growImg.cols * maxV_white : growImg.rows * maxV_white;
+		//maxV_white /= 255;//°×µã¸öÊý
+		if (/*1.5*whitenum / white_range > maxV_white ||*/ 2 * whitenum < growT_RECT.width*growT_RECT.height)
 		{
 			continue;
 		}
@@ -357,17 +359,21 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			continue;
 		if (2 * min_v > avgmean[0])
 			continue;
+		mount = mean(ano_boxImg, growImg);
 		bitwise_and(ano_boxImg, growImg, ano_boxImg);
-		threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + min_v), 255, 0);
+		threshold(ano_boxImg, ano_boxImg, 0.5*(mount[0] + min_v), 255, 0);
 		bitwise_not(ano_boxImg, ano_boxImg, growImg);
 		vector<vector<cv::Point>> lowTcontour;
-		findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		vector<Vec4i> hierarchy;
+		findContours(ano_boxImg, lowTcontour, hierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 		int size_v = 1;
 		sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
 		for (size_t j = 1; j < lowTcontour.size(); j++)
 		{
-			if (contourArea(lowTcontour[0]) > 500 * contourArea(lowTcontour[j]))
+			if (contourArea(lowTcontour[0]) > 500 * contourArea(lowTcontour[j]) || lowTcontour[j].size() <= 6)
 				break;
+			//if (hierarchy[j][3] != 0)
+			//	continue;
 			else
 				size_v++;
 		}
@@ -384,6 +390,21 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			hole.diameter = growT_RECT.height;
 		else
 			hole.diameter = growT_RECT.height;
+  		if (hole.diameter < 40)
+		{
+			bitwise_and(ready_boxImg, mask_point_ImgROI, ano_boxImg);
+			threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + max_v), 255, 0);
+			lowTcontour.clear();
+			findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+			sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+			if (lowTcontour.size() != 0)
+			{
+				if (contourArea(lowTcontour[0]) < 0.1*whitenum || contourArea(lowTcontour[0]) < 6)
+					continue;
+			}
+			else
+				continue;
+		}
 		Point hole_torect_a(hole.position.x - 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
 		Point hole_torect_b(hole.position.x - 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
 		Point hole_torect_c(hole.position.x + 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
@@ -658,6 +679,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
 	Canny(MaskImg, MaskImg, 40, 50);
+	Mat Mask_temp = MaskImg.clone();
 	vector<vector<Point>> Maskcontours;
 	findContours(MaskImg, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	if (Maskcontours.size() != 0)
@@ -670,6 +692,9 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 				if (Maskcontours[i].size() > 30)
 				{
 					Rect mask_rect = boundingRect(Maskcontours[i]);
+					int th_num = countNonZero(Mask_temp(Rect(mask_rect)));
+					if (th_num < 1.5*mask_rect.height || th_num < 1.5*mask_rect.width)
+						continue;
 					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
 					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
 					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_small.cols) ? 4 * mask_rect.width + 32 : Mask_result_small.cols;

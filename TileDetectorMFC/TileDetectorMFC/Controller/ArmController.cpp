@@ -28,7 +28,7 @@ void ArmController::tickTick()
 {
 	//bool emptyFlag = true; //标记待触发为空
 	bool workFlag = false; //标记上一轮工作状态
-	while (true)
+	while (stopFlag)
 	{
 		//emptyFlag = true;
 		workFlag = false;

@@ -9,7 +9,7 @@ EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
 	_faults = NULL;
 	src = img;
 
-
+	
 	A = p_block->A;
 
 	B = p_block->B;
@@ -56,11 +56,11 @@ EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
 		cvtColor(downROI, downROI, CV_BGR2GRAY);
 
 
-	Mat leftROI1, rightROI1, upROI1, downROI1;
-	leftROI.copyTo(leftROI1);
-	rightROI.copyTo(rightROI1);
-	upROI.copyTo(upROI1);
-	downROI.copyTo(downROI1);
+	//Mat leftROI1, rightROI1, upROI1, downROI1;
+	//leftROI.copyTo(leftROI1);
+	//rightROI.copyTo(rightROI1);
+	//upROI.copyTo(upROI1);
+	//downROI.copyTo(downROI1);
 	/*leftROI=src(Rect(xleft, yleft, left_width, left_height));
 	rightROI=src(Rect(xright, yright, right_width, right_height));
 	upROI=src(Rect(xup, yup, up_width, up_height));
@@ -76,10 +76,10 @@ EdgeDetector::EdgeDetector(Mat& img, Block *_block, Faults *_faults)
 	ROI.push_back(rightROI);
 	ROI.push_back(upROI);
 
-	ROI1.push_back(leftROI1);
-	ROI1.push_back(downROI1);
-	ROI1.push_back(rightROI1);
-	ROI1.push_back(upROI1);
+	//ROI1.push_back(leftROI1);
+	//ROI1.push_back(downROI1);
+	//ROI1.push_back(rightROI1);
+	//ROI1.push_back(upROI1);
 
 
 }
@@ -90,10 +90,10 @@ void EdgeDetector::start()
 
 	double t = (double)cv::getTickCount();*/
 	// 预处理
-	for (int i = 0; i < ROI.size(); i++)
-	{
-		Dynamic_range(ROI[i]);
-	}
+	//for (int i = 0; i < ROI.size(); i++)
+	//{
+	//	Dynamic_range(ROI[i]);
+	//}
 	/*t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	cout << "预处理time=" << t << "\t";
 
@@ -814,13 +814,21 @@ void EdgeDetector::RectAdjust(cv::Mat img,int &x, int& y, int& width, int& heigh
 	{
 		y = imgheight - height - 1;
 	}
-
-	if (x + width > imgwidth)
+	if (width > imgwidth)
+	{
+		x = 0;
+		width = imgwidth;
+	}
+	else if (x + width > imgwidth)
 	{
 		x = (imgwidth - width);
 	}
-
-	if (y + height > imgheight)
+	if (height > imgheight)
+	{
+		y = 0;
+		height = imgheight;
+	}
+	else if (y + height > imgheight)
 	{
 		y = (imgheight - height);
 	}

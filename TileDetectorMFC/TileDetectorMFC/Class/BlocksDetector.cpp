@@ -2,26 +2,32 @@
 
 
 
-BlocksDetector::BlocksDetector(cv::Mat& Img)
+BlocksDetector::BlocksDetector(cv::Mat& Img, int _ledStartX, int _ledEndX)
 {
+	ledStartX = _ledStartX;
+	ledEndX = _ledEndX;
 	img = Img;
+
 
 	//初始化左边缘检测参数
 	leftY = 0;//在第几行检测
-	leftX = ORANGE_MARGIN_ROW;//检测的中点
+	leftX = ledStartX + ORANGE_RANGE_ROW;//检测的中点
 	leftRnage = ORANGE_RANGE_ROW;//在中点周围多少像素内检测
 	leftNoneCount = 0;//连续没有找到边缘的数量。
 	leftNeedReFind = false;//对该行是否需要扩大range重新搜索
 
 	rightY = 0;//在第几行检测
-	rightX = img.cols - ORANGE_MARGIN_ROW;;//检测的中点
+	rightX = ledEndX - ORANGE_RANGE_ROW;;//检测的中点
 	rightRnage = ORANGE_RANGE_ROW;//在中点周围多少像素内检测
 	rightNoneCount = 0;//连续没有找到边缘的数量。
 	rightNeedReFind = false;//对该行是否需要扩大range重新搜索
 
 
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
+	printf_globle("BlocksDetector::Init()!\r\n");
+
+
+#ifdef BD_OUTPUT_DEBUG_INFO
+	if (BD_OUTPUT_DEBUG_INFO)
 	{
 		if (img.channels() == 1)
 		{
@@ -44,7 +50,8 @@ BlocksDetector::~BlocksDetector()
 
 bool BlocksDetector::Start()
 {
-	A = B = C = D = cv::Point(0, 0);
+	printf_globle("BlocksDetector::Start()!\r\n");
+
 
 	if (1 == 1)//用IF隔离局部代码
 	{
@@ -60,6 +67,7 @@ bool BlocksDetector::Start()
 					leftNeedReFind = false;
 				}
 		}
+
 		//若没有找到边缘，停止程序。
 		if (LeftBorder.size() < 2)
 			return false;
@@ -86,8 +94,8 @@ bool BlocksDetector::Start()
 
 
 
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			//debug绘图
 			for (size_t i = 0; i < LeftBorder.size(); i++)
@@ -111,7 +119,7 @@ bool BlocksDetector::Start()
 			//	cv::circle(drowDebugResult, LeftDown[i], 30, cv::Scalar(100, 255, 30), 1);
 
 
-			cv::line(drowDebugResult, cv::Point((img.rows - LeftLine.y0) / LeftLine.k + LeftLine.x0, img.rows), cv::Point((0 - LeftLine.y0) / LeftLine.k + LeftLine.x0, 0), cv::Scalar(180, 100, 255), 1);
+			cv::line(drowDebugResult, cv::Point((drowDebugResult.rows - LeftLine.y0) / LeftLine.k + LeftLine.x0, drowDebugResult.rows), cv::Point((0 - LeftLine.y0) / LeftLine.k + LeftLine.x0, 0), cv::Scalar(180, 100, 255), 1);
 			//cv::line(drowDebugResult, cv::Point(x0, y0), cv::Point(leftLine[2] + 2000 * leftLine[0], leftLine[3] + 2000 * leftLine[1]), cv::Scalar(255, 255, 255), 3);
 
 		}
@@ -156,8 +164,8 @@ bool BlocksDetector::Start()
 		std::sort(RightBorder.begin(), RightBorder.end(), ORDER_BY_Y_ASC);
 
 
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			for (size_t i = 0; i < RightBorder.size(); i++)
 				cv::circle(drowDebugDetectLR, RightBorder[i], 5, cv::Scalar(0, 0, 255), 2);
@@ -174,7 +182,7 @@ bool BlocksDetector::Start()
 			//for (size_t i = 0; i < RightDown.size(); i++)
 			//	cv::circle(drowDebugResult, RightDown[i], 30, cv::Scalar(100, 255, 30), 1);
 
-			cv::line(drowDebugResult, cv::Point((img.rows - RightLine.y0) / RightLine.k + RightLine.x0, img.rows), cv::Point((0 - RightLine.y0) / RightLine.k + RightLine.x0, 0), cv::Scalar(180, 100, 255), 1);
+			cv::line(drowDebugResult, cv::Point((drowDebugResult.rows - RightLine.y0) / RightLine.k + RightLine.x0, drowDebugResult.rows), cv::Point((0 - RightLine.y0) / RightLine.k + RightLine.x0, 0), cv::Scalar(180, 100, 255), 1);
 
 		}
 #endif
@@ -182,6 +190,7 @@ bool BlocksDetector::Start()
 	std::sort(allLeftList.begin(), allLeftList.end(), ORDER_BY_Y_ASC);
 	std::sort(allRightList.begin(), allRightList.end(), ORDER_BY_Y_ASC);
 
+	printf_globle("left right ok\r\n");
 	return true;
 }
 bool BlocksDetector::StartUP_DOWN(BorderType bt)
@@ -190,9 +199,26 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 	if (allLeftList.size() == 0 || allRightList.size() == 0)
 		return false;
 	if (bt == BlocksDetector::Up && allLeftList[0].y == 0 && allRightList[0].y == 0)
-		return false;
-	else if (bt == BlocksDetector::Down && !(allLeftList[allLeftList.size() - 1].y > 0 && allLeftList[allLeftList.size() - 1].y < (img.rows - SUM_COUNT) && allRightList[allRightList.size() - 1].y>0 && allRightList[allRightList.size() - 1].y < (img.rows - SUM_COUNT)))
-		return false;
+	{
+		//这种情况认为上边界为y=0
+		UpLine.dx = 0;
+		UpLine.dy = 0;
+		UpLine.k = 0;
+		UpLine.x0 = 0;
+		UpLine.y0 = 0;
+		return true;
+	}
+	else if (bt == BlocksDetector::Down &&
+		allLeftList[allLeftList.size() - 1].y == (img.rows - 1) && 
+		allRightList[allRightList.size() - 1].y < (img.rows - 1))
+	{
+		DownLine.dx = 0;
+		DownLine.dy = 0;
+		DownLine.k = 0;
+		DownLine.x0 = 0;
+		DownLine.y0 = img.rows - 1;
+		return true;
+	}
 	vector<cv::Point> *targetBorder;
 	vector<cv::Point> *tmptargetList;
 	vector<cv::Point> *alltargetList;
@@ -282,8 +308,8 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 	std::sort((*targetBorder).begin(), (*targetBorder).end(), ORDER_BY_X_ASC);
 
 
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+	if (BD_OUTPUT_DEBUG_INFO)
 	{
 		//debug绘图
 		for (size_t i = 0; i < (*targetBorder).size(); i++)
@@ -293,7 +319,7 @@ bool BlocksDetector::StartUP_DOWN(BorderType bt)
 		}
 		for (size_t i = 0; i < (*tmptargetList).size(); i++)
 			cv::circle(drowDebugResult, (*tmptargetList)[i], 8, cv::Scalar(0, 128, 120), 2);
-		cv::line(drowDebugResult, cv::Point(0, (*line).k * (0 - (*line).x0) + (*line).y0), cv::Point(img.cols, (*line).k * (img.cols - (*line).x0) + (*line).y0), cv::Scalar(180, 255, 100), 1);
+		cv::line(drowDebugResult, cv::Point(0, (*line).k * (0 - (*line).x0) + (*line).y0), cv::Point(drowDebugResult.cols, (*line).k * (drowDebugResult.cols - (*line).x0) + (*line).y0), cv::Scalar(180, 255, 100), 1);
 		//cv::line(drowDebugResult, cv::Point((*line).x0, (*line).y0), cv::Point((*line).x0 + 2000 * (*line).dx, (*line).y0 + 2000 * (*line).dy), cv::Scalar(255, 0, 255), 3);
 
 		//for (size_t i = 0; i < LeftUp.size(); i++)
@@ -317,11 +343,11 @@ int BlocksDetector::DetectOneLineLeft(int y)
 	//判断是否越界
 	if (y < 0 || (y + 3 + 1) >img.rows)
 		return -1;
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+	if (BD_OUTPUT_DEBUG_INFO)
 	{
 		//绘制检测中心点
-		//cv::circle(drowDebugDetectLR, cv::Point(leftX, y), 5, cv::Scalar(0, 255, 255), 3);
+		cv::circle(drowDebugDetectLR, cv::Point(leftX, y), 5, cv::Scalar(0, 255, 255), 3);
 	}
 #endif
 	int x1 = GetEdgeX3(cv::Point(leftX, y), leftRnage, BlocksDetector::Left);
@@ -362,11 +388,11 @@ int BlocksDetector::DetectOneLineRight(int y)
 	//判断是否越界
 	if (y < 0 || (y + 3 + 1) >img.rows)
 		return -1;
-#ifdef OUTPUT_DEBUG_INFO
-	if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+	if (BD_OUTPUT_DEBUG_INFO)
 	{
 		//绘制检测中心点
-		//cv::circle(drowDebugDetectLR, cv::Point(rightX, y), 5, cv::Scalar(0, 255, 255), 3);
+		cv::circle(drowDebugDetectLR, cv::Point(rightX, y), 5, cv::Scalar(0, 255, 255), 3);
 	}
 #endif
 	int x1 = GetEdgeX3(cv::Point(rightX, y), rightRnage, BlocksDetector::Right);
@@ -436,7 +462,7 @@ int BlocksDetector::GetEdgeX3(cv::Point start, int range, BlocksDetector::Border
 	default:
 		break;
 	}
-	if ((a + b + c) > 0 && abs((a + c - b - b)) < 5)
+	if ((a == b && b == c) || ((a + b + c) > 0 && abs((a + c - b - b)) < 5))
 		return ((a + b + c) / 3);
 	return -1;
 }
@@ -447,30 +473,52 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 	//检测算法
 	cv::Mat oneLineGray;
 	int xstart = start.x - range;
-	if (xstart < 0)
-		xstart = 0;
+
+	if (xstart < ledStartX)
+		xstart = ledStartX;
 	int width = range + range;
-	if ((width + xstart) >img.cols - 1)
-		width = img.cols - 1 - xstart;
+	if ((width + xstart) > ledEndX)
+		xstart = ledEndX - width;
+
+
 	if (img.channels() == 1)
 		oneLineGray = img(cv::Rect(xstart, start.y, width, 1));
 	else
 		cv::cvtColor(img(cv::Rect(xstart, start.y, width, 1)), oneLineGray, CV_BGR2GRAY);
 
-	int elementCount = oneLineGray.cols;//每行元素数
+
+	if (isLeft && xstart <= 0 && 
+		oneLineGray.ptr<uchar>(0)[0] >= WHITE_THRESHOD)
+	{
+		//判断x = 0处是否大于二值化阈值WHITE_THRESHOD，若大于则认为瓷砖超过了边界，直接返回ret = 0;
+		if (oneLineGray.ptr<uchar>(0)[1] >= WHITE_THRESHOD && 
+			oneLineGray.ptr<uchar>(0)[2] >= WHITE_THRESHOD && 
+			oneLineGray.ptr<uchar>(0)[3] >= WHITE_THRESHOD)
+			return 0;
+	}
+	if (!isLeft && (width + xstart) >= (img.cols - 1) &&
+		oneLineGray.ptr<uchar>(0)[width - 1] >= WHITE_THRESHOD)
+	{
+		if (oneLineGray.ptr<uchar>(0)[width - 2] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(0)[width - 3] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(0)[width - 4] >= WHITE_THRESHOD)
+			return img.cols - 1;
+	}
+
+
 	int ret = -1;
 	int diff = SUM_THRESHOD;
 
 
-	for (size_t i = sumcount; i < oneLineGray.cols - 1 - sumcount; i++)
+	for (size_t i = 0; i < oneLineGray.cols - 1; i++)
 	{
 		int leftsum = 0;
-		for (size_t ii = i; ii > i - sumcount; ii--)
+		for (size_t ii = i; ii >=0 && ii >(i - sumcount); ii--)
 		{
 			leftsum += oneLineGray.ptr<uchar>(0)[ii];
 		}
 		int rightsum = 0;
-		for (size_t ii = i + 1; ii <= i + sumcount; ii++)
+		for (size_t ii = i + 1; ii < width && ii <= i + sumcount; ii++)
 		{
 			rightsum += oneLineGray.ptr<uchar>(0)[ii];
 		}
@@ -481,8 +529,8 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 			c = leftsum - rightsum;
 
 
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 1] = 255;//填充绿色，表示扫描范围
 			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 0] = 0;//填充绿色，表示扫描范围
@@ -493,8 +541,8 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 		{
 			diff = c;
 			ret = i;
-#ifdef OUTPUT_DEBUG_INFO
-			if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+			if (BD_OUTPUT_DEBUG_INFO)
 			{
 				drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3] = 255;//填充蓝色表示diff超过阈值
 				drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[i * 3 + 1] = 0;
@@ -505,8 +553,8 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 	}
 	if (ret >= 0)
 	{
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[ret * 3 + 2] = 255;//填充红色
 			drowDebugDetectLR(cv::Rect(xstart, start.y, width, 1)).ptr<uchar>(0)[ret * 3 + 1] = 0;
@@ -515,6 +563,8 @@ int BlocksDetector::GetEdgeVertical(cv::Point start, int range, bool isLeft)
 #endif
 		ret += xstart;
 	}
+
+
 	return ret;
 }
 
@@ -538,27 +588,47 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 		cv::cvtColor(img(cv::Rect(start.x, ystart, 1, height)), oneLineGray, CV_BGR2GRAY);
 	
 
+	if (isUp && ystart <= 0)
+	{
+		//判断x = 0处是否大于二值化阈值WHITE_THRESHOD，若大于则认为瓷砖超过了边界，直接返回ret = 0;
+		if (oneLineGray.ptr<uchar>(0)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(1)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(2)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(3)[0] >= WHITE_THRESHOD)
+			return 0;
+	}
+	if (!isUp && (height + ystart) >= (img.rows - 1))
+	{
+		if (oneLineGray.ptr<uchar>(height - 1)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(height - 2)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(height - 3)[0] >= WHITE_THRESHOD &&
+			oneLineGray.ptr<uchar>(height - 4)[0] >= WHITE_THRESHOD)
+			return (img.rows - 1);
+	}
+
+
+
 	int ret = -1;
 	int diff = SUM_THRESHOD;
-#ifdef OUTPUT_DEBUG_INFO
+#ifdef BD_OUTPUT_DEBUG_INFO
 	cv::Mat drowROI;
 	cv::Mat _drowDebugDetectUD = drowDebugDetectUD;
-	if (OUTPUT_DEBUG_INFO)
+	if (BD_OUTPUT_DEBUG_INFO)
 	{
 		drowROI = drowDebugDetectUD(cv::Rect(start.x, ystart, 1, height));
 	}
 #endif
-	for (size_t y = sumcount; y < height - sumcount; y++)
+	for (size_t y = 0; y < height - 1; y++)
 	{
 		int upsum = 0;
-		for (size_t yy = y; yy > y - sumcount; yy--)
+		for (size_t yy = y; yy >= 0 && yy > y - sumcount; yy--)
 		{
-			upsum += oneLineGray.ptr<uchar>(yy)[0] > 5 ? 255 : 0;//TODO:确定要这么干嘛？
+			upsum += oneLineGray.ptr<uchar>(yy)[0];
 		}
 		int downsum = 0;
-		for (size_t yy = y + 1; yy <= y + sumcount; yy++)
+		for (size_t yy = y + 1; yy< height && yy <= y + sumcount; yy++)
 		{
-			downsum += oneLineGray.ptr<uchar>(yy)[0] > 5 ? 255 : 0;
+			downsum += oneLineGray.ptr<uchar>(yy)[0];
 		}
 		int c = 0;
 		if (isUp)
@@ -566,8 +636,8 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 		else
 			c = (upsum - downsum);
 
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			drowROI.ptr<uchar>(y)[1] = 255;//填充绿色
 			drowROI.ptr<uchar>(y)[0] = 0;//填充绿色
@@ -578,8 +648,8 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 		{
 			diff = c;
 			ret = y;
-#ifdef OUTPUT_DEBUG_INFO
-			if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+			if (BD_OUTPUT_DEBUG_INFO)
 			{
 				drowROI.ptr<uchar>(y)[0] = 255;//填充蓝色
 				drowROI.ptr<uchar>(y)[1] = 0;//填充蓝色
@@ -590,8 +660,8 @@ int BlocksDetector::GetEdgeHorizontal(cv::Point start, int range, bool isUp)
 	}
 	if (ret >= 0)
 	{
-#ifdef OUTPUT_DEBUG_INFO
-		if (OUTPUT_DEBUG_INFO)
+#ifdef BD_OUTPUT_DEBUG_INFO
+		if (BD_OUTPUT_DEBUG_INFO)
 		{
 			drowROI.ptr<uchar>(ret)[2] = 255;//填充红色
 			drowROI.ptr<uchar>(ret)[1] = 0;//填充红色

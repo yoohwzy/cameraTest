@@ -12,9 +12,10 @@ using namespace std;
 
 #include "Base\Block.h"
 #include "Base\Faults.h"
-#include "../globle_var.h"
 
-//#define WRITEIMG
+#include <thread>
+
+//#define SAVE_IMG
 
 
 class EdgeInnerDetctor
@@ -30,6 +31,11 @@ private:
 	Block *p_block =  NULL;
 	Faults *p_faults = NULL;
 	cv::Mat image;//Ô­Ê¼Í¼Ïñ
+
+	void doUp();
+	void doDown();
+	void doLeft();
+	void doRight();
 
 	double getFrechetDistance(vector<double> lineA, vector<double> lineB);
 	double getFrechetDistance(cv::Mat lineA, cv::Mat lineB);

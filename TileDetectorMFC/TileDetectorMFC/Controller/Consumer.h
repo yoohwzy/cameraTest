@@ -40,7 +40,10 @@ public:
 
 public:
 	int GrabbingIndex = 0;
-
+	int ConsumerThreshod = 5;
+	int ConsumerThreshodHight = 12;
+	int ConsumerLedStartX = 0;
+	int ConsumerLedEndX = 4095;
 	Faults faults;
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;
@@ -65,14 +68,15 @@ public:
 		switch (subtype)
 		{
 		case 1:return "Î´¼ì²âµ½´É×©";
-		case 2:return "Î´¼ì²âµ½ÍêÕûµÄ´É×©";
+		case 2:return "´É×©°Ú·Å×ËÌ¬´íÎó";
 		default:
 			return "";
 		}
 	}
 
-private:
 	Block *p_block = NULL;
+
+private:
 	Measurer *p_measurer = NULL;
 	HWND hwnd = NULL;//¸¸´°¿Ú¾ä±ú
 	void processingThread();

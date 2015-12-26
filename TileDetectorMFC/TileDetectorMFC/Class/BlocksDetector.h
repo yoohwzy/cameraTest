@@ -6,6 +6,7 @@
 
 #include "Base\Block.h"
 
+//#define BD_OUTPUT_DEBUG_INFO 1
 
 //@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
 //@author VShawn
@@ -14,7 +15,7 @@ class BlocksDetector
 {
 
 public:
-	BlocksDetector(cv::Mat& Img);
+	BlocksDetector(cv::Mat& Img, int _ledStartX = 0, int _ledEndX = 4095);
 	~BlocksDetector();
 
 	enum BorderType{
@@ -38,18 +39,13 @@ public:
 	//bool ABCD();
 
 
-#ifdef OUTPUT_DEBUG_INFO
+#ifdef BD_OUTPUT_DEBUG_INFO
 	//检测过程中的图片
 	cv::Mat drowDebugDetectLR;
 	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
 #endif
 
-	//拟合直线求出的焦点ABCD
-	cv::Point A;
-	cv::Point B;
-	cv::Point C;
-	cv::Point D;
 
 	vector < cv::Point > LeftBorder;
 	Block::Line LeftLine;
@@ -62,7 +58,8 @@ public:
 
 private:
 	cv::Mat img;
-
+	int ledStartX = 0;
+	int ledEndX = 4095;
 	vector<cv::Point> tmpLeftList;
 	vector<cv::Point> allLeftList;//记录所有找到的点，预测用
 	vector<cv::Point> tmpRightList;
@@ -110,14 +107,14 @@ private:
 	 
 
 
-
+	const int WHITE_THRESHOD = 3 * 3;
 
 	 
 
 	//检测边缘时，累加多少个像素点
 	const int SUM_COUNT = 20;
 	//平均每个点之间要差SUM_AVG_THRESHOD才算作是边界，真正的阈值为SUM_COUNT*SUM_AVG_THRESHOD;
-	const int SUM_AVG_THRESHOD = 10;
+	const int SUM_AVG_THRESHOD = 240;
 	const int SUM_THRESHOD = SUM_COUNT * SUM_AVG_THRESHOD;
 
 
@@ -126,7 +123,7 @@ private:
 	//默认启动扫描的中心点，左边为ORANGE_MARGIN_LINE，右边为width-ORANGE_MARGIN_LINE
 	const int ORANGE_MARGIN_ROW = 400;
 	//默认的，对一个左右多少范围内进行扫描，宽度为ORANGE_RANGE_ROW+ORANGE_RANGE_ROW
-	const int ORANGE_RANGE_ROW = 300;
+	const int ORANGE_RANGE_ROW = 400;
 
 	//隔几列采样一次
 	const int COL_SPAN = 100;

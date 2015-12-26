@@ -55,7 +55,8 @@ private:
 	void FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &line_, vector<Vec4f> &line_roi, Vec4f &Fit_Line);
 
 	Mat src;
-	vector<Mat> ROI, ROI1;
+	vector<Mat> ROI;
+	//vector<Mat> ROI1;
 	// 边缘ROI
 	Mat leftROI, upROI, rightROI, downROI;
 	Point A, B, C, D;
@@ -69,7 +70,7 @@ private:
 	int xdown = 0, ydown = 0, down_height = 0, down_width = 0;
 
 	// 点到拟合直线的距离阈值
-	int distance_threld = 6;
+	int distance_threld = 12;
 	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
 	int Edge_threld = 8;
 	// 容忍度阈值
