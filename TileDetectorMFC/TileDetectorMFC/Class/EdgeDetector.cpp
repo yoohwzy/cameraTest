@@ -354,8 +354,11 @@ void EdgeDetector::start()
 								bc.width = edge_deep;
 							}
 							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
-							p_faults->BrokenCorners.push_back(bc);
-							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
+
+
+							if (finalJudge(cv::Rect(bc.position.x - bc.deep, bc.position.y - bc.length / 2, bc.deep * 2, bc.length / 2)))
+								p_faults->BrokenCorners.push_back(bc);
+							//cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
 							break;
 						}
 						else
@@ -374,9 +377,10 @@ void EdgeDetector::start()
 								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_Y())*/;
 								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
 							}
-
-							p_faults->BrokenEdges.push_back(be);
-							cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
+							
+							if (finalJudge(cv::Rect(be.position.x - be.deep, be.position.y - be.length / 2, be.deep * 2, be.length)))
+								p_faults->BrokenEdges.push_back(be);
+							//cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
 							break;
 						}
 					}
@@ -388,6 +392,142 @@ void EdgeDetector::start()
 	//cout << "崩边检测time=" << t << endl;
 	//cout << "start time= " << ((double)cv::getTickCount() - t2) / cv::getTickFrequency() << endl;
 }
+
+bool EdgeDetector::finalJudge(cv::Rect r)
+{
+	if (r.x + r.width >= grayImg.size().width)
+		r.width = grayImg.size().width - 1 - r.x;
+	if (r.y + r.height >= grayImg.size().height)
+		r.height = grayImg.size().height - 1 - r.y;
+
+
+	if (r.width > 500 || r.height > 500)
+	{
+		return false;
+	}
+	int s = r.width * 0.2 * r.height * 0.2;//连通域最小面积
+
+
+	vector<double> counts;
+	for (int vi = ThreshodLow; vi < ThreshodHigh; vi++)
+	{
+		counts.push_back(0);
+	}
+
+	cv::Mat oimg = grayImg(r);
+	for (int i = 0; i < oimg.rows; i++)
+	{
+		uchar* linehead = oimg.ptr<uchar>(i);//每行的起始地址
+		for (int j = 0; j < oimg.cols; j++)
+		{
+			for (int vi = ThreshodLow; vi < ThreshodHigh; vi++)
+			{
+				if (linehead[j] == vi)
+				{
+					counts[vi - ThreshodLow]++;
+					break;
+				}
+			}
+		}
+	}
+	int sum = 0;
+	for (int i = 0; i < counts.size(); i++)
+	{
+		sum += counts[i];
+	}
+	for (int i = 0; i < counts.size(); i++)
+	{
+		counts[i] /= sum;
+	}
+
+	cv::Mat img1 = ThreshodImgLow(r);
+	cv::Mat img2 = ThreshodImgHigh(r);
+	cv::Mat img3 = img1 - img2;
+
+
+	int bigcount1 = 0;
+	int smallcount1 = 0;
+	//去除小的连通域
+	vector<vector<Point>>contours1;
+	findContours(img1.clone(), contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	for (int i = 0; i < contours1.size(); i++)
+	{
+		double cArea = contourArea(contours1[i]);//根据轮廓线求区域面积
+		//TODO:去除小的连通域，连通域阈值如何确定？
+		if (cArea > s)
+		{
+			bigcount1++;
+		}
+		else
+		{
+			smallcount1++;
+		}
+	}
+
+	int bigcount2 = 0;
+	int smallcount2 = 0;
+	//去除小的连通域
+	vector<vector<Point>>contours2;
+	findContours(img2.clone(), contours2, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	for (int i = 0; i < contours2.size(); i++)
+	{
+		double cArea = contourArea(contours2[i]);//根据轮廓线求区域面积
+		//TODO:去除小的连通域，连通域阈值如何确定？
+		if (cArea > s)
+		{
+			bigcount2++;
+		}
+		else
+		{
+			smallcount2++;
+		}
+	}
+
+	int bigcount3 = 0;
+	int smallcount3 = 0;
+	//去除小的连通域
+	vector<vector<Point>>contours3;
+	findContours(img3.clone(), contours3, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	for (int i = 0; i < contours3.size(); i++)
+	{
+		double cArea = contourArea(contours3[i]);//根据轮廓线求区域面积
+		//TODO:去除小的连通域，连通域阈值如何确定？
+		if (cArea > s)
+		{
+			bigcount3++;
+		}
+		else
+		{
+			smallcount3++;
+		}
+	}
+	//判据1
+	if (smallcount1 == 0 && smallcount2 == 0 && smallcount3 < 5 && bigcount3 == 1)
+		return true;
+
+	//判据2
+	double max = counts[0];
+	for (int i = 1; i < counts.size(); i++)
+	{
+		if (counts[i] - counts[i - 1] > max)
+			max = counts[i] - counts[i - 1];
+	}
+	if (max > 0.32 && max < 0.6)
+		return true;
+
+	//判据3
+	if (bigcount3 == 1 && smallcount3 < 10 && smallcount3 > 3)
+		return true;
+
+
+
+
+	return false;
+}
+
+
+
+
 void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G, int B)
 {
 	if (EdgeIndex % 2)
@@ -663,7 +803,7 @@ void EdgeDetector::FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &l
 			}
 			Fit_Line[2] += t1;
 			Fit_Line[3] += t2;
-			DrawLine(i, src, Fit_Line, 200, 200, 100);
+			//DrawLine(i, src, Fit_Line, 200, 200, 100);
 			/*DrawLine(i, image1, Fit_Line, 200, 200, 100);*/
 			line_.push_back(Fit_Line);
 		}

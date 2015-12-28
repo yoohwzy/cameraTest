@@ -116,4 +116,6 @@ public:
 	int consumerLedEndX;
 	afx_msg void OnEnChangeTbLedFrom();
 	afx_msg void OnEnChangeTbLedTo();
+	int consumerThreshodHigh;
+	afx_msg void OnBnClickedCbDoThreeinone();
 };

@@ -26,9 +26,11 @@ public:
 	void start();
 	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
-
-
-
+	cv::Mat grayImg;
+	cv::Mat ThreshodImgHigh;
+	cv::Mat ThreshodImgLow;
+	int ThreshodHigh;
+	int ThreshodLow;
 
 private:
 	Block *p_block = NULL;
@@ -70,11 +72,11 @@ private:
 	int xdown = 0, ydown = 0, down_height = 0, down_width = 0;
 
 	// 点到拟合直线的距离阈值
-	int distance_threld = 20;
+	int distance_threld = 12;
 	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
 	int Edge_threld = 8;
 	// 容忍度阈值
-	int seat = 6;
+	//int seat = 6;
 	int simple = 5;
 	int Pixel_threld = 15;
 
@@ -88,5 +90,8 @@ private:
 
 	//调整ROI区域范围，防止越界
 	void RectAdjust(cv::Mat img,int& x, int& y, int& width, int& height);
+
+
+	bool finalJudge(cv::Rect r);
 };
 

@@ -15,21 +15,17 @@ bool Consumer::StartNewProces(cv::Mat img)
 		printf_globle("拍摄的图片不存在\r\n");
 		return false;
 	}
-	printf_globle("if (img.rows == 0 || img.cols == 0)\r\n");
 
 	//将采集到的图像保存一份副本，并灰度化
 	//originalImg.release();
 	originalImg = img.clone();
-	printf_globle("Consumer Img Clone\r\n");
 	if (originalImg.channels() == 3)
 	{
 		cv::cvtColor(originalImg, grayImg, CV_BGR2GRAY);
-		printf_globle("Consumer cvtColor\r\n");
 	}
 
 
 	p_block = new Block(globle_var::Width, globle_var::FrameCount);
-	printf_globle("Consumer new Block\r\n");
 	std::thread t_processingThread(std::mem_fn(&Consumer::processingThread), this);
 	t_processingThread.detach();
 
@@ -62,8 +58,7 @@ void Consumer::processingThread()
 
 
 
-	//清空
-	faults.Clear();
+	//faults.Clear();
 	IsProcessing = true;
  
 	//IsProcessing = false;
@@ -82,7 +77,9 @@ void Consumer::processingThread()
 		printf_globle("Img Empty!\r\n");
 	}
 	cv::Mat threshodImg;
-	cv::threshold(grayImg, threshodImg, ConsumerThreshod, 255, 0);
+	cv::threshold(grayImg, threshodImg, ConsumerThreshodLow, 255, 0);
+	cv::Mat threshodImgHight;
+	cv::threshold(grayImg, threshodImgHight, ConsumerThreshodHight, 255, 0);
 
 
 	double t = 0;
@@ -126,14 +123,6 @@ void Consumer::processingThread()
 		{
 			printf_globle("瓷砖有边角位于图片外\r\n");
 			p_block->ABCDAdjust();
-			//line(originalImg, p_block->A, p_block->B, cv::Scalar(0, 255, 0), 5);
-			//line(originalImg, p_block->A, p_block->D, cv::Scalar(255, 0, 0), 5);
-			//line(originalImg, p_block->C, p_block->B, cv::Scalar(255, 255, 0), 5);
-			//line(originalImg, p_block->C, p_block->D, cv::Scalar(0, 255, 255), 5);
-			//IsProcessing = false;
-			//sendMsg(0, 2);
-			//printf_globle(Consumer::GetErrorDescription(2));
-			//return;
 		}
 
 		//ss << "p_block->ABCD()" << endl;
@@ -168,8 +157,13 @@ void Consumer::processingThread()
 		tmpb.UpLine = p_block->UpLine;
 		tmpb.DownLine = p_block->DownLine;
 		tmpb.Lines2ABCD();
-		EdgeDetector ed = EdgeDetector(threshodImg, &tmpb, &faults);
+		EdgeDetector ed = EdgeDetector(threshodImgHight, &tmpb, &faults);
 		//EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
+		ed.ThreshodImgHigh = threshodImgHight;
+		ed.ThreshodImgLow = threshodImg;
+		ed.ThreshodHigh = ConsumerThreshodHight;
+		ed.ThreshodLow = ConsumerThreshodLow;
+		ed.grayImg = grayImg;
 		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

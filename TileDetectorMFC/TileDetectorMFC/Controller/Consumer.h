@@ -40,7 +40,8 @@ public:
 
 public:
 	int GrabbingIndex = 0;
-	int ConsumerThreshod = 0;
+	int ConsumerThreshodLow = 5;
+	int ConsumerThreshodHight = 9;
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
 	Faults faults;

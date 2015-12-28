@@ -94,9 +94,9 @@ void TiggerWatcherAndGrabber::StartWatch()
 	if (!IsWatching && p_t_watcher == NULL)
 	{
 		IsWatching = true;
-		//std::thread p_t_watcher(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
 		p_t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-
+		auto tn = p_t_watcher->native_handle();
+		SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
 		p_t_watcher->detach();
 		printf_globle("StartWatch：开始监控触发信号\n");
 
@@ -145,7 +145,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 		{
 			IsGrabbing = true;
 
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 			double t = (double)cv::getTickCount();
 			stringstream ss;
 			if (BeManualTiggered)
@@ -169,7 +169,7 @@ void TiggerWatcherAndGrabber::watcherThread()
 			ss.str("");
 			t_span = (double)cv::getTickCount();//用于计算两次触发间隔
 
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 
 			ss << GrabbingIndex << " " << "producer: Start" << endl;
 			printf_globle(ss.str());
@@ -185,23 +185,33 @@ void TiggerWatcherAndGrabber::watcherThread()
 
 
 
-			std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
-			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
 
+			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
 			auto tn = t_capture.native_handle();
 			SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
-
-			t_3in1.join();
+			if (DoThreeInOne)
+			{
+				std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
+				t_3in1.join();
+			}
 			t_capture.join();
 
-			//capture();
-			//threeInOne();
 
-			//图片获取完成，复制到全局变量，并删除s
-			//OriginalImage.release();
-			//Image.release();
-			OriginalImage = p_gb->OriginalImage.clone();
-			Image = p_gb->Image.clone();
+			if (DoThreeInOne)
+			{
+				//图片获取完成，复制到全局变量，并删除s
+				//OriginalImage.release();
+				//Image.release();
+				OriginalImage = p_gb->OriginalImage.clone();
+				Image = p_gb->Image.clone();
+			}
+			else
+			{
+				OriginalImage = p_gb->OriginalImage.clone();
+				Image = OriginalImage;
+			}
+
+
 
 
 
@@ -232,21 +242,21 @@ void TiggerWatcherAndGrabber::watcherThread()
 void TiggerWatcherAndGrabber::capture()
 {
 
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 	double t = (double)cv::getTickCount();
 	printf_globle("  capture(); START \r\n");
 #endif
 
 	if (globle_var::TiggerCaptureWaitTimeMS > 0)
 	{
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 		double tSleep = (double)cv::getTickCount();
 #endif
 		//触发后，等待砖进入拍摄区。
 		//Sleep(globle_var::TiggerCaptureWaitTimeMS);
 		std::this_thread::sleep_for(chrono::milliseconds(globle_var::TiggerCaptureWaitTimeMS));
 
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 		tSleep = ((double)cv::getTickCount() - tSleep) * 1000 / cv::getTickFrequency();
 		stringstream ss;
 		ss << GrabbingIndex << " " << "Sleep real(ms):" << tSleep << endl;
@@ -270,7 +280,7 @@ void TiggerWatcherAndGrabber::capture()
 	}
 
 
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 	//采样计时
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	stringstream ss;
@@ -281,7 +291,7 @@ void TiggerWatcherAndGrabber::capture()
 //图片合成
 void TiggerWatcherAndGrabber::threeInOne()
 {
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 	double t = (double)cv::getTickCount();
 #endif
 
@@ -296,10 +306,7 @@ void TiggerWatcherAndGrabber::threeInOne()
 		}
 		p_gb->ThreeInOne(p_gb->ReadIndex);
 	}
-
-
-
-#ifdef OUTPUT_TO_CONSOLE
+#ifdef TWAG_OUTPUT_TO_CONSOLE
 	stringstream ss;
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	ss << GrabbingIndex << " " << "ThreeInOne：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
