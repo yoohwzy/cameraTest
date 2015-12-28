@@ -356,7 +356,7 @@ void EdgeDetector::start()
 							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
 
 
-							if (finalJudge(cv::Rect(bc.position.x - bc.deep, bc.position.y - bc.length / 2, bc.deep * 2, bc.length / 2)))
+							if (finalJudge(bc.position, bc.deep, bc.length))
 								p_faults->BrokenCorners.push_back(bc);
 							//cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
 							break;
@@ -378,7 +378,7 @@ void EdgeDetector::start()
 								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
 							}
 							
-							if (finalJudge(cv::Rect(be.position.x - be.deep, be.position.y - be.length / 2, be.deep * 2, be.length)))
+							if (finalJudge(be.position, be.deep, be.length))
 								p_faults->BrokenEdges.push_back(be);
 							//cv::circle(src, Point(be.position.x, be.position.y), be.length, Scalar(255, 255, 250));
 							break;
@@ -393,8 +393,36 @@ void EdgeDetector::start()
 	//cout << "start time= " << ((double)cv::getTickCount() - t2) / cv::getTickFrequency() << endl;
 }
 
-bool EdgeDetector::finalJudge(cv::Rect r)
+bool EdgeDetector::finalJudge(cv::Point center, int deep, int length)
 {
+	//double d1 = abs((center.y - p_block->UpLine.k*center.x + p_block->UpLine.x0*p_block->UpLine.k - p_block->UpLine.y0) / ((double)sqrt(1 + p_block->UpLine.k*p_block->UpLine.k)));
+	//double d2 = abs((center.y - p_block->DownLine.k*center.x + p_block->DownLine.x0*p_block->DownLine.k - p_block->DownLine.y0) / ((double)sqrt(1 + p_block->DownLine.k*p_block->DownLine.k)));
+	//double d3 = abs((center.y - p_block->LeftLine.k*center.x + p_block->LeftLine.x0*p_block->LeftLine.k - p_block->LeftLine.y0) / ((double)sqrt(1 + p_block->LeftLine.k*p_block->LeftLine.k)));
+	//double d4 = abs((center.y - p_block->RightLine.k*center.x + p_block->RightLine.x0*p_block->RightLine.k - p_block->RightLine.y0) / ((double)sqrt(1 + p_block->RightLine.k*p_block->RightLine.k)));
+
+	//Block::Line *line = NULL;
+	//if (d1 > d2 && d1 > d3 && d1 > d4)//ÉÏ±ßÈ±ÏÝ
+	//{
+	//	line = &p_block->UpLine;
+	//	for (size_t i = center.x - 10; i < center.x + 10; i++)
+	//	{
+
+	//	}
+	//}
+	//else if (d2 > d1 && d2 > d3 && d3 > d4)//ÏÂ±ß
+	//{
+	//	line = &p_block->DownLine;
+	//}
+	//else if (d3 > d2 && d3 > d1 && d3 > d4)//×ó±ß
+	//{
+	//	line = &p_block->LeftLine;
+	//}
+	//else//ÓÒ±ß
+	//{
+	//	line = &p_block->RightLine;
+	//}
+
+	cv::Rect r(center.x - deep, center.y - length / 2, deep * 2, length);
 	if (r.x + r.width >= grayImg.size().width)
 		r.width = grayImg.size().width - 1 - r.x;
 	if (r.y + r.height >= grayImg.size().height)

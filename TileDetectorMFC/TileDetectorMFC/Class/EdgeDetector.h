@@ -92,6 +92,6 @@ private:
 	void RectAdjust(cv::Mat img,int& x, int& y, int& width, int& height);
 
 
-	bool finalJudge(cv::Rect r);
+	bool finalJudge(cv::Point center, int width, int height);
 };
 
