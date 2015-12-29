@@ -38,13 +38,15 @@ private:
 	typedef struct ItemRepository ItemRepository;
 	int size;
 	Faults *_faults;
+	vector<Point> pointlist;
+	vector<Point> in_or_out;
 	vector<Point> Containpoints;
 	vector<Point> locationpoints;
 	vector<vector<Point>> CneedContours;
 	vector<vector<vector<Point>>> Warehousecontours;
 	vector<vector<Point>> Linecontours;
 	vector<vector<cv::Point>> ecliptours;
-	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg;;
+	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg, lookUpTable;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;

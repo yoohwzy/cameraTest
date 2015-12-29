@@ -157,13 +157,13 @@ void Consumer::processingThread()
 		tmpb.UpLine = p_block->UpLine;
 		tmpb.DownLine = p_block->DownLine;
 		tmpb.Lines2ABCD();
-		EdgeDetector ed = EdgeDetector(threshodImgHight, &tmpb, &faults);
+		EdgeDetector ed = EdgeDetector(grayImg, &tmpb, &faults);
 		//EdgeDetector ed = EdgeDetector(grayImg, p_block, &faults);
-		ed.ThreshodImgHigh = threshodImgHight;
-		ed.ThreshodImgLow = threshodImg;
-		ed.ThreshodHigh = ConsumerThreshodHight;
-		ed.ThreshodLow = ConsumerThreshodLow;
-		ed.grayImg = grayImg;
+		//ed.ThreshodImgHigh = threshodImgHight;
+		//ed.ThreshodImgLow = threshodImg;
+		//ed.ThreshodHigh = ConsumerThreshodHight;
+		//ed.ThreshodLow = ConsumerThreshodLow;
+		//ed.grayImg = grayImg;
 		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

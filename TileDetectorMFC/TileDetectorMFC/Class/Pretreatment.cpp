@@ -9,7 +9,7 @@ using namespace std;
 #undef max
 #undef min
 
-int kItemsToProduce = 9;   // How many items we plan to produce.
+int kItemsToProduce = 10;   // How many items we plan to produce.
 int m = 0;
 vector<Point3f> repoint;
 Mat MidImg, ThImg, LMidImg, PMidImg;
@@ -22,6 +22,62 @@ vector<vector<cv::Point>> dilateneedcontours;
 bool SortBysize(const vector<Point>v1, const vector<Point>v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致  
 {
 	return v1.size() > v2.size();//降序排列  
+}
+
+bool WhetherLine(Mat &oneImg,Mat &G_Img,bool cor,bool boe)//判断是否为line的核心部分
+{
+	vector<Point> maxV_white_Points;
+	if (countNonZero(oneImg) >= 1)//获取四边的白色点坐标
+	{
+		if (cor == 1)
+		{
+			for (int i = 0; i < oneImg.cols - 1; i++)
+			{
+				if (oneImg.at<uchar>(0, i) == 255 && oneImg.at<uchar>(0, i + 1) == 0)
+					maxV_white_Points.push_back(Point(i + 0.2*G_Img.cols, 0));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < oneImg.rows - 1; i++)
+			{
+				if (oneImg.at<uchar>(i, 0) == 255 && oneImg.at<uchar>(i + 1, 0) == 0)
+					maxV_white_Points.push_back(Point(0, i + 0.2*G_Img.rows));
+			}
+		}
+	}
+	Mat Ataxon, Ltaxon, Rtaxon;
+	for (int i = 0; i < maxV_white_Points.size(); i++)
+	{
+		Point maxV_white_Point = maxV_white_Points[i];
+		if (cor == 1 && boe == 0)//第一行
+		{
+			Ataxon = G_Img(Rect(Point(maxV_white_Point.x - 2, 0), Point(maxV_white_Point.x + 2, 4)));//包含该点的全4*4范围
+			Ltaxon = G_Img(Rect(Point(maxV_white_Point.x - 2, 0), Point(maxV_white_Point.x, 4)));//包含该点的左2*4范围
+			Rtaxon = G_Img(Rect(Point(maxV_white_Point.x, 0), Point(maxV_white_Point.x + 2, 4)));//包含该点的右2*4范围
+		}
+		else if (cor == 1 && boe == 1)//最后一行
+		{
+			Ataxon = G_Img(Rect(Point(maxV_white_Point.x - 2, G_Img.rows - 5), Point(maxV_white_Point.x + 2, G_Img.rows - 1)));
+			Ltaxon = G_Img(Rect(Point(maxV_white_Point.x - 2, G_Img.rows - 5), Point(maxV_white_Point.x, G_Img.rows - 1)));
+			Rtaxon = G_Img(Rect(Point(maxV_white_Point.x, G_Img.rows - 5), Point(maxV_white_Point.x + 2, G_Img.rows - 1)));
+		}
+		else if (cor == 0 && boe == 0)//第一列
+		{
+			Ataxon = G_Img(Rect(Point(0, maxV_white_Point.y - 2), Point(4, maxV_white_Point.y + 2)));
+			Ltaxon = G_Img(Rect(Point(0, maxV_white_Point.y - 2), Point(4, maxV_white_Point.y)));
+			Rtaxon = G_Img(Rect(Point(0, maxV_white_Point.y), Point(4, maxV_white_Point.y + 2)));
+		}
+		else if (cor == 0 && boe == 1)//最后一列
+		{
+			Ataxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y - 2), Point(G_Img.cols - 1, maxV_white_Point.y + 2)));
+			Ltaxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y - 2), Point(G_Img.cols - 1, maxV_white_Point.y)));
+			Rtaxon = G_Img(Rect(Point(G_Img.cols - 5, maxV_white_Point.y), Point(G_Img.cols - 1, maxV_white_Point.y + 2)));
+		}
+		if (countNonZero(Ataxon) != countNonZero(Ltaxon) && countNonZero(Ataxon) != countNonZero(Rtaxon))//当边界上点的左包含不等于全包含且右包含不等于全包含时可知该点不是端点
+			return 1;
+	}
+	return 0;
 }
 
 Point barycenter1(vector<Point> contoursi)//计算轮廓重心
@@ -63,6 +119,8 @@ int otsuThreshold(Mat &frame, MatND hist)//局部二值化的阈值选取
 
 	}
 	Point max = Point(0, 0);
+	if (grayVlist.size() == 0)
+		return frame.at<uchar>(0, 0);
 	for (int i = 0; i < grayVlist.size(); i++)
 	{
 		int j = grayVlist[i].size();
@@ -231,10 +289,22 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			pt_ROI_b.y = pt8.y + 2 * box.height;
 
 		Point centermark = 0.5 * (pt7 + pt8) - pt_ROI_a;//在boxImg中待检测连通域的中心标记
-		Mat ready_boxImg = PMidImg(Rect(pt_ROI_a + locationpoint, pt_ROI_b + locationpoint));//截取连通域外界矩形面积100倍大的区域
+		Mat ready_boxImg = PMidImg(Rect(pt_ROI_a + locationpoint, pt_ROI_b + locationpoint));//截取连通域外界矩形面积25倍大的区域
 		Scalar avgmean;
 		avgmean = mean(ready_boxImg);
-		Mat growImg = Grow(ready_boxImg, centermark, avgmean[0] - 5);//区域生长
+		double min_v = 0.0, max_v = 0.0, input_th_v = avgmean[0] - 5;
+		minMaxLoc(ready_boxImg, &min_v, &max_v);
+		if (avgmean[0] - min_v > 10)
+		{
+			if (max_v - min_v > 20)
+				input_th_v = avgmean[0] - 5;
+			else
+				input_th_v = avgmean[0] - 7;
+		}
+		else
+			input_th_v = (min_v + 3 > 0.5*(min_v + avgmean[0])) ? 0.5*(min_v + avgmean[0]) : min_v + 3;
+
+		Mat growImg = Grow(ready_boxImg, centermark, input_th_v);//区域生长
 
 		int whitenum = countNonZero(growImg);
 		Mat growtemp = growImg.clone();
@@ -242,7 +312,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		/*erode(growtemp, growtemp,Mat(),Point(-1,-1),2);*/
 		vector<vector<cv::Point>> tempttours;
 		findContours(growtemp, tempttours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		if (tempttours.size() == 0 || countNonZero(growImg) <= 2)
+		if (tempttours.size() == 0 || countNonZero(growImg) <= 4)
 		{
 			continue;
 		}
@@ -252,43 +322,60 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		{
 			continue;
 		}
-		int k = 1;
-		Mat oneImg;
-		if (growImg.rows>growImg.cols)
-		{
-			oneImg = growImg(Range(1, 1), Range::all());
-		}
-		else
-		{
-			oneImg = growImg(Range::all(), Range(1, 1));
-			k = 0;
-		}
-		reduce(growImg, oneImg, k, CV_REDUCE_AVG);
-		double maxV_white;
-		minMaxLoc(oneImg, NULL, &maxV_white);
-		int white_range = countNonZero(oneImg);
-		maxV_white = (k == 1) ? growImg.rows * maxV_white : growImg.cols * maxV_white;
-		maxV_white /= 255;
-		if (1.5*whitenum / white_range > maxV_white || 2 * whitenum < growT_RECT.width*growT_RECT.height)
+		//int k = 1;
+		//Mat oneImg;
+		//if (growT_RECT.height>growT_RECT.width)
+		//{
+		//	oneImg = growImg(Range(1, 1), Range::all());
+		//}
+		//else
+		//{
+		//	oneImg = growImg(Range::all(), Range(1, 1));
+		//	k = 0;
+		//}
+		//reduce(growImg, oneImg, k, CV_REDUCE_AVG);
+		//double maxV_white;
+		//minMaxLoc(oneImg, NULL, &maxV_white);
+		//int white_range = countNonZero(oneImg);
+		//maxV_white = (k == 1) ? growImg.cols * maxV_white : growImg.rows * maxV_white;
+		//maxV_white /= 255;//白点个数
+		if (/*1.5*whitenum / white_range > maxV_white ||*/ 2 * whitenum < growT_RECT.width*growT_RECT.height)
 		{
 			continue;
 		}
+		Mat biggerImg;
+		vector<vector<Point>> biggercontours;
+		resize(growImg, biggerImg, Size(growImg.cols *1.2, growImg.rows * 1.2), 0, 0, INTER_LINEAR);
+		findContours(biggerImg, biggercontours, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		Mat mask_point_Img(biggerImg.size(),CV_8U,Scalar(0));
+		Mat mask_point_ImgROI = mask_point_Img(Rect(Point(growImg.cols*0.1, growImg.rows*0.1), Point(growImg.cols*1.1, growImg.rows*1.1)));
+		drawContours(mask_point_Img, biggercontours, -1, Scalar(255), -1);
+		drawContours(mask_point_ImgROI, tempttours, -1, Scalar(0), -1);
+
 		Mat ano_boxImg = ready_boxImg.clone();
-		double min_v = 0.0;
-		minMaxLoc(ano_boxImg, &min_v);
+		Scalar mount;
+		mount = mean(ano_boxImg, mask_point_ImgROI);//分析环状区域的平均灰度值
+		if (mount[0] < 0.8*avgmean[0])
+			continue;
 		if (2 * min_v > avgmean[0])
 			continue;
+		mount = mean(ano_boxImg, growImg);
 		bitwise_and(ano_boxImg, growImg, ano_boxImg);
-		threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + min_v), 255, 0);
+		threshold(ano_boxImg, ano_boxImg, 0.5*(mount[0] + min_v), 255, 0);
 		bitwise_not(ano_boxImg, ano_boxImg, growImg);
 		vector<vector<cv::Point>> lowTcontour;
-		findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-		int size_v = lowTcontour.size();
-		sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+		vector<Vec4i> hierarchy;
+		findContours(ano_boxImg, lowTcontour, hierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		int size_v = 1;
+		vector<vector<cv::Point>> sortcontours;
+		sortcontours.insert(sortcontours.end(),lowTcontour.begin(), lowTcontour.end());
+		sort(sortcontours.begin(), sortcontours.end(), SortBysize);
 		for (size_t j = 1; j < lowTcontour.size(); j++)
 		{
-			if (contourArea(lowTcontour[0]) > 1000 * contourArea(lowTcontour[j]))
+			if (contourArea(sortcontours[0]) > 500 * contourArea(sortcontours[j]) || lowTcontour[j].size() <= 6)
 				break;
+			if (hierarchy[j][3] < 0)
+				continue;
 			else
 				size_v++;
 		}
@@ -305,7 +392,28 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			hole.diameter = growT_RECT.height;
 		else
 			hole.diameter = growT_RECT.height;
-		_faults->Holes.push_back(hole);
+  //		if (hole.diameter < 35)
+		//{
+		//	bitwise_and(ready_boxImg, mask_point_ImgROI, ano_boxImg);
+		//	threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + max_v), 255, 0);
+		//	lowTcontour.clear();
+		//	findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		//	sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+		//	if (lowTcontour.size() != 0)
+		//	{
+		//		if (contourArea(lowTcontour[0]) < 0.1*whitenum || contourArea(lowTcontour[0]) < 6)
+		//			continue;
+		//	}
+		//	/*else
+		//		continue*/;
+		//}
+		Point hole_torect_a(hole.position.x - 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
+		Point hole_torect_b(hole.position.x - 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
+		Point hole_torect_c(hole.position.x + 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
+		Point hole_torect_d(hole.position.x + 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
+		if (pointPolygonTest(pointlist, hole_torect_a, 0) == 1 && pointPolygonTest(pointlist, hole_torect_b, 0) == 1)//检测该凹点是否在瓷砖内部，防止瓷砖倾斜误判
+			if (pointPolygonTest(pointlist, hole_torect_c, 0) == 1 && pointPolygonTest(pointlist, hole_torect_d, 0) == 1)
+				_faults->Holes.push_back(hole);
 
 	}
 	(ir->read_position)++; // 读取位置后移
@@ -351,8 +459,39 @@ void Pretreatment::ProducerTask() // 生产者任务
 			if (i == 4)
 				ThRect.height = MidImg.rows - 4 * MidImg.rows*0.2;
 			MidImgROI = MidImg(Rect(ThRect));
-			ThImgROI = ThImg(Rect(ThRect));
 
+			Mat sampleImg;
+			if (j)
+			{
+				sampleImg = MidImgROI(Rect(MidImgROI.cols - 201, 0, 200, MidImgROI.rows)).clone();
+				threshold(sampleImg, sampleImg, 40, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.rows;
+				rectangle(MidImgROI, Rect(MidImgROI.cols - wide_v -1, 0, wide_v+1, MidImgROI.rows),Scalar(255),-1);
+			}
+			else
+			{
+				sampleImg = MidImgROI(Rect(0, 0, 200, MidImgROI.rows - 1)).clone();
+				threshold(sampleImg, sampleImg, 40, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.rows;
+				rectangle(MidImgROI, Rect(0, 0, wide_v, MidImgROI.rows), Scalar(255), -1);
+
+			}
+			if (i == 1)
+			{
+				sampleImg = MidImgROI(Rect(0, 0, MidImgROI.cols, 200)).clone();
+				threshold(sampleImg, sampleImg, 40, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.cols;
+				rectangle(MidImgROI, Rect(0, 0, MidImgROI.cols, wide_v+5), Scalar(255), -1);
+			}
+			if (i == 5)
+			{
+				sampleImg = MidImgROI(Rect(0, MidImgROI.rows-201, MidImgROI.cols, 200)).clone();
+				threshold(sampleImg, sampleImg, 40, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.cols;
+				rectangle(MidImgROI, Rect(0, MidImgROI.rows - wide_v-5, MidImgROI.cols, wide_v+5), Scalar(255), -1);
+			}
+			MidImgROI = MidImg(Rect(ThRect));
+			ThImgROI = ThImg(Rect(ThRect));
 			MatND histolist;
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);
 			int OtsuV = otsuThreshold(MidImgROI, histolist);//找到离散灰度值导数的阈值
@@ -366,7 +505,7 @@ void Pretreatment::ProducerTask() // 生产者任务
 				if (decontours[k].size() > 8)
 				{
 					double matchextent = matchShapes(decontours[k], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//比较待检测缺陷的形态
-					if (matchextent < 1.0)
+					if (matchextent < 5.0)
 					{
 						needContour.push_back(decontours[k]);
 					}
@@ -408,7 +547,7 @@ void Pretreatment::linedetect()
 	if (dilatecontours.size() > 100)
 		move_n = 20;
 	else
-		move_n = dilatecontours.size()*0.5;
+		move_n = int(dilatecontours.size()*0.5);
 	partial_sort(dilatecontours.begin(), dilatecontours.begin() + move_n, dilatecontours.end(), SortBysize);
 	Mat dilateImg(BlurImg.size(), CV_8UC1, Scalar(0));
 
@@ -423,6 +562,7 @@ void Pretreatment::linedetect()
 		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	}
 
+	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
 	int m = 0, linenumall = 0, linenum = 0;
 	for (size_t i = 0; i < bigcontours.size(); i++)
@@ -437,35 +577,52 @@ void Pretreatment::linedetect()
 		int matchlinepro = matchShapes(bigcontours[i], Linecontours[0], CV_CONTOURS_MATCH_I1, 0);
 		if (matchlinepro> 1.0)
 			continue;
-		Mat I_rows_L = waitImg(Range(0, 1), Range(10, int(waitImg.cols*0.5)));//第一行左
-		Mat I_rows_R = waitImg(Range(0, 1), Range(int(waitImg.cols*0.5), waitImg.cols - 10));//第一行右
-
-		Mat II_rows_L = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(10, int(waitImg.cols*0.5)));//最后一行左
-		Mat II_rows_R = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.5), waitImg.cols - 10));//最后一行右
-
-		Mat I_cols_U = waitImg(Range(10, int(waitImg.rows*0.5)), Range(0, 1));//第一列上
-		Mat I_cols_D = waitImg(Range(int(waitImg.rows*0.5), waitImg.rows - 10), Range(0, 1));//第一列下
-		Mat II_cols_U = waitImg(Range(10, int(waitImg.rows*0.5)), Range(waitImg.cols - 1, waitImg.cols));//最后一列上
-		Mat II_cols_D = waitImg(Range(int(waitImg.rows*0.5), waitImg.rows - 10), Range(waitImg.cols - 1, waitImg.cols));//最后一列下
-		if (countNonZero(I_rows_L) != 0 && countNonZero(I_cols_U) != 0)
+		Mat fingerprint_Img = CannyImg(Rect(cannyrect));//防止指纹误检
+		LUT(fingerprint_Img, lookUpTable, fingerprint_Img);
+		threshold(fingerprint_Img, fingerprint_Img, CannyImg.at<uchar>(bigcontours[i][0]), 255, 0);
+		if (countNonZero(fingerprint_Img) <= 0.6 * fingerprint_Img.cols * fingerprint_Img.rows)
 			continue;
-		if (countNonZero(I_rows_R) != 0 && countNonZero(II_cols_U) != 0)
-			continue;
-		if (countNonZero(II_rows_L) != 0 && countNonZero(I_cols_D) != 0)
-			continue;
-		if (countNonZero(II_rows_R) != 0 && countNonZero(II_cols_D) != 0)
+		Mat I_rows = waitImg(Range(0, 1), Range(int(waitImg.cols*0.2), int(waitImg.cols*0.8)));//第一行
+		Mat II_rows = waitImg(Range(waitImg.rows - 1, waitImg.rows), Range(int(waitImg.cols*0.2), int(waitImg.cols*0.8)));//最后一行
+		Mat I_cols = waitImg(Range(int(waitImg.rows*0.2), int(waitImg.rows*0.8)), Range(0, 1));//第一列
+		Mat II_cols = waitImg(Range(int(waitImg.rows*0.2), int(waitImg.rows*0.8)), Range(waitImg.cols - 1, waitImg.cols));//最后一列
+		if (countNonZero(I_rows) != 0)
+		{
+			if (WhetherLine(I_rows, waitImg,1,0))
+				continue;
+		}
+		if (countNonZero(I_cols) != 0)
+		{
+			if (WhetherLine(I_cols, waitImg, 0,0))
+				continue;
+		}
+		if (countNonZero(II_rows) != 0)
+		{
+			if (WhetherLine(II_rows, waitImg,1,1))
+				continue;
+		}
+		if (countNonZero(II_cols) != 0)
+		{
+			if (WhetherLine(II_cols, waitImg,0,1))
+				continue;
+		}
+		if (countNonZero(I_rows) && countNonZero(I_cols) && countNonZero(II_rows) && countNonZero(II_cols))
 			continue;
 		Faults::Scratch scratch;
 		scratch.position.x = 4 * cannyrect.x + 2 * cannyrect.width + recImg.x;
 		scratch.position.y = 4 * cannyrect.y + 2 * cannyrect.height + recImg.y;
 		scratch.length = (cannyrect.width >cannyrect.height) ? 2 * cannyrect.width : 2 * cannyrect.height;
-		//if (scratch.length < 35)
-		//	continue;
-		_faults->Scratchs.push_back(scratch);
+		Point torect_a(scratch.position.x - 2 * cannyrect.width, scratch.position.y - 2 * cannyrect.height);
+		Point torect_b(scratch.position.x - 2 * cannyrect.width, scratch.position.y + 2 * cannyrect.height);
+		Point torect_c(scratch.position.x + 2 * cannyrect.width, scratch.position.y - 2 * cannyrect.height);
+		Point torect_d(scratch.position.x + 2 * cannyrect.width, scratch.position.y + 2 * cannyrect.height);
+		if (pointPolygonTest(pointlist, torect_a, 0) == 1 && pointPolygonTest(pointlist, torect_b, 0) == 1)//检测该划痕 是否在瓷砖上，防止瓷砖倾斜误判
+			if (pointPolygonTest(pointlist, torect_c, 0) == 1 && pointPolygonTest(pointlist, torect_d, 0) == 1)
+				_faults->Scratchs.push_back(scratch);
 	}
 }
 
-void Pretreatment::tem_2plate()
+void Pretreatment::tem_2plate()//模板轮廓匹配预处理线程
 {
 	Mat cirlceImg(160, 160, CV_8UC1, Scalar(0));
 	ellipse(cirlceImg, Point(80, 80), Size(40, 30), 90.0, 0, 360, Scalar(255), -1, 8);//画椭圆
@@ -475,13 +632,20 @@ void Pretreatment::tem_2plate()
 	cv::findContours(LineImg, Linecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
 }
 
-void Pretreatment::img2clone()
+void Pretreatment::img2clone()//待处理大图复制线程
 {
 	PMidImg = MidImg.clone();
+	lookUpTable = Mat(1, 256, CV_8U);
+	uchar* p = lookUpTable.data;
+	p[0] = 255;
+	for (int j = 1; j < 256; j++)
+	{
+		p[j] = j;
+	}
 	//LMidImg = PMidImg.clone();
 }
 
-void Pretreatment::img2zoom()
+void Pretreatment::img2zoom()//划痕检测缩放预处理
 {
 	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
 	blur(CannyImg, BlurImg, Size(3, 3));
@@ -504,17 +668,39 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	if (image.channels() == 3)//判断是否为彩图
 		cvtColor(image, image, CV_RGB2GRAY);
 
-	vector<Point> pointlist;
 	pointlist.push_back(_block->A);
 	pointlist.push_back(_block->B);
 	pointlist.push_back(_block->C);
 	pointlist.push_back(_block->D);
 
-	recImg = boundingRect(pointlist);//截取瓷砖区域
-	recImg.x += 100;
-	recImg.y += 400;
-	recImg.width -= 200;
-	recImg.height -= 800;
+	recImg = boundingRect(pointlist);//截取瓷砖区域,对拍摄不全的区域也进行截取
+	Mat sample_Img = image(Rect(recImg.x, recImg.y + 500, 220, 220)).clone();
+	threshold(sample_Img, sample_Img, 40, 255, 0);
+	int wide_v = ((220 - countNonZero(sample_Img) / 220)>50) ? 220 - countNonZero(sample_Img) / 220 : 50;
+	if (recImg.x > 0)
+		recImg.x += wide_v;
+	if (recImg.y > 0)
+		recImg.y += 200;
+	if (recImg.x + recImg.width < image.cols && recImg.x + recImg.width > 2 * wide_v)
+	{
+		if (recImg.x > 0)
+			recImg.width -= 2 * wide_v;
+		else
+			recImg.width -= wide_v;
+	}
+	else if (recImg.x + recImg.width >= image.cols && recImg.x > 0)
+		recImg.width -= wide_v;
+
+	if (recImg.y + recImg.height < image.rows && recImg.y + recImg.height > 400)
+	{
+		if (recImg.y > 0)
+			recImg.height -= 400;
+		else
+			recImg.height -= 200;
+	}
+	else if (recImg.y + recImg.height >= image.rows && recImg.y > 0)
+		recImg.height -= 200;
+
 	MidImg = image(Rect(recImg));
 
 	std::thread imgzoom(std::mem_fn(&Pretreatment::img2zoom), this);
@@ -529,9 +715,9 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
 	Canny(MaskImg, MaskImg, 40, 50);
+	Mat Mask_temp = MaskImg.clone();
 	vector<vector<Point>> Maskcontours;
 	findContours(MaskImg, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	imgclone.join();
 	if (Maskcontours.size() != 0)
 	{
 		partial_sort(Maskcontours.begin(), Maskcontours.begin() + 1, Maskcontours.end(), SortBysize);
@@ -542,6 +728,9 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 				if (Maskcontours[i].size() > 30)
 				{
 					Rect mask_rect = boundingRect(Maskcontours[i]);
+					int th_num = countNonZero(Mask_temp(Rect(mask_rect)));
+					if (th_num < 1.5*mask_rect.height || th_num < 1.5*mask_rect.width)
+						continue;
 					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
 					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
 					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_small.cols) ? 4 * mask_rect.width + 32 : Mask_result_small.cols;
@@ -558,73 +747,45 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 					markpen.markposition = mask_rect;
 					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
 					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
-					int mark_continue = 1;
-					if (!Containpoints.empty())
+					int out_mark = 0;
+					while (1)//标记重复框取判断
 					{
-						while (1)//判断是否出现存在包含关系的矩形框，若存在取范围较大的
+						if (in_or_out.size() == 0)
+							break;
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_a + outpoint_b), 0) == 0)
 						{
-							if (pointPolygonTest(Containpoints, 0.5*(outpoint_a + outpoint_b), 0) == 0)
-							{
-								if (pointPolygonTest(Containpoints, outpoint_a, 0) == 1)
-								{
-									_faults->MarkPens.pop_back();
-									break;
-								}
-								else
-								{
-									mark_continue = 0;
-									break;
-								}		
-							}
-							if (pointPolygonTest(Containpoints, 0.5*(outpoint_b + outpoint_c), 0) == 0)
-							{
-								if (pointPolygonTest(Containpoints, outpoint_b, 0) == 1)
-								{
-									_faults->MarkPens.pop_back();
-									break;
-								}
-								else
-								{
-									mark_continue = 0;
-									break;
-								}
-							}
-							if (pointPolygonTest(Containpoints, 0.5*(outpoint_c + outpoint_d), 0) == 0)
-							{
-								if (pointPolygonTest(Containpoints, outpoint_c, 0) == 1)
-								{
-									_faults->MarkPens.pop_back();
-									break;
-								}
-								else
-								{
-									mark_continue = 0;
-									break;
-								}
-							}
-							if (pointPolygonTest(Containpoints, 0.5*(outpoint_d + outpoint_a), 0) == 0)
-							{
-								if (pointPolygonTest(Containpoints, outpoint_d, 0) == 1)
-								{
-									_faults->MarkPens.pop_back();
-									break;
-								}
-								else
-								{
-									mark_continue = 0;
-									break;
-								}
-							}
+							out_mark = 1;
 							break;
 						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_b + outpoint_c), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_c + outpoint_d), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						if (pointPolygonTest(in_or_out, 0.5*(outpoint_d + outpoint_a), 0) == 0)
+						{
+							out_mark = 1;
+							break;
+						}
+						break;
 					}
-					if (mark_continue == 0)
-						continue;
-					Containpoints.clear();
-					Containpoints.push_back(outpoint_a);
-					Containpoints.push_back(outpoint_b);
-					Containpoints.push_back(outpoint_c);
-					Containpoints.push_back(outpoint_d);
+					if (out_mark == 1)
+					{
+						if (pointPolygonTest(in_or_out, outpoint_a, 0) == 1)
+							_faults->MarkPens.pop_back();
+						else
+							continue;
+					}
+					in_or_out.clear();
+					in_or_out.push_back(outpoint_a);
+					in_or_out.push_back(outpoint_b);
+					in_or_out.push_back(outpoint_c);
+					in_or_out.push_back(outpoint_d);
 					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//检测该标记是否在瓷砖上，防止瓷砖倾斜误判
 						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
 							_faults->MarkPens.push_back(markpen);
@@ -632,17 +793,17 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 			}
 		}
 	}
+	imgclone.join();
 	imgzoom.join();
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测
+	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
 	producer.join();
 	line.join();
 	consumer.join();
-
 	needContour.clear();
 	dilateneedcontours.clear();
 	CneedContours.clear();

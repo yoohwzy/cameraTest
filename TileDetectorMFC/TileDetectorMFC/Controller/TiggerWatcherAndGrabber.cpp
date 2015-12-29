@@ -6,7 +6,7 @@ TiggerWatcherAndGrabber::TiggerWatcherAndGrabber(HWND _hwnd, string virtualImg)
 	hwnd = _hwnd;
 	Init(virtualImg);
 
-
+	IsGrabbing2 = false;
 	p_gb = new GrabbingBuffer(globle_var::FrameCount, globle_var::Width);
 
 	/*读取定标图片 定标*/
@@ -95,8 +95,6 @@ void TiggerWatcherAndGrabber::StartWatch()
 	{
 		IsWatching = true;
 		p_t_watcher = new thread(std::mem_fn(&TiggerWatcherAndGrabber::watcherThread), this);
-		auto tn = p_t_watcher->native_handle();
-		SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
 		p_t_watcher->detach();
 		printf_globle("StartWatch：开始监控触发信号\n");
 
@@ -135,16 +133,24 @@ bool TiggerWatcherAndGrabber::ManualTigger()
 	BeManualTiggered = true;
 	return true;
 }
+
+
 void TiggerWatcherAndGrabber::watcherThread()
 {
 	double t_span = (double)cv::getTickCount();//用于计算两次触发间隔
 
 	while (IsWatching)
 	{
-		if (!IsGrabbing && (BeManualTiggered || pci1761.GetRisingEdgeIDI(7) ))
+		if ((BeManualTiggered || pci1761.GetRisingEdgeIDI(7)))
 		{
-			IsGrabbing = true;
+			if (IsGrabbing)
+			{
+				printf_globle("IsGrabbing = 1 触发后不响应\r\n");
+				continue;
+			}
 
+
+			IsGrabbing = true;
 #ifdef TWAG_OUTPUT_TO_CONSOLE
 			double t = (double)cv::getTickCount();
 			stringstream ss;
@@ -159,78 +165,72 @@ void TiggerWatcherAndGrabber::watcherThread()
 			if (BeManualTiggered)
 				BeManualTiggered = false;
 
-			GrabbingIndex += 1;
-			if (GrabbingIndex > 1000000) GrabbingIndex = 1;
-
-			t_span = ((double)cv::getTickCount() - t_span) / cv::getTickFrequency();
-			ss << endl << endl << "第 " << GrabbingIndex << "次触发：与上次触发间隔为" << t_span << "秒" << endl;
-			printf_globle(ss.str());
-			LogHelper::Log(ss.str());
-			ss.str("");
-			t_span = (double)cv::getTickCount();//用于计算两次触发间隔
-
 #ifdef TWAG_OUTPUT_TO_CONSOLE
 
-			ss << GrabbingIndex << " " << "producer: Start" << endl;
+			ss << _grabbingIndex + 1 << " " << "producer: Start" << endl;
 			printf_globle(ss.str());
 			ss.str("");
 
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << GrabbingIndex << " " << "twag Inint(ms):" << t << endl;
+			ss << _grabbingIndex + 1 << " " << "twag Init(ms):" << t << endl;
 			printf_globle(ss.str());
 			LogHelper::Log(ss.str());
 			ss.str("");
-
 #endif
 
 
 
 
-			std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
-			auto tn = t_capture.native_handle();
-			SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
-			if (DoThreeInOne)
+			if (globle_var::TiggerCaptureWaitTimeMS > 0)
 			{
-				std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
-				t_3in1.join();
+#ifdef TWAG_OUTPUT_TO_CONSOLE
+				double tSleep = (double)cv::getTickCount();
+#endif
+				//触发后，等待砖进入拍摄区。
+				//Sleep(globle_var::TiggerCaptureWaitTimeMS);
+				std::this_thread::sleep_for(chrono::milliseconds(globle_var::TiggerCaptureWaitTimeMS));
+
+#ifdef TWAG_OUTPUT_TO_CONSOLE
+				tSleep = ((double)cv::getTickCount() - tSleep) * 1000 / cv::getTickFrequency();
+				stringstream ss;
+				ss << _grabbingIndex + 1 << " " << "Sleep real(ms):" << tSleep << endl;
+				printf_globle(ss.str());
+#endif
 			}
-			t_capture.join();
 
 
-			if (DoThreeInOne)
+
+			if (!IsGrabbing2)
 			{
-				//图片获取完成，复制到全局变量，并删除s
-				//OriginalImage.release();
-				//Image.release();
-				OriginalImage = p_gb->OriginalImage.clone();
-				Image = p_gb->Image.clone();
+				_grabbingIndex += 1;
+				if (_grabbingIndex > 1000000) _grabbingIndex = 1;
+
+#ifdef TWAG_OUTPUT_TO_CONSOLE
+
+			t_span = ((double)cv::getTickCount() - t_span) / cv::getTickFrequency();
+			ss << endl << endl << "第 " << _grabbingIndex << "次触发：与上次触发间隔为" << t_span << "秒" << endl;
+			printf_globle(ss.str());
+			LogHelper::Log(ss.str());
+			ss.str("");
+			t_span = (double)cv::getTickCount();//用于计算两次触发间隔
+
+
+#endif
+
+
+
+				std::thread t_run(std::mem_fn(&TiggerWatcherAndGrabber::runThread), this);
+				//auto tn = t_run.native_handle();
+				//SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
+				t_run.detach();
 			}
 			else
 			{
-				OriginalImage = p_gb->OriginalImage.clone();
-				Image = OriginalImage;
+				ss << _grabbingIndex + 1 << " " << "        触发后不响应  IsGrabbing2 = 1 ,still running capture();" << endl;
+				printf_globle(ss.str());
+				LogHelper::Log(ss.str());
 			}
-
-
-
-
-
 			IsGrabbing = false;
-
-			if (!IsCalibration)
-			{
-				if (hwnd != NULL)
-				{
-					PostMessage(hwnd, WM_USER + 100, 0, 0);
-				}
-				//标记生产者工作结束
-			}
-			else//若是标定环境，则停止监控
-			{
-				IsCalibration = false;
-				StopWatch();
-				PostMessage(hwnd, WM_USER + 102, 0, 0);//定标、采集结束处理程序
-			}
 		}
 		else
 		{
@@ -239,6 +239,61 @@ void TiggerWatcherAndGrabber::watcherThread()
 		}
 	}
 }
+
+void TiggerWatcherAndGrabber::runThread(){
+
+
+
+	IsGrabbing2 = true;
+	GrabbingIndex = _grabbingIndex;
+
+
+	std::thread t_capture(std::mem_fn(&TiggerWatcherAndGrabber::capture), this);
+	auto tn = t_capture.native_handle();
+	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
+	if (DoThreeInOne)
+	{
+		std::thread t_3in1(std::mem_fn(&TiggerWatcherAndGrabber::threeInOne), this);
+		t_3in1.join();
+	}
+	t_capture.join();
+
+	if (DoThreeInOne)
+	{
+		//图片获取完成，复制到全局变量，并删除s
+		//OriginalImage.release();
+		//Image.release();
+		OriginalImage = p_gb->OriginalImage.clone();
+		Image = p_gb->Image.clone();
+	}
+	else
+	{
+		OriginalImage = p_gb->OriginalImage.clone();
+		Image = OriginalImage;
+	}
+
+
+
+
+	IsGrabbing2 = false;
+
+	if (!IsCalibration)
+	{
+		if (hwnd != NULL)
+		{
+			PostMessage(hwnd, WM_USER + 100, 0, 0);
+		}
+		//标记生产者工作结束
+	}
+	else//若是标定环境，则停止监控
+	{
+		IsCalibration = false;
+		StopWatch();
+		PostMessage(hwnd, WM_USER + 102, 0, 0);//定标、采集结束处理程序
+	}
+}
+
+
 void TiggerWatcherAndGrabber::capture()
 {
 
@@ -246,23 +301,6 @@ void TiggerWatcherAndGrabber::capture()
 	double t = (double)cv::getTickCount();
 	printf_globle("  capture(); START \r\n");
 #endif
-
-	if (globle_var::TiggerCaptureWaitTimeMS > 0)
-	{
-#ifdef TWAG_OUTPUT_TO_CONSOLE
-		double tSleep = (double)cv::getTickCount();
-#endif
-		//触发后，等待砖进入拍摄区。
-		//Sleep(globle_var::TiggerCaptureWaitTimeMS);
-		std::this_thread::sleep_for(chrono::milliseconds(globle_var::TiggerCaptureWaitTimeMS));
-
-#ifdef TWAG_OUTPUT_TO_CONSOLE
-		tSleep = ((double)cv::getTickCount() - tSleep) * 1000 / cv::getTickFrequency();
-		stringstream ss;
-		ss << GrabbingIndex << " " << "Sleep real(ms):" << tSleep << endl;
-		printf_globle(ss.str());
-#endif
-	}
 
 
 
