@@ -63,6 +63,7 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , consumerThreshod(0)
 , consumerLedStartX(0)
 , consumerLedEndX(0)
+, consumerThreshodHigh(0)
 {
 	printf_globle("");
 }
@@ -80,6 +81,8 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, consumerLedStartX, 0, 4094);
 	DDX_Text(pDX, IDC_TB_LED_TO, consumerLedEndX);
 	DDV_MinMaxInt(pDX, consumerLedEndX, 1, 4095);
+	DDX_Text(pDX, IDC_TB_THRESHOD_HIGH, consumerThreshodHigh);
+	DDV_MinMaxInt(pDX, consumerThreshodHigh, 1, 254);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -100,6 +103,7 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_TB_THRESHOD, &CTileDetectorMFCDlg::OnEnChangeTbThreshod)
 	ON_EN_CHANGE(IDC_TB_LED_FROM, &CTileDetectorMFCDlg::OnEnChangeTbLedFrom)
 	ON_EN_CHANGE(IDC_TB_LED_TO, &CTileDetectorMFCDlg::OnEnChangeTbLedTo)
+	ON_BN_CLICKED(IDC_CB_DO_THREEINONE, &CTileDetectorMFCDlg::OnBnClickedCbDoThreeinone)
 END_MESSAGE_MAP()
 
 
@@ -159,6 +163,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
 	consumerThreshod = 5;
+	consumerThreshodHigh = 9;
 	consumerLedStartX = 0;
 	consumerLedEndX = 4095;
 
@@ -166,6 +171,9 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 
 	//CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
 	//radio->SetCheck(1);
+
+	CButton* radio2 = (CButton*)GetDlgItem(IDC_CB_DO_THREEINONE);
+	radio2->SetCheck(1);
 
 	//创建系统日志
 	LogHelper::Log("系统启动\r\n");
@@ -317,7 +325,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 	{
 		p_consumer = new Consumer(this->GetSafeHwnd());
 		p_consumer->GrabbingIndex = p_twag->GrabbingIndex;
-		p_consumer->ConsumerThreshod = consumerThreshod;
+		p_consumer->ConsumerThreshodLow = consumerThreshod;
+		p_consumer->ConsumerThreshodHight = consumerThreshodHigh;
 		p_consumer->ConsumerLedStartX = consumerLedStartX;
 		p_consumer->ConsumerLedEndX = consumerLedEndX;
 		IsConsumerProcessing = true;
@@ -416,6 +425,15 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 	{
 		img_on_show.release();
 		img_on_show = p_consumer->originalImg.clone();
+		if (p_consumer->faults.BrokenEdges.size() > 0 || 
+			p_consumer->faults.BrokenCorners.size() > 0 ||
+			p_consumer->faults.Scratchs.size() > 0 || 
+			p_consumer->faults.Holes.size() > 0 || 
+			p_consumer->faults.MarkPens.size() > 0
+			)
+		{
+			arm.AddAction(0, TimeHelper::GetTimeNow(100));
+		}
 		if (p_consumer->faults.BrokenEdges.size() > 0)
 		{
 			CString str;
@@ -426,7 +444,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			{
 				cv::circle(img_on_show, p_consumer->faults.BrokenEdges[i].position, p_consumer->faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
 			}
-			arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+			//arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 		}
 		if (p_consumer->faults.BrokenCorners.size() > 0)
 		{
@@ -438,7 +456,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			{
 				cv::circle(img_on_show, p_consumer->faults.BrokenCorners[i].position, p_consumer->faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
 			}
-			arm.AddAction(1, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+			//arm.AddAction(1, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 		}
 		if (p_consumer->faults.SomethingBigs.size() > 0)
 		{
@@ -450,7 +468,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			{
 				cv::circle(img_on_show, p_consumer->faults.SomethingBigs[i].position, p_consumer->faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
 			}
-			arm.AddAction(2, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+			//arm.AddAction(2, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 		}
 		if (p_consumer->faults.Scratchs.size() > 0)
 		{
@@ -462,7 +480,7 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			{
 				cv::circle(img_on_show, p_consumer->faults.Scratchs[i].position, p_consumer->faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
 			}
-			arm.AddAction(3, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+			//arm.AddAction(3, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 		}
 		if (p_consumer->faults.Holes.size() > 0)
 		{
@@ -782,4 +800,13 @@ void CTileDetectorMFCDlg::OnEnChangeTbLedFrom()
 void CTileDetectorMFCDlg::OnEnChangeTbLedTo()
 {
 	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnBnClickedCbDoThreeinone()
+{
+	if (p_twag != NULL)
+	{
+		p_twag->DoThreeInOne = (IsDlgButtonChecked(IDC_CB_DO_THREEINONE) == BST_CHECKED);
+	}
 }

@@ -9,7 +9,7 @@ using namespace std;
 #undef max
 #undef min
 
-int kItemsToProduce = 9;   // How many items we plan to produce.
+int kItemsToProduce = 10;   // How many items we plan to produce.
 int m = 0;
 vector<Point3f> repoint;
 Mat MidImg, ThImg, LMidImg, PMidImg;
@@ -355,9 +355,9 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Mat ano_boxImg = ready_boxImg.clone();
 		Scalar mount;
 		mount = mean(ano_boxImg, mask_point_ImgROI);//分析环状区域的平均灰度值
-		if (mount[0] < 0.95*avgmean[0])
+		if (mount[0] < 0.8*avgmean[0])
 			continue;
-		if (2 * min_v > avgmean[0])
+		if (1.8 * min_v > avgmean[0])
 			continue;
 		mount = mean(ano_boxImg, growImg);
 		bitwise_and(ano_boxImg, growImg, ano_boxImg);
@@ -367,13 +367,15 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		vector<Vec4i> hierarchy;
 		findContours(ano_boxImg, lowTcontour, hierarchy, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 		int size_v = 1;
-		sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+		vector<vector<cv::Point>> sortcontours;
+		sortcontours.insert(sortcontours.end(),lowTcontour.begin(), lowTcontour.end());
+		sort(sortcontours.begin(), sortcontours.end(), SortBysize);
 		for (size_t j = 1; j < lowTcontour.size(); j++)
 		{
-			if (contourArea(lowTcontour[0]) > 500 * contourArea(lowTcontour[j]) || lowTcontour[j].size() <= 6)
+			if (contourArea(sortcontours[0]) > 500 * contourArea(sortcontours[j]) || lowTcontour[j].size() <= 6)
 				break;
-			//if (hierarchy[j][3] != 0)
-			//	continue;
+			if (hierarchy[j][3] < 0)
+				continue;
 			else
 				size_v++;
 		}
@@ -390,21 +392,21 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 			hole.diameter = growT_RECT.height;
 		else
 			hole.diameter = growT_RECT.height;
-  		if (hole.diameter < 40)
-		{
-			bitwise_and(ready_boxImg, mask_point_ImgROI, ano_boxImg);
-			threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + max_v), 255, 0);
-			lowTcontour.clear();
-			findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-			sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
-			if (lowTcontour.size() != 0)
-			{
-				if (contourArea(lowTcontour[0]) < 0.1*whitenum || contourArea(lowTcontour[0]) < 6)
-					continue;
-			}
-			else
-				continue;
-		}
+  //		if (hole.diameter < 35)
+		//{
+		//	bitwise_and(ready_boxImg, mask_point_ImgROI, ano_boxImg);
+		//	threshold(ano_boxImg, ano_boxImg, 0.5*(avgmean[0] + max_v), 255, 0);
+		//	lowTcontour.clear();
+		//	findContours(ano_boxImg, lowTcontour, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		//	sort(lowTcontour.begin(), lowTcontour.end(), SortBysize);
+		//	if (lowTcontour.size() != 0)
+		//	{
+		//		if (contourArea(lowTcontour[0]) < 0.1*whitenum || contourArea(lowTcontour[0]) < 6)
+		//			continue;
+		//	}
+		//	/*else
+		//		continue*/;
+		//}
 		Point hole_torect_a(hole.position.x - 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
 		Point hole_torect_b(hole.position.x - 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
 		Point hole_torect_c(hole.position.x + 0.5 * growT_RECT.width, hole.position.y - 0.5 * growT_RECT.height);
@@ -457,22 +459,69 @@ void Pretreatment::ProducerTask() // 生产者任务
 			if (i == 4)
 				ThRect.height = MidImg.rows - 4 * MidImg.rows*0.2;
 			MidImgROI = MidImg(Rect(ThRect));
+
+			Mat sampleImg;
+			if (j)
+			{
+				sampleImg = MidImgROI(Rect(MidImgROI.cols - 201, 0, 200, MidImgROI.rows)).clone();
+				threshold(sampleImg, sampleImg, 15, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.rows;
+				wide_v = 2 * wide_v;
+				sampleImg = MidImgROI(Rect(MidImgROI.cols - wide_v - 1, 0, wide_v + 1, MidImgROI.rows));
+				LUT(sampleImg, lookUpTable_main, sampleImg);
+			}
+			else
+			{
+				sampleImg = MidImgROI(Rect(0, 0, 200, MidImgROI.rows - 1)).clone();
+				threshold(sampleImg, sampleImg, 15, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.rows;
+				wide_v = 2 * wide_v;
+				sampleImg = MidImgROI(Rect(0, 0, wide_v, MidImgROI.rows));
+				LUT(sampleImg, lookUpTable_main, sampleImg);
+
+			}
+			if (i == 1)
+			{
+				sampleImg = MidImgROI(Rect(0, 0, MidImgROI.cols, 200)).clone();
+				threshold(sampleImg, sampleImg, 15, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.cols;
+				wide_v = 2 * wide_v;
+				sampleImg = MidImgROI(Rect(0, 0, MidImgROI.cols, wide_v));
+				LUT(sampleImg, lookUpTable_main, sampleImg);
+			}
+			else if (i == 5)
+			{
+				sampleImg = MidImgROI(Rect(0, MidImgROI.rows - 201, MidImgROI.cols, 200)).clone();
+				threshold(sampleImg, sampleImg, 15, 255, 0);
+				int wide_v = 200 - countNonZero(sampleImg) / MidImgROI.cols;
+				wide_v = 2 * wide_v;
+				sampleImg = MidImgROI(Rect(0, MidImgROI.rows - wide_v, MidImgROI.cols, wide_v));
+				LUT(sampleImg, lookUpTable_main, sampleImg);
+			}
+			LUT(MidImgROI, lookUpTable, MidImgROI);
 			ThImgROI = ThImg(Rect(ThRect));
 
+			sampleImg = MidImgROI(Rect(0, 0, 0.67*MidImgROI.cols, MidImgROI.rows));
+			Mat TsampleImg = ThImgROI(Rect(0, 0, 0.67*MidImgROI.cols, MidImgROI.rows));
 			MatND histolist;
-			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);
-			int OtsuV = otsuThreshold(MidImgROI, histolist);//找到离散灰度值导数的阈值
+			calcHist(&sampleImg, 1, &channels, Mat(), histolist, 1, &size, ranges);
+			int OtsuV = otsuThreshold(sampleImg, histolist);//找到离散灰度值导数的阈值
+			threshold(sampleImg, TsampleImg, OtsuV, 255, CV_THRESH_BINARY_INV);
 
-			threshold(MidImgROI, ThImgROI, OtsuV, 255, CV_THRESH_BINARY_INV);
+			sampleImg = MidImgROI(Rect(0.67*MidImgROI.cols, 0, 0.33*MidImgROI.cols, MidImgROI.rows));
+			TsampleImg = ThImgROI(Rect(0.67*MidImgROI.cols, 0, 0.33*MidImgROI.cols, MidImgROI.rows));
+			calcHist(&sampleImg, 1, &channels, Mat(), histolist, 1, &size, ranges);
+			OtsuV = otsuThreshold(sampleImg, histolist);//找到离散灰度值导数的阈值
+			threshold(sampleImg, TsampleImg, OtsuV, 255, CV_THRESH_BINARY_INV);
+
 			vector<vector<cv::Point>> decontours;
-
 			cv::findContours(ThImgROI, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 			for (size_t k = 0; k < decontours.size(); k++)
 			{
 				if (decontours[k].size() > 8)
 				{
 					double matchextent = matchShapes(decontours[k], ecliptours[0], CV_CONTOURS_MATCH_I3, 0);//比较待检测缺陷的形态
-					if (matchextent < 1.0)
+					if (matchextent < 5.0)
 					{
 						needContour.push_back(decontours[k]);
 					}
@@ -546,7 +595,7 @@ void Pretreatment::linedetect()
 			continue;
 		Mat fingerprint_Img = CannyImg(Rect(cannyrect));//防止指纹误检
 		LUT(fingerprint_Img, lookUpTable, fingerprint_Img);
-		threshold(fingerprint_Img, fingerprint_Img, CannyImg.at<uchar>(bigcontours[i][0]), 255, 0);
+		threshold(fingerprint_Img, fingerprint_Img, CannyImg.at<uchar>(0.5*(bigcontours[i][0] + bigcontours[i][bigcontours[i].size()-1])), 255, 0);
 		if (countNonZero(fingerprint_Img) <= 0.6 * fingerprint_Img.cols * fingerprint_Img.rows)
 			continue;
 		Mat I_rows = waitImg(Range(0, 1), Range(int(waitImg.cols*0.2), int(waitImg.cols*0.8)));//第一行
@@ -609,6 +658,16 @@ void Pretreatment::img2clone()//待处理大图复制线程
 	{
 		p[j] = j;
 	}
+	lookUpTable_main = Mat(1, 256, CV_8U);
+	uchar* pm = lookUpTable_main.data;
+	for (int j = 0; j < 256; j++)
+	{
+		if (j<=15)
+			pm[j] = 255;
+		else
+			pm[j] = j;
+	}
+
 	//LMidImg = PMidImg.clone();
 }
 
@@ -641,29 +700,33 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	pointlist.push_back(_block->D);
 
 	recImg = boundingRect(pointlist);//截取瓷砖区域,对拍摄不全的区域也进行截取
+	//Mat sample_Img = image(Rect(recImg.x, recImg.y + 500, 220, 220)).clone();
+	//threshold(sample_Img, sample_Img, 40, 255, 0);
+	/*int wide_v = ((220 - countNonZero(sample_Img) / 220)>50) ? 220 - countNonZero(sample_Img) / 220 : 50;*/
+	int wide_v = 50;
 	if (recImg.x > 0)
-		recImg.x += 100;
+		recImg.x += wide_v;
 	if (recImg.y > 0)
-		recImg.y += 400;
-	if (recImg.x + recImg.width < image.cols && recImg.x + recImg.width > 200)
+		recImg.y += 200;
+	if (recImg.x + recImg.width < image.cols && recImg.x + recImg.width > 2 * wide_v)
 	{
 		if (recImg.x > 0)
-			recImg.width -= 200;
+			recImg.width -= 2 * wide_v;
 		else
-			recImg.width -= 100;
+			recImg.width -= wide_v;
 	}
 	else if (recImg.x + recImg.width >= image.cols && recImg.x > 0)
-		recImg.width -= 100;
+		recImg.width -= wide_v;
 
-	if (recImg.y + recImg.height < image.rows && recImg.y + recImg.height > 800)
+	if (recImg.y + recImg.height < image.rows && recImg.y + recImg.height > 400)
 	{
 		if (recImg.y > 0)
-			recImg.height -= 800;
-		else
 			recImg.height -= 400;
+		else
+			recImg.height -= 200;
 	}
 	else if (recImg.y + recImg.height >= image.rows && recImg.y > 0)
-		recImg.height -= 400;
+		recImg.height -= 200;
 
 	MidImg = image(Rect(recImg));
 

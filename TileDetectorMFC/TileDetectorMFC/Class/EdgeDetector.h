@@ -5,10 +5,11 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include "BlocksDetector.h"
-
+#include "Base\Faults.h"
 #include "Base/Block.h"
 #include "Base\Faults.h"
 
+/*2015年12月1日*/
 
 using namespace cv;
 
@@ -18,11 +19,7 @@ class EdgeDetector
 public:
 
 	EdgeDetector(Mat&, Block *_block,Faults *_faults);
-	~EdgeDetector()
-	{
-		p_block = NULL;
-		p_faults = NULL;
-	};
+	~EdgeDetector(){};
 	void start();
 	//vector<Point3f> Defects; // 保存缺陷点（x，y，半径）
 
@@ -31,8 +28,8 @@ public:
 
 
 private:
-	Block *p_block = NULL;
-	Faults *p_faults = NULL;
+	Block *block;
+	Faults *faults;
 	// 边缘点集合到拟合直线的距离，距离存在向量Distance中
 	void DistanceDetector_set(vector<Point> Boundary_Point_temp, Vec4f FitLine, vector<float> &Distance);
 	// 边缘点到拟合直线的距离
@@ -48,15 +45,14 @@ private:
 	// 寻找边缘点，Contours为原图边缘，ROI_Contours为ROI边缘
 	void Find_contours(vector<Mat> image, vector<vector<Point>> &Contours, vector<vector<Point>> &ROI_Contours);
 	// 将临近的点合并
-	void Merge_Defects(vector<Point3f> &Defects);
+	void Merge_Defects(vector<Faults::BrokenEdge> &Defects);
 	// 边缘点附近的缺陷检测,异常块存入Blocks中，异常块坐标存入local_中
 	void Blocks_Defects(vector<Mat> roi, vector<Vec4f> line, vector<Mat> &Blocks, vector<Point3f> &local_);
 	// 直线拟合
 	void FitLine(vector<vector<Point>> &Fit_contours, vector<Vec4f> &line_, vector<Vec4f> &line_roi, Vec4f &Fit_Line);
 
 	Mat src;
-	vector<Mat> ROI;
-	//vector<Mat> ROI1;
+	vector<Mat> ROI, ROI1;
 	// 边缘ROI
 	Mat leftROI, upROI, rightROI, downROI;
 	Point A, B, C, D;
@@ -70,13 +66,14 @@ private:
 	int xdown = 0, ydown = 0, down_height = 0, down_width = 0;
 
 	// 点到拟合直线的距离阈值
-	int distance_threld = 12;
+	int distance_threld = 20;
 	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
-	int Edge_threld = 8;
+	int Edge_threld = 20;
 	// 容忍度阈值
 	int seat = 6;
 	int simple = 5;
-	int Pixel_threld = 15;
+	int Pixel_threld_lr = 25;
+	int Pixel_threld_ud = 15;
 
 	int contours_threld = 31;
 	int Dynamic_range_min = 5;

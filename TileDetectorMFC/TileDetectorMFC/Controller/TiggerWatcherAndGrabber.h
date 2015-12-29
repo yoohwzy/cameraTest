@@ -21,6 +21,8 @@
 
 #include <thread>
 
+
+#define TWAG_OUTPUT_TO_CONSOLE
 class TiggerWatcherAndGrabber
 {
 public:
@@ -55,6 +57,7 @@ public:
 	bool Switch2Real();
 	bool Switch2Virtual(string virtualImg);
 
+	bool DoThreeInOne = true;
 
 	//手动触发，若无法触发返回false
 	bool ManualTigger();
@@ -66,6 +69,7 @@ public:
 	cv::Mat Image;
 	GrabbingBuffer *p_gb = NULL;
 private:
+	int _grabbingIndex = 0;
 	HWND hwnd;
 	E2VCamera *p_e2v = NULL;
 	VirtualCameraPre *p_vc = NULL;
@@ -80,7 +84,9 @@ private:
 	bool IsCalibration = false;
 	bool IsWatching = false;
 	bool IsGrabbing = false;
+	bool IsGrabbing2 = false;
 	
+	void runThread();
 
 	void watcherThread();
 	//采图进程
