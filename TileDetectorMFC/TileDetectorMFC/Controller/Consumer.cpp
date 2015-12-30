@@ -164,6 +164,9 @@ void Consumer::processingThread()
 		//ed.ThreshodHigh = ConsumerThreshodHight;
 		//ed.ThreshodLow = ConsumerThreshodLow;
 		//ed.grayImg = grayImg;
+
+		ed.distance_threld = distance_threld;
+		ed.Edge_threld = Edge_threld;
 		ed.start();
 
 		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();

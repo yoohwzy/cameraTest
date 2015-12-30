@@ -16,6 +16,7 @@
 #include "Class\Helper\StringHelper.h"
 
 #include "SettingDlg.h"
+#include "afxwin.h"
 
 #define WM_MSG_POSTMSG (WM_USER + 99)
 #define WM_MSG_GRABBING_END (WM_USER + 100)
@@ -118,4 +119,8 @@ public:
 	afx_msg void OnEnChangeTbLedTo();
 	int consumerThreshodHigh;
 	afx_msg void OnBnClickedCbDoThreeinone();
+	int m_distance_threld;
+	int m_Edge_threld;
+	afx_msg void OnEnChangeTbThreshod2();
+	afx_msg void OnEnChangeTbThreshod3();
 };

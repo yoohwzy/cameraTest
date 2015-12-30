@@ -114,7 +114,7 @@ private:
 	//检测边缘时，累加多少个像素点
 	const int SUM_COUNT = 20;
 	//平均每个点之间要差SUM_AVG_THRESHOD才算作是边界，真正的阈值为SUM_COUNT*SUM_AVG_THRESHOD;
-	const int SUM_AVG_THRESHOD = 200;
+	const int SUM_AVG_THRESHOD = 180;
 	const int SUM_THRESHOD = SUM_COUNT * SUM_AVG_THRESHOD;
 
 

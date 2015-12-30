@@ -384,8 +384,10 @@ void EdgeDetector::start()
 								bc.width = edge_deep;
 							}
 							bc.deep = bc.length*bc.width / sqrt(pow(bc.length, 2) + pow(bc.width, 2));
+							if (bc.deep > 300 || bc.length > 300)
+								continue;
 							faults->BrokenCorners.push_back(bc);
-							cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
+							//cv::circle(src, Point(bc.position.x, bc.position.y), bc.length, Scalar(255, 255, 250));
 							/*break;*/
 							i = ender + 5;
 						}
@@ -406,7 +408,8 @@ void EdgeDetector::start()
 								be.length = (ender - starter)/**(double)(fs.GetMilliMeterPerPix_Y())*/;
 								be.deep = edge_deep/**(double)(fs.GetMilliMeterPerPix_X())*/;
 							}
-
+							if (be.deep > 300 || be.length > 300)
+								continue;
 							faults->BrokenEdges.push_back(be);
 							/*break;*/
 							i = ender + 5;
@@ -434,7 +437,7 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int y1 = FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
 		int x2 = 4096;
 		int y2 = FitLine[1] * x2 / FitLine[0] + FitLine[3] - FitLine[1] * FitLine[2] / FitLine[0];
-		cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		//cv::line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 	else
 	{
@@ -442,7 +445,7 @@ void EdgeDetector::DrawLine(int EdgeIndex, Mat src, Vec4f FitLine, int R, int G,
 		int x1 = FitLine[2] - FitLine[0] / FitLine[1] * FitLine[3];
 		int y2 = 11000;
 		int x2 = (y2 - FitLine[3])*FitLine[0] / FitLine[1] + FitLine[2];
-		line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
+		//line(src, Point(x1, y1), Point(x2, y2), Scalar(R, G, B));
 	}
 }
 
@@ -728,6 +731,14 @@ void EdgeDetector::Merge_Defects(vector<Faults::BrokenEdge> &Defects)
 			}
 		}
 	}
+	for (int i = 0; i < Defects.size(); i++)
+	{
+		if (Defects[i].deep > 300 || Defects[i].length > 300)
+		{
+			Defects.erase(Defects.begin() + i);
+			i--;
+		}
+	}
 }
 
 void EdgeDetector::Blocks_Defects(vector<Mat> roi, vector<Vec4f> line_1, vector<Mat> &Blocks, vector<Point3f> &local_)
@@ -855,12 +866,12 @@ void EdgeDetector::RectAdjust(cv::Mat img,int &x, int& y, int& width, int& heigh
 
 	if (x + width > imgwidth)
 	{
-		x = (imgwidth - width);
+		width = (imgwidth - x);
 	}
 
 	if (y + height > imgheight)
 	{
-		y = (imgheight - height);
+		height = (imgheight - y);
 	}
 }
 

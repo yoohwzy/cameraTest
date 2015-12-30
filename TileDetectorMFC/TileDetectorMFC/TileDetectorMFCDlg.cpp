@@ -64,6 +64,8 @@ CTileDetectorMFCDlg::CTileDetectorMFCDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CT
 , consumerLedStartX(0)
 , consumerLedEndX(0)
 , consumerThreshodHigh(0)
+, m_distance_threld(0)
+, m_Edge_threld(0)
 {
 	printf_globle("");
 }
@@ -83,6 +85,8 @@ void CTileDetectorMFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, consumerLedEndX, 1, 4095);
 	DDX_Text(pDX, IDC_TB_THRESHOD_HIGH, consumerThreshodHigh);
 	DDV_MinMaxInt(pDX, consumerThreshodHigh, 1, 254);
+	DDX_Text(pDX, IDC_TB_THRESHOD2, m_distance_threld);
+	DDX_Text(pDX, IDC_TB_THRESHOD3, m_Edge_threld);
 }
 BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -104,6 +108,8 @@ BEGIN_MESSAGE_MAP(CTileDetectorMFCDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_TB_LED_FROM, &CTileDetectorMFCDlg::OnEnChangeTbLedFrom)
 	ON_EN_CHANGE(IDC_TB_LED_TO, &CTileDetectorMFCDlg::OnEnChangeTbLedTo)
 	ON_BN_CLICKED(IDC_CB_DO_THREEINONE, &CTileDetectorMFCDlg::OnBnClickedCbDoThreeinone)
+	ON_EN_CHANGE(IDC_TB_THRESHOD2, &CTileDetectorMFCDlg::OnEnChangeTbThreshod2)
+	ON_EN_CHANGE(IDC_TB_THRESHOD3, &CTileDetectorMFCDlg::OnEnChangeTbThreshod3)
 END_MESSAGE_MAP()
 
 
@@ -167,6 +173,9 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	consumerLedStartX = 0;
 	consumerLedEndX = 4095;
 
+
+	m_distance_threld = 12;
+	m_Edge_threld = 20;
 	UpdateData(false);
 
 	//CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
@@ -329,6 +338,8 @@ LRESULT CTileDetectorMFCDlg::OnMsgGrabbingEnd(WPARAM wParam, LPARAM lParam)
 		p_consumer->ConsumerThreshodHight = consumerThreshodHigh;
 		p_consumer->ConsumerLedStartX = consumerLedStartX;
 		p_consumer->ConsumerLedEndX = consumerLedEndX;
+		p_consumer->distance_threld = m_distance_threld;
+		p_consumer->Edge_threld = m_Edge_threld;
 		IsConsumerProcessing = true;
 		p_consumer->StartNewProces(p_twag->Image);
 	}
@@ -809,4 +820,16 @@ void CTileDetectorMFCDlg::OnBnClickedCbDoThreeinone()
 	{
 		p_twag->DoThreeInOne = (IsDlgButtonChecked(IDC_CB_DO_THREEINONE) == BST_CHECKED);
 	}
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbThreshod2()
+{
+	UpdateData(true);
+}
+
+
+void CTileDetectorMFCDlg::OnEnChangeTbThreshod3()
+{
+	UpdateData(true);
 }

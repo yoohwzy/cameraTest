@@ -101,3 +101,5 @@ Debug
 /生成图像样本/生成图像样本/*.jpg
 /ModuleTest
 /TileDetectorMFC/TileDetectorMFC/*.aps
+/TileDetectorMFC/TileDetectorMFC/EdgeInner
+/TileDetectorMFC/TileDetectorMFC/Release/TileDetectorMFC.res

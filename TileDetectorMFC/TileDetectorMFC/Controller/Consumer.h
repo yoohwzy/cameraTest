@@ -44,6 +44,15 @@ public:
 	int ConsumerThreshodHight = 9;
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
+
+
+	// 点到拟合直线的距离阈值
+	int distance_threld = 20;
+	// 判定崩边连续点点数量阈值，大于该值认为有连续的点异常，则认为崩边
+	int Edge_threld = 20;
+
+
+
 	Faults faults;
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;
