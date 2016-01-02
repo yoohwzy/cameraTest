@@ -46,7 +46,7 @@ private:
 	vector<vector<vector<Point>>> Warehousecontours;
 	vector<vector<Point>> Linecontours;
 	vector<vector<cv::Point>> ecliptours;
-	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg, lookUpTable;
+	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg, lookUpTable,lookUpTable_main;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;

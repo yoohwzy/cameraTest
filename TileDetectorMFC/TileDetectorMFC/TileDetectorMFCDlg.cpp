@@ -169,13 +169,13 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"");
 
 	consumerThreshod = 5;
-	consumerThreshodHigh = 9;
+	consumerThreshodHigh = 12;
 	consumerLedStartX = 0;
 	consumerLedEndX = 4095;
 
 
-	m_distance_threld = 12;
-	m_Edge_threld = 20;
+	m_distance_threld = 18;
+	m_Edge_threld = 24;
 	UpdateData(false);
 
 	//CButton* radio = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
@@ -187,6 +187,7 @@ BOOL CTileDetectorMFCDlg::OnInitDialog()
 	//创建系统日志
 	LogHelper::Log("系统启动\r\n");
 
+	arm.pci1761.SetR(0, true);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -443,7 +444,10 @@ LRESULT CTileDetectorMFCDlg::OnMsgProcessingEnd(WPARAM wParam, LPARAM subtype)
 			p_consumer->faults.MarkPens.size() > 0
 			)
 		{
-			arm.AddAction(0, TimeHelper::GetTimeNow(100));
+			arm.pci1761.SetR(0, true);
+			Sleep(100);
+			arm.pci1761.SetR(0, false);
+			//arm.AddAction(0, TimeHelper::GetTimeNow(500));
 		}
 		if (p_consumer->faults.BrokenEdges.size() > 0)
 		{
@@ -582,6 +586,8 @@ void CTileDetectorMFCDlg::DrawPicToHDC(cv::Mat& img, UINT ID, HDC hDC)
 
 void CTileDetectorMFCDlg::OnBnClickedCbCanbetiggered()
 {
+	arm.AddAction(0, TimeHelper::GetTimeNow(500));
+
 	if (IsDlgButtonChecked(IDC_CB_CanBeTiggered) == BST_CHECKED)
 		p_twag->StartWatch();
 	else
@@ -657,6 +663,8 @@ void CTileDetectorMFCDlg::OnEnKillfocusTbVirtualcamera()
 
 void CTileDetectorMFCDlg::OnBnClickedBtnSetting()
 {
+	arm.pci1761.SetR(0, false);
+
 	SettingDlg sd;
 	p_twag->StopWatch();
 

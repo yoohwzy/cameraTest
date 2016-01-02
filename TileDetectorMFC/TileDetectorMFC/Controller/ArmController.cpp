@@ -58,7 +58,7 @@ void ArmController::tickTick()
 						workFlag = true;
 
 						pci1761.SetR(i, true);
-						std::this_thread::sleep_for(chrono::milliseconds(50));
+						std::this_thread::sleep_for(chrono::milliseconds(500));
 						pci1761.SetR(i, false);
 					}
 				}

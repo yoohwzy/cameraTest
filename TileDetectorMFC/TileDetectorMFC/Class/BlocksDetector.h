@@ -6,7 +6,7 @@
 
 #include "Base\Block.h"
 
-//#define BD_OUTPUT_DEBUG_INFO 1
+#define BD_OUTPUT_DEBUG_INFO 1
 
 //@description 瓷砖位置快速定位，传入二值化后的图像，计算出ABCD四个角理论位置
 //@author VShawn

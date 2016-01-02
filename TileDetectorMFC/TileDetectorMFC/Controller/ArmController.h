@@ -26,10 +26,10 @@ public:
 	bool AddAction(int ArmNum, SYSTEMTIME ct);
 	//存储需要执行机械臂1动作的时间戳，每次执行完将该条出栈
 	vector<queue<SYSTEMTIME>> TriggerTimestamps;
+	PCI1761 pci1761;
 private:
 	const int armCount = 1;//有几条机械臂
 	thread t_watch;
-	PCI1761 pci1761;
 	bool stopFlag = false;
 	//时间不断地走，当走到有触发的时刻即触发并出栈
 	void tickTick();
