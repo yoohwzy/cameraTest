@@ -144,6 +144,9 @@
     <ClInclude Include="Class\IOCard\PCI1761IO.h">
       <Filter>Class\IOCard</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Base\E2VBuffer.h">
+      <Filter>Class\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TileDetectorMFC.cpp">
@@ -217,6 +220,9 @@
     </ClCompile>
     <ClCompile Include="Controller\ArmController.cpp">
       <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Base\E2VBuffer.cpp">
+      <Filter>Class\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

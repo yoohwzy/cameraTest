@@ -203,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class\Base\Block.h" />
+    <ClInclude Include="Class\Base\E2VBuffer.h" />
     <ClInclude Include="Class\Base\Faults.h" />
     <ClInclude Include="Class\BlocksDetector.h" />
     <ClInclude Include="Class\BufferStorage.h" />
@@ -241,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class\Base\Block.cpp" />
+    <ClCompile Include="Class\Base\E2VBuffer.cpp" />
     <ClCompile Include="Class\BlocksDetector.cpp" />
     <ClCompile Include="Class\BufferStorage.cpp" />
     <ClCompile Include="Class\Camera\E2VCamera.cpp" />
