@@ -80,14 +80,4 @@ static void ExitWithError(std::string errorInfo,int errorCode = 1){
 	exit(errorCode);
 }
 
-//检测MD采集卡是否有错误
-//报错->退出
-static void MD_ErrorMessageWait(Fg_Struct *fg)
-{
-	int error = Fg_getLastErrorNumber(fg);
-	const char*	err_str = Fg_getLastErrorDescription(fg);
-	fprintf(stderr, "Error: %d : %s\n", error, err_str);
-	ExitWithError(err_str);
-}
-
 #define OUTPUT_TO_CONSOLE

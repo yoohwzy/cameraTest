@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Class">
+      <UniqueIdentifier>{869013a2-1177-41f4-bd6c-3fb231c4fd11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Camera">
+      <UniqueIdentifier>{f339bc77-c62d-4fec-acbe-23082719a807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\IOCard">
+      <UniqueIdentifier>{ece9a19b-27c7-4060-8b8a-d14d34f66f2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Helper">
+      <UniqueIdentifier>{1ecd844c-715b-4a51-b9f6-abd6b186f8ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Camera\e2v_EV71YC1CCL4005BA0">
+      <UniqueIdentifier>{42e98774-330a-4baa-9c2c-dc91fb002ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Camera\virtualcamera">
+      <UniqueIdentifier>{7c930dcb-302a-4e70-9170-c3b465edfd58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{1bac9774-2821-4992-8bbc-1b1a39630eef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{24ae75bd-67a9-415f-a0d3-623d595d16e9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Spots.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\StringHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Helper\TimeHelper.h">
+      <Filter>Class\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761\compatibility.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h">
+      <Filter>Class\IOCard</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\Worker.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\ImgScanner.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotsMainDlg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\Controller.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Spots.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp">
+      <Filter>Class\IOCard</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\Worker.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\ImgScanner.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotsMainDlg.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\Controller.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Spots.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Spots.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Spots.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Class\IOCard\PCI1761\Adsapi32.lib">
+      <Filter>Class\IOCard</Filter>
+    </Library>
+    <Library Include="Class\IOCard\PCI1761\odbc32.lib">
+      <Filter>Class\IOCard</Filter>
+    </Library>
+    <Library Include="Class\IOCard\PCI1761\odbccp32.lib">
+      <Filter>Class\IOCard</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
