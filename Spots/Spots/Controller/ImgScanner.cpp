@@ -5,7 +5,7 @@
 ImgScanner::ImgScanner(E2VBuffer *_e2vbuffer)
 {
 	p_e2vbuffer = _e2vbuffer;
-	p_e2v = new E2VCamera(p_e2vbuffer, 4096, 200, p_e2vbuffer->GetColorType() == CV_8U ? E2VCamera::GRAY : E2VCamera::RGB, 0, PORT_A);
+	p_e2v = new E2VCamera(p_e2vbuffer, 4096, ImgScanner::FrameTimeUS, p_e2vbuffer->GetColorType() == CV_8U ? E2VCamera::GRAY : E2VCamera::RGB, 0, PORT_A);
 	std::thread t_scanThread(std::mem_fn(&ImgScanner::freerun), this);
 	t_scanThread.detach();
 }

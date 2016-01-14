@@ -3,8 +3,8 @@
 //
 #include "Class\Helper\StringHelper.h"
 
-#include "Controller\ImgScanner.h"
-#include "Controller\Worker.h"
+
+#include "CvvImage.h"
 
 #pragma once
 
@@ -15,7 +15,9 @@ class CSpotsMainDlg : public CDialogEx
 // 构造
 public:
 	CSpotsMainDlg(CWnd* pParent = NULL);	// 标准构造函数
-
+	~CSpotsMainDlg()
+	{
+	}
 // 对话框数据
 	enum { IDD = IDD_SPOTS_DIALOG };
 
@@ -34,8 +36,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	E2VBuffer *p_e2vbuffer = NULL;
-	ImgScanner *p_imgscanner;
 public:
 	afx_msg void OnBnClickedOk();
+	void DrawPicToHDC(cv::Mat& img, UINT ID);
 };

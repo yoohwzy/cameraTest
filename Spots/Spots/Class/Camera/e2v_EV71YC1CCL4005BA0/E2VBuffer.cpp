@@ -30,8 +30,8 @@ void E2VBuffer::WriteData(cv::Mat oneline)
 
 
 	++WriteIndex;
-	if (WriteIndex == 20000)
-		WriteIndex = 1;
+	if (WriteIndex >= 20000)
+		WriteIndex = 0;
 
 	//t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
 	//std::cout << t1 << endl;

@@ -20,7 +20,10 @@ public:
 	//获得OPENCV的色彩模式，
 	int GetColorType(){ return colorType; };
 	//获取当前的写指针
-	int GetWriteIndex(){ return WriteIndex; };
+	int GetWriteIndex()
+	{ 
+		return WriteIndex; 
+	};
 
 	//将一行写入循环缓存
 	void WriteData(cv::Mat oneline);

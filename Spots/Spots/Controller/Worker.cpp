@@ -1,13 +1,8 @@
 #include "Worker.h"
 
-
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
 	p_e2vbuffer = _e2vbuffer;
-
-	//std::thread t_workThread(std::mem_fn(&Worker::work), this);
-	//t_workThread.detach();
-	work();
 }
 
 
@@ -15,14 +10,38 @@ Worker::~Worker()
 {
 }
 
-
+void Worker::StartWork()
+{
+	std::thread t_workThread(std::mem_fn(&Worker::work), this);
+	t_workThread.detach();
+	//work();
+}
 void Worker::work()
 {
+	MyStatus = WorkerStatus::Busy;
+
 	int startFrame = p_e2vbuffer->GetWriteIndex();
+	//加入延时时间
+	frameIndexAdd(startFrame, WaitTimeMS * 1000 / ImgScanner::FrameTimeUS);
+	if (startFrame >= E2VBuffer::BufferLength)
+		startFrame -= E2VBuffer::BufferLength;
+
+
 	//触发后等待一段时间，砖走到拍摄区域
 	image = getPhoto(startFrame, 0);
+
+	MyStatus = WorkerStatus::Done;
 	return;
 }
+
+
+
+
+
+
+
+
+
 //length < 12000
 //取图范围 startFrame 到 endFrame，包括startFrame与endFrame两行
 cv::Mat Worker::getPhoto(int startFrame, int length)
@@ -34,37 +53,51 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 		length = Worker::frameCountsOut;
 
 	int width = p_e2vbuffer->Buffer.cols;
-	int endFrame = startFrame + length - 1;//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。
-
-
-	// 如果循环缓存跨页面
-	if (endFrame >= E2VBuffer::BufferLength)
-	{
-		endFrame = endFrame - E2VBuffer::BufferLength;
-	}
+	int endFrameAbso = startFrame;//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
+	frameIndexAdd(endFrameAbso, length - 1);
+	int endFrame = endFrameAbso;
 
 	GetPhotoOn = true;
-
 	//wait capture end
+	Sleep(100);
 	while (GetPhotoOn)
 	{
 		//判断是否读够那么多行
 		int now = p_e2vbuffer->GetWriteIndex();
-		if (endFrame > startFrame  && now >= endFrame)
+		//因超时而退出
+		if (
+			(endFrameAbso > startFrame  && now >= endFrameAbso) ||
+			(startFrame > endFrameAbso && now >= endFrameAbso && now < length)
+			)
+		{
 			break;
-		else if (startFrame > endFrame && now >= endFrame && now < length)
-			break;
-		Sleep(1);
+		}
+		Sleep(2);
 	}
-
-	//GetPhotoOn == flase 表示是触发器的下降沿结束了采集
 	if (GetPhotoOn == false)
 	{
-		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。
-		
+		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
+		//此处重新计算endFrame
 		endFrame = p_e2vbuffer->GetWriteIndex();
+		frameIndexAdd(endFrame, WaitTimeMS * 1000 / ImgScanner::FrameTimeUS);
+		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。		
 	}
-	GetPhotoOn = false;
+	while (true)
+	{
+		//判断是否读够那么多行
+		int now = p_e2vbuffer->GetWriteIndex();
+		//计数完成而退出
+		if (
+			(endFrame > startFrame  && now >= endFrame) ||
+			(startFrame > endFrame && now >= endFrame && now < length)
+			)
+		{
+			GetPhotoOn = false;
+			break;
+		}
+		Sleep(2);
+	}
+
 
 
 	//提取图像

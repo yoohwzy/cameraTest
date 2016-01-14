@@ -123,11 +123,13 @@
     <ClInclude Include="Controller\Controller.h" />
     <ClInclude Include="Controller\ImgScanner.h" />
     <ClInclude Include="Controller\Worker.h" />
+    <ClInclude Include="CvvImage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Spots.h" />
     <ClInclude Include="SpotsMainDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="View\SpotsMainView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
@@ -136,12 +138,14 @@
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="Controller\ImgScanner.cpp" />
     <ClCompile Include="Controller\Worker.cpp" />
+    <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="Spots.cpp" />
     <ClCompile Include="SpotsMainDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="View\SpotsMainView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Spots.rc" />

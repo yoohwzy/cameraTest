@@ -37,14 +37,17 @@
     <Filter Include="UI">
       <UniqueIdentifier>{24ae75bd-67a9-415f-a0d3-623d595d16e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="View">
+      <UniqueIdentifier>{49a8b2fa-06bc-4118-a217-d63817c5db93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{517733bb-2311-4085-86ca-f9ed29a58a7e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Spots.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -87,11 +90,17 @@
     <ClInclude Include="Controller\Controller.h">
       <Filter>Controller</Filter>
     </ClInclude>
+    <ClInclude Include="CvvImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="View\SpotsMainView.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="Spots.h">
+      <Filter>App</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Spots.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -115,6 +124,15 @@
     </ClCompile>
     <ClCompile Include="Controller\Controller.cpp">
       <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="CvvImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="View\SpotsMainView.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+    <ClCompile Include="Spots.cpp">
+      <Filter>App</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

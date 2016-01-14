@@ -46,8 +46,6 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
-	p_e2vbuffer = new E2VBuffer(4096, true);
-	p_imgscanner = new ImgScanner(p_e2vbuffer);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -92,8 +90,16 @@ HCURSOR CSpotsMainDlg::OnQueryDragIcon()
 
 void CSpotsMainDlg::OnBnClickedOk()
 {
-	Worker worker = Worker(p_e2vbuffer);
-
-	// TODO:  在此添加控件通知处理程序代码
-	//CDialogEx::OnOK();
+}
+void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
+{
+	IplImage image(img); //原始图像
+	CDC *p_DC = GetDlgItem(ID)->GetDC();
+	HDC hDC = p_DC->GetSafeHdc();
+	CRect rect;
+	GetDlgItem(ID)->GetClientRect(&rect);
+	CvvImage cimg;
+	cimg.CopyOf(&image); // 复制图片
+	cimg.DrawToHDC(hDC, &rect); // 将图片绘制到显示控件的指定区域内
+	ReleaseDC(p_DC);
 }

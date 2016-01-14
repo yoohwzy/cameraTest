@@ -40,6 +40,7 @@ public:
 	};
 
 	bool StartFlag = true;
+
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
 	Fg_Struct *fg = NULL;			//frame grabber
