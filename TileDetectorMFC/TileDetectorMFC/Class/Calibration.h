@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <condition_variable>
 #include "Base\Block.h"
+#include "Pretreatment.h"
 
 
 
@@ -18,12 +19,13 @@
 using namespace cv;
 using namespace std;
 
-#include "Base\Faults.h"
 #include "Base\Calibra.h"
+#include "Base\Faults.h"
+
 
 
 #pragma once
-class Pretreatment
+class Calibration:public Pretreatment
 {
 private:
 	static const int kItemRepositorySize = 200; // Item buffer size.
@@ -38,7 +40,14 @@ private:
 
 	typedef struct ItemRepository ItemRepository;
 	int size;
-	Faults *_faults;
+	int kItemsToProduce = 10;   // How many items we plan to produce.
+	int m = 0;
+	int faultnum = 0;
+	vector<Point3f> repoint;
+	Mat MidImg, ThImg, LMidImg, PMidImg;
+	vector<vector<cv::Point>> needContour;
+	Rect recImg = Rect(Point(0, 0), Point(0, 0));
+	vector<vector<cv::Point>> dilateneedcontours;
 	vector<Point> pointlist;
 	vector<Point> in_or_out;
 	vector<Point> Containpoints;
@@ -47,15 +56,11 @@ private:
 	vector<vector<vector<Point>>> Warehousecontours;
 	vector<vector<Point>> Linecontours;
 	vector<vector<cv::Point>> ecliptours;
+	Mat CannyImg, BlurImg, lookUpTable, lookUpTable_main;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
-	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg, lookUpTable, lookUpTable_main;
-	
-public:
-	
-	Mat Grow(Mat &image, Point seedpoint, double th_v);
-	int otsuThreshold(Mat &frame, MatND hist);
+	bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe);
 	void img2clone();
 	void img2zoom();
 	void linedetect();
@@ -65,8 +70,17 @@ public:
 	int ConsumeItem(ItemRepository *ir);
 	void ConsumerTask();
 	void InitItemRepository(ItemRepository *ir);
-	void pretreatment(Mat &image, Block *_block, Faults *faults,Scales *scales);
-	Pretreatment()
+public:
+	void C_pretreatment(Mat &image, Block *_block, Scales *_scales);
+	Mat C_Grow(Mat &image, Point seedpoint, double th_v)
+	{
+		return Grow(image,seedpoint,th_v);
+	}
+	int C_otsuThreshold(Mat &frame, MatND hist)
+	{
+		return otsuThreshold(frame, hist);
+	}
+	Calibration()
 	{
 		size = 256;
 		hranges[0] = 0.0;
@@ -74,7 +88,9 @@ public:
 		ranges[0] = hranges;
 		channels = 0;
 	}
-	~Pretreatment();
+	~Calibration();
 
 };
+
+
 

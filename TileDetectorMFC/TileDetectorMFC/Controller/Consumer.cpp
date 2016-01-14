@@ -217,8 +217,10 @@ void Consumer::processingThread()
 		{
 			t = (double)cv::getTickCount();
 			ss << "瓷砖内部缺陷检测 开始" << endl;
+			Calibration c;
+			c.C_pretreatment(grayImg, p_block, &scales);
 			Pretreatment p;
-			p.pretreatment(grayImg, p_block, &faults);
+			p.pretreatment(grayImg, p_block, &faults, &scales);
 
 			ss << GrabbingIndex << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
 			ss << GrabbingIndex << " " << "内部有凹点：" << faults.Holes.size() << endl;

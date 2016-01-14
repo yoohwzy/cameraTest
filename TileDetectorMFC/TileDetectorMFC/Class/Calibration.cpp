@@ -1,5 +1,4 @@
-#include "Pretreatment.h"
-#include "Judgement.h"
+#include "Calibration.h"
 
 
 using namespace cv;
@@ -9,22 +8,16 @@ using namespace std;
 #undef max
 #undef min
 
-int kItemsToProduce = 10;   // How many items we plan to produce.
-int m = 0;
-vector<Point3f> repoint;
-Mat MidImg, ThImg, LMidImg, PMidImg;
-vector<vector<cv::Point>> needContour;
-Rect recImg = Rect(Point(0, 0), Point(0, 0));
-vector<vector<cv::Point>> dilateneedcontours;
 
 
 
-bool SortBysize(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊýµÄÀàÐÍÒ»¶¨ÒªÓëvectorÖÐÔªËØµÄÀàÐÍÒ»ÖÂ  
+
+bool SortBysize1(const vector<Point>v1, const vector<Point>v2)//×¢Òâ£º±¾º¯ÊýµÄ²ÎÊýµÄÀàÐÍÒ»¶¨ÒªÓëvectorÖÐÔªËØµÄÀàÐÍÒ»ÖÂ  
 {
 	return v1.size() > v2.size();//½µÐòÅÅÁÐ  
 }
 
-bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
+bool Calibration::WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
 {
 	vector<Point> maxV_white_Points;
 	if (countNonZero(oneImg) >= 1)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
@@ -80,159 +73,9 @@ bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄº
 	return 0;
 }
 
-Point barycenter1(vector<Point> contoursi)//¼ÆËãÂÖÀªÖØÐÄ
-{
-	Moments m = moments(contoursi);
-	Point center = Point(0, 0);
-	center.x = (int)(m.m10 / m.m00);
-	center.y = (int)(m.m01 / m.m00);
-	return center;
-}
-
-int Pretreatment::otsuThreshold(Mat &frame, MatND hist)//¾Ö²¿¶þÖµ»¯µÄãÐÖµÑ¡È¡
-{
-	const int GrayScale = 256;
-	int width = frame.cols;
-	int height = frame.rows;
-	float pixelPro[GrayScale] = { 0 };
-	int pixelSum = width * height, threshold = 0;
-	vector<vector<int>> grayVlist;
-	vector<int> grayV;
-
-	int n = 0, m = 0;
-	for (int i = 0; i < GrayScale; i++)
-	{
-		pixelPro[i] = hist.at<float>(i) / pixelSum;
-
-		if (pixelPro[i] > 0.00015)
-		{
-			grayV.push_back(i);
-			m = 1;
-		}
-		else if (m == 1)
-		{
-			grayVlist.push_back(grayV);
-			grayV.clear();
-			n++;
-			m = 0;
-		}
-
-	}
-	Point max = Point(0, 0);
-	if (grayVlist.size() == 0)
-		return frame.at<uchar>(0, 0);
-	for (int i = 0; i < grayVlist.size(); i++)
-	{
-		int j = grayVlist[i].size();
-		if (max.x < j)
-		{
-			max.x = j;
-			max.y = i;
-		}
-	}
-	threshold = grayVlist[max.y][0];
-	return threshold;
-}
-
-Mat Pretreatment::Grow(Mat &image, Point seedpoint, double th_v)//ÇøÓòÉú³¤Í¼ÏñÖÖ×ÓµãÃÅÏÞ
-{
-	Mat HyImg = image.clone();
-	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
-	vector<Point> seedq;
-	seedq.push_back(seedpoint);
-	while (!seedq.empty())
-	{
-		Point growpoint = seedq[seedq.size() - 1];
-		seedq.pop_back();
-		uchar* data = HyImg.ptr<uchar>(growpoint.y);//»Ò¶ÈÍ¼±¾ÐÐÊ×µØÖ·
-		uchar* dataT = SameImg.ptr<uchar>(growpoint.y);//¶þÖµÍ¼±¾ÐÐÊ×µØÖ·
-		if ((growpoint.x > 0) && (growpoint.x < (image.cols - 1)) && (growpoint.y > 0) && (growpoint.y < (image.rows - 1)))
-		{
-			if (data[growpoint.x - 1] < th_v)
-			{
-				if (dataT[growpoint.x - 1] == 0 && data[growpoint.x - 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y));
-					dataT[growpoint.x - 1] = 255;
-				}
-			}
-
-			if (data[growpoint.x + 1] < th_v)
-			{
-				if (dataT[growpoint.x + 1] == 0 && data[growpoint.x + 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y));
-					dataT[growpoint.x + 1] = 255;
-				}
-			}
-
-			uchar* dataU = HyImg.ptr<uchar>(growpoint.y - 1);//»Ò¶ÈÍ¼ÉÏÒ»ÐÐÊ×µØÖ·
-			uchar* dataUT = SameImg.ptr<uchar>(growpoint.y - 1);//¶þÖµÍ¼ÉÏÒ»ÐÐÊ×µØÖ·
-
-			if (dataU[growpoint.x] < th_v)
-			{
-				if (dataUT[growpoint.x] == 0 && dataU[growpoint.x] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x, growpoint.y - 1));
-					dataUT[growpoint.x] = 255;
-				}
-			}
-			if (dataU[growpoint.x - 1] < th_v)
-			{
-				if (dataUT[growpoint.x - 1] == 0 && dataU[growpoint.x - 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y - 1));
-					dataUT[growpoint.x - 1] = 255;
-				}
-			}
-
-			if (dataU[growpoint.x + 1]   < th_v)
-			{
-				if (dataUT[growpoint.x + 1] == 0 && dataU[growpoint.x + 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y - 1));
-					dataUT[growpoint.x + 1] = 255;
-				}
-			}
-
-			uchar* dataD = HyImg.ptr<uchar>(growpoint.y + 1);//»Ò¶ÈÍ¼ÏÂÒ»ÐÐÊ×µØÖ·
-			uchar* dataDT = SameImg.ptr<uchar>(growpoint.y + 1);//¶þÖµÍ¼ÏÂÒ»ÐÐÊ×µØÖ·
-
-			if (dataD[growpoint.x] < th_v)
-			{
-				if (dataDT[growpoint.x] == 0 && dataD[growpoint.x] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x, growpoint.y + 1));
-					dataDT[growpoint.x] = 255;
-				}
-			}
-
-			if (dataD[growpoint.x - 1] < th_v)
-			{
-				if (dataDT[growpoint.x - 1] == 0 && dataD[growpoint.x - 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x - 1, growpoint.y + 1));
-					dataDT[growpoint.x - 1] = 255;
-				}
-			}
-			if (dataD[growpoint.x + 1] < th_v)
-			{
-				if (dataDT[growpoint.x + 1] == 0 && dataD[growpoint.x + 1] - data[growpoint.x] <= 2)
-				{
-					seedq.push_back(Point(growpoint.x + 1, growpoint.y + 1));
-					dataDT[growpoint.x + 1] = 255;
-				}
-			}
-		}
 
 
-	}
-	return SameImg;
-}
-
-
-
-void Pretreatment::ProduceItem(ItemRepository *ir, int item)
+void Calibration::ProduceItem(ItemRepository *ir, int item)
 {
 	std::unique_lock<std::mutex> lock(ir->mtx);
 	while (((ir->write_position + 1) % kItemRepositorySize)
@@ -254,7 +97,7 @@ void Pretreatment::ProduceItem(ItemRepository *ir, int item)
 	lock.unlock(); // ½âËø.
 }
 
-int Pretreatment::ConsumeItem(ItemRepository *ir)
+int Calibration::ConsumeItem(ItemRepository *ir)
 {
 	int data;
 	std::unique_lock<std::mutex> lock(ir->mtx);
@@ -304,7 +147,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		else
 			input_th_v = (min_v + 3 > 0.5*(min_v + avgmean[0])) ? 0.5*(min_v + avgmean[0]) : min_v + 3;
 
-		Mat growImg = Grow(ready_boxImg, centermark, input_th_v);//ÇøÓòÉú³¤
+		Mat growImg = C_Grow(ready_boxImg, centermark, input_th_v);//ÇøÓòÉú³¤
 
 		int whitenum = countNonZero(growImg);
 		Mat growtemp = growImg.clone();
@@ -322,44 +165,10 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		{
 			continue;
 		}
-		//int k = 1;
-		//Mat oneImg;
-		//if (growT_RECT.height>growT_RECT.width)
-		//{
-		//	oneImg = growImg(Range(1, 1), Range::all());
-		//}
-		//else
-		//{
-		//	oneImg = growImg(Range::all(), Range(1, 1));
-		//	k = 0;
-		//}
-		//reduce(growImg, oneImg, k, CV_REDUCE_AVG);
-		//double maxV_white;
-		//minMaxLoc(oneImg, NULL, &maxV_white);
-		//int white_range = countNonZero(oneImg);
-		//maxV_white = (k == 1) ? growImg.cols * maxV_white : growImg.rows * maxV_white;
-		//maxV_white /= 255;//°×µã¸öÊý
-		if (/*1.5*whitenum / white_range > maxV_white ||*/ 2 * whitenum < growT_RECT.width*growT_RECT.height)
+		if ( 2 * whitenum < growT_RECT.width*growT_RECT.height)
 		{
 			continue;
 		}
-		//Mat biggerImg;
-		//vector<vector<Point>> biggercontours;
-		//resize(growImg, biggerImg, Size(growImg.cols *1.2, growImg.rows * 1.2), 0, 0, INTER_LINEAR);
-		//findContours(biggerImg, biggercontours, RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-		//Mat mask_point_Img(biggerImg.size(),CV_8U,Scalar(0));
-		//Mat mask_point_ImgROI = mask_point_Img(Rect(Point(growImg.cols*0.1, growImg.rows*0.1), Point(growImg.cols*1.1, growImg.rows*1.1)));
-		//drawContours(mask_point_Img, biggercontours, -1, Scalar(255), -1);
-		//drawContours(mask_point_ImgROI, tempttours, -1, Scalar(0), -1);
-
-
-		//Scalar mount;
-		//mount = mean(ano_boxImg, mask_point_ImgROI);//·ÖÎö»·×´ÇøÓòµÄÆ½¾ù»Ò¶ÈÖµ
-		//if (mount[0] < 0.8*avgmean[0])
-		//	continue;
-		//if (1.8 * min_v > avgmean[0])
-		//	continue;
-
 		MatND box_histolist;
 		calcHist(&ready_boxImg, 1, &channels, Mat(), box_histolist, 1, &size, ranges);
 		Point modePoint = Point(0, 0);
@@ -396,7 +205,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		int size_v = 1;
 		vector<vector<cv::Point>> sortcontours;
 		sortcontours.insert(sortcontours.end(), lowTcontour.begin(), lowTcontour.end());
-		sort(sortcontours.begin(), sortcontours.end(), SortBysize);
+		sort(sortcontours.begin(), sortcontours.end(), SortBysize1);
 		for (size_t j = 1; j < lowTcontour.size(); j++)
 		{
 			if (contourArea(sortcontours[0]) > 500 * contourArea(sortcontours[j]) || lowTcontour[j].size() <= 6)
@@ -440,7 +249,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		Point hole_torect_d(hole.position.x + 0.5 * growT_RECT.width, hole.position.y + 0.5 * growT_RECT.height);
 		if (pointPolygonTest(pointlist, hole_torect_a, 0) == 1 && pointPolygonTest(pointlist, hole_torect_b, 0) == 1)//¼ì²â¸Ã°¼µãÊÇ·ñÔÚ´É×©ÄÚ²¿£¬·ÀÖ¹´É×©ÇãÐ±ÎóÅÐ
 			if (pointPolygonTest(pointlist, hole_torect_c, 0) == 1 && pointPolygonTest(pointlist, hole_torect_d, 0) == 1)
-				_faults->Holes.push_back(hole);
+				faultnum++;
 
 	}
 	(ir->read_position)++; // ¶ÁÈ¡Î»ÖÃºóÒÆ
@@ -455,21 +264,10 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 }
 
 
-void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
+void Calibration::ProducerTask() // Éú²úÕßÈÎÎñ
 {
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//¶þÖµ»¯Ô­Í¼
 	Mat DilateImg = getStructuringElement(MORPH_RECT, Size(3, 3));
-	if (_faults->MarkPens.size() != 0)
-	{
-		double t = (double)cv::getTickCount();
-		cv::max(MidImg, Mask_result_big, MidImg);
-		/*bitwise_and(MidImg, Mask_result_big, MidImg);
-		Mat table;
-		CreateLookupTable(table);
-		LUT(MidImg, table, MidImg);*/
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		cout << t << endl;
-	}
 
 	Mat ThImgROI, MidImgROI;
 	Point Thpt = Point(0, 0);
@@ -565,7 +363,7 @@ void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
 	}
 }
 
-void Pretreatment::ConsumerTask() // Ïû·ÑÕßÈÎÎñ
+void Calibration::ConsumerTask() // Ïû·ÑÕßÈÎÎñ
 {
 	static int cnt = 1;
 	while (1) {
@@ -574,14 +372,14 @@ void Pretreatment::ConsumerTask() // Ïû·ÑÕßÈÎÎñ
 	}
 }
 
-void Pretreatment::InitItemRepository(ItemRepository *ir)
+void Calibration::InitItemRepository(ItemRepository *ir)
 {
 	ir->write_position = 0; // ³õÊ¼»¯²úÆ·Ð´ÈëÎ»ÖÃ.
 	ir->read_position = 0; // ³õÊ¼»¯²úÆ·¶ÁÈ¡Î»ÖÃ.
 }
 
 
-void Pretreatment::linedetect()
+void Calibration::linedetect()
 {
 	vector<vector<cv::Point>> dilatecontours;
 	findContours(BlurImg, dilatecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -591,19 +389,12 @@ void Pretreatment::linedetect()
 		move_n = 20;
 	else
 		move_n = int(dilatecontours.size()*0.5);
-	partial_sort(dilatecontours.begin(), dilatecontours.begin() + move_n, dilatecontours.end(), SortBysize);
+	partial_sort(dilatecontours.begin(), dilatecontours.begin() + move_n, dilatecontours.end(), SortBysize1);
 	Mat dilateImg(BlurImg.size(), CV_8UC1, Scalar(0));
 
 	vector<vector<Point>> bigcontours;
 	bigcontours.insert(bigcontours.end(), dilatecontours.begin(), dilatecontours.begin() + move_n);
 	drawContours(dilateImg, bigcontours, -1, Scalar(255), -1);
-
-	if (_faults->MarkPens.size() != 0)
-	{
-		bitwise_and(dilateImg, Mask_result_small, dilateImg);
-		bigcontours.clear();
-		findContours(dilateImg, bigcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	}
 
 	Mat CcontourImg = BlurImg.clone();
 	Rect cannyrect;
@@ -666,11 +457,11 @@ void Pretreatment::linedetect()
 		Point torect_d(scratch.position.x + 2 * cannyrect.width, scratch.position.y + 2 * cannyrect.height);
 		if (pointPolygonTest(pointlist, torect_a, 0) == 1 && pointPolygonTest(pointlist, torect_b, 0) == 1)//¼ì²â¸Ã»®ºÛ ÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãÐ±ÎóÅÐ
 			if (pointPolygonTest(pointlist, torect_c, 0) == 1 && pointPolygonTest(pointlist, torect_d, 0) == 1)
-				_faults->Scratchs.push_back(scratch);
+				faultnum++;
 	}
 }
 
-void Pretreatment::tem_2plate()//Ä£°åÂÖÀªÆ¥ÅäÔ¤´¦ÀíÏß³Ì
+void Calibration::tem_2plate()//Ä£°åÂÖÀªÆ¥ÅäÔ¤´¦ÀíÏß³Ì
 {
 	Mat cirlceImg(160, 160, CV_8UC1, Scalar(0));
 	ellipse(cirlceImg, Point(80, 80), Size(40, 30), 90.0, 0, 360, Scalar(255), -1, 8);//»­ÍÖÔ²
@@ -678,18 +469,6 @@ void Pretreatment::tem_2plate()//Ä£°åÂÖÀªÆ¥ÅäÔ¤´¦ÀíÏß³Ì
 	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
 	line(LineImg, Point(4, 80), Point(156, 80), Scalar(255), 2, 8);//»­Ö±Ïß
 	cv::findContours(LineImg, Linecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//±È½ÏÂÖÀªµÄ±ê×¼
-}
-
-void Pretreatment::img2clone()//´ý´¦Àí´óÍ¼¸´ÖÆÏß³Ì
-{
-	PMidImg = MidImg.clone();
-	lookUpTable = Mat(1, 256, CV_8U);
-	uchar* p = lookUpTable.data;
-	p[0] = 255;
-	for (int j = 1; j < 256; j++)
-	{
-		p[j] = j;
-	}
 	lookUpTable_main = Mat(1, 256, CV_8U);
 	uchar* pm = lookUpTable_main.data;
 	for (int j = 0; j < 256; j++)
@@ -699,11 +478,22 @@ void Pretreatment::img2clone()//´ý´¦Àí´óÍ¼¸´ÖÆÏß³Ì
 		else
 			pm[j] = j;
 	}
+}
 
+void Calibration::img2clone()//´ý´¦Àí´óÍ¼¸´ÖÆÏß³Ì
+{
+	PMidImg = MidImg.clone();
+	lookUpTable = Mat(1, 256, CV_8U);
+	uchar* p = lookUpTable.data;
+	p[0] = 255;
+	for (int j = 1; j < 256; j++)
+	{
+		p[j] = j;
+	}
 	//LMidImg = PMidImg.clone();
 }
 
-void Pretreatment::img2zoom()//»®ºÛ¼ì²âËõ·ÅÔ¤´¦Àí
+void Calibration::img2zoom()//»®ºÛ¼ì²âËõ·ÅÔ¤´¦Àí
 {
 	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_LINEAR);
 	blur(CannyImg, BlurImg, Size(3, 3));
@@ -714,14 +504,13 @@ void Pretreatment::img2zoom()//»®ºÛ¼ì²âËõ·ÅÔ¤´¦Àí
 
 
 
-Pretreatment::~Pretreatment()
+Calibration::~Calibration()
 {
 }
 
-void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults, Scales *scales)
+void Calibration::C_pretreatment(Mat &image, Block *_block, Scales *_scales)
 {
-	std::thread tem_plate(std::mem_fn(&Pretreatment::tem_2plate), this);
-	_faults = faults;
+	std::thread tem_plate(std::mem_fn(&Calibration::tem_2plate), this);
 
 	if (image.channels() == 3)//ÅÐ¶ÏÊÇ·ñÎª²ÊÍ¼
 		cvtColor(image, image, CV_RGB2GRAY);
@@ -730,6 +519,8 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults, Scale
 	pointlist.push_back(_block->B);
 	pointlist.push_back(_block->C);
 	pointlist.push_back(_block->D);
+
+	Scales::standard_part standard_v;
 
 	recImg = boundingRect(pointlist);//½ØÈ¡´É×©ÇøÓò,¶ÔÅÄÉã²»È«µÄÇøÓòÒ²½øÐÐ½ØÈ¡
 	//Mat sample_Img = image(Rect(recImg.x, recImg.y + 500, 220, 220)).clone();
@@ -762,102 +553,29 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults, Scale
 
 	MidImg = image(Rect(recImg));
 
-	std::thread imgzoom(std::mem_fn(&Pretreatment::img2zoom), this);
+	std::thread imgzoom(std::mem_fn(&Calibration::img2zoom), this);
 
-	Mat MaskImg, Mask2CannyImg;
-	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
-	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
+	Mat MaskImg;
 	resize(MidImg, MaskImg, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
 
 	tem_plate.join();
-	std::thread imgclone(std::mem_fn(&Pretreatment::img2clone), this);
+	std::thread imgclone(std::mem_fn(&Calibration::img2clone), this);
 
-	GaussianBlur(MaskImg, MaskImg, Size(5, 5), 0, 0);
-	Canny(MaskImg, MaskImg, 40, 50);
-	Mat Mask_temp = MaskImg.clone();
-	vector<vector<Point>> Maskcontours;
-	findContours(MaskImg, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	if (Maskcontours.size() != 0)
-	{
-		partial_sort(Maskcontours.begin(), Maskcontours.begin() + 1, Maskcontours.end(), SortBysize);
-		if (Maskcontours.front().size() > 30)
-		{
-			for (size_t i = 0; i < Maskcontours.size(); i++)
-			{
-				if (Maskcontours[i].size() > 30)
-				{
-					Rect mask_rect = boundingRect(Maskcontours[i]);
-					int th_num = countNonZero(Mask_temp(Rect(mask_rect)));
-					if (th_num < 1.5*mask_rect.height || th_num < 1.5*mask_rect.width)
-						continue;
-					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
-					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
-					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_small.cols) ? 4 * mask_rect.width + 32 : Mask_result_small.cols;
-					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_small.rows) ? 4 * mask_rect.height + 32 : Mask_result_small.rows;
-					rectangle(Mask_result_small, mask_rect, Scalar(0), -1);
-					mask_rect.x = (4 * mask_rect.x - 16 > 0) ? 4 * mask_rect.x - 16 : 0;
-					mask_rect.y = (4 * mask_rect.y - 16 > 0) ? 4 * mask_rect.y - 16 : 0;
-					mask_rect.width = (4 * mask_rect.width + 32 < Mask_result_big.cols) ? 4 * mask_rect.width + 32 : Mask_result_big.cols;;
-					mask_rect.height = (4 * mask_rect.height + 32 < Mask_result_big.rows) ? 4 * mask_rect.height + 32 : Mask_result_big.rows;;
-					rectangle(Mask_result_big, mask_rect, Scalar(255), -1);
-					Faults::MarkPen markpen;
-					mask_rect.x += recImg.x;
-					mask_rect.y += recImg.y;
-					markpen.markposition = mask_rect;
-					Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);
-					Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);
-					int out_mark = 0;
-					while (1)//±ê¼ÇÖØ¸´¿òÈ¡ÅÐ¶Ï
-					{
-						if (in_or_out.size() == 0)
-							break;
-						if (pointPolygonTest(in_or_out, 0.5*(outpoint_a + outpoint_b), 0) == 0)
-						{
-							out_mark = 1;
-							break;
-						}
-						if (pointPolygonTest(in_or_out, 0.5*(outpoint_b + outpoint_c), 0) == 0)
-						{
-							out_mark = 1;
-							break;
-						}
-						if (pointPolygonTest(in_or_out, 0.5*(outpoint_c + outpoint_d), 0) == 0)
-						{
-							out_mark = 1;
-							break;
-						}
-						if (pointPolygonTest(in_or_out, 0.5*(outpoint_d + outpoint_a), 0) == 0)
-						{
-							out_mark = 1;
-							break;
-						}
-						break;
-					}
-					if (out_mark == 1)
-					{
-						if (pointPolygonTest(in_or_out, outpoint_a, 0) == 1)
-							_faults->MarkPens.pop_back();
-						else
-							continue;
-					}
-					in_or_out.clear();
-					in_or_out.push_back(outpoint_a);
-					in_or_out.push_back(outpoint_b);
-					in_or_out.push_back(outpoint_c);
-					in_or_out.push_back(outpoint_d);
-					if (pointPolygonTest(pointlist, outpoint_a, 0) == 1 && pointPolygonTest(pointlist, outpoint_b, 0) == 1)//¼ì²â¸Ã±ê¼ÇÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãÐ±ÎóÅÐ
-						if (pointPolygonTest(pointlist, outpoint_c, 0) == 1 && pointPolygonTest(pointlist, outpoint_d, 0) == 1)
-							_faults->MarkPens.push_back(markpen);
-				}
-			}
-		}
-	}
+	Mat CalibrationImg;
+	LUT(MaskImg, lookUpTable_main, CalibrationImg);
+	MatND Calibration_hist;
+	calcHist(&CalibrationImg, 1, &channels, Mat(), Calibration_hist, 1, &size, ranges);
+	Calibration_hist.at<float>(255) = 0;
+	Point CalibrationPoint;
+	minMaxLoc(Calibration_hist, NULL, NULL, NULL, &CalibrationPoint);
+	standard_v.gray_v = CalibrationPoint.y;
+
 	imgclone.join();
 	imgzoom.join();
 	InitItemRepository(&gItemRepository);
-	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // ´ý¼ì²âÈ±ÏÝµÄÔ¤´¦Àí.
-	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // Çø·ÖÈ±ÏÝÓëË®×Õ.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//»®ºÛ¼ì²â 
+	std::thread producer(std::mem_fn(&Calibration::ProducerTask), this); // ´ý¼ì²âÈ±ÏÝµÄÔ¤´¦Àí.
+	std::thread consumer(std::mem_fn(&Calibration::ConsumerTask), this); // Çø·ÖÈ±ÏÝÓëË®×Õ.
+	std::thread line(std::mem_fn(&Calibration::linedetect), this);//»®ºÛ¼ì²â 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///Ïß³ÌÓÅÏÈ¼¶µ÷Õû
 	producer.join();
@@ -867,4 +585,10 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults, Scale
 	dilateneedcontours.clear();
 	CneedContours.clear();
 	Warehousecontours.clear();
+	if (faultnum == 0)
+		standard_v.level = 0;
+	else
+		standard_v.level = 1;
+	_scales->Standard_parts.push_back(standard_v);
 }
+

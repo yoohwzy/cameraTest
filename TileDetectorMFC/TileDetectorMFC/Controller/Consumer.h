@@ -16,6 +16,8 @@
 #include "../Class/EdgeInnerDetctor.h"
 
 #include "../Class/Pretreatment.h"
+#include "../Class/Calibration.h"
+
 
 
 class Consumer
@@ -45,6 +47,7 @@ public:
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
 	Faults faults;
+	Scales scales;
 	//vector<cv::Point3f> EdgeFaults;
 	//vector<cv::Point3f> EIDFaults;
 	//vector<cv::Point3f> InnerFaults;
