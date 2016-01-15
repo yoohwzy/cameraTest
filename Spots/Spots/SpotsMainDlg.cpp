@@ -90,6 +90,7 @@ HCURSOR CSpotsMainDlg::OnQueryDragIcon()
 
 void CSpotsMainDlg::OnBnClickedOk()
 {
+	printf_globle("test");
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {

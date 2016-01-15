@@ -9,19 +9,20 @@ E2VCamera::E2VCamera(E2VBuffer *_e2vbuffer, int width, int frameTimeUS, int colo
 	_colorType = colorType;
 	_nBoard = boardID;
 	_camPort = Camport;
-	
-	init_fg();
 
-	//if (_e2vbuffer == NULL)
-	//	p_e2vbuffer = new E2VBuffer(width, colorType == GRAY);
-
-	//caculateForTimes();
+	if (!init_fg())
+	{
+		release();
+		StartFlag = false;
+	}
+	else
+		StartFlag = true;
 }
 E2VCamera::~E2VCamera()
 {
 	release();
 }
-void E2VCamera::FreeRun()
+bool E2VCamera::FreeRun()
 {
 	//acquire one image per subbuffer
 	//1.fg
@@ -31,7 +32,7 @@ void E2VCamera::FreeRun()
 	//5.缓存地址
 	if ((Fg_AcquireEx(fg, _camPort, GRAB_INFINITE, ACQ_STANDARD, memHandle)) < 0) {
 		fprintf(stderr, "Fg_AcquireEx() failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 
 	frameindex_t fcount = 0;
@@ -48,7 +49,7 @@ void E2VCamera::FreeRun()
 		if (cur_pic_nr < 0)
 		{
 			Fg_stopAcquire(fg, _camPort);
-			errorMessageWait();
+			errorMessageWait(); return false;
 		}
 		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, cur_pic_nr, 0, memHandle);
 		//if (nId != -1)
@@ -79,6 +80,7 @@ void E2VCamera::FreeRun()
 	}
 
 	Fg_stopAcquireEx(fg, _camPort, memHandle, 0);
+	return true;
 }
 
 
@@ -92,19 +94,19 @@ void E2VCamera::test()
 	release();
 }
 
-void E2VCamera::init_fg()
+bool E2VCamera::init_fg()
 {
 	// 初始化FG
 
 	if ((fg = Fg_Init(dllNameRGB, _nBoard)) == NULL) {
 		fprintf(stderr, "Fg_Init() failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 	//传输模式的调整
 	int _FG_CAMERA_LINK_CAMTYP = FG_CL_RGB;
 	if (Fg_setParameter(fg, FG_CAMERA_LINK_CAMTYP, &_FG_CAMERA_LINK_CAMTYP, _camPort) < 0) {
 		fprintf(stderr, "Fg_setParameter(FG_CAMERA_LINK_CAMTYP) failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 
 
@@ -113,25 +115,28 @@ void E2VCamera::init_fg()
 	// 设置参数
 	if (Fg_setParameter(fg, FG_WIDTH, &_width, _camPort) < 0) {
 		fprintf(stderr, "Fg_setParameter(FG_WIDTH) failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 	int h = _frameHeight;//每帧采集图像高度
 	if (Fg_setParameter(fg, FG_HEIGHT, &h, _camPort) < 0) {
 		fprintf(stderr, "Fg_setParameter(FG_HEIGHT) failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 	int bitAlignment = FG_LEFT_ALIGNED;
 	if (Fg_setParameter(fg, FG_BITALIGNMENT, &bitAlignment, _camPort) < 0) {
 		fprintf(stderr, "Fg_setParameter(FG_BITALIGNMENT) failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
 
 	//创建DMA缓存
-	memoryAllocation();
+	if (!memoryAllocation())
+		return false;
 
 	//显示或不显示E2V自带的显示框
 	//createDiplayBuffer();
 	//CloseDisplay(createDiplayBuffer());
+
+	return true;
 }
 
 
@@ -170,7 +175,7 @@ int E2VCamera::createDiplayBuffer()
 	return dispId0;
 }
 
-void E2VCamera::memoryAllocation()
+bool E2VCamera::memoryAllocation()
 {
 	// Memory allocation
 	int format = 0;
@@ -188,8 +193,9 @@ void E2VCamera::memoryAllocation()
 	size_t totalBufSize = _width*_frameHeight*nr_of_buffer*bytesPerPixel;
 	if ((memHandle = Fg_AllocMemEx(fg, totalBufSize, nr_of_buffer)) == NULL){
 		fprintf(stderr, "Fg_AllocMemEx() failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait();
+		errorMessageWait(); return false;
 	}
+	return true;
 }
 
 void E2VCamera::release()
@@ -222,7 +228,7 @@ void E2VCamera::errorMessageWait()
 	MultiByteToWideChar(CP_ACP, 0, err_str, dwLen, lpwstr, nwLen);
 	MessageBox(NULL, lpwstr, L"Error", 0);
 #endif
-	exit(1);
+	//exit(1);
 }
 
 

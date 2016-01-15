@@ -1,6 +1,7 @@
 #pragma once
 
 
+
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -14,6 +15,8 @@
 #include <opencv2/opencv.hpp>
 
 #include "E2VBuffer.h"
+
+
 using namespace std;
 
 class E2VCamera
@@ -30,7 +33,7 @@ public:
 	~E2VCamera();
 
 	//开始采图
-	void FreeRun();
+	bool FreeRun();
 
 
 	enum ColorType
@@ -77,13 +80,13 @@ private:
 
 	//初始化fg，返回ErrCode，0为无错误
 	//static int init_fg(Fg_Struct *fg, const char *dllName, int nBoard, int camPort);
-	void init_fg();
+	bool init_fg();
 
 	//创建显示窗口，返回窗口id;
 	int createDiplayBuffer();
 
 	//分配内存，返回ErrCode
-	void memoryAllocation();
+	bool memoryAllocation();
 
 	//释放内存
 	void release();

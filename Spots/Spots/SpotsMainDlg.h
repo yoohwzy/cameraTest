@@ -2,7 +2,7 @@
 // SpotsMainDlg.h : м╥нд╪Ч
 //
 #include "Class\Helper\StringHelper.h"
-
+#include "globle_debug.h"
 
 #include "CvvImage.h"
 

@@ -7,8 +7,24 @@ Controller::Controller()
 	p_e2vbuffer = new E2VBuffer(4096, true);
 	p_imgscanner = new ImgScanner(p_e2vbuffer);
 
-
-	pci1761.init();
+	//初始化e2v_EV71YC1CCL4005BA0失败
+	if (!p_imgscanner->StartFlag)
+	{
+		if (p_imgscanner != NULL)
+		{
+			delete p_imgscanner;
+			p_imgscanner = NULL;
+		}
+		if (p_e2vbuffer != NULL)
+		{
+			delete p_e2vbuffer;
+			p_e2vbuffer = NULL;
+		}
+		AfxMessageBox(L"初始化e2v_EV71YC1CCL4005BA0失败！");
+	}
+	if (!pci1761.init())
+		AfxMessageBox(L"初始化PCI-1761失败！");
+	
 	worker1 = new Worker(p_e2vbuffer);
 	worker2 = new Worker(p_e2vbuffer);
 	std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcher), this);
@@ -49,16 +65,20 @@ Controller::~Controller()
 void Controller::triggerWatcher()
 {
 	short int tiggerindex = 0;
+	double t = cv::getTickCount();
 	while (!exitFlag)
 	{
 		if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
 		{
+			t = cv::getTickCount();
+
 			tiggerindex++;
 			if (tiggerindex >= 100)
 				tiggerindex = 0;
 
 			if (tiggerindex % 2 == 1)
 			{
+				printf_globle("worker1 Start Work\r\n");
 				//if (worker1->MyStatus != Worker::WorkerStatus::Free)
 				//{
 				//	delete worker1;
@@ -69,6 +89,7 @@ void Controller::triggerWatcher()
 			}
 			else
 			{
+				printf_globle("worker2 Start Work\r\n");
 				//if (worker2->MyStatus != Worker::WorkerStatus::Free)
 				//{
 				//	delete worker2;
@@ -81,6 +102,12 @@ void Controller::triggerWatcher()
 		}
 		else if (pci1761.GetTrailingEdgeIDI(7))//下降沿结束采图
 		{
+			printf_globle("Stop Work\r\n");
+			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+			stringstream ss;
+			ss << "Timespan:" << t << "ms" << endl;
+			printf_globle(ss.str());
+
 			lastestWorker->GetPhotoOn = false;
 		}
 		else

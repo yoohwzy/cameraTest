@@ -14,11 +14,14 @@ public:
 	ImgScanner(E2VBuffer *_e2vbuffer);
 	~ImgScanner();
 
+	bool StartFlag = true;
+
 	static const int FrameTimeUS = 200;//√ø∏Ù200Œ¢√Î»°“ª÷°
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
 	E2VCamera *p_e2v = NULL;
 
+	void release();
 	void freerun();
 };
 

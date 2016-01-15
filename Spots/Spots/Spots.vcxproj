@@ -124,6 +124,7 @@
     <ClInclude Include="Controller\ImgScanner.h" />
     <ClInclude Include="Controller\Worker.h" />
     <ClInclude Include="CvvImage.h" />
+    <ClInclude Include="globle_debug.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Spots.h" />
     <ClInclude Include="SpotsMainDlg.h" />
