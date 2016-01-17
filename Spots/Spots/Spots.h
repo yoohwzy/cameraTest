@@ -9,6 +9,7 @@
 #endif
 
 #include "resource.h"		// Ö÷·ûºÅ
+#include "UI\SpotsMainDlg.h"
 #include "Controller\Controller.h"
 
 // CSpotsApp: 

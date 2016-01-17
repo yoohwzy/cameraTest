@@ -24,6 +24,11 @@ public:
 	{ 
 		return WriteIndex; 
 	};
+	//根据起始行索引，获取一副图像
+	//例，输入startLine = 0,endLine = 2，将获得一副0行开始，长度为3像素的图像
+	//输入startLine = 19000,endLine = 0，将获得一副19000行开始，长度为1001像素的图像
+	cv::Mat GetImage(int startLine, int endLine);
+
 
 	//将一行写入循环缓存
 	void WriteData(cv::Mat oneline);

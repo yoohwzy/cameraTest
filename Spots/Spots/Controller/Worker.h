@@ -6,7 +6,8 @@
 class Worker
 {
 public:
-	Worker(E2VBuffer *_e2vbuffer);
+	//初始化时若传入指针为NULL，则表示使用虚拟相机。
+	Worker(E2VBuffer *_e2vbuffer = NULL);
 	~Worker();
 
 	enum WorkerStatus{
@@ -26,7 +27,6 @@ public:
 	cv::Mat image;
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
-
 
 	// 直接读取N张图片
 	void work();

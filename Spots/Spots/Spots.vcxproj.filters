@@ -84,9 +84,6 @@
     <ClInclude Include="Controller\ImgScanner.h">
       <Filter>Controller</Filter>
     </ClInclude>
-    <ClInclude Include="SpotsMainDlg.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="Controller\Controller.h">
       <Filter>Controller</Filter>
     </ClInclude>
@@ -100,6 +97,12 @@
       <Filter>App</Filter>
     </ClInclude>
     <ClInclude Include="globle_debug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\SpotsMainDlg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\InitDevicesDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -122,9 +125,6 @@
     <ClCompile Include="Controller\ImgScanner.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
-    <ClCompile Include="SpotsMainDlg.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="Controller\Controller.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
@@ -136,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="Spots.cpp">
       <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\SpotsMainDlg.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

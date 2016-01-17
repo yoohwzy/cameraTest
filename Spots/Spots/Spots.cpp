@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Spots.h"
-#include "SpotsMainDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,20 +69,25 @@ BOOL CSpotsApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	Controller controller = Controller();
 
-	CSpotsMainDlg dlgMain;
-	m_pMainWnd = &dlgMain;
-	dlgMain.DoModal();
-
-	// 删除上面创建的 shell 管理器。
-	if (pShellManager != NULL)
+	//InitDevicesDlg dlgInit;
+	//if (dlgInit.DoModal() == IDOK)
 	{
-		delete pShellManager;
-	}
+		CSpotsMainDlg *dlgMain = new CSpotsMainDlg();
+		Controller controller = Controller(dlgMain);
+		m_pMainWnd = dlgMain;
+		dlgMain->DoModal();
+		//dlgMain->ShowWindow(SW_SHOWDEFAULT);//DoModal();
 
-	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
-	//  而不是启动应用程序的消息泵。
+		// 删除上面创建的 shell 管理器。
+		if (pShellManager != NULL)
+		{
+			delete pShellManager;
+		}
+
+		// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
+		//  而不是启动应用程序的消息泵。
+	}
 	return FALSE;
 }
 

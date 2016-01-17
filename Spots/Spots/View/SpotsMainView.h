@@ -1,6 +1,8 @@
 #pragma once
 
-class Contrller;// 解决类互相包含
+#include <opencv2\opencv.hpp>
+
+class Controller;// 解决类互相包含
 
 class SpotsMainView
 {
@@ -10,7 +12,15 @@ public:
 		
 	}
 	~SpotsMainView();
+
+	void AddController(Controller *c)
+	{
+		p_contrller = c;
+	}
+	// interface
+	// 显示图片到UI
+	virtual void ShowBigImg(cv::Mat) {}
 protected:
-	Contrller* m_contrller;
+	Controller* p_contrller;
 };
 
