@@ -131,9 +131,6 @@
     <ClCompile Include="CvvImage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="View\SpotsMainView.cpp">
-      <Filter>View</Filter>
-    </ClCompile>
     <ClCompile Include="Spots.cpp">
       <Filter>App</Filter>
     </ClCompile>

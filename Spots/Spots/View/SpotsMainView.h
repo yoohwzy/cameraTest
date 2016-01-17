@@ -11,7 +11,10 @@ public:
 	{
 		
 	}
-	~SpotsMainView();
+	~SpotsMainView()
+	{
+
+	}
 
 	void AddController(Controller *c)
 	{

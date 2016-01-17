@@ -23,7 +23,8 @@ void Controller::triggerWatcher()
 			}
 			else
 			{
-				printf_globle("worker2 Start Work\r\n");
+				printf_globle("worker2 Start Work\r\n");  
+				 
 				worker2->StartWork();
 				lastestWorker = worker2;
 			}

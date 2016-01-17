@@ -30,7 +30,14 @@ public:
 		ATLASSERT(spotsMainView);
 		spotsMainView->AddController(this);
 
+		init();
+	}
+	~Controller()
+	{
+		release();
+	}
 
+	void init(){
 		//¿ªÆôÍ¼Ïñ»º´æ
 		p_e2vbuffer = new E2VBuffer(4096, true);
 		p_imgscanner = new ImgScanner(p_e2vbuffer);
@@ -86,9 +93,12 @@ public:
 
 
 			//¿ªÆôÐéÄâÏà»ú
+			cv::Mat virtualImg;
+			worker1 = new Worker(NULL);
+			worker1->image = virtualImg;
 		}
 	}
-	~Controller()
+	void release()
 	{
 		exitFlag = true;
 		Sleep(10);
@@ -115,6 +125,7 @@ public:
 			p_e2vbuffer = NULL;
 		}
 	}
+
 
 
 	void Start()

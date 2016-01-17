@@ -147,7 +147,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="UI\SpotsMainDlg.cpp" />
-    <ClCompile Include="View\SpotsMainView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Spots.rc" />
