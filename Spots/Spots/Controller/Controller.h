@@ -37,7 +37,7 @@ public:
 		release();
 	}
 
-	void init(){
+	void init(){ 
 		//¿ªÆôÍ¼Ïñ»º´æ
 		p_e2vbuffer = new E2VBuffer(4096, true);
 		p_imgscanner = new ImgScanner(p_e2vbuffer);

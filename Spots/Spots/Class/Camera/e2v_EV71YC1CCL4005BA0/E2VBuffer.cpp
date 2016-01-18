@@ -55,8 +55,8 @@ cv::Mat E2VBuffer::GetImage(int startLine, int endLine)
 		int length1 = (E2VBuffer::BufferLength - startLine);
 		int length2 = (endLine + 1);
 		cv::Mat result(length1 + length2, Buffer.cols, colorType, cv::Scalar(0, 0, 0));
-		cv::Mat roi1 = result(cv::Rect(0, startLine, Buffer.cols, length1));
-		cv::Mat roi2 = result(cv::Rect(0, 0, Buffer.cols, length2));
+		cv::Mat roi1 = result(cv::Rect(0, 0, Buffer.cols, length1));
+		cv::Mat roi2 = result(cv::Rect(0, length1, Buffer.cols, length2));
 
 		Buffer(cv::Rect(0, startLine, Buffer.cols, length1)).copyTo(roi1);	//debug 2Œ¢√Î release 1.5Œ¢√Î
 		Buffer(cv::Rect(0, 0, Buffer.cols, length2)).copyTo(roi2);
