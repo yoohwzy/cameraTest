@@ -3,6 +3,9 @@
 #include "ImgScanner.h"
 #include <thread>
 
+#include <globle_debug.h>
+
+extern class Controller;
 class Worker
 {
 public:
@@ -25,9 +28,11 @@ public:
 
 	int WaitTimeMS = 50;//等待瓷砖进入拍摄区的时间
 	cv::Mat image;
+
+	Controller *P_Controller = NULL;
+
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
-
 	// 直接读取N张图片
 	void work();
 	// 从循环缓存中取出图片

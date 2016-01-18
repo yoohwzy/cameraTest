@@ -2,8 +2,8 @@
 // SpotsMainDlg.cpp : 实现文件
 //
 
-#include "stdafx.h"
-#include "Spots.h"
+#include "../stdafx.h"
+#include "../Spots.h"
 #include "SpotsMainDlg.h"
 #include "afxdialogex.h"
 

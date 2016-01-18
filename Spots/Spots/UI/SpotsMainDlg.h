@@ -5,7 +5,7 @@
 #include "globle_debug.h"
 
 #include "../View/SpotsMainView.h"
-#include "CvvImage.h"
+#include "../CvvImage.h"
 
 #pragma once
 

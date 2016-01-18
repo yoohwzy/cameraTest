@@ -1,4 +1,5 @@
 #include "Worker.h"
+#include "Controller.h"
 
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
@@ -48,6 +49,7 @@ void Worker::work()
 
 
 	//开始图像处理
+	P_Controller->Start();
 
 	MyStatus = WorkerStatus::Done;
 	return;
