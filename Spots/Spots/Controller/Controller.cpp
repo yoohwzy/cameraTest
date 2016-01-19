@@ -48,6 +48,8 @@ void Controller::init(){
 		t_tiggerThread.detach();
 		//std::thread t_jobThread(std::mem_fn(&Controller::jobWatcher), this);
 		//t_jobThread.detach();
+
+		spotsMainView->SwitchModel2Virtual(false);
 	}
 	else
 	{
@@ -64,6 +66,8 @@ void Controller::init(){
 		worker1 = new Worker(NULL);
 		worker1->image = virtualImg;
 		worker1->P_Controller = this;
+
+		spotsMainView->SwitchModel2Virtual(true);
 	}
 
 }
@@ -94,7 +98,6 @@ void Controller::release()
 		p_e2vbuffer = NULL;
 	}
 }
-
 
 void Controller::triggerWatcher()
 {
@@ -137,5 +140,32 @@ void Controller::triggerWatcher()
 		}
 		else
 			this_thread::sleep_for(chrono::microseconds(1));
+	}
+}
+
+
+void Controller::VirtualSelectImg(cv::Mat image)
+{
+	if (image.cols == 0)
+		MessageBox(0, L"图片读取失败！", L"错误", 0);
+	else
+	{
+		worker1->image = image;
+	}
+}
+void Controller::VirtualWorkerStart()
+{
+	if (worker1->image.cols == 0)
+	{
+		MessageBox(0, L"请先加载虚拟底片！", L"错误", 0);
+		return;
+	}
+	if (worker1->MyStatus == Worker::Done || worker1->MyStatus == Worker::Free)
+	{
+		worker1->StartWork();
+	}
+	else
+	{
+		MessageBox(0, L"上一轮处理尚未结束！", L"警告", 0);
 	}
 }

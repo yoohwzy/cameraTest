@@ -29,7 +29,7 @@ public:
 		//ATLASSERT(spotsMainView);
 		spotsMainView->AddController(this);
 
-		init();
+		//init();
 	}
 	~Controller()
 	{
@@ -37,22 +37,23 @@ public:
 	}
 
 	void init();
-	void release();
 
-
-	void Start()
+	//处理结束后显示处理结果
+	void ShowWorkResult(cv::Mat image)
 	{
-		cv::Mat img(100, 100, CV_8UC3, cv::Scalar(0,255,0));
 		ui_lock.lock();
-		spotsMainView->ShowBigImg(img);
+		spotsMainView->ShowBigImg(image);
 		ui_lock.unlock();
 	}
 
+	/*****************虚拟相机模式方法*****************/
+	void VirtualSelectImg(cv::Mat);
+	void VirtualWorkerStart();
 
-
-
+	/*****************虚拟相机模式方法 End*****************/
 
 private:
+	void release();
 	//HWND handle_mainWindow;
 
 	E2VBuffer *p_e2vbuffer = NULL;

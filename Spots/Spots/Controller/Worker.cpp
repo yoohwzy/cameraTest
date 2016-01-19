@@ -49,7 +49,7 @@ void Worker::work()
 
 
 	//开始图像处理
-	P_Controller->Start();
+	P_Controller->ShowWorkResult(image);
 
 	MyStatus = WorkerStatus::Done;
 	return;

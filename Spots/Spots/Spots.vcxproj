@@ -120,6 +120,7 @@
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h" />
     <ClInclude Include="Class\IOCard\PCI1761\compatibility.h" />
     <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h" />
+    <ClInclude Include="Class\Log\Recorder.h" />
     <ClInclude Include="Controller\Controller.h" />
     <ClInclude Include="Controller\ImgScanner.h" />
     <ClInclude Include="Controller\Worker.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
+    <ClCompile Include="Class\Log\Recorder.cpp" />
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="Controller\ImgScanner.cpp" />
     <ClCompile Include="Controller\Worker.cpp" />

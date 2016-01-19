@@ -74,10 +74,10 @@ BOOL CSpotsApp::InitInstance()
 	//if (dlgInit.DoModal() == IDOK)
 	{
 		CSpotsMainDlg *dlgMain = new CSpotsMainDlg();
+		//dlgMain->Create(IDD_SPOTS_DIALOG);
 		Controller controller = Controller(dlgMain);
 		m_pMainWnd = dlgMain;
 		dlgMain->DoModal();
-		//dlgMain->ShowWindow(SW_SHOWDEFAULT);//DoModal();
 
 		// 删除上面创建的 shell 管理器。
 		if (pShellManager != NULL)

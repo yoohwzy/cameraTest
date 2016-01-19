@@ -31,6 +31,9 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CSpotsMainDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BTN_RUN, &CSpotsMainDlg::OnBnClickedBtnRun)
+	ON_BN_CLICKED(IDC_BTN_SelectVirtualImg, &CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg)
+	ON_BN_CLICKED(IDC_BTN_virtualTigger, &CSpotsMainDlg::OnBnClickedBtnvirtualtigger)
 END_MESSAGE_MAP()
 
 
@@ -49,6 +52,8 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	ModifyStyle(WS_THICKFRAME, DS_MODALFRAME);
 	menu.LoadMenuW(IDR_MenuMain);
 	SetMenu(&menu);
+
+	p_contrller->init();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -96,16 +101,17 @@ HCURSOR CSpotsMainDlg::OnQueryDragIcon()
 }
 
 
-
+int i;
 void CSpotsMainDlg::OnBnClickedOk()
 {
-	printf_globle("test");
-	p_contrller->Start();
+	i++;
+	cv::Mat a = cv::Mat(100, 100, CV_8UC3, cv::Scalar(i * 30, 0, i * 30));
+	DrawPicToHDC(a, IDC_IMG_BIG);
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
 	IplImage image(img); //原始图像
-	if (hDC == NULL)
+	//if (hDC == NULL)
 	{
 		p_DC = GetDlgItem(ID)->GetDC();
 		hDC = p_DC->GetSafeHdc();
@@ -115,9 +121,68 @@ void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 	CvvImage cimg;
 	cimg.CopyOf(&image); // 复制图片
 	cimg.DrawToHDC(hDC, &rect); // 将图片绘制到显示控件的指定区域内
+	ReleaseDC(p_DC);
 }
+
+
 void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 {
 	DrawPicToHDC(img, IDC_IMG_BIG);
-	GetDlgItem(IDOK)->SetWindowText(L"hello world");
+}
+void CSpotsMainDlg::UpdateRecord()
+{
+	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::A, Recorder::TimeSpan::Today)));
+	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::B, Recorder::TimeSpan::Today)));
+	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::C, Recorder::TimeSpan::Today)));
+	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::Good, Recorder::TimeSpan::Today)));
+	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::Total, Recorder::TimeSpan::Today)));
+}
+void CSpotsMainDlg::SwitchModel2Virtual(bool switchToV)
+{
+	if (switchToV)
+	{
+		(CButton*)GetDlgItem(IDC_BTN_SelectVirtualImg)->ShowWindow(true);
+		(CButton*)GetDlgItem(IDC_BTN_virtualTigger)->ShowWindow(true);
+	}
+	else
+	{
+		(CButton*)GetDlgItem(IDC_BTN_SelectVirtualImg)->ShowWindow(false);
+		(CButton*)GetDlgItem(IDC_BTN_virtualTigger)->ShowWindow(false);
+	}
+}
+void CSpotsMainDlg::OnBnClickedBtnRun()
+{
+	isRunning = !isRunning;
+	if (!isRunning)
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始");
+	else
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停");
+}
+
+
+void CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg()
+{
+	CString strFile = _T("");
+
+	CFileDialog    dlgFile(TRUE, NULL, NULL, OFN_HIDEREADONLY, _T("图片文件 (*.jpg;*.bmp;*.png)|*.jpg;*.bmp;*.png|所有文件 (*.*)|*.*||"), NULL);
+	dlgFile.m_ofn.lpstrTitle = L"打开线阵相机底片";
+
+	if (dlgFile.DoModal())
+	{
+		strFile = dlgFile.GetPathName();
+	}
+	cv::Mat img = cv::imread(StringHelper::CString2String(strFile));
+	if (img.cols == 0)
+		MessageBox(L"图片读取失败！", L"错误");
+	else
+	{
+		p_contrller->VirtualSelectImg(img);
+	}
+	return;
+}
+
+
+void CSpotsMainDlg::OnBnClickedBtnvirtualtigger()
+{
+	p_contrller->VirtualWorkerStart();
 }

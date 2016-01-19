@@ -2,10 +2,11 @@
 // SpotsMainDlg.h : 头文件
 //
 #include "Class\Helper\StringHelper.h"
-#include "globle_debug.h"
+#include <globle_debug.h>
 
-#include "../View/SpotsMainView.h"
-#include "../CvvImage.h"
+#include <View/SpotsMainView.h>
+#include <CvvImage.h>
+#include <Class\Log\Recorder.h>
 
 #pragma once
 
@@ -39,12 +40,25 @@ protected:
 
 private:
 	CMenu menu;
+	bool isRunning = true;
 public:
 	afx_msg void OnBnClickedOk();
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
 	HDC hDC = NULL;
 	CDC *p_DC;
 
-	// Override
+	// 供Controller调用 //Override
+
 	void ShowBigImg(cv::Mat);
+	// 更新UI上显示的记录数据
+	void UpdateRecord();
+	//传入true切换UI到虚拟相机模式，false切换UI到真实相机模式
+	void SwitchModel2Virtual(bool switchToV);
+
+	// 供Controller调用 END
+
+
+	afx_msg void OnBnClickedBtnRun();
+	afx_msg void OnBnClickedBtnSelectvirtualimg();
+	afx_msg void OnBnClickedBtnvirtualtigger();
 };
