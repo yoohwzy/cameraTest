@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "../globle_debug.h"
 #include <opencv2\opencv.hpp>
 //引入算法
 #include <Algorithm/Base/Block.h>
@@ -13,15 +12,26 @@
 #include <Algorithm/EdgeInnerDetctor.h>
 #include <Algorithm/Pretreatment.h>
 
+#include <Class\Debug\MFCConsole.h>
+
 using namespace std;
 //算法综合器，用于统筹所有算法代码
 class Synthesizer
 {
 public:
-	Synthesizer();
+	enum Status
+	{
+		NoImage = 0,//无图
+		NotFound = 1,//未找到瓷砖
+		TypeA = 2,//A级
+		TypeB = 3,//B级
+		TypeC = 4,//C级
+		Rejected = 5//不合格
+	};
+	Synthesizer(int _SN);
 	~Synthesizer();
 	//传入线阵相机所拍照片（乘以3倍后）
-	void Run(cv::Mat linerGrayImg);
+	Status Run(cv::Mat linerGrayImg);
 
 	//编号
 	int SN = 0;
@@ -33,13 +43,13 @@ public:
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
 private:
-	Block *block = NULL;
+	Block *p_block = NULL;
 	Faults faults;
 
-	//瓷砖定位
-	void positioning();
+	//瓷砖定位，返回是否找到瓷砖
+	bool positioning(cv::Mat grayImg);
 	//边缘缺陷检测
-	void detectEdge();
+	void detectEdge(cv::Mat grayImg);
 	//内部缺陷检测
-	void detectInner();
+	void detectInner(cv::Mat grayImg);
 };

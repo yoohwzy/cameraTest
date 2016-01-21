@@ -52,6 +52,9 @@
     <Filter Include="Algorithm\Base">
       <UniqueIdentifier>{d71b299f-07ac-41c4-8632-f3d5db4e1372}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\Debug">
+      <UniqueIdentifier>{be777575-db59-40f0-a043-c32fde9dcf2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -145,7 +148,10 @@
       <Filter>Algorithm\Base</Filter>
     </ClInclude>
     <ClInclude Include="Algorithm\Synthesizer.h">
-      <Filter>头文件</Filter>
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Debug\MFCConsole.h">
+      <Filter>Class\Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -207,7 +213,10 @@
       <Filter>Algorithm\Base</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\Synthesizer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Debug\MFCConsole.cpp">
+      <Filter>Class\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -126,6 +126,7 @@
     <ClInclude Include="Algorithm\Synthesizer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h" />
+    <ClInclude Include="Class\Debug\MFCConsole.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
     <ClInclude Include="Class\Helper\TimeHelper.h" />
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="Algorithm\Synthesizer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
+    <ClCompile Include="Class\Debug\MFCConsole.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
     <ClCompile Include="Class\Log\Recorder.cpp" />
     <ClCompile Include="Controller\Controller.cpp" />

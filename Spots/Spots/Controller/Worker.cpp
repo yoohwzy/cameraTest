@@ -42,13 +42,19 @@ void Worker::work()
 	}
 	else
 	{
-
+		MFCConsole::Output("硬件初始化失败，且虚拟相机无底片，请设置好再试。");
+		MessageBox(0, L"硬件初始化失败，请设置好再试。", L"警告", 0);
+		return;
 	}
 	if (image.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
 
 	//开始图像处理
+	Synthesizer s = Synthesizer(0);
+	Synthesizer::Status status  = s.Run(image);
+	
+	//显示结果
 	P_Controller->ShowWorkResult(image);
 
 	MyStatus = WorkerStatus::Done;

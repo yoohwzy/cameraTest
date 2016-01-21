@@ -1,6 +1,8 @@
 #pragma once
 
-#include <afxwin.h>
+#ifndef AFX_DATA
+#	include <afxwin.h>
+#endif
 
 using namespace std;
 

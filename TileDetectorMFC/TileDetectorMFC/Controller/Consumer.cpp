@@ -84,54 +84,6 @@ void Consumer::processingThread()
 
 	double t = 0;
 
-	//瓷砖粗定位
-	if (1 == 1)//使用if隔绝局部变量
-	{
-		BlocksDetector bd = BlocksDetector(threshodImg, ConsumerLedStartX, ConsumerLedEndX);
-
-		t = (double)cv::getTickCount();
-		//BlocksDetector加入判断是否检测到完整瓷砖
-		bool left_right = bd.Start();
-		bool up = bd.StartUP_DOWN(BlocksDetector::Up);
-		bool down = bd.StartUP_DOWN(BlocksDetector::Down);
-		if (!left_right ||
-			!up ||
-			!down)
-		{
-			if (!left_right)
-				printf_globle("左右未找到\r\n");
-			else if (!up)
-				printf_globle("上未找到\r\n");
-			else if (!down)
-				printf_globle("下未找到\r\n");
-			IsProcessing = false;
-			sendMsg(0, 1);
-			printf_globle(Consumer::GetErrorDescription(1));
-			return;
-		}
-		//ss << "bd.Start() && bd.StartUP_DOWN(BlocksDetector::Up) &&	bd.StartUP_DOWN(BlocksDetector::Down)" << endl;
-
-
-		p_block->UpLine = bd.UpLine;
-		p_block->DownLine = bd.DownLine;
-		p_block->LeftLine = bd.LeftLine;
-		p_block->RightLine = bd.RightLine;
-
-
-		//判断各点坐标是否小于0或大于宽度
-		if (!p_block->Lines2ABCD())
-		{
-			printf_globle("瓷砖有边角位于图片外\r\n");
-			p_block->ABCDAdjust();
-		}
-
-		//ss << "p_block->ABCD()" << endl;
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		ss << GrabbingIndex << " " << "BlocksDetector：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		printf_globle(ss.str());
-		ss.str("");
-		t = (double)cv::getTickCount();
-	}
 
 
 

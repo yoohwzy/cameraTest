@@ -2,11 +2,11 @@
 // SpotsMainDlg.h : м╥нд╪Ч
 //
 #include "Class\Helper\StringHelper.h"
-#include <globle_debug.h>
 
 #include <View/SpotsMainView.h>
 #include <CvvImage.h>
 #include <Class\Log\Recorder.h>
+//#include <Class\Debug\MFCConsole.h>
 
 #pragma once
 

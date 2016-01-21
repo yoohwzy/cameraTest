@@ -50,6 +50,13 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+	if (__argc > 1)
+	{ 
+		MFCConsole::Init();
+		MFCConsole::Output("Debug start.\r\n");
+	}
+
+
 	ModifyStyle(WS_THICKFRAME, DS_MODALFRAME);
 	menu.LoadMenuW(IDR_MenuMain);
 	SetMenu(&menu);
@@ -123,6 +130,15 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CSpotsMainDlg::OnBnClickedOk()
 {
+	//AllocConsole();//为进程创造一个新的控制台
+	//HANDLE hOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);//获得控制台输出句柄
+	//freopen("CON", "w", stdout);
+	//printf("test");
+	////lstrcpy(buf, _T("Hello"));
+	////WriteConsole(hOutputHandle, buf, lstrlen(buf), &nRet, NULL);
+	////system("pause");
+	//FreeConsole();
+	//CloseHandle(hOutputHandle);
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {

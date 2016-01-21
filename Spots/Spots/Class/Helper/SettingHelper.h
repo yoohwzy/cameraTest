@@ -1,7 +1,8 @@
 #pragma once
 
-#include <afxwin.h>
-//#include <windows.h>
+#ifndef AFX_DATA
+#	include <afxwin.h>
+#endif
 #include <string>
 #include <iostream>
 #include <sstream>
