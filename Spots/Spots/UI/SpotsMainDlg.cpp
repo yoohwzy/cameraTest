@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_RUN, &CSpotsMainDlg::OnBnClickedBtnRun)
 	ON_BN_CLICKED(IDC_BTN_SelectVirtualImg, &CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg)
 	ON_BN_CLICKED(IDC_BTN_virtualTigger, &CSpotsMainDlg::OnBnClickedBtnvirtualtigger)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -101,12 +102,27 @@ HCURSOR CSpotsMainDlg::OnQueryDragIcon()
 }
 
 
-int i;
+HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+	// TODO:  在此更改 DC 的任何特性
+	// TODO:  如果默认的不是所需画笔，则返回另一个画笔
+	CString ClassName;
+	GetClassName(pWnd->GetSafeHwnd(), ClassName.GetBuffer(255), 255);
+
+	//if (ClassName.Find(_T("Static"), 0) >= 0 || ClassName.Find(_T("Static"), 0) >= 0 || pWnd->GetDlgCtrlID() == IDC_LB1)
+	{
+		//pDC->SetBkMode(TRANSPARENT);
+		pDC->SetBkColor(RGB(255, 255, 255));
+		//pDC->SetTextColor(RGB(0, 0, 0));
+		//return (HBRUSH)GetStockObject(HOLLOW_BRUSH);//透明笔刷
+		return (HBRUSH)GetStockObject(WHITE_BRUSH);
+	}
+	return hbr;
+}
+
 void CSpotsMainDlg::OnBnClickedOk()
 {
-	i++;
-	cv::Mat a = cv::Mat(100, 100, CV_8UC3, cv::Scalar(i * 30, 0, i * 30));
-	DrawPicToHDC(a, IDC_IMG_BIG);
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {

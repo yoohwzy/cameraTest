@@ -110,9 +110,20 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="Algorithm\说明.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Algorithm\Base\Block.h" />
+    <ClInclude Include="Algorithm\Base\Faults.h" />
+    <ClInclude Include="Algorithm\BlocksDetector.h" />
+    <ClInclude Include="Algorithm\BufferStorage.h" />
+    <ClInclude Include="Algorithm\EdgeDetector.h" />
+    <ClInclude Include="Algorithm\EdgeInnerDetctor.h" />
+    <ClInclude Include="Algorithm\Judgement.h" />
+    <ClInclude Include="Algorithm\Pretreatment.h" />
+    <ClInclude Include="Algorithm\Processor.h" />
+    <ClInclude Include="Algorithm\Synthesizer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
@@ -130,11 +141,19 @@
     <ClInclude Include="Spots.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="UI\InitDevicesDlg.h" />
     <ClInclude Include="UI\SpotsMainDlg.h" />
     <ClInclude Include="View\SpotsMainView.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Algorithm\Base\Block.cpp" />
+    <ClCompile Include="Algorithm\BlocksDetector.cpp" />
+    <ClCompile Include="Algorithm\BufferStorage.cpp" />
+    <ClCompile Include="Algorithm\EdgeDetector.cpp" />
+    <ClCompile Include="Algorithm\EdgeInnerDetctor.cpp" />
+    <ClCompile Include="Algorithm\Judgement.cpp" />
+    <ClCompile Include="Algorithm\Pretreatment.cpp" />
+    <ClCompile Include="Algorithm\Processor.cpp" />
+    <ClCompile Include="Algorithm\Synthesizer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />

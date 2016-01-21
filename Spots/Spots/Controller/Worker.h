@@ -1,9 +1,12 @@
 #pragma once
-#include "../Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCamera.h"
 #include "ImgScanner.h"
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCamera.h>
 #include <thread>
 
 #include <globle_debug.h>
+
+//引入算法综合器
+#include <Algorithm\Synthesizer.h>
 
 extern class Controller;
 class Worker

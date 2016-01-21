@@ -61,4 +61,5 @@ public:
 	afx_msg void OnBnClickedBtnRun();
 	afx_msg void OnBnClickedBtnSelectvirtualimg();
 	afx_msg void OnBnClickedBtnvirtualtigger();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

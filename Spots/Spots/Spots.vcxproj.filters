@@ -46,9 +46,18 @@
     <Filter Include="Class\Log">
       <UniqueIdentifier>{8f1f70ef-af65-41a6-9642-0b7f6e23b27c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Algorithm">
+      <UniqueIdentifier>{bf814ab1-8d41-4442-a3a6-7210be5759da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Base">
+      <UniqueIdentifier>{d71b299f-07ac-41c4-8632-f3d5db4e1372}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="Algorithm\说明.txt">
+      <Filter>Algorithm</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -105,11 +114,38 @@
     <ClInclude Include="UI\SpotsMainDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="UI\InitDevicesDlg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Log\Recorder.h">
       <Filter>Class\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\BlocksDetector.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\BufferStorage.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\EdgeDetector.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\EdgeInnerDetctor.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Judgement.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Pretreatment.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Processor.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Base\Block.h">
+      <Filter>Algorithm\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Base\Faults.h">
+      <Filter>Algorithm\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Synthesizer.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +181,33 @@
     </ClCompile>
     <ClCompile Include="Class\Log\Recorder.cpp">
       <Filter>Class\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\BlocksDetector.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\BufferStorage.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\EdgeDetector.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\EdgeInnerDetctor.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Judgement.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Pretreatment.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Processor.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Base\Block.cpp">
+      <Filter>Algorithm\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Synthesizer.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

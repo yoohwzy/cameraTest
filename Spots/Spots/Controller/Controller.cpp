@@ -69,7 +69,6 @@ void Controller::init(){
 
 		spotsMainView->SwitchModel2Virtual(true);
 	}
-
 }
 void Controller::release()
 {
