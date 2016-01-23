@@ -38,11 +38,12 @@ void Worker::work()
 	//虚拟相机
 	else if (image.cols > 0)
 	{
+		MFCConsole::Output("虚拟相机模式运行\r\n");
 		grayImg = image.clone();
 	}
 	else
 	{
-		MFCConsole::Output("硬件初始化失败，且虚拟相机无底片，请设置好再试。");
+		MFCConsole::Output("硬件初始化失败，且虚拟相机无底片，请设置好再试。\r\n");
 		MessageBox(0, L"硬件初始化失败，请设置好再试。", L"警告", 0);
 		return;
 	}

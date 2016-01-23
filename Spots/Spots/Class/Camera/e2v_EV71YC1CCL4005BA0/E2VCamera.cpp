@@ -1,6 +1,5 @@
 #include "E2VCamera.h"
 
-
 E2VCamera::E2VCamera(E2VBuffer *_e2vbuffer, int width, int frameTimeUS, int colorType, int boardID, int Camport)
 {
 	p_e2vbuffer = _e2vbuffer;
@@ -220,7 +219,9 @@ void E2VCamera::errorMessageWait()
 	release();
 
 
+	printf("E2V:");
 	printf(err_str);
+	printf("\r\n");
 #ifdef afx_msg
 	int dwLen = strlen(err_str) + 1;
 	int nwLen = MultiByteToWideChar(CP_ACP, 0, err_str, dwLen, NULL, 0);//算出合适的长度

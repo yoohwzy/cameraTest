@@ -1,8 +1,13 @@
+#ifndef AFX_DATA
+#	include <afxwin.h>
+#endif
 #include "Controller.h"
 
 
-
 void Controller::init(){
+
+	release();
+
 	//开启图像缓存
 	p_e2vbuffer = new E2VBuffer(4096, true);
 	p_imgscanner = new ImgScanner(p_e2vbuffer);
@@ -21,14 +26,12 @@ void Controller::init(){
 			p_e2vbuffer = NULL;
 		}
 		e2vInitFlag = false;
-		//AfxMessageBox(L"初始化e2v_EV71YC1CCL4005BA0失败！");
 	}
 
 	bool pci1761InitFlag = true;
 	if (!pci1761.init())
 	{
 		pci1761InitFlag = false;
-		//AfxMessageBox(L"初始化PCI-1761失败！");
 	}
 
 
@@ -46,19 +49,19 @@ void Controller::init(){
 		//开始监控触发
 		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcher), this);
 		t_tiggerThread.detach();
-		//std::thread t_jobThread(std::mem_fn(&Controller::jobWatcher), this);
-		//t_jobThread.detach();
 
 		spotsMainView->SwitchModel2Virtual(false);
+
+		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
 	{
-		//if (!e2vInitFlag && !pci1761InitFlag)
-		//	AfxMessageBox(L"线阵相机&pci1761初始化失败！");
-		//else if (!pci1761InitFlag)
-		//	AfxMessageBox(L"pci1761初始化失败！");
-		//else if (!e2vInitFlag)
-		//	AfxMessageBox(L"线阵相机初始化失败！");
+		if (!e2vInitFlag && !pci1761InitFlag)
+			AfxMessageBox(L"线阵相机&pci1761初始化失败！");
+		else if (!pci1761InitFlag)
+			AfxMessageBox(L"pci1761初始化失败！");
+		else if (!e2vInitFlag)
+			AfxMessageBox(L"线阵相机初始化失败！");
 
 
 		//开启虚拟相机
@@ -68,12 +71,12 @@ void Controller::init(){
 		worker1->P_Controller = this;
 
 		spotsMainView->SwitchModel2Virtual(true);
+
+		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
 }
 void Controller::release()
 {
-	exitFlag = true;
-	Sleep(10);
 	p_e2vbuffer = NULL;
 	if (worker1 != NULL)
 	{
@@ -114,13 +117,13 @@ void Controller::triggerWatcher()
 
 			if (tiggerindex % 2 == 1)
 			{
-				printf_globle("worker1 Start Work\r\n");
+				MFCConsole::Output("worker1 Start Work\r\n");
 				worker1->StartWork();
 				lastestWorker = worker1;
 			}
 			else
 			{
-				printf_globle("worker2 Start Work\r\n");  
+				MFCConsole::Output("worker2 Start Work\r\n");  
 				 
 				worker2->StartWork();
 				lastestWorker = worker2;
@@ -129,11 +132,11 @@ void Controller::triggerWatcher()
 		}
 		else if (pci1761.GetTrailingEdgeIDI(7))//下降沿结束采图
 		{
-			printf_globle("Stop Work\r\n");
+			MFCConsole::Output("Stop Work\r\n");
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			stringstream ss;
 			ss << "Timespan:" << t << "ms" << endl;
-			printf_globle(ss.str());
+			MFCConsole::Output(ss.str());
 
 			lastestWorker->GetPhotoOn = false;
 		}
@@ -142,6 +145,9 @@ void Controller::triggerWatcher()
 	}
 }
 
+
+
+/*********************  虚拟模式方法  ***********************/
 
 void Controller::VirtualSelectImg(cv::Mat image)
 {
@@ -168,3 +174,4 @@ void Controller::VirtualWorkerStart()
 		MessageBox(0, L"上一轮处理尚未结束！", L"警告", 0);
 	}
 }
+/*********************虚拟模式方法结束***********************/

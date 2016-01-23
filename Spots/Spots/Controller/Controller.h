@@ -11,8 +11,9 @@
 #include <thread>
 #include <mutex>
 
-#include "../globle_debug.h"
 #include "Worker.h"
+
+#include <Class\Debug\MFCConsole.h>
 
 using namespace std;
 
@@ -32,6 +33,9 @@ public:
 	}
 	~Controller()
 	{
+		exitFlag = true;
+		Sleep(10);
+
 		release();
 	}
 
