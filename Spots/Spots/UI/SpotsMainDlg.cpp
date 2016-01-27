@@ -203,7 +203,7 @@ void CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg()
 	{
 		strFile = dlgFile.GetPathName();
 	}
-	cv::Mat img = cv::imread(StringHelper::CString2String(strFile));
+	cv::Mat img = cv::imread(StringHelper::CString2string(strFile));
 	if (img.cols == 0)
 		MessageBox(L"Õº∆¨∂¡»° ß∞‹£°", L"¥ÌŒÛ");
 	else
