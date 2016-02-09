@@ -1,3 +1,4 @@
+#pragma once
 
 // SpotsMainDlg.h : 头文件
 //
@@ -8,7 +9,6 @@
 #include <Class\Log\Recorder.h>
 //#include <Class\Debug\MFCConsole.h>
 
-#pragma once
 
 // CSpotsMainDlg 对话框
 class CSpotsMainDlg : public CDialogEx
