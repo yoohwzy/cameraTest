@@ -55,6 +55,9 @@
     <Filter Include="Class\Debug">
       <UniqueIdentifier>{be777575-db59-40f0-a043-c32fde9dcf2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{905107a1-fada-40a3-a4dd-d96abbdad303}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -92,12 +95,6 @@
     </ClInclude>
     <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h">
       <Filter>Class\IOCard</Filter>
-    </ClInclude>
-    <ClInclude Include="Controller\Worker.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="Controller\ImgScanner.h">
-      <Filter>Controller</Filter>
     </ClInclude>
     <ClInclude Include="Controller\Controller.h">
       <Filter>Controller</Filter>
@@ -153,6 +150,18 @@
     <ClInclude Include="Class\Debug\MFCConsole.h">
       <Filter>Class\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="Model\ImgScanner.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\ModelVirtual.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Worker.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\StatisticsController.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -166,12 +175,6 @@
     </ClCompile>
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp">
       <Filter>Class\IOCard</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\Worker.cpp">
-      <Filter>Controller</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\ImgScanner.cpp">
-      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Controller\Controller.cpp">
       <Filter>Controller</Filter>
@@ -217,6 +220,15 @@
     </ClCompile>
     <ClCompile Include="Class\Debug\MFCConsole.cpp">
       <Filter>Class\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\ImgScanner.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Worker.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\StatisticsController.cpp">
+      <Filter>Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@
 #include <thread>
 #include <mutex>
 
-#include "Worker.h"
+#include <Model\Worker.h>
 
 #include <Class\Debug\MFCConsole.h>
 
@@ -46,6 +46,7 @@ public:
 	{
 		ui_lock.lock();
 		spotsMainView->ShowBigImg(image);
+
 		ui_lock.unlock();
 	}
 

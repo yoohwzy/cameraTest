@@ -10,7 +10,6 @@
 
 #include "resource.h"		// 主符号
 #include "UI\SpotsMainDlg.h"
-#include "Controller\Controller.h"
 
 // CSpotsApp: 
 // 有关此类的实现，请参阅 Spots.cpp

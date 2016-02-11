@@ -1,5 +1,5 @@
 #include "Worker.h"
-#include "Controller.h"
+#include <Controller\Controller.h>
 
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
@@ -52,12 +52,11 @@ void Worker::work()
 
 
 	//开始图像处理
-	Synthesizer s = Synthesizer(0);
-	Synthesizer::Status status  = s.Run(image);
+	//Synthesizer s = Synthesizer(0);
+	//Synthesizer::Status status  = s.Run(image);
 	
 	//显示结果
 	P_Controller->ShowWorkResult(image);
-
 	MyStatus = WorkerStatus::Done;
 	return;
 }

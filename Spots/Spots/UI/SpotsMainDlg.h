@@ -2,13 +2,16 @@
 
 // SpotsMainDlg.h : 头文件
 //
-#include "Class\Helper\StringHelper.h"
 
 #include <View/SpotsMainView.h>
 #include <CvvImage.h>
-#include <Class\Log\Recorder.h>
-//#include <Class\Debug\MFCConsole.h>
 
+#include <Class\Helper\StringHelper.h>
+#include <Class\Log\Recorder.h>
+#include <Class\Debug\MFCConsole.h>
+
+#include <Controller\Controller.h>
+#include <Controller\StatisticsController.h>
 
 // CSpotsMainDlg 对话框
 class CSpotsMainDlg : public CDialogEx
