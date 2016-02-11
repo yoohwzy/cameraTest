@@ -27,3 +27,27 @@ int StatisticsController::YearA = 0;
 int StatisticsController::YearB = 0;
 int StatisticsController::YearC = 0;
 int StatisticsController::YearRejected = 0;
+
+bool StatisticsController::InitDate()
+{
+
+	StatisticsController::TodayAll = 0;
+	StatisticsController::TodayA = 0;
+	StatisticsController::TodayB = 0;
+	StatisticsController::TodayC = 0;
+	StatisticsController::TodayRejected = 0;
+
+	StatisticsController::MonthAll = 0;
+	StatisticsController::MonthA = 0;
+	StatisticsController::MonthB = 0;
+	StatisticsController::MonthC = 0;
+	StatisticsController::MonthRejected = 0;
+
+	StatisticsController::YearAll = 10;
+	StatisticsController::YearA = 0;
+	StatisticsController::YearB = 0;
+	StatisticsController::YearC = 0;
+	StatisticsController::YearRejected = 0;
+
+	return true;
+}

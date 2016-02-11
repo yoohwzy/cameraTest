@@ -50,18 +50,43 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+	// 打开控制台
 	if (__argc > 1)
 	{ 
 		MFCConsole::Init();
 		MFCConsole::Output("Debug start.\r\n");
 	}
 
-
+	// 添加菜单栏
 	ModifyStyle(WS_THICKFRAME, DS_MODALFRAME);
 	menu.LoadMenuW(IDR_MenuMain);
 	SetMenu(&menu);
 
+	//系统初始化
 	p_contrller->init();
+
+	// 控件初始化
+	// 统计数据初始化
+	if (StatisticsController::InitDate())
+	{
+		GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll));
+		GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayA));
+		GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayB));
+		GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayC));
+		GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll - StatisticsController::TodayRejected));
+
+		GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll));
+		GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthA));
+		GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthB));
+		GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthC));
+		GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll - StatisticsController::MonthRejected));
+
+		GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll));
+		GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearA));
+		GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearB));
+		GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
+		GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
+	}
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

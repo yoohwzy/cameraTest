@@ -25,5 +25,14 @@ public:
 	static int YearC;
 	static int YearRejected;
 
+	// 初始化统计数据，从数据库中读取历史记录
+	// 返回是否成功
+	static bool InitDate();
+
+	//获得合格率
+	static double GetFineRate()
+	{
+		return 0;
+	}
 };
 
