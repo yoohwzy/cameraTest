@@ -87,7 +87,6 @@ BOOL CSpotsMainDlg::OnInitDialog()
 		GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
 		GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
 	}
-
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 

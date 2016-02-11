@@ -51,3 +51,40 @@ bool StatisticsController::InitDate()
 
 	return true;
 }
+
+void StatisticsController::AddTodayA()
+{
+	TodayA++;
+	TodayAll++;
+	MonthA++;
+	MonthAll++;
+	YearA++;
+	YearAll++;
+}
+void StatisticsController::AddTodayB()
+{
+	TodayB++;
+	TodayAll++;
+	MonthB++;
+	MonthAll++;
+	YearB++;
+	YearAll++;
+}
+void StatisticsController::AddTodayC()
+{
+	TodayC++;
+	TodayAll++;
+	MonthC++;
+	MonthAll++;
+	YearC++;
+	YearAll++;
+}
+void StatisticsController::AddTodayRejected()
+{
+	TodayRejected++;
+	TodayAll++;
+	MonthRejected++;
+	MonthAll++;
+	YearRejected++;
+	YearAll++;
+}

@@ -30,9 +30,12 @@ public:
 	static bool InitDate();
 
 	//获得合格率
-	static double GetFineRate()
-	{
-		return 0;
-	}
+	static double GetFineRate();
+
+	//今日产量加一
+	static void AddTodayA();
+	static void AddTodayB();
+	static void AddTodayC();
+	static void AddTodayRejected();
 };
 

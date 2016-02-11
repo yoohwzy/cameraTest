@@ -13,6 +13,8 @@
 #include <Controller\Controller.h>
 #include <Controller\StatisticsController.h>
 
+#import "c:\program files\common files\system\ado\msado15.dll" no_namespace rename("EOF","adoEOF")
+
 // CSpotsMainDlg ¶Ô»°¿ò
 class CSpotsMainDlg : public CDialogEx
 	, public SpotsMainView

@@ -58,6 +58,9 @@
     <Filter Include="Model">
       <UniqueIdentifier>{905107a1-fada-40a3-a4dd-d96abbdad303}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class\Access">
+      <UniqueIdentifier>{447d723e-a68a-4870-b928-0ba3daa77904}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
