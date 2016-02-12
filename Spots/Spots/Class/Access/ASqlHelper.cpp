@@ -13,9 +13,13 @@ ASqlHelper::~ASqlHelper()
 string ASqlHelper::CnnStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D://cameraTest//AccessCtrl//11.mdb;Persist Security Info=False";
 const string ASqlHelper::NONE = "_NONE_QUERY_NO_RESULT";
 
+_ConnectionPtr ASqlHelper::_pConnection = NULL;
+_RecordsetPtr ASqlHelper::_pRecordset = NULL;
+
 
 bool ASqlHelper::OpenCnn(_ConnectionPtr& m_pConnection)
 {
+	CloseCnn();
 	CoInitialize(NULL);//CoInitialize是Windows提供的API函数，用来告诉 Windows以单线程的方式创建com对象
 	m_pConnection.CreateInstance(__uuidof(Connection));
 	try
@@ -35,7 +39,10 @@ bool ASqlHelper::OpenCnn(_ConnectionPtr& m_pConnection)
 	//{
 	//}
 }
-
+void ASqlHelper::CloseCnn()
+{
+	CloseCnn(ASqlHelper::_pConnection, ASqlHelper::_pRecordset);
+}
 void ASqlHelper::CloseCnn(_ConnectionPtr& m_pConnection)
 {
 	if (m_pConnection != NULL)
@@ -44,21 +51,23 @@ void ASqlHelper::CloseCnn(_ConnectionPtr& m_pConnection)
 		m_pConnection = NULL;
 	}
 }
-void ASqlHelper::CloseCnn(_ConnectionPtr& m_pConnection, _RecordsetPtr& m_pRecordset)
+void ASqlHelper::CloseCnn(_RecordsetPtr& m_pRecordset)
 {
-	//if (m_pRecordset->State)
 	if (m_pRecordset != NULL)
 	{
 		m_pRecordset->Close();
 		m_pRecordset = NULL;
 	}
+}
+void ASqlHelper::CloseCnn(_ConnectionPtr& m_pConnection, _RecordsetPtr& m_pRecordset)
+{
+	CloseCnn(m_pRecordset);
 	CloseCnn(m_pConnection);
 }
 
 
 
-
-bool ASqlHelper::ExecuteNonQuery(string sql)
+int ASqlHelper::ExecuteNonQuery(string sql)
 {
 	_ConnectionPtr m_pConnection;
 	if (OpenCnn(m_pConnection))
@@ -69,7 +78,7 @@ bool ASqlHelper::ExecuteNonQuery(string sql)
 			_bstr_t strCmd = sql.c_str();
 			m_pConnection->Execute(strCmd, &RecordsAffected, adCmdText);
 			CloseCnn(m_pConnection);
-			return true;
+			return (int)RecordsAffected;
 		}
 		catch (_com_error &e)
 		{
@@ -77,7 +86,7 @@ bool ASqlHelper::ExecuteNonQuery(string sql)
 		}
 	}
 	CloseCnn(m_pConnection);
-	return false;
+	return 0;
 }
 
 string ASqlHelper::ExecuteScalar(string sql)
@@ -108,16 +117,16 @@ string ASqlHelper::ExecuteScalar(string sql)
 
 _RecordsetPtr ASqlHelper::ExecuteRecordset(string sql)
 {
-	_ConnectionPtr m_pConnection;
-	if (OpenCnn(m_pConnection))
+	if (OpenCnn(ASqlHelper::_pConnection))
 	{
-		_RecordsetPtr m_pRecordset;
-		m_pRecordset.CreateInstance("ADODB.Recordset");
+		ASqlHelper::_pRecordset.CreateInstance("ADODB.Recordset");
 		_variant_t RecordsAffected;
-		m_pRecordset = m_pConnection->Execute(sql.c_str(), &RecordsAffected, adCmdText);
-		CloseCnn(m_pConnection);
-		return m_pRecordset;
+		ASqlHelper::_pRecordset = ASqlHelper::_pConnection->Execute(sql.c_str(), &RecordsAffected, adCmdText);
+		if (!ASqlHelper::_pRecordset->BOF)
+		{
+			return ASqlHelper::_pRecordset;
+		}
 	}
-	CloseCnn(m_pConnection);
+	CloseCnn();
 	return NULL;
 }

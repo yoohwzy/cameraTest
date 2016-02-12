@@ -30,6 +30,8 @@ int StatisticsController::YearRejected = 0;
 
 bool StatisticsController::InitDate()
 {
+	//update 程序设置 set 日期 = format(now(), 'yyyy-mm-dd ')
+	_RecordsetPtr record = ASqlHelper::ExecuteRecordset("select * from 历史记录");
 
 	StatisticsController::TodayAll = 0;
 	StatisticsController::TodayA = 0;
