@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include "../Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h"
-#include "../Class/IOCard/PCI1761/PCI1761.h"
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
+#include <Class/IOCard/PCI1761/PCI1761.h>
 
-#include "../View/SpotsMainView.h"
+#include <View/SpotsMainView.h>
 
 #include <opencv2\opencv.hpp>
 #include <queue>
@@ -14,6 +14,7 @@
 #include <Model\Worker.h>
 
 #include <Class\Debug\MFCConsole.h>
+#include <Controller\StatisticsController.h>
 
 using namespace std;
 
@@ -42,11 +43,21 @@ public:
 	void init();
 
 	//处理结束后显示处理结果
-	void ShowWorkResult(cv::Mat image)
+	//结果图像
+	//产品类型，1A 2B 3C 4Rejcet
+	void ShowWorkResult(cv::Mat image,int type)
 	{
 		ui_lock.lock();
 		spotsMainView->ShowBigImg(image);
-
+		switch (type)
+		{
+		case 1:StatisticsController::AddTodayA(); break;
+		case 2:StatisticsController::AddTodayB(); break;
+		case 3:StatisticsController::AddTodayC(); break;
+		case 4:StatisticsController::AddTodayRejected(); break;
+		default:break;
+		}
+		spotsMainView->UpdateStatistics();
 		ui_lock.unlock();
 	}
 

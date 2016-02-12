@@ -185,13 +185,26 @@ void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 {
 	DrawPicToHDC(img, IDC_IMG_BIG);
 }
-void CSpotsMainDlg::UpdateRecord()
+
+void CSpotsMainDlg::UpdateStatistics()
 {
-	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::A, Recorder::TimeSpan::Today)));
-	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::B, Recorder::TimeSpan::Today)));
-	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::C, Recorder::TimeSpan::Today)));
-	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::Good, Recorder::TimeSpan::Today)));
-	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(Recorder::GetCount(Recorder::Quality::Total, Recorder::TimeSpan::Today)));
+	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll));
+	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayA));
+	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayB));
+	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayC));
+	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll - StatisticsController::TodayRejected));
+
+	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll));
+	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthA));
+	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthB));
+	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthC));
+	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll - StatisticsController::MonthRejected));
+
+	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll));
+	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearA));
+	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearB));
+	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
+	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
 }
 void CSpotsMainDlg::SwitchModel2Virtual(bool switchToV)
 {

@@ -1,5 +1,7 @@
 #include "StatisticsController.h"
 
+#include <cstdio>
+#include <Class\Access\ASqlHelper.h>
 
 StatisticsController::StatisticsController()
 {

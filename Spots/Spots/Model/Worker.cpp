@@ -56,7 +56,8 @@ void Worker::work()
 	//Synthesizer::Status status  = s.Run(image);
 	
 	//ÏÔÊ¾½á¹û
-	P_Controller->ShowWorkResult(image);
+	P_Controller->ShowWorkResult(image, 1);
+
 	MyStatus = WorkerStatus::Done;
 	return;
 }

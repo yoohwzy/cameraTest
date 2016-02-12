@@ -117,9 +117,6 @@
     <ClInclude Include="UI\SpotsMainDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Log\Recorder.h">
-      <Filter>Class\Log</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\BlocksDetector.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
@@ -193,9 +190,6 @@
     </ClCompile>
     <ClCompile Include="UI\SpotsMainDlg.cpp">
       <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\Log\Recorder.cpp">
-      <Filter>Class\Log</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\BlocksDetector.cpp">
       <Filter>Algorithm</Filter>
