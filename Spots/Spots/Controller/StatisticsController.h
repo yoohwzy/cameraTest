@@ -42,5 +42,10 @@ public:
 	static void AddTodayB();
 	static void AddTodayC();
 	static void AddTodayRejected();
+private:
+	//初始化今日的记录数据
+	static void initToday();
+	//在数据库中更新今日数据
+	static void updateTodayAccess();
 };
 
