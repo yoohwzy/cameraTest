@@ -48,7 +48,6 @@ public:
 	void ShowWorkResult(cv::Mat image,int type)
 	{
 		ui_lock.lock();
-		spotsMainView->ShowBigImg(image);
 		switch (type)
 		{
 		case 1:StatisticsController::AddTodayA(); break;
@@ -57,6 +56,8 @@ public:
 		case 4:StatisticsController::AddTodayRejected(); break;
 		default:break;
 		}
+
+		spotsMainView->ShowBigImg(image);
 		spotsMainView->UpdateStatistics();
 		ui_lock.unlock();
 	}

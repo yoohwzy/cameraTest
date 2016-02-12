@@ -35,6 +35,9 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SelectVirtualImg, &CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg)
 	ON_BN_CLICKED(IDC_BTN_virtualTigger, &CSpotsMainDlg::OnBnClickedBtnvirtualtigger)
 	ON_WM_CTLCOLOR()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -65,28 +68,7 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	//系统初始化
 	p_contrller->init();
 
-	// 控件初始化
-	// 统计数据初始化
-	if (StatisticsController::InitDate())
-	{
-		GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll));
-		GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayA));
-		GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayB));
-		GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayC));
-		GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll - StatisticsController::TodayRejected));
 
-		GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll));
-		GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthA));
-		GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthB));
-		GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthC));
-		GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll - StatisticsController::MonthRejected));
-
-		GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll));
-		GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearA));
-		GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearB));
-		GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
-		GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
-	}
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -183,6 +165,7 @@ void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 
 void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 {
+	img_on_show = img;
 	DrawPicToHDC(img, IDC_IMG_BIG);
 }
 
@@ -254,4 +237,128 @@ void CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg()
 void CSpotsMainDlg::OnBnClickedBtnvirtualtigger()
 {
 	p_contrller->VirtualWorkerStart();
+}
+
+
+
+
+void CSpotsMainDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	ShowImgROI(point);
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void CSpotsMainDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	img_big_flag = !img_big_flag;//标记放大/不放大图像
+	//if (img_big_flag)
+	//	zoom = 1;
+	zoom = 1;
+	ShowImgROI(point);
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+//鼠标滚轮
+BOOL CSpotsMainDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
+{
+	//zDelta：大于0时为向上滚动，小于0时为向下滚动。
+	if (img_on_show.rows > 0)
+	{
+		if (mouse_in_img)   //鼠标是否在控件范围之内
+		{
+			//if (!img_big_flag)
+			//	img_big_flag = true;
+			if (zDelta > 0)
+			{
+				zoom = zoom % 2 == 0 ? zoom - 2 : zoom - 1;
+				zoom = zoom < 1 ? 1 : zoom;
+			}
+			else
+			{
+				zoom = zoom % 2 == 0 ? zoom + 2 : zoom + 1;
+				zoom = zoom > 4 ? 4 : zoom;
+			}
+		}
+		ShowImgROI(CPoint(0, 0));
+	}
+	return CDialogEx::OnMouseWheel(nFlags, zDelta, point);
+}
+
+void CSpotsMainDlg::ShowImgROI(CPoint point = CPoint(0, 0))
+{
+	if (img_on_show.rows > 0)
+	{
+		if (point != CPoint(0, 0))
+		{
+			ClientToScreen(&point);
+			mouse_point = point;
+		}
+		CRect rect;
+		GetDlgItem(IDC_IMG_BIG)->GetClientRect(rect);
+		GetDlgItem(IDC_IMG_BIG)->ClientToScreen(rect);//函数是将你打开的APP中客户区的坐标点信息转换为整个屏幕的坐标
+		bool inRect = rect.PtInRect(point);
+		bool inRectFlag = (point == CPoint(0, 0) && mouse_in_img);
+		if (inRect || inRectFlag)   //鼠标是否在控件范围之内
+		{
+			if (point == CPoint(0, 0))
+				point = mouse_point;
+			mouse_in_img = true;//标记鼠标移入图像
+			if (img_big_flag)
+			{
+				int idc_width = rect.right - rect.left;//图像控件宽
+				int idc_height = rect.bottom - rect.top;//图像控件高
+
+				//将鼠标所在位置换算为原始图像坐标点
+				int x = (float)(point.x - rect.left) / idc_width * img_on_show.cols;
+				int y = (float)(point.y - rect.top) / idc_height * img_on_show.rows;
+
+				//根据放大系数转换ROI长宽
+				int zoom_width = zoom * idc_width;
+				int zoom_height = zoom * idc_height;
+				if (zoom_width >= img_on_show.cols || zoom_height >= img_on_show.rows)//若放大系数过小，则显示全图
+				{
+					img_big_flag = false;//标记不放大图像
+					DrawPicToHDC(img_on_show, IDC_IMG_BIG);
+					GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+				}
+				else//放大显示
+				{
+					int startx = x - zoom_width / 2;
+					int starty = y - zoom_height / 2;
+
+					//防止越界
+					if (startx < 0)startx = 0;
+					if (starty < 0)starty = 0;
+					if (startx + zoom_width > img_on_show.cols)
+						startx = img_on_show.cols - zoom_width;
+					if (starty + zoom_height > img_on_show.rows)
+						starty = img_on_show.rows - zoom_height;
+					//ROI
+					cv::Mat roi = img_on_show(cv::Rect(startx, starty, zoom_width, zoom_height));
+					DrawPicToHDC(roi, IDC_IMG_BIG);
+
+					stringstream ss;
+					ss << "(" << x << "," << y << ") " << zoom << "×";
+
+					int dwLen = ss.str().length() + 1;//strlen(ss.str().c_str()) + 1;
+					int nwLen = MultiByteToWideChar(CP_ACP, 0, ss.str().c_str(), dwLen, NULL, 0);//算出合适的长度
+					LPWSTR lpszPath = new WCHAR[dwLen];
+					MultiByteToWideChar(CP_ACP, 0, ss.str().c_str(), dwLen, lpszPath, nwLen);
+
+					GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(lpszPath);
+				}
+			}
+			else// if(!inRect && !inRectFlag)
+			{
+				mouse_in_img = false;//标记鼠标移出图像
+				DrawPicToHDC(img_on_show, IDC_IMG_BIG);
+				GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+			}
+		}
+		else
+		{
+			DrawPicToHDC(img_on_show, IDC_IMG_BIG);
+			GetDlgItem(IDC_LABLE_IMG_INFO)->SetWindowText(L"全显示");
+			img_big_flag = false;//标记不放大图像
+		}
+	}
 }

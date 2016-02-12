@@ -45,6 +45,30 @@ protected:
 private:
 	CMenu menu;
 	bool isRunning = true;
+
+	afx_msg   void   PicOnMouseHover(WPARAM wParam, LPARAM lParam){ MessageBox(L"鼠标已进入 "); };
+	afx_msg   void   PicOnMouseLeave(WPARAM wParam, LPARAM lParam){ MessageBox(L"鼠标已离开 "); };
+	BOOL mouse_in_img = false;
+	BOOL img_big_flag = false;
+	CPoint mouse_point;
+	int zoom = 1;//放大倍数
+	cv::Mat img_on_show;//全尺寸图
+	//缩放显示图片
+	void ShowImgROI(CPoint point);
+
+
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
+
+	afx_msg void OnBnClickedBtnRun();
+	afx_msg void OnBnClickedBtnSelectvirtualimg();
+	afx_msg void OnBnClickedBtnvirtualtigger();
+
+
 public:
 	afx_msg void OnBnClickedOk();
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
@@ -62,8 +86,8 @@ public:
 	// 供Controller调用 END
 
 
-	afx_msg void OnBnClickedBtnRun();
-	afx_msg void OnBnClickedBtnSelectvirtualimg();
-	afx_msg void OnBnClickedBtnvirtualtigger();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
+
+
+
 };

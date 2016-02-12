@@ -74,6 +74,12 @@ void Controller::init(){
 
 		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
+
+	// 统计数据初始化
+	StatisticsController::InitDate();
+	spotsMainView->UpdateStatistics();
+	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
+	spotsMainView->ShowBigImg(white);
 }
 void Controller::release()
 {
