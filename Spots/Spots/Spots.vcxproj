@@ -137,6 +137,7 @@
     <ClInclude Include="Controller\StatisticsController.h" />
     <ClInclude Include="CvvImage.h" />
     <ClInclude Include="globle_debug.h" />
+    <ClInclude Include="HistoryController.h" />
     <ClInclude Include="Model\ImgScanner.h" />
     <ClInclude Include="Model\ModelVirtual.h" />
     <ClInclude Include="Model\Worker.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="Controller\StatisticsController.cpp" />
     <ClCompile Include="CvvImage.cpp" />
+    <ClCompile Include="HistoryController.cpp" />
     <ClCompile Include="Model\ImgScanner.cpp" />
     <ClCompile Include="Model\Worker.cpp" />
     <ClCompile Include="Spots.cpp" />

@@ -188,6 +188,36 @@ void CSpotsMainDlg::UpdateStatistics()
 	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearB));
 	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
 	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
+
+	if (StatisticsController::TodayAll > 0)
+	{
+		float dayFineRate = (StatisticsController::TodayAll - StatisticsController::TodayRejected) / (float)StatisticsController::TodayAll * 100;
+		CString strfineRate;
+		strfineRate.Format(L"%.2f", dayFineRate);
+		GetDlgItem(IDC_LB_dayFineRate)->SetWindowText(strfineRate + L"%");
+	}
+	else
+		GetDlgItem(IDC_LB_dayFineRate)->SetWindowText(L"NaN");
+
+	if (StatisticsController::MonthAll > 0)
+	{
+		float monthFineRate = (StatisticsController::MonthAll - StatisticsController::MonthRejected) / (float)StatisticsController::MonthAll * 100;
+		CString strfineRate;
+		strfineRate.Format(L"%.2f", monthFineRate);
+		GetDlgItem(IDC_LB_monthFineRate)->SetWindowText(strfineRate + L"%");
+	}
+	else
+		GetDlgItem(IDC_LB_monthFineRate)->SetWindowText(L"NaN");
+
+	if (StatisticsController::YearAll > 0)
+	{
+		float yearFineRate = (StatisticsController::YearAll - StatisticsController::YearRejected) / (float)StatisticsController::YearAll * 100;
+		CString strfineRate;
+		strfineRate.Format(L"%.2f", yearFineRate);
+		GetDlgItem(IDC_LB_yearFineRate)->SetWindowText(strfineRate + L"%");
+	}
+	else
+		GetDlgItem(IDC_LB_yearFineRate)->SetWindowText(L"NaN");
 }
 void CSpotsMainDlg::SwitchModel2Virtual(bool switchToV)
 {

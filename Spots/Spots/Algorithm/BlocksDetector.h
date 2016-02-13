@@ -1,7 +1,6 @@
 #pragma once
 #include <opencv2\opencv.hpp>
 #include "Base\Block.h"
-//#include <globle_debug.h>
 
 #define BD_OUTPUT_DEBUG_INFO 1
 
