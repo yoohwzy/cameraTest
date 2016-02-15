@@ -111,9 +111,6 @@
     <ClInclude Include="Spots.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="globle_debug.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="UI\SpotsMainDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -165,8 +162,8 @@
     <ClInclude Include="Class\Access\ASqlHelper.h">
       <Filter>Class\Access</Filter>
     </ClInclude>
-    <ClInclude Include="HistoryController.h">
-      <Filter>Controller</Filter>
+    <ClInclude Include="Controller\HistoryController.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -236,8 +233,8 @@
     <ClCompile Include="Class\Access\ASqlHelper.cpp">
       <Filter>Class\Access</Filter>
     </ClCompile>
-    <ClCompile Include="HistoryController.cpp">
-      <Filter>Controller</Filter>
+    <ClCompile Include="Controller\HistoryController.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
