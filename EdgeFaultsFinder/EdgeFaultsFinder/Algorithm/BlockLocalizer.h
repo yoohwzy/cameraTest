@@ -3,6 +3,8 @@
 #include <opencv2\opencv.hpp>
 #include "Base\Block.h"
 
+#include <thread>
+
 #define BD_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
@@ -25,18 +27,35 @@ public:
 
 	void FindUp();
 	void FindLeft();
+	void FindRight();
+	void FindDown();
+	int OKFlag = -1;//完成标记
+
+	//判断各线是否在边界上
+	//是否有较大的崩边
+	//最后给出各边方程
+	void Judgement();
 private:
 	cv::Mat img;
 	//在水平边缘（上、下）上获得y坐标值
-	int getYOnLine(cv::Point start, int range);
+	//start搜索的中点
+	//在start上下共range高的范围内搜索
+	//scanUp2Down搜索方向为上到下？
+	int getYOnLine(cv::Point start, int range, bool scanUp2Down = true);
 	//在竖直边缘（左、右）上获得x坐标值
-	int getXOnRow(cv::Point start, int range);
+	//start搜索的中点
+	//在start左右共range宽的范围内搜索
+	//scanLeft2right 搜索方向
+	int getXOnRow(cv::Point start, int range, bool scanLeft2right = true);
 
 	vector<cv::Point> uppoints;
 	vector<cv::Point> downpoints;
 	vector<cv::Point> leftpoints;
 	vector<cv::Point> rightpoints;
 
+	//判断一组点是否是一根直线的，若有折线则返回false
+	//言下之意即为判断瓷砖是否有崩边，崩边返回false
+	bool judgemanBrokenLine(vector<cv::Point>& points);
 
 	void rectFix(cv::Rect& rect)
 	{

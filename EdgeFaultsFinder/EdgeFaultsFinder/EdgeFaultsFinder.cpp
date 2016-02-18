@@ -15,8 +15,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//cv::Mat img = cv::imread("D://16_oԭͼ2.jpg", 0);
 
 	BlockLocalizer bl = BlockLocalizer(img);
-	bl.FindUp();
-	bl.FindLeft();
+
 
 	//cv::threshold(img, img, 10,255,CV_THRESH_BINARY);
 
