@@ -1,9 +1,11 @@
 #include "BlockLocalizer.h"
 
 
-BlockLocalizer::BlockLocalizer(cv::Mat& Img)
+BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 {
-	img = Img;
+	img = _img;
+	block = _block;
+	faults = _faults;
 
 #ifdef BD_OUTPUT_DEBUG_INFO
 	if (img.channels() == 1)
@@ -22,7 +24,7 @@ BlockLocalizer::BlockLocalizer(cv::Mat& Img)
 
 
 	FindUp();
-	if (uppoints.size() == 0)
+	if (uppoints.size() < 5)
 	{
 		return;
 	}
@@ -32,19 +34,37 @@ BlockLocalizer::BlockLocalizer(cv::Mat& Img)
 	t2.join();
 	//FindLeft();
 	//FindRight();
-	if (leftpoints.size() == 0 || rightpoints.size() == 0)
+	if (leftpoints.size() < 5 || rightpoints.size() < 5)
 	{
 		return;
 	}
 
 	FindDown();
-
 	Judgement();
+	block->Lines2ABCD();
+	NotFoundBlockFlag = false;
+
+
+#ifdef BD_OUTPUT_DEBUG_INFO
+	cv::line(drowDebugResult, cv::Point(0, (*block).UpLine.k * (0 - (*block).UpLine.x0) + (*block).UpLine.y0), cv::Point(drowDebugResult.cols, (*block).UpLine.k * (drowDebugResult.cols - (*block).UpLine.x0) + (*block).UpLine.y0), cv::Scalar(0, 0, 255), 1);
+	cv::line(drowDebugResult, cv::Point(0, (*block).DownLine.k * (0 - (*block).DownLine.x0) + (*block).DownLine.y0), cv::Point(drowDebugResult.cols, (*block).DownLine.k * (drowDebugResult.cols - (*block).DownLine.x0) + (*block).DownLine.y0), cv::Scalar(0, 255, 255), 1);
+	cv::line(drowDebugResult, cv::Point((drowDebugResult.rows - (*block).LeftLine.y0) / (*block).LeftLine.k + (*block).LeftLine.x0, drowDebugResult.rows), cv::Point((0 - (*block).LeftLine.y0) / (*block).LeftLine.k + (*block).LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
+	cv::line(drowDebugResult, cv::Point((drowDebugResult.rows - (*block).RightLine.y0) / (*block).RightLine.k + (*block).RightLine.x0, drowDebugResult.rows), cv::Point((0 - (*block).RightLine.y0) / (*block).RightLine.k + (*block).RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
+
+	if (faults->BrokenEdges.size() > 0)
+	{
+		for (size_t i = 0; i < faults->BrokenEdges.size(); i++)
+		{
+			cv::circle(drowDebugResult, faults->BrokenEdges[i].position, faults->BrokenEdges[i].length / 2, cv::Scalar(0, 0, 255), 10);
+		}
+	}
+#endif
 }
 
 
 BlockLocalizer::~BlockLocalizer()
 {
+	faults = NULL;
 }
 
 void BlockLocalizer::FindUp()
@@ -514,73 +534,38 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 
 void BlockLocalizer::Judgement()
 {
-	if (uppoints.size() < 5)
-	{
-		return;
-	}
-	judgementForOneLine(uppoints, true, UpLine);
-	judgementForOneLine(downpoints, true, DownLine);
-	judgementForOneLine(leftpoints, false, LeftLine);
-	judgementForOneLine(rightpoints, false, RightLine);
+	judgementForOneLine(uppoints, true, (*block).UpLine);
+	judgementForOneLine(downpoints, true, (*block).DownLine);
+	judgementForOneLine(leftpoints, false, (*block).LeftLine);
+	judgementForOneLine(rightpoints, false, (*block).RightLine);
 }
 void BlockLocalizer::judgementForOneLine(vector<cv::Point>& points, bool updown, Block::Line& line)
 {
 	if (fixLineOnBorder(points, line))
 	{
-		judgemanBrokenLine(uppoints, updown);
+		//判断是否崩边
+		judgemanBrokenLine(points, updown);
+
+		//拟合直线
+		cv::Vec4f line4f;
+		cv::fitLine(cv::Mat(points), line4f, CV_DIST_L2, 0, 0.01, 0.01);
+
+		line.x0 = line4f[2];
+		line.y0 = line4f[3];
+		line.dx = line4f[0];
+		line.dy = line4f[1];
+		line.k = line.dy / line.dx;
 	}
 }
-bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
+void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 {
-
-	//cv::Point start2 = uppoints[1];
-	//cv::Point center = uppoints[uppoints.size() / 2];
-	//cv::Point start_2 = uppoints[uppoints.size() - 2];
-	//double k1 = (center.y - start2.y) / (double)(center.x - start2.x);
-	//double k2 = (start_2.y - center.y) / (double)(start_2.x - center.x);
-	//double diff = k1 - k2;
-
-	/*	此处的center点不一定就是两个点的中间点，因此不能简单的计算y坐标是否满足 center*2 = start2 + start_2
-	可以计算start2 与 center 的斜率k1
-	center 与 start_2 的斜率k2
-	比较k1，k2
-
-	或者计算多组斜率，求出标准差
-	*/
-
-
-
-	//int count = points.size() - 3;
-	//cv::Mat k(1, count, CV_32F, cv::Scalar(0));
-	//for (size_t i = 0; i < count; i++)
-	//{
-	//	//float k1 = (points[i].y - points[i +2].y) / (float)(points[i].x - points[i + 1].x);
-	//	float k1 = (float)(points[i].x - points[i + 1].x);
-	//	//float k1 = (points[i].y - points[i +2].y);
-	//	k.ptr<float>(0)[i] = k1;
-	//}
-
-	//cv::Mat tmp_m, tmp_sd;
-	//cv::meanStdDev(k, tmp_m, tmp_sd);
-
-	//double stdDev = tmp_sd.ptr<double>(0)[0];
-	//if (stdDev < 0.005)//TODO:将该敏感度参数设置入数据库
-	//	return true;
-	//else
-	//	return false;
-
-
-	/*
-	计算相邻点之间的坐标像素位移，如果位移像素数与上次不一致，则
-	*/
-
-
 	int count = points.size() - 2;
 
 	//确定每个点间的间隔
 	int spanX = 0;
 	int spanY = 0;
 	int iii = 0;
+	//之所以使用循环，是考虑到了第一个点有重复的情况，如0 1号点相同，那么spanY=0
 	while (spanY == 0 && iii < count)
 	{
 		spanY = abs(points[iii].y - points[iii + 1].y);
@@ -593,10 +578,11 @@ bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		iii++;
 	}
 
-	//
-	vector<float> diffs;
-	vector<int> diffsCount;
-	vector<cv::Point> errorPoint;
+	//循环检查相邻点之间的像素增量
+	//比较相邻增量间的差异是否大于阈值，若大于则认为该点为转折点，diffs将push进一个新的像素增量
+	vector<float> diffs;//记录像素差
+	vector<int> diffsCount;//对应像素差计数
+	vector<int> errorPointIndex;//记录转折点索引
 	if (updown)
 	{
 		vector<int> dy;
@@ -621,7 +607,8 @@ bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			{
 				diffs.push_back(dy[i]);
 				diffsCount.push_back(1);
-				errorPoint.push_back(points[i]);
+				errorPointIndex.push_back(i);
+
 			}
 		}
 	}
@@ -649,27 +636,64 @@ bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			{
 				diffs.push_back(dx[i]);
 				diffsCount.push_back(1);
-				errorPoint.push_back(points[i]);
+				errorPointIndex.push_back(i);
 			}
 		}
 	}
 	//斜率全部一致
-	if (diffs.size() == 1)
+	if (errorPointIndex.size() == 0)
 	{
-		return true;
+		return;
 	}
 	//斜率只有一个点的波动
-	if (diffs.size() < 4)
+	if (errorPointIndex.size() <= 2)
 	{
 		int smallcount = 0;
 		for (size_t i = 0; i < diffs.size(); i++)
 			if (diffs[i] == 1)
 				smallcount++;
 		if ((smallcount + 1) == diffs.size())
-			return true;
+			return;
 	}
+	
 
-	return false;
+
+	//添加缺陷信息
+	Faults::BrokenEdge be;
+
+	//int dx = 0;
+	//int dy = 0;
+
+	//计算各种情况下的length 与  deep值
+
+	int l1 = updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
+	int d1 = !updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
+	int l2 = updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
+	int d2 = !updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
+
+	int indexOffset = l1 < l2 ? abs(errorPointIndex[errorPointIndex.size() - 1]) : abs((int)points.size() - 1 - errorPointIndex[0]);
+	indexOffset /= 2;
+
+	//根据水平还是竖直方向分配length 与  deep
+	be.length = l1 < l2 ? l1 : l2;
+	be.deep = l1 < l2 ? d1 : d2;
+
+	be.position.x = l1 < l2 ? abs(points[0].x + points[errorPointIndex[errorPointIndex.size() - 1]].x) / 2 : abs(points[points.size() - 1].x + points[errorPointIndex[0]].x) / 2;
+	be.position.y = l1 < l2 ? abs(points[0].y + points[errorPointIndex[errorPointIndex.size() - 1]].y) / 2 : abs(points[points.size() - 1].y + points[errorPointIndex[0]].y) / 2;
+	//be.position.x += updown ? be.length / 2 : be.deep;
+	//be.position.y += updown ? be.deep / 2 : be.length;
+	faults->BrokenEdges.push_back(be);
+
+#ifdef BD_OUTPUT_DEBUG_INFO
+	//debug绘图
+	for (size_t i = 0; i < errorPointIndex.size(); i++)
+	{
+		cv::circle(drowDebugResult, points[errorPointIndex[i]], 10, cv::Scalar(255, 255, 0), -1);
+	}
+	cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
+#endif
+
+	BrokenEdgeFlag = true;
 }
 bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& line)
 {

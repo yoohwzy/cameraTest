@@ -1,11 +1,12 @@
 #pragma once
 #include <vector>
 #include <opencv2\opencv.hpp>
+#include "Base\Faults.h"
 #include "Base\Block.h"
 
 #include <thread>
 
-#define BD_OUTPUT_DEBUG_INFO 1
+//#define BD_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像
@@ -15,7 +16,7 @@ using namespace std;
 class BlockLocalizer
 {
 public:
-	BlockLocalizer(cv::Mat& Img);
+	BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults);
 	~BlockLocalizer();
 
 #ifdef BD_OUTPUT_DEBUG_INFO
@@ -25,16 +26,9 @@ public:
 	cv::Mat drowDebugResult;
 #endif
 
-	void FindUp();
-	void FindLeft();
-	void FindRight();
-	void FindDown();
-	int OKFlag = -1;//完成标记
+	bool NotFoundBlockFlag = true;//未找到瓷砖标记
+	bool BrokenEdgeFlag = false;//有崩边缺陷标记
 
-	//判断各线是否在边界上
-	//是否有较大的崩边
-	//最后给出各边方程
-	void Judgement();
 private:
 	cv::Mat img;
 	//在水平边缘（上、下）上获得y坐标值
@@ -53,21 +47,29 @@ private:
 	vector<cv::Point> leftpoints;
 	vector<cv::Point> rightpoints;
 
-	Block::Line LeftLine;
-	Block::Line RightLine;
-	Block::Line UpLine;
-	Block::Line DownLine;
+	Faults *faults = NULL;
+	Block *block = NULL;
+
+	void FindUp();
+	void FindLeft();
+	void FindRight();
+	void FindDown();
 
 
+	//判断各线是否在边界上
+	//是否有较大的崩边
+	//最后给出各边方程
+	void Judgement();
 	void judgementForOneLine(vector<cv::Point>& points, bool updown, Block::Line& line);
-
-	//判断一组点是否是一根直线的，若有折线则返回false
-	//言下之意即为判断瓷砖是否有崩边，崩边返回false
-	bool judgemanBrokenLine(vector<cv::Point>& points,bool updown);
+	//判断一组点是否是一根直线的，若有折线则BrokenEdgeFlag标记true
+	//言下之意即为判断瓷砖是否有崩边，崩边则BrokenEdgeFlag标记true
+	void judgemanBrokenLine(vector<cv::Point>& points,bool updown);
 	//判断一组点是否在边界上，分为以下几种情况
 	//1.开始点与结束点都在边界上：该直线为边界线，返回false
 	//2.一般点在边界上，一半不在，删除在边界上的点，以便进行拟合，返回true
 	bool fixLineOnBorder(vector<cv::Point>& points, Block::Line& line);
+
+
 
 	void rectFix(cv::Rect& rect)
 	{

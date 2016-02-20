@@ -4,38 +4,29 @@
 #include "stdafx.h"
 #include <opencv2\opencv.hpp>
 
+#include "Algorithm\Base\Faults.h"
+#include "Algorithm\Base\Block.h"
+
 #include "Algorithm\BlocksDetector.h"
 #include "Algorithm\BlockLocalizer.h"
 
 using namespace std;
 
-int _tmain(int argc, _TCHAR* argv[])
+void _tmain(int argc, _TCHAR* argv[])
 {
-	cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
+	cv::Mat img = cv::imread("D://16_o原图3.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_o原图2.jpg", 0);
 
-	BlockLocalizer bl = BlockLocalizer(img);
-
-
-	//cv::threshold(img, img, 10,255,CV_THRESH_BINARY);
-
-	//BlocksDetector bd = BlocksDetector(img);
-
-	//bool left_right = bd.Start();
-	//bool up = bd.StartUP_DOWN(BlocksDetector::Up);
-	//bool down = bd.StartUP_DOWN(BlocksDetector::Down);
-	//if (!left_right ||
-	//	!up ||
-	//	!down)
-	//{
-	//	if (!left_right)
-	//		cout << ("左右未找到\r\n");
-	//	else if (!up)
-	//		cout << ("上未找到\r\n");
-	//	else if (!down)
-	//		cout << ("下未找到\r\n");
-	//	return false;
-	//}
-	//return 0;
+	Faults faults;
+	Block block = Block(img.cols, img.rows);
+	BlockLocalizer bl = BlockLocalizer(img, &block, &faults);
+	if (bl.NotFoundBlockFlag)
+	{
+		return;
+	}
+	if (bl.BrokenEdgeFlag)
+	{
+		return;
+	}
 }
 
