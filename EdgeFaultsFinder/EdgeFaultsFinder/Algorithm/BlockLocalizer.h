@@ -53,9 +53,21 @@ private:
 	vector<cv::Point> leftpoints;
 	vector<cv::Point> rightpoints;
 
+	Block::Line LeftLine;
+	Block::Line RightLine;
+	Block::Line UpLine;
+	Block::Line DownLine;
+
+
+	void judgementForOneLine(vector<cv::Point>& points, bool updown, Block::Line& line);
+
 	//判断一组点是否是一根直线的，若有折线则返回false
 	//言下之意即为判断瓷砖是否有崩边，崩边返回false
-	bool judgemanBrokenLine(vector<cv::Point>& points);
+	bool judgemanBrokenLine(vector<cv::Point>& points,bool updown);
+	//判断一组点是否在边界上，分为以下几种情况
+	//1.开始点与结束点都在边界上：该直线为边界线，返回false
+	//2.一般点在边界上，一半不在，删除在边界上的点，以便进行拟合，返回true
+	bool fixLineOnBorder(vector<cv::Point>& points, Block::Line& line);
 
 	void rectFix(cv::Rect& rect)
 	{

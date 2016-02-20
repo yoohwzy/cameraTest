@@ -133,7 +133,7 @@ void BlockLocalizer::FindUp()
 		}
 	}
 	std::sort(uppoints.begin(), uppoints.end(), ORDER_BY_X_ASC);
-
+	std::unique(uppoints.begin(), uppoints.end());
 	
 
 
@@ -206,6 +206,9 @@ void BlockLocalizer::FindLeft()
 		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))
 			y = img.rows - ROW_SPAN - 1;
 	}
+	std::sort(leftpoints.begin(), leftpoints.end(), ORDER_BY_Y_ASC);
+	std::unique(leftpoints.begin(), leftpoints.end());
+
 
 #ifdef BD_OUTPUT_DEBUG_INFO
 	//debug绘图
@@ -271,6 +274,9 @@ void BlockLocalizer::FindRight()
 		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))
 			y = img.rows - ROW_SPAN - 1;
 	}
+	std::sort(rightpoints.begin(), rightpoints.end(), ORDER_BY_Y_ASC);
+	std::unique(rightpoints.begin(), rightpoints.end());
+
 
 #ifdef BD_OUTPUT_DEBUG_INFO
 	//debug绘图
@@ -331,6 +337,8 @@ void BlockLocalizer::FindDown()
 			needReFind = false;
 		}
 	}
+	std::sort(downpoints.begin(), downpoints.end(), ORDER_BY_X_ASC);
+	std::unique(downpoints.begin(), downpoints.end());
 
 #ifdef BD_OUTPUT_DEBUG_INFO
 	//debug绘图
@@ -340,7 +348,7 @@ void BlockLocalizer::FindDown()
 	}
 #endif
 
-	needReFind = 0;
+	//needReFind = 0;
 }
 
 int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down)
@@ -510,13 +518,19 @@ void BlockLocalizer::Judgement()
 	{
 		return;
 	}
-	judgemanBrokenLine(uppoints);
-	judgemanBrokenLine(downpoints);
-	judgemanBrokenLine(leftpoints);
-	judgemanBrokenLine(rightpoints);
+	judgementForOneLine(uppoints, true, UpLine);
+	judgementForOneLine(downpoints, true, DownLine);
+	judgementForOneLine(leftpoints, false, LeftLine);
+	judgementForOneLine(rightpoints, false, RightLine);
 }
-
-bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points)
+void BlockLocalizer::judgementForOneLine(vector<cv::Point>& points, bool updown, Block::Line& line)
+{
+	if (fixLineOnBorder(points, line))
+	{
+		judgemanBrokenLine(uppoints, updown);
+	}
+}
+bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 {
 
 	//cv::Point start2 = uppoints[1];
@@ -536,22 +550,176 @@ bool BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points)
 
 
 
-	int count = points.size() - 3;
-	cv::Mat k(1, count, CV_32F, cv::Scalar(0));
-	for (size_t i = 0; i < count; i++)
+	//int count = points.size() - 3;
+	//cv::Mat k(1, count, CV_32F, cv::Scalar(0));
+	//for (size_t i = 0; i < count; i++)
+	//{
+	//	//float k1 = (points[i].y - points[i +2].y) / (float)(points[i].x - points[i + 1].x);
+	//	float k1 = (float)(points[i].x - points[i + 1].x);
+	//	//float k1 = (points[i].y - points[i +2].y);
+	//	k.ptr<float>(0)[i] = k1;
+	//}
+
+	//cv::Mat tmp_m, tmp_sd;
+	//cv::meanStdDev(k, tmp_m, tmp_sd);
+
+	//double stdDev = tmp_sd.ptr<double>(0)[0];
+	//if (stdDev < 0.005)//TODO:将该敏感度参数设置入数据库
+	//	return true;
+	//else
+	//	return false;
+
+
+	/*
+	计算相邻点之间的坐标像素位移，如果位移像素数与上次不一致，则
+	*/
+
+
+	int count = points.size() - 2;
+
+	//确定每个点间的间隔
+	int spanX = 0;
+	int spanY = 0;
+	int iii = 0;
+	while (spanY == 0 && iii < count)
 	{
-		//float k1 = (points[i].y - points[i + 1].y) / (float)(points[i].x - points[i + 2].x);
-		float k1 = (float)(points[i].x - points[i + 2].x);
-		//float k1 = (points[i].y - points[i + 1].y);
-		k.ptr<float>(0)[i] = k1;
+		spanY = abs(points[iii].y - points[iii + 1].y);
+		iii++;
+	}
+	iii = 0;
+	while (spanX == 0 && iii < count)
+	{
+		spanX = abs(points[iii].x - points[iii + 1].x);
+		iii++;
 	}
 
-	cv::Mat tmp_m, tmp_sd;
-	cv::meanStdDev(k, tmp_m, tmp_sd);
+	//
+	vector<float> diffs;
+	vector<int> diffsCount;
+	vector<cv::Point> errorPoint;
+	if (updown)
+	{
+		vector<int> dy;
+		for (size_t i = 0; i < count; i++)
+		{
+			int xss = abs(points[i].x - points[i + 1].x);
+			if (abs(points[i].x - points[i + 1].x) == spanX)
+				dy.push_back(points[i].y - points[i + 1].y);
+		}
+		diffs.push_back(dy[0]);
+		diffsCount.push_back(1);
 
-	double stdDev = tmp_sd.ptr<double>(0)[0];
-	if (stdDev < 0.005)//TODO:将该敏感度参数设置入数据库
-		return true;
+		for (size_t i = 0; i < dy.size(); i++)
+		{
+			float lastdiff = diffs[diffs.size() - 1];
+			if (abs(lastdiff - dy[i]) < 5)
+			{
+				diffs[diffs.size() - 1] = lastdiff * 0.7 + dy[i] * 0.3;
+				diffsCount[diffsCount.size() - 1] += 1;
+			}
+			else
+			{
+				diffs.push_back(dy[i]);
+				diffsCount.push_back(1);
+				errorPoint.push_back(points[i]);
+			}
+		}
+	}
 	else
+	{
+		vector<int> dx;
+		for (size_t i = 0; i < count; i++)
+		{
+			int yxxs = abs(points[i].y - points[i + 1].y);
+			if (abs(points[i].y - points[i + 1].y) == spanY)
+				dx.push_back(points[i].x - points[i + 1].x);
+		}
+		diffs.push_back(dx[0]);
+		diffsCount.push_back(1);
+
+		for (size_t i = 0; i < dx.size(); i++)
+		{
+			float lastdiff = diffs[diffs.size() - 1];
+			if (abs(lastdiff - dx[i]) < 5)
+			{
+				diffs[diffs.size() - 1] = lastdiff * 0.7 + dx[i] * 0.3;
+				diffsCount[diffsCount.size() - 1] += 1;
+			}
+			else
+			{
+				diffs.push_back(dx[i]);
+				diffsCount.push_back(1);
+				errorPoint.push_back(points[i]);
+			}
+		}
+	}
+	//斜率全部一致
+	if (diffs.size() == 1)
+	{
+		return true;
+	}
+	//斜率只有一个点的波动
+	if (diffs.size() < 4)
+	{
+		int smallcount = 0;
+		for (size_t i = 0; i < diffs.size(); i++)
+			if (diffs[i] == 1)
+				smallcount++;
+		if ((smallcount + 1) == diffs.size())
+			return true;
+	}
+
+	return false;
+}
+bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& line)
+{
+	int borderX = img.cols - 1;
+	int borderY = img.rows - 1;
+	if ((points[0].x == 0 && points[1].x == 0 && points[points.size() - 1].x == 0 && points[points.size() - 2].x == 0) ||
+		(points[0].x == borderX && points[1].x == borderX && points[points.size() - 1].x == borderX && points[points.size() - 2].x == borderX))
+	{
+		line.k = 0;
+		line.x0 = points[0].x;
+		line.y0 = points[0].y;
 		return false;
+	}
+	if ((points[0].y == 0 && points[1].y == 0 && points[points.size() - 1].y == 0 && points[points.size() - 2].y == 0) ||
+		(points[0].y == borderY && points[1].y == borderY && points[points.size() - 1].y == borderY && points[points.size() - 2].y == borderY)
+		)
+	{
+		line.k = 999999;
+		line.x0 = points[0].x;
+		line.y0 = points[0].y;
+		return false;
+	}
+	vector<cv::Point> ::iterator pIter = points.begin();
+	cv::Point tmp = 0;
+	for (; pIter != points.end();) // 遍历
+	{
+		if (pIter->x == 0 || pIter->x == borderX || pIter->y == 0 || pIter->y == borderY)
+		{
+			tmp.x = pIter->x;
+			tmp.y = pIter->y;
+			pIter = points.erase(pIter);
+			continue;
+		}
+		pIter++;
+	}
+
+	//若删除点后，剩余点数过少，则将线认为边缘线
+	if (points.size() < 5)
+	{
+		line.x0 = tmp.x;
+		line.y0 = tmp.y;
+		if (tmp.x == 0 || tmp.x == borderX)
+		{
+			line.k = 0;
+		}
+		if (tmp.y == 0 || tmp.y == borderY)
+		{
+			line.k = 999999;
+		}
+		return false;
+	}
+	return true;
 }
