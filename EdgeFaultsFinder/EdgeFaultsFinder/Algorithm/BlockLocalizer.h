@@ -19,15 +19,16 @@ public:
 	BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults);
 	~BlockLocalizer();
 
+	bool NotFoundBlockFlag = true;//未找到瓷砖标记
+	bool BrokenEdgeFlag = false;//有崩边缺陷标记
+
+
 #ifdef BD_OUTPUT_DEBUG_INFO
 	//检测过程中的图片
 	cv::Mat drowDebugDetectLR;
 	cv::Mat drowDebugDetectUD;
 	cv::Mat drowDebugResult;
 #endif
-
-	bool NotFoundBlockFlag = true;//未找到瓷砖标记
-	bool BrokenEdgeFlag = false;//有崩边缺陷标记
 
 private:
 	cv::Mat img;

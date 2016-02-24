@@ -12,19 +12,19 @@
 
 using namespace std;
 
-void _tmain(int argc, _TCHAR* argv[])
+void main(int argc, _TCHAR* argv[])
 {
-	cv::Mat img = cv::imread("D://16_oԭͼ3.jpg", 0);
+	cv::Mat img = cv::imread("D://16_oԭͼ4.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_oԭͼ2.jpg", 0);
 
 	Faults faults;
 	Block block = Block(img.cols, img.rows);
 	BlockLocalizer bl = BlockLocalizer(img, &block, &faults);
-	if (bl.NotFoundBlockFlag)
+	if (bl.NotFoundBlockFlag == true)
 	{
 		return;
 	}
-	if (bl.BrokenEdgeFlag)
+	if (bl.BrokenEdgeFlag == true)
 	{
 		return;
 	}

@@ -7,7 +7,11 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 	block = _block;
 	faults = _faults;
 
+	NotFoundBlockFlag = true;//未找到瓷砖标记
+	BrokenEdgeFlag = false;//有崩边缺陷标记
+
 #ifdef BD_OUTPUT_DEBUG_INFO
+	bool test = 1;
 	if (img.channels() == 1)
 	{
 		cvtColor(img, drowDebugDetectLR, CV_GRAY2BGR);
