@@ -69,6 +69,7 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 BlockLocalizer::~BlockLocalizer()
 {
 	faults = NULL;
+	block = NULL;
 }
 
 void BlockLocalizer::FindUp()

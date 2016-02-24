@@ -14,7 +14,7 @@ using namespace std;
 
 void main(int argc, _TCHAR* argv[])
 {
-	cv::Mat img = cv::imread("D://16_oԭͼ4.jpg", 0);
+	cv::Mat img = cv::imread("D://16_oԭͼ.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_oԭͼ2.jpg", 0);
 
 	Faults faults;
@@ -22,10 +22,21 @@ void main(int argc, _TCHAR* argv[])
 	BlockLocalizer bl = BlockLocalizer(img, &block, &faults);
 	if (bl.NotFoundBlockFlag == true)
 	{
+		cv::namedWindow("0", 0);
+		cv::imshow("0", img);
+		cv::waitKey(0);
 		return;
 	}
 	if (bl.BrokenEdgeFlag == true)
 	{
+		cv::cvtColor(img, img, CV_GRAY2BGR);
+		for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
+		{
+			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length / 2, cv::Scalar(0, 0, 255), 10);
+		}
+		cv::namedWindow("1", 0);
+		cv::imshow("1", img);
+		cv::waitKey(0);
 		return;
 	}
 }
