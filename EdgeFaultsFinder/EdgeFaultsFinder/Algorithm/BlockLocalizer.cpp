@@ -261,7 +261,7 @@ void BlockLocalizer::FindRight()
 		while (x == -1 && startX > firstPoint.x - RANGE_DEFAULT)
 		{
 			x = getXOnRow(cv::Point(startX, firstPoint.y), RANGE_DEFAULT, false);
-			startX += RANGE_DEFAULT / 2;
+			startX -= RANGE_DEFAULT / 2;
 		}
 		if (x == -1)
 			return;
@@ -378,7 +378,7 @@ void BlockLocalizer::FindDown()
 
 int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down)
 {
-	const int THRESHOD = 12;
+	const int THRESHOD = 10;
 
 	const int continuePointCount = 50;//连续多少个点则判断为边缘
 	//const int roiHeight = continuePointCount * 2;//ROI高度
@@ -564,6 +564,7 @@ void BlockLocalizer::judgementForOneLine(vector<cv::Point>& points, bool updown,
 }
 void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 {
+	const int PIX_OFFSET = 20;//误差超过这个值，认为崩边。
 	int count = points.size() - 2;
 
 	//确定每个点间的间隔
@@ -603,7 +604,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		for (size_t i = 0; i < dy.size(); i++)
 		{
 			float lastdiff = diffs[diffs.size() - 1];
-			if (abs(lastdiff - dy[i]) < 5)
+			if (abs(lastdiff - dy[i]) < PIX_OFFSET)
 			{
 				diffs[diffs.size() - 1] = lastdiff * 0.7 + dy[i] * 0.3;
 				diffsCount[diffsCount.size() - 1] += 1;
@@ -632,7 +633,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		for (size_t i = 0; i < dx.size(); i++)
 		{
 			float lastdiff = diffs[diffs.size() - 1];
-			if (abs(lastdiff - dx[i]) < 5)
+			if (abs(lastdiff - dx[i]) < PIX_OFFSET)
 			{
 				diffs[diffs.size() - 1] = lastdiff * 0.7 + dx[i] * 0.3;
 				diffsCount[diffsCount.size() - 1] += 1;
@@ -707,7 +708,7 @@ bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& lin
 	if ((points[0].x == 0 && points[1].x == 0 && points[points.size() - 1].x == 0 && points[points.size() - 2].x == 0) ||
 		(points[0].x == borderX && points[1].x == borderX && points[points.size() - 1].x == borderX && points[points.size() - 2].x == borderX))
 	{
-		line.k = 0;
+		line.k = 999999;
 		line.x0 = points[0].x;
 		line.y0 = points[0].y;
 		return false;
@@ -716,7 +717,7 @@ bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& lin
 		(points[0].y == borderY && points[1].y == borderY && points[points.size() - 1].y == borderY && points[points.size() - 2].y == borderY)
 		)
 	{
-		line.k = 999999;
+		line.k = 0;
 		line.x0 = points[0].x;
 		line.y0 = points[0].y;
 		return false;

@@ -36,9 +36,6 @@
     <ClInclude Include="Algorithm\Base\Faults.h">
       <Filter>Algorithm\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\BlocksDetector.h">
-      <Filter>Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\BlockLocalizer.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
@@ -52,9 +49,6 @@
     </ClCompile>
     <ClCompile Include="Algorithm\Base\Block.cpp">
       <Filter>Algorithm\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\BlocksDetector.cpp">
-      <Filter>Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\BlockLocalizer.cpp">
       <Filter>Algorithm</Filter>
