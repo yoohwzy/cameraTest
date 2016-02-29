@@ -183,7 +183,7 @@ void EdgeInnerDetctor::doRight()
 	vector<cv::Point3f> points;
 	//ÓÒ±ß½ç
 	int startY = p_block->B.y + 100;
-	int endY = p_block->C.y - 100;
+	int endY = p_block->C.y - 100; 
 	int inc = (float)(endY - startY) / 60 + 0.5;//·¶Î§ÔöÁ¿
 	for (int y = startY; y < endY; y += inc, index++)
 	{
