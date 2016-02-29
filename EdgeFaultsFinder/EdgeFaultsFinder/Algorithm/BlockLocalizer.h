@@ -32,6 +32,9 @@ public:
 
 private:
 	cv::Mat img;
+	Faults *faults = NULL;
+	Block *block = NULL;
+
 	//在水平边缘（上、下）上获得y坐标值
 	//start搜索的中点
 	//在start上下共range高的范围内搜索
@@ -48,8 +51,7 @@ private:
 	vector<cv::Point> leftpoints;
 	vector<cv::Point> rightpoints;
 
-	Faults *faults = NULL;
-	Block *block = NULL;
+
 
 	void FindUp();
 	void FindLeft();

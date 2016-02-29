@@ -402,7 +402,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 
 		//ѡȡroi
 		cv::Mat roi = img(roiRect).clone();
-		cv::GaussianBlur(roi, roi, cv::Size(3, 3), 0, 0);
+		cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0, 0);
 		//ˮƽͶӰ
 		cv::Mat roirow;
 		cv::reduce(roi, roirow, 1, CV_REDUCE_AVG);

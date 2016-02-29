@@ -55,6 +55,4 @@ void main(int argc, _TCHAR* argv[])
 	cv::namedWindow("2", 0);
 	cv::imshow("2", img);
 	cv::waitKey(0);
-
 }
-
