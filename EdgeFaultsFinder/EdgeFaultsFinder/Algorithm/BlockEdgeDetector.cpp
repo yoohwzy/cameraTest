@@ -4,16 +4,81 @@
 BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	img = _img;
-	block = _block;
-	faults = _faults;
+	p_block = _block;
+	p_faults = _faults;
+
+	doRight();
 }
 
 
 BlockEdgeDetector::~BlockEdgeDetector()
 {
-	faults = NULL;
-	block = NULL;
+	p_faults = NULL;
+	p_block = NULL;
 }
+
+void BlockEdgeDetector::doRight()
+{
+	const int ROI_WIDTH = 200;
+	const int ROI_HEIGHT = 100;
+
+	int index = 0;
+	vector<cv::Mat> reduceList;
+	vector<cv::Point3f> points;
+	//ÓÒ±ß½ç
+	int startY = p_block->A.y + 100;
+	int endY = p_block->D.y - 100;
+	int inc = 50;//(float)(endY - startY) / 60 + 0.5;//·¶Î§ÔöÁ¿
+	for (int y = startY; y < endY && y < img.rows; y += inc, index++)
+	{
+		int x = p_block->GetPonintByY(y, &p_block->RightLine).x;
+		if (x < 0 || x > img.cols)
+			continue;
+
+		cv::Mat tmpROI;
+		if ((y + inc) > endY)
+			x = p_block->GetPonintByY(endY - ROI_HEIGHT, &p_block->RightLine).x;
+
+		tmpROI = img(cv::Rect(x - ROI_WIDTH, y, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat reduceImg;
+
+		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
+		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//¿íËõ¼õÎªÒ»°ë
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(5, 5), 0);
+
+#ifdef SAVE_IMG
+		//±£´æÍ¼Æ¬
+		char num[10];
+		sprintf(num, "%03d", index);
+		string strnum(num);
+		stringstream ss;
+		ss << "EdgeInner\\R\\ÓÒ_" << strnum << "_reduce.jpg";
+		cv::imwrite(ss.str(), reduceImg);
+		ss.str("");
+		ss << "EdgeInner\\R\\ÓÒ_" << strnum << ".jpg";
+		cv::imwrite(ss.str(), tmpROI);
+#endif
+
+		tmpROI.release();
+
+		//reduceImg.convertTo(reduceImg, CV_64F);
+		reduceList.push_back(reduceImg);
+		points.push_back(cv::Point3f(p_block->GetPonintByY(y, &p_block->RightLine).x, y, inc));
+	}
+
+	for (size_t i = 0; i < reduceList.size() - 2; i++)
+	{
+		cv::Mat result;
+		cv::absdiff(reduceList[i], reduceList[i + 1], result);
+		double max;
+		cv::minMaxLoc(result, NULL, &max);
+		continue;
+	}
+	//processAndSaveData(reduceList, points, "R\\ÓÒ");
+}
+
+
+
 
 
 void ImageBinarization(IplImage *src)

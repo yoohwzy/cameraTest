@@ -8,14 +8,15 @@
 #include "Algorithm\Base\Block.h"
 
 #include "Algorithm\BlockLocalizer.h"
+#include "Algorithm\BlockEdgeDetector.h"
 
 using namespace std;
 
 void main(int argc, _TCHAR* argv[])
 {
 	//cv::Mat img = cv::imread("D://出差//2015.12.28//baocuo//2_o原图.jpg", 0);
-	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//1_o原图.jpg", 0);
-	cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//6_o原图.jpg", 0);
+	cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//1_o原图.jpg", 0);
+	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//6_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_o原图2.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_o原图3.jpg", 0);
@@ -45,14 +46,17 @@ void main(int argc, _TCHAR* argv[])
 		return;
 	}
 	
-	cv::cvtColor(img, img, CV_GRAY2BGR);
+	BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
+	
 
-	cv::line(img, cv::Point(0, block.UpLine.k * (0 - block.UpLine.x0) + block.UpLine.y0), cv::Point(img.cols, block.UpLine.k * (img.cols - block.UpLine.x0) + block.UpLine.y0), cv::Scalar(0, 0, 255), 1);
-	cv::line(img, cv::Point(0, block.DownLine.k * (0 - block.DownLine.x0) + block.DownLine.y0), cv::Point(img.cols, block.DownLine.k * (img.cols - block.DownLine.x0) + block.DownLine.y0), cv::Scalar(0, 255, 255), 1);
-	cv::line(img, cv::Point((img.rows - block.LeftLine.y0) / block.LeftLine.k + block.LeftLine.x0, img.rows), cv::Point((0 - block.LeftLine.y0) / block.LeftLine.k + block.LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
-	cv::line(img, cv::Point((img.rows - block.RightLine.y0) / block.RightLine.k + block.RightLine.x0, img.rows), cv::Point((0 - block.RightLine.y0) / block.RightLine.k + block.RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
+	//cv::cvtColor(img, img, CV_GRAY2BGR);
 
-	cv::namedWindow("2", 0);
-	cv::imshow("2", img);
-	cv::waitKey(0);
+	//cv::line(img, cv::Point(0, block.UpLine.k * (0 - block.UpLine.x0) + block.UpLine.y0), cv::Point(img.cols, block.UpLine.k * (img.cols - block.UpLine.x0) + block.UpLine.y0), cv::Scalar(0, 0, 255), 1);
+	//cv::line(img, cv::Point(0, block.DownLine.k * (0 - block.DownLine.x0) + block.DownLine.y0), cv::Point(img.cols, block.DownLine.k * (img.cols - block.DownLine.x0) + block.DownLine.y0), cv::Scalar(0, 255, 255), 1);
+	//cv::line(img, cv::Point((img.rows - block.LeftLine.y0) / block.LeftLine.k + block.LeftLine.x0, img.rows), cv::Point((0 - block.LeftLine.y0) / block.LeftLine.k + block.LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
+	//cv::line(img, cv::Point((img.rows - block.RightLine.y0) / block.RightLine.k + block.RightLine.x0, img.rows), cv::Point((0 - block.RightLine.y0) / block.RightLine.k + block.RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
+
+	//cv::namedWindow("2", 0);
+	//cv::imshow("2", img);
+	//cv::waitKey(0);
 }

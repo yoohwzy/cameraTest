@@ -14,7 +14,9 @@ public:
 
 private:
 	cv::Mat img;
-	Faults *faults = NULL;
-	Block *block = NULL;
+	Faults *p_faults = NULL;
+	Block *p_block = NULL;
+
+	void doRight();
 };
 

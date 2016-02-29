@@ -32,8 +32,8 @@ public:
 
 private:
 	cv::Mat img;
-	Faults *faults = NULL;
-	Block *block = NULL;
+	Faults *p_faults = NULL;
+	Block *p_block = NULL;
 
 	//在水平边缘（上、下）上获得y坐标值
 	//start搜索的中点
