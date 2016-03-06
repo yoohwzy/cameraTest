@@ -42,8 +42,11 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 	{
 		return;
 	}
-
 	FindDown();
+	if (downpoints.size() < 5)
+	{
+		return;
+	}
 	Judgement();
 	p_block->Lines2ABCD();
 	NotFoundBlockFlag = false;

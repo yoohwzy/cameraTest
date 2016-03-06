@@ -22,6 +22,8 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	t2.join();
 	t3.join();
 	t4.join();
+
+	//doUp();
 }
 
 
@@ -56,11 +58,14 @@ void BlockEdgeDetector::doUp()
 
 		cv::Mat tmpROI = image(cv::Rect(x, y, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
+#ifdef BED_OUTPUT_DEBUG_INFO
+		debug_ups.push_back(tmpROI);
+#endif
+		tmpROI.convertTo(tmpROI, CV_32F);
 
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
 		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
-
 
 #ifdef SAVE_IMG
 		//保存图片
@@ -80,9 +85,8 @@ void BlockEdgeDetector::doUp()
 		reduceList.push_back(reduceImg);
 		points.push_back(cv::Point(x, p_block->GetPonintByX(x, &p_block->UpLine).y));
 	}
-	//processAndSaveData(reduceList, points, "U\\上");
+	processUpDown(reduceList, points);
 }
-
 void BlockEdgeDetector::doDown()
 {
 	const int ROI_WIDTH = 100;
@@ -108,6 +112,9 @@ void BlockEdgeDetector::doDown()
 		cv::Mat tmpROI = image(cv::Rect(x, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
 
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
+#ifdef BED_OUTPUT_DEBUG_INFO
+		debug_downs.push_back(tmpROI);
+#endif
 		tmpROI.convertTo(tmpROI, CV_32F);
 
 		cv::Mat reduceImg;
@@ -133,9 +140,8 @@ void BlockEdgeDetector::doDown()
 		reduceList.push_back(reduceImg);
 		points.push_back(p_block->GetPonintByX(x, &p_block->DownLine));
 	}
-	//processAndSaveData(reduceList, points, "D\\下");
+	processLeftRight(reduceList, points);
 }
-
 void BlockEdgeDetector::doLeft()
 {
 	const int ROI_WIDTH = 200;
@@ -162,11 +168,9 @@ void BlockEdgeDetector::doLeft()
 
 		tmpROI = image(cv::Rect(x, y, 200, inc)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(9, 9), 0);
-
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_lefts.push_back(tmpROI);
 #endif
-
 		tmpROI.convertTo(tmpROI, CV_32F);
 
 		cv::Mat reduceImg;
@@ -221,11 +225,9 @@ void BlockEdgeDetector::doRight()
 
 		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH, y, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_rights.push_back(tmpROI);
 #endif
-
 		tmpROI.convertTo(tmpROI, CV_32F);
 
 		cv::Mat reduceImg;
@@ -254,7 +256,7 @@ void BlockEdgeDetector::doRight()
 
 
 
-int BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points)
+void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points)
 {
 #ifdef BED_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
@@ -262,36 +264,34 @@ int BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::P
 		stringstream ss;
 		ss << i;
 		cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 255, 0));
-		cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
+		cv::circle(drowDebugResult, points[i], 2, cv::Scalar(125, 125, 255), -1);
 	}
 #endif
 
-
-	double maxdiff = 0;
+	//筛选出错误点
 	vector<int> errorPointsIndex;
 	vector<int> errorPointsDeep;
 	if (reduceList.size() > 2)
 	{
 		for (int i = 0; i < reduceList.size() - 2; i++)
 		{
-			cv::Mat result;
-			cv::absdiff(reduceList[i], reduceList[i + 1], result);
+			cv::Mat diffresult;
+			cv::absdiff(reduceList[i], reduceList[i + 1], diffresult);
 			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
 			cv::Point maxLoc;
-			minMaxLoc(result, NULL, &maxVal, NULL, &maxLoc);
-			if (maxdiff < maxVal)
-				maxdiff = maxVal;
+			minMaxLoc(diffresult, NULL, &maxVal, NULL, &maxLoc);
+			if (maxdiff_X < maxVal) maxdiff_X = maxVal;//定标用统计
 			if (maxVal > JUDGEMENT_THRESHOLD)
 			{
 				int count = 0;
 				int x = maxLoc.x;
-				for (int j = maxLoc.x; j < result.cols; j++)
+				for (int j = maxLoc.x; j < diffresult.cols; j++)
 				{
 					//判断新点到上一错误点的距离
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (result.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD)
+					if (diffresult.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD)
 					{
 						count++;
 						x = j;
@@ -304,7 +304,7 @@ int BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::P
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (result.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
+					if (diffresult.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
 					{
 						count++;
 						x = j;
@@ -321,6 +321,116 @@ int BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::P
 						cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
 #endif
 				}
+				if (maxDeep_X < count) maxDeep_X = count;//定标用统计
+			}
+			continue;
+		}
+	}
+
+	//根据错误点生成BrokenEdge实体
+	if (errorPointsIndex.size() > 0)
+	{
+		int absolutDeep = 0;
+		int startIndex = errorPointsIndex[0];
+		int endIndex = errorPointsIndex[0];
+		for (int i = 0; i < errorPointsIndex.size(); i++)
+		{
+			if (errorPointsIndex[i] - startIndex < 3)
+			{
+				endIndex = errorPointsIndex[i];
+				absolutDeep = errorPointsDeep[i] > absolutDeep ? errorPointsDeep[i] : absolutDeep;
+			}
+			if (errorPointsIndex[i] - startIndex >= 3 || i == errorPointsIndex.size() - 1)
+			{
+				if (startIndex == endIndex)
+				{
+					if (startIndex == (points.size() - 1))
+						startIndex = (points.size() - 2);
+					else if (endIndex == 0)
+						endIndex = 1;
+					else
+					{
+						startIndex--;
+						endIndex++;
+					}
+				}
+
+				int x = (points[startIndex].x + points[endIndex].x) / 2;
+				int y = (points[startIndex].y + points[endIndex].y) / 2;
+				Faults::BrokenEdge be;
+				be.position = cv::Point(x, y);
+				be.deep = absolutDeep;
+				be.length = abs(points[endIndex].y - points[startIndex].y);
+				p_faults->BrokenEdges.push_back(be);
+
+				startIndex = errorPointsIndex[i];
+			}
+		}
+	}
+}
+void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points)
+{
+#ifdef BED_OUTPUT_DEBUG_INFO
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		stringstream ss;
+		ss << i;
+		cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 255, 0));
+		cv::circle(drowDebugResult, points[i], 2, cv::Scalar(255, 0, 255), -1);
+	}
+#endif
+
+	vector<int> errorPointsIndex;
+	vector<int> errorPointsDeep;
+	if (reduceList.size() > 2)
+	{
+		for (int i = 0; i < reduceList.size() - 2; i++)
+		{
+			cv::Mat diffresult;
+			cv::absdiff(reduceList[i], reduceList[i + 1], diffresult);
+			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
+			cv::Point maxLoc;
+			minMaxLoc(diffresult, NULL, &maxVal, NULL, &maxLoc);
+			if (maxdiff_Y < maxVal) maxdiff_Y = maxVal;//定标用统计
+			if (maxVal > JUDGEMENT_THRESHOLD)
+			{
+				int count = 0;
+				int y = maxLoc.y;
+				for (int j = maxLoc.y; j < diffresult.rows; j++)
+				{
+					//判断新点到上一错误点的距离
+					if (abs((float)j - y) > FAULTS_SPAN) break;
+					//判断值是否大于阈值
+					if (diffresult.ptr<float>(j)[0] > JUDGEMENT_THRESHOLD)
+					{
+						count++;
+						y = j;
+					}
+				}
+				y = maxLoc.y;
+				for (int j = maxLoc.y; j >= 0; j--)
+				{
+					//判断新点到上一错误点的距离
+					if (abs((float)j - y) > FAULTS_SPAN) break;
+					//判断值是否大于阈值
+					if (diffresult.ptr<float>(j)[0] > JUDGEMENT_THRESHOLD && abs((float)j - j) <= FAULTS_SPAN)
+					{
+						count++;
+						y = j;
+					}
+				}
+				if (count > FAULTS_COUNT)
+				{
+					errorPointsIndex.push_back(i);
+					errorPointsDeep.push_back(count);
+#ifdef BED_OUTPUT_DEBUG_INFO
+					stringstream ss;
+					ss << i;
+					cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));
+					cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
+#endif
+				}
+				if (maxDeep_Y < count) maxDeep_Y = count;//定标用统计
 			}
 			continue;
 		}
@@ -366,9 +476,7 @@ int BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::P
 			}
 		}
 	}
-	return maxdiff;
 }
-
 
 //void ImageBinarization(IplImage *src)
 //{

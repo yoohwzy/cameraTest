@@ -14,7 +14,9 @@ using namespace std;
 
 void main(int argc, _TCHAR* argv[])
 {
+	//cv::Mat img = cv::imread("D://出差//11错_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.28//baocuo//2_o原图.jpg", 0);
+	//cv::Mat img = cv::imread("D://出差//2015.12.30//1//12_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//1_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//5_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//6_o原图.jpg", 0);
