@@ -20,13 +20,16 @@ void main(int argc, _TCHAR* argv[])
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//1_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//5_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//6_o原图.jpg", 0);
-	cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
+	//cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
 	//cv::Mat img = cv::imread("D://16_o原图2.jpg", 0);
-	//cv::Mat img = cv::imread("D://16_o原图3.jpg", 0);
+	cv::Mat img = cv::imread("D://16_o原图3.jpg", 0);
 
 
 	if (img.rows == 0)
+	{
+		cout << "图片未加载！";
 		return;
+	}
 
 	cv::normalize(img, img, 0, 100, cv::NORM_MINMAX);
 

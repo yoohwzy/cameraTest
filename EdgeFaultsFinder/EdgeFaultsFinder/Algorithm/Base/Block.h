@@ -20,6 +20,7 @@ public:
 		double k;
 		double dx;
 		double dy;
+		bool isAllOutOfImg = false;//是否是位于图片外面
 	};
 
 	cv::Point A, B, C, D;
