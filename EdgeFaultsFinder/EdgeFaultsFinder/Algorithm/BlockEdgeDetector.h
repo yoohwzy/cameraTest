@@ -6,7 +6,7 @@
 
 #include <thread>
 
-//#define BED_OUTPUT_DEBUG_INFO 1
+#define BED_OUTPUT_DEBUG_INFO 1
 
 class BlockEdgeDetector
 {
@@ -34,9 +34,9 @@ public:
 	//竖直方向（上下边）差值的最大值
 	int maxdiff_Y = 0;
 private:
-	const int JUDGEMENT_THRESHOLD = 8;//超过这个阈值则认为有缺陷
+	const int JUDGEMENT_THRESHOLD = 7;//超过这个阈值则认为可能有缺陷
 	int FAULTS_SPAN = 4;//近邻像素 
-	int FAULTS_COUNT = 3;
+	int FAULTS_COUNT = 5;
 
 	cv::Mat image;
 	Faults *p_faults = NULL;

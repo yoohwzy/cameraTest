@@ -13,7 +13,11 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	drowDebugResult = _img.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
-#endif
+	doUp();
+	doDown();
+	doLeft();
+	doRight();
+#else
 	thread t1 = thread(std::mem_fn(&BlockEdgeDetector::doUp), this);
 	thread t2 = thread(std::mem_fn(&BlockEdgeDetector::doDown), this);
 	thread t3 = thread(std::mem_fn(&BlockEdgeDetector::doLeft), this);
@@ -22,8 +26,7 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	t2.join();
 	t3.join();
 	t4.join();
-
-	//doUp();
+#endif
 }
 
 
@@ -34,8 +37,9 @@ BlockEdgeDetector::~BlockEdgeDetector()
 }
 void BlockEdgeDetector::doUp()
 {
-	const int ROI_WIDTH = 100;
-	const int ROI_HEIGHT = 200;
+	const int ROI_WIDTH = 50;
+	const int ROI_HEIGHT = 66;
+	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -44,19 +48,21 @@ void BlockEdgeDetector::doUp()
 	//上边界
 	int startX = p_block->A.x + 50;
 	int endX = p_block->B.x - 50;
-	int inc = 50;//(float)(endX - startX) / 30 + 0.5;//范围增量
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
-		int y = p_block->GetPonintByX(x, &p_block->UpLine).y;
+		int x1 = x;
 		if (x < 0 || x >= image.cols)
 			continue;
+		if ((x + ROI_WIDTH) >= endX)
+			x1 = endX - ROI_WIDTH - 1;
+		if ((x + ROI_WIDTH) >= image.cols)
+			x1 = image.cols - ROI_WIDTH - 1;
+
+		int y = p_block->GetPonintByX(x1, &p_block->UpLine).y;
 		if (y < 0 || y >= image.rows)
 			continue;
 
-		if ((x + inc) > endX)
-			y = p_block->GetPonintByX(endX - ROI_WIDTH, &p_block->UpLine).y;
-
-		cv::Mat tmpROI = image(cv::Rect(x, y, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x1, y, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_ups.push_back(tmpROI);
@@ -89,8 +95,9 @@ void BlockEdgeDetector::doUp()
 }
 void BlockEdgeDetector::doDown()
 {
-	const int ROI_WIDTH = 100;
-	const int ROI_HEIGHT = 200;
+	const int ROI_WIDTH = 50;
+	const int ROI_HEIGHT = 66;
+	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -98,18 +105,22 @@ void BlockEdgeDetector::doDown()
 	//下边界
 	int startX = p_block->D.x + 50;
 	int endX = p_block->C.x - 50;
-	int inc = 50;//(float)(endX - startX) / 30 + 0.5;//范围增量
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
-		int y = p_block->GetPonintByX(x, &p_block->DownLine).y;
+		int x1 = x;
 		if (x < 0 || x >= image.cols)
 			continue;
+		if ((x + ROI_WIDTH) >= endX)
+			x1 = endX - ROI_WIDTH - 1;
+		if ((x + ROI_WIDTH) >= image.cols)
+			x1 = image.cols - ROI_WIDTH - 1;
+
+
+		int y = p_block->GetPonintByX(x1, &p_block->DownLine).y;
 		if (y < 0 || y >= image.rows)
 			continue;
 
-		if ((x + inc) > endX)
-			y = p_block->GetPonintByX(endX - ROI_WIDTH, &p_block->DownLine).y;
-		cv::Mat tmpROI = image(cv::Rect(x, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
 
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
@@ -140,13 +151,13 @@ void BlockEdgeDetector::doDown()
 		reduceList.push_back(reduceImg);
 		points.push_back(p_block->GetPonintByX(x, &p_block->DownLine));
 	}
-	processLeftRight(reduceList, points);
+	processUpDown(reduceList, points);
 }
 void BlockEdgeDetector::doLeft()
 {
-	const int ROI_WIDTH = 200;
-	const int ROI_HEIGHT = 40;
-	int inc = 30;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	const int ROI_WIDTH = 66;
+	const int ROI_HEIGHT = 50;
+	int inc = 25;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -156,17 +167,19 @@ void BlockEdgeDetector::doLeft()
 	int endY = p_block->D.y - 150;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{
-		int x = p_block->GetPonintByY(y, &p_block->LeftLine).x;
+		int y1 = y;
+		if (y1 < 0 || y1 >= image.rows)
+			continue;
+		if ((y1 + ROI_HEIGHT) >= endY)
+			y1 = endY - ROI_HEIGHT - 1;
+		if ((y1 + ROI_HEIGHT) >= image.rows)
+			y1 = image.rows - ROI_HEIGHT - 1;
+
+		int x = p_block->GetPonintByY(y1, &p_block->LeftLine).x;
 		if (x < 0 || x >= image.cols)
 			continue;
-		if (y < 0 || y >= image.rows)
-			continue;
 
-		cv::Mat tmpROI;
-		if ((y + inc) > endY)
-			x = p_block->GetPonintByY(endY - ROI_HEIGHT, &p_block->LeftLine).x;
-
-		tmpROI = image(cv::Rect(x, y, 200, inc)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(9, 9), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_lefts.push_back(tmpROI);
@@ -202,9 +215,9 @@ void BlockEdgeDetector::doLeft()
 }
 void BlockEdgeDetector::doRight()
 {
-	const int ROI_WIDTH = 200;
-	const int ROI_HEIGHT = 40;
-	int inc = 30;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	const int ROI_WIDTH = 66;
+	const int ROI_HEIGHT = 50;
+	int inc = 25;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -214,16 +227,19 @@ void BlockEdgeDetector::doRight()
 	int endY = p_block->D.y - 150;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{
-		int x = p_block->GetPonintByY(y, &p_block->RightLine).x;
+		int y1 = y;
+		if (y1 < 0 || y1 >= image.rows)
+			continue;
+		if ((y1 + ROI_HEIGHT) >= endY)
+			y1 = endY - ROI_HEIGHT - 1;
+		if ((y1 + ROI_HEIGHT) >= image.rows)
+			y1 = image.rows - ROI_HEIGHT - 1;
+
+		int x = p_block->GetPonintByY(y1, &p_block->RightLine).x;
 		if (x < 0 || x >= image.cols)
 			continue;
-		if (y < 0 || y >= image.rows)
-			continue;
 
-		if ((y + inc) > endY)
-			x = p_block->GetPonintByY(endY - ROI_HEIGHT, &p_block->RightLine).x;
-
-		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH, y, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_rights.push_back(tmpROI);
@@ -275,6 +291,12 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 	{
 		for (int i = 0; i < reduceList.size() - 2; i++)
 		{
+//#ifdef BED_OUTPUT_DEBUG_INFO
+//			cv::Mat img1 = debug_lefts[i];
+//			cv::Mat img2 = debug_lefts[i + 1];
+//			cv::Mat r1 = reduceList[i];
+//			cv::Mat r2 = reduceList[i + 1];
+//#endif
 			cv::Mat diffresult;
 			cv::absdiff(reduceList[i], reduceList[i + 1], diffresult);
 			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
@@ -364,6 +386,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				p_faults->BrokenEdges.push_back(be);
 
 				startIndex = errorPointsIndex[i];
+				endIndex = errorPointsIndex[i];
 			}
 		}
 	}

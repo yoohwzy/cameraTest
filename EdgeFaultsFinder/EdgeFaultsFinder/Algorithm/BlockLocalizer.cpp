@@ -105,7 +105,7 @@ void BlockLocalizer::FindUp()
 	int range = RANGE_DEFAULT;
 	bool needReFind = false;//对该行是否需要扩大range重新搜索
 	//扫描其他点，左往右
-	for (int x = 2048 + COL_SPAN; (x + COL_SPAN) < img.cols; x += COL_SPAN)
+	for (int x = 2048 + COL_SPAN; x < img.cols; x += COL_SPAN)
 	{
 		int	y = getYOnLine(cv::Point(x, centerY), range);
 		if (y >= 0)
@@ -137,7 +137,7 @@ void BlockLocalizer::FindUp()
 	range = RANGE_DEFAULT;
 	needReFind = false;
 	//扫描其他点，右往左
-	for (int x = 2048 - COL_SPAN; (x - COL_SPAN) > 0; x -= COL_SPAN)
+	for (int x = 2048 - COL_SPAN; x > 0; x -= COL_SPAN)
 	{
 		int	y = getYOnLine(cv::Point(x, centerY), range);
 		if (y >= 0)
@@ -178,7 +178,6 @@ void BlockLocalizer::FindUp()
 
 	needReFind = 0;
 }
-
 void BlockLocalizer::FindLeft()
 {
 	const int ROW_SPAN = 150;
@@ -251,8 +250,6 @@ void BlockLocalizer::FindLeft()
 #endif
 	//needReFind = 0;
 }
-
-
 void BlockLocalizer::FindRight()
 {
 	const int ROW_SPAN = 150;
@@ -389,7 +386,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 {
 	const int THRESHOD = 10;
 
-	const int continuePointCount = 50;//连续多少个点则判断为边缘
+	const int continuePointCount = 30;//连续多少个点则判断为边缘
 	//const int roiHeight = continuePointCount * 2;//ROI高度
 	const int roiWidth = 11;//所取ROI宽度，一定为奇数，输入的x值为ROI的中心
 
@@ -412,14 +409,16 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 		//选取roi
 		cv::Mat roi = img(roiRect).clone();
 		cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0, 0);
+		cv::Mat canny;
+		cv::Canny(roi, canny, 7, 10);
 		//水平投影
 		cv::Mat roirow;
 		cv::reduce(roi, roirow, 1, CV_REDUCE_AVG);
-		int count = 0;
 		if (scanUp2Down)
 		{
 			for (int j = 0; j < roirow.rows; j++)
 			{
+				int count = 0;
 				for (int i = j; i < roirow.rows; i++)
 				{
 					if (roirow.ptr<uchar>(i)[0] >= THRESHOD)
@@ -443,6 +442,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 		{
 			for (int j = roirow.rows - 1; j >= 0; j--)
 			{
+				int count = 0;
 				for (int i = j; i >= 0; i--)
 				{
 					if (roirow.ptr<uchar>(i)[0] >= THRESHOD)
@@ -468,7 +468,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2right)
 {
 	const int THRESHOD = 10;
-	const int continuePointCount = 20;//连续多少个点则判断为边缘
+	const int continuePointCount = 30;//连续多少个点则判断为边缘
 	const int roiHeight = 11;//所取ROI宽度，一定为奇数，输入的x值为ROI的中心
 
 	//创建roi范围，并防止越界。
@@ -494,11 +494,11 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 		//竖直投影
 		cv::Mat roirow;
 		cv::reduce(roi, roirow, 0, CV_REDUCE_AVG);
-		int count = 0;
 		if (scanLeft2right)
 		{
 			for (int j = 0; j < roirow.cols; j++)
 			{
+				int count = 0;
 				for (int i = j; i < roirow.cols; i++)
 				{
 					if (roirow.ptr<uchar>(0)[i] >= THRESHOD)
@@ -522,6 +522,7 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 		{
 			for (int j = roirow.cols - 1; j >= 0; j--)
 			{
+				int count = 0;
 				for (int i = j; i >= 0; i--)
 				{
 					if (roirow.ptr<uchar>(0)[i] >= THRESHOD)
@@ -555,7 +556,7 @@ void BlockLocalizer::Judgement()
 }
 void BlockLocalizer::judgementForOneLine(vector<cv::Point>& points, bool updown, Block::Line& line)
 {
-	if (fixLineOnBorder(points, line))//修复边界点，如边界在图像外，或一半在图内一半子在图外的情况。
+	if (fixLineOnBorder(points, line) && points.size() >= 5)//修复边界点，如边界在图像外，或一半在图内一半子在图外的情况。
 	{
 		//判断是否崩边
 		judgemanBrokenLine(points, updown);
@@ -711,6 +712,9 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 }
 bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& line)
 {
+	//首先删除第一点与最后一点，排除干扰
+	points.pop_back();
+	points.erase(points.begin());
 	int borderX = img.cols - 1;
 	int borderY = img.rows - 1;
 
@@ -756,7 +760,7 @@ bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& lin
 		if (line.x0 == 0 || line.x0 == borderX)
 		{
 			line.k = 0;
-		}
+		} 
 		if (line.y0 == 0 || line.y0 == borderY)
 		{
 			line.k = 999999;
