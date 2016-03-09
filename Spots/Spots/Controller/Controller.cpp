@@ -76,8 +76,12 @@ void Controller::init(){
 	}
 
 	// 统计数据初始化
-	StatisticsController::InitDate();
-	spotsMainView->UpdateStatistics();
+	if (StatisticsController::InitDate())
+	{
+		spotsMainView->UpdateStatistics();
+	}
+	else
+		AfxMessageBox(L"无法连接到数据库！");
 	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
 	spotsMainView->ShowBigImg(white);
 }

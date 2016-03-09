@@ -41,6 +41,8 @@ public:
 	static void AddTodayC();
 	static void AddTodayRejected();
 private:
+	//数据库是否成功加载？
+	static bool accessDBHasOpened;
 	//初始化今日的记录数据
 	static void initToday();
 	//在数据库中更新今日数据

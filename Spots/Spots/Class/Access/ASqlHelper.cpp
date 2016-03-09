@@ -10,13 +10,25 @@ ASqlHelper::~ASqlHelper()
 {
 }
 
-string ASqlHelper::CnnStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D://cameraTest//AccessCtrl//11.mdb;Persist Security Info=False";
+
+
+string ASqlHelper::conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D://cameraTest//AccessCtrl//11.mdb;Persist Security Info=False";
 const string ASqlHelper::NONE = "_NONE_QUERY_NO_RESULT";
 
 _ConnectionPtr ASqlHelper::_pConnection = NULL;
 _RecordsetPtr ASqlHelper::_pRecordset = NULL;
 
-
+bool ASqlHelper::SetConStr(string constr)
+{
+	conStr = constr;
+	_ConnectionPtr m_pConnection;
+	if (OpenCnn(m_pConnection))
+	{
+		CloseCnn(m_pConnection);
+		return true;
+	}
+	return false;
+}
 bool ASqlHelper::OpenCnn(_ConnectionPtr& m_pConnection)
 {
 	CloseCnn();
@@ -24,7 +36,7 @@ bool ASqlHelper::OpenCnn(_ConnectionPtr& m_pConnection)
 	m_pConnection.CreateInstance(__uuidof(Connection));
 	try
 	{
-		if (m_pConnection->Open(ASqlHelper::CnnStr.c_str(), "", "", adModeUnknown) == S_OK)
+		if (m_pConnection->Open(ASqlHelper::conStr.c_str(), "", "", adModeUnknown) == S_OK)
 		{
 			return true;
 		}
@@ -127,6 +139,6 @@ _RecordsetPtr ASqlHelper::ExecuteRecordset(string sql)
 			return ASqlHelper::_pRecordset;
 		}
 	}
-	CloseCnn();
+	ASqlHelper::_pConnection = NULL;
 	return NULL;
 }

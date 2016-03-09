@@ -30,14 +30,23 @@ int StatisticsController::YearB = 0;
 int StatisticsController::YearC = 0;
 int StatisticsController::YearRejected = 0;
 
+bool StatisticsController::accessDBHasOpened = false;
+
 bool StatisticsController::InitDate()
 {
-	ASqlHelper::CnnStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D://cameraTest//Spots//瓷砖缺陷检测数据库.mdb;Persist Security Info=False";
+	if (!ASqlHelper::SetConStr("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=E://项目资料//cameraTest//Spots//瓷砖缺陷检测数据库.mdb;Persist Security Info=False"))
+	{
+		accessDBHasOpened = false;
+		return false;
+	}
+	else
+	{
+		accessDBHasOpened = true;
+	}
+
 	//update 程序设置 set 日期 = format(now(), 'yyyy-mm-dd ')
 
-
 	//载入今日数据
-
 	_RecordsetPtr record = ASqlHelper::ExecuteRecordset("SELECT * FROM 历史记录 WHERE 日期 = format(now(), 'yyyy-mm-dd ')");
 	if (record == NULL)
 	{
@@ -157,17 +166,19 @@ void StatisticsController::initToday()
 }
 void StatisticsController::updateTodayAccess()
 {
-	//string sql = "UPDATE [历史记录] SET [A类] = 2,[B类] = 2,[C类] = 3,[不合格数量] = 2,[今日产量] = 0,[合格率] = 0.6432 WHERE [日期] = format(now(), 'yyyy-mm-dd ')";
-
-	char buffer[255];
-	sprintf(buffer, "UPDATE [历史记录] SET [A类] = %d,[B类] = %d,[C类] = %d,[不合格数量] = %d,[今日产量] = %d,[合格率] = %f WHERE [日期] = format(now(), 'yyyy-mm-dd ')", 
-		StatisticsController::TodayA,
-		StatisticsController::TodayB, 
-		StatisticsController::TodayC, 
-		StatisticsController::TodayRejected, 
-		StatisticsController::TodayAll,
-		(1 - (StatisticsController::TodayRejected / (float)StatisticsController::TodayAll))
-		);/*赋予数值*/
-	string sql(buffer);
-	ASqlHelper::ExecuteNonQuery(sql);
+	if (accessDBHasOpened)
+	{
+		//string sql = "UPDATE [历史记录] SET [A类] = 2,[B类] = 2,[C类] = 3,[不合格数量] = 2,[今日产量] = 0,[合格率] = 0.6432 WHERE [日期] = format(now(), 'yyyy-mm-dd ')";
+		char buffer[255];
+		sprintf(buffer, "UPDATE [历史记录] SET [A类] = %d,[B类] = %d,[C类] = %d,[不合格数量] = %d,[今日产量] = %d,[合格率] = %f WHERE [日期] = format(now(), 'yyyy-mm-dd ')",
+			StatisticsController::TodayA,
+			StatisticsController::TodayB,
+			StatisticsController::TodayC,
+			StatisticsController::TodayRejected,
+			StatisticsController::TodayAll,
+			(1 - (StatisticsController::TodayRejected / (float)StatisticsController::TodayAll))
+			);/*赋予数值*/
+		string sql(buffer);
+		ASqlHelper::ExecuteNonQuery(sql);
+	}
 }
