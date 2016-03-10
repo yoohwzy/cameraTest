@@ -25,6 +25,8 @@ public:
 	// interface
 	// 显示图片到UI
 	virtual void ShowBigImg(cv::Mat) {}
+	// 显示图片到记录图片
+	virtual void ShowLogImg(cv::Mat) {}
 	// 更新UI上的记录数据
 	virtual void UpdateStatistics() {}
 	// 切换到虚拟相机模式，传入true切换到虚拟相机模式，false回到真实相机模式

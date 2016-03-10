@@ -36,8 +36,19 @@ void Controller::init(){
 
 
 
+	// 配置参数初始化
 
 
+
+	// 统计数据初始化
+	if (StatisticsController::InitDate())
+	{
+		spotsMainView->UpdateStatistics();
+	}
+	else
+		AfxMessageBox(L"无法连接到数据库！");
+
+	// 初始化工作线程
 	if (e2vInitFlag && pci1761InitFlag)
 	{
 		//初始化工人
@@ -75,15 +86,11 @@ void Controller::init(){
 		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
 
-	// 统计数据初始化
-	if (StatisticsController::InitDate())
-	{
-		spotsMainView->UpdateStatistics();
-	}
-	else
-		AfxMessageBox(L"无法连接到数据库！");
+	//初始化UI
 	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
+	logImg.InitDrawingBoard();
 	spotsMainView->ShowBigImg(white);
+	spotsMainView->ShowLogImg(logImg.DrawingBoard);
 }
 void Controller::release()
 {

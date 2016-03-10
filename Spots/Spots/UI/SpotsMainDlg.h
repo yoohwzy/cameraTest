@@ -78,16 +78,13 @@ public:
 	// 供Controller调用 //Override
 
 	void ShowBigImg(cv::Mat);
+
+	void ShowLogImg(cv::Mat);
+
 	// 更新UI上显示的记录数据
 	void UpdateStatistics();
 	//传入true切换UI到虚拟相机模式，false切换UI到真实相机模式
 	void SwitchModel2Virtual(bool switchToV);
 
 	// 供Controller调用 END
-
-
-
-
-
-
 };

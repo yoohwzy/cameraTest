@@ -12,6 +12,7 @@
 #include <mutex>
 
 #include <Model\Worker.h>
+#include <Model\LogImgGenerator.h>
 
 #include <Class\Debug\MFCConsole.h>
 #include <Controller\StatisticsController.h>
@@ -24,8 +25,7 @@ protected:
 	SpotsMainView*  spotsMainView = NULL;
 
 public:
-	Controller(SpotsMainView* _spotsMainView) :
-		spotsMainView(_spotsMainView)
+	Controller(SpotsMainView* _spotsMainView) :	spotsMainView(_spotsMainView)
 	{
 		//ATLASSERT(spotsMainView);
 		spotsMainView->AddController(this);
@@ -58,6 +58,8 @@ public:
 		}
 
 		spotsMainView->ShowBigImg(image);
+		logImg.AddItem(image,"test");
+		spotsMainView->ShowLogImg(logImg.DrawingBoard);
 		spotsMainView->UpdateStatistics();
 		ui_lock.unlock();
 	}
@@ -76,6 +78,7 @@ private:
 	ImgScanner *p_imgscanner = NULL;
 
 	PCI1761 pci1761;
+	LogImgGenerator logImg;
 
 	//同时只允许两个工人工作，即只能两张图（两块砖）
 

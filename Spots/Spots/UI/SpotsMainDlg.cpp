@@ -145,6 +145,9 @@ void CSpotsMainDlg::OnBnClickedOk()
 	////system("pause");
 	//FreeConsole();
 	//CloseHandle(hOutputHandle);
+
+	cv::Mat white(2, 2, CV_8UC3, cv::Scalar(255,0,0));
+	ShowLogImg(white);
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
@@ -167,6 +170,10 @@ void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 {
 	img_on_show = img;
 	DrawPicToHDC(img, IDC_IMG_BIG);
+}
+void CSpotsMainDlg::ShowLogImg(cv::Mat img)
+{
+	DrawPicToHDC(img, IDC_IMG_HISTORY);
 }
 
 void CSpotsMainDlg::UpdateStatistics()
