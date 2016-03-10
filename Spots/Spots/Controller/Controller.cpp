@@ -41,7 +41,7 @@ void Controller::init(){
 
 
 	// 统计数据初始化
-	if (StatisticsController::InitDate())
+	if (Statistics::InitDate())
 	{
 		spotsMainView->UpdateStatistics();
 	}

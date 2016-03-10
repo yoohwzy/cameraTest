@@ -20,6 +20,5 @@ private:
 	int piecewidth = 100;
 	int pieceheight = 200;
 	int piecespan = 100;
-
 };
 

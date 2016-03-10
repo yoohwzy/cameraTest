@@ -3,10 +3,11 @@
 
 #include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 #include <Class/IOCard/PCI1761/PCI1761.h>
+#include <Class/Statistics/Statistics.h>
 
 #include <View/SpotsMainView.h>
 
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 #include <queue>
 #include <thread>
 #include <mutex>
@@ -15,7 +16,6 @@
 #include <Model\LogImgGenerator.h>
 
 #include <Class\Debug\MFCConsole.h>
-#include <Controller\StatisticsController.h>
 
 using namespace std;
 
@@ -50,10 +50,10 @@ public:
 		ui_lock.lock();
 		switch (type)
 		{
-		case 1:StatisticsController::AddTodayA(); break;
-		case 2:StatisticsController::AddTodayB(); break;
-		case 3:StatisticsController::AddTodayC(); break;
-		case 4:StatisticsController::AddTodayRejected(); break;
+		case 1:Statistics::AddTodayA(); break;
+		case 2:Statistics::AddTodayB(); break;
+		case 3:Statistics::AddTodayC(); break;
+		case 4:Statistics::AddTodayRejected(); break;
 		default:break;
 		}
 

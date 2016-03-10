@@ -4,11 +4,11 @@
 using namespace std;
 // 用于生产计数，静态类，包括ACCESS数据库数据写入读取
 // 表现于UI上的数据统计区
-class StatisticsController
+class Statistics
 {
 public:
-	StatisticsController();
-	~StatisticsController();
+	Statistics();
+	~Statistics();
 
 	static int TodayAll;
 	static int TodayA;
