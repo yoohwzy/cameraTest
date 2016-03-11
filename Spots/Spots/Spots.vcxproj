@@ -116,10 +116,8 @@
   <ItemGroup>
     <ClInclude Include="Algorithm\Base\Block.h" />
     <ClInclude Include="Algorithm\Base\Faults.h" />
-    <ClInclude Include="Algorithm\BlocksDetector.h" />
-    <ClInclude Include="Algorithm\BufferStorage.h" />
-    <ClInclude Include="Algorithm\EdgeDetector.h" />
-    <ClInclude Include="Algorithm\EdgeInnerDetctor.h" />
+    <ClInclude Include="Algorithm\BlockEdgeDetector.h" />
+    <ClInclude Include="Algorithm\BlockLocalizer.h" />
     <ClInclude Include="Algorithm\Judgement.h" />
     <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
@@ -151,10 +149,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\Base\Block.cpp" />
-    <ClCompile Include="Algorithm\BlocksDetector.cpp" />
-    <ClCompile Include="Algorithm\BufferStorage.cpp" />
-    <ClCompile Include="Algorithm\EdgeDetector.cpp" />
-    <ClCompile Include="Algorithm\EdgeInnerDetctor.cpp" />
+    <ClCompile Include="Algorithm\BlockEdgeDetector.cpp" />
+    <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
     <ClCompile Include="Algorithm\Judgement.cpp" />
     <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />

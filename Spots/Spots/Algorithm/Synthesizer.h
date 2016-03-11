@@ -5,11 +5,7 @@
 #include <Algorithm/Base/Block.h>
 #include <Algorithm/Base/Faults.h>
 
-#include <Algorithm/BlocksDetector.h>
-#include <Algorithm/EdgeDetector.h>
-#include <Algorithm/Processor.h>
-#include <Algorithm/EdgeDetector.h>
-#include <Algorithm/EdgeInnerDetctor.h>
+
 #include <Algorithm/Pretreatment.h>
 
 #include <Class\Debug\MFCConsole.h>
@@ -26,12 +22,12 @@ public:
 		TypeA = 2,//A级
 		TypeB = 3,//B级
 		TypeC = 4,//C级
-		Rejected = 5//不合格
+		Rejected = 5,//不合格
 	};
 	Synthesizer(int _SN);
 	~Synthesizer();
 	//传入线阵相机所拍照片（乘以3倍后）
-	Status Run(cv::Mat linerGrayImg);
+	Status Run(cv::Mat TileImg);
 
 	//编号
 	int SN = 0;
@@ -43,13 +39,20 @@ public:
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
 private:
+	enum _Status
+	{
+		_NotFound,
+		_Edge_Broken,//崩边
+		_NEXT//崩边
+	};
+
 	Block *p_block = NULL;
 	Faults faults;
 
 	//瓷砖定位，返回是否找到瓷砖
-	bool positioning(cv::Mat grayImg);
+	_Status positioning(cv::Mat grayImg);
 	//边缘缺陷检测
-	void detectEdge(cv::Mat grayImg);
+	_Status detectEdge(cv::Mat grayImg);
 	//内部缺陷检测
-	void detectInner(cv::Mat grayImg);
+	_Status detectInner(cv::Mat grayImg);
 };
