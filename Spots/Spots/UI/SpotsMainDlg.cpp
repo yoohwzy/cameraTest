@@ -7,6 +7,8 @@
 #include "SpotsMainDlg.h"
 #include "afxdialogex.h"
 
+#include <Class\Statistics\Statistics.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -178,27 +180,27 @@ void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 
 void CSpotsMainDlg::UpdateStatistics()
 {
-	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll));
-	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayA));
-	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayB));
-	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayC));
-	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::TodayAll - StatisticsController::TodayRejected));
+	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll));
+	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(Statistics::TodayA));
+	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(Statistics::TodayB));
+	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(Statistics::TodayC));
+	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll - Statistics::TodayRejected));
 
-	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll));
-	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthA));
-	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthB));
-	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthC));
-	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::MonthAll - StatisticsController::MonthRejected));
+	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll));
+	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(Statistics::MonthA));
+	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(Statistics::MonthB));
+	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(Statistics::MonthC));
+	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll - Statistics::MonthRejected));
 
-	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll));
-	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearA));
-	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearB));
-	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearC));
-	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(StatisticsController::YearAll - StatisticsController::YearRejected));
+	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll));
+	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(Statistics::YearA));
+	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(Statistics::YearB));
+	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(Statistics::YearC));
+	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll - Statistics::YearRejected));
 
-	if (StatisticsController::TodayAll > 0)
+	if (Statistics::TodayAll > 0)
 	{
-		float dayFineRate = (StatisticsController::TodayAll - StatisticsController::TodayRejected) / (float)StatisticsController::TodayAll * 100;
+		float dayFineRate = (Statistics::TodayAll - Statistics::TodayRejected) / (float)Statistics::TodayAll * 100;
 		CString strfineRate;
 		strfineRate.Format(L"%.2f", dayFineRate);
 		GetDlgItem(IDC_LB_dayFineRate)->SetWindowText(strfineRate + L"%");
@@ -206,9 +208,9 @@ void CSpotsMainDlg::UpdateStatistics()
 	else
 		GetDlgItem(IDC_LB_dayFineRate)->SetWindowText(L"NaN");
 
-	if (StatisticsController::MonthAll > 0)
+	if (Statistics::MonthAll > 0)
 	{
-		float monthFineRate = (StatisticsController::MonthAll - StatisticsController::MonthRejected) / (float)StatisticsController::MonthAll * 100;
+		float monthFineRate = (Statistics::MonthAll - Statistics::MonthRejected) / (float)Statistics::MonthAll * 100;
 		CString strfineRate;
 		strfineRate.Format(L"%.2f", monthFineRate);
 		GetDlgItem(IDC_LB_monthFineRate)->SetWindowText(strfineRate + L"%");
@@ -216,9 +218,9 @@ void CSpotsMainDlg::UpdateStatistics()
 	else
 		GetDlgItem(IDC_LB_monthFineRate)->SetWindowText(L"NaN");
 
-	if (StatisticsController::YearAll > 0)
+	if (Statistics::YearAll > 0)
 	{
-		float yearFineRate = (StatisticsController::YearAll - StatisticsController::YearRejected) / (float)StatisticsController::YearAll * 100;
+		float yearFineRate = (Statistics::YearAll - Statistics::YearRejected) / (float)Statistics::YearAll * 100;
 		CString strfineRate;
 		strfineRate.Format(L"%.2f", yearFineRate);
 		GetDlgItem(IDC_LB_yearFineRate)->SetWindowText(strfineRate + L"%");

@@ -57,31 +57,12 @@ void SettingHelper::AddKey(string SectionName, string Key, LPWSTR value)
 }
 void SettingHelper::AddKey(string SectionName, string Key, string value)
 {
-	size_t size = SectionName.length();
-	wchar_t *sectionbuffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, SectionName.c_str(), size, sectionbuffer, size * sizeof(wchar_t));
-	sectionbuffer[size] = 0;  // 确保以 '\0' 结尾 
-
-	size = Key.length();
-	wchar_t *keybuffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, Key.c_str(), size, keybuffer, size * sizeof(wchar_t));
-	keybuffer[size] = 0;  // 确保以 '\0' 结尾 
-
-	size = value.length();
-	wchar_t *valuebuffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, value.c_str(), size, valuebuffer, size * sizeof(wchar_t));
-	valuebuffer[size] = 0;  // 确保以 '\0' 结尾 
-
-	::WritePrivateProfileStringW(sectionbuffer, keybuffer, valuebuffer, SettingHelper::path);
-
-	delete valuebuffer;
-	delete keybuffer;
-	delete sectionbuffer;
+	::WritePrivateProfileStringW(StringHelper::string2LPWSTR(SectionName), StringHelper::string2LPWSTR(Key), StringHelper::string2LPWSTR(value), SettingHelper::path);
 }
 bool SettingHelper::GetKeyInt(string SectionName, string Key, int& value)
 {
 	string str;
-	bool flag = GetKeyString(key, str);
+	bool flag = GetKeyString(SectionName, Key, str);
 	if (!flag)
 		return false;
 	stringstream ss;
@@ -93,7 +74,7 @@ bool SettingHelper::GetKeyInt(string SectionName, string Key, int& value)
 bool SettingHelper::GetKeyFloat(string SectionName, string Key, float& value)
 {
 	string str;
-	bool flag = GetKeyString(key, str);
+	bool flag = GetKeyString(SectionName, Key, str);
 	if (!flag)
 		return false;
 	stringstream ss;
@@ -106,7 +87,7 @@ bool SettingHelper::GetKeyFloat(string SectionName, string Key, float& value)
 bool SettingHelper::GetKeyDouble(string SectionName, string Key, double& value)
 {
 	string str;
-	bool flag = GetKeyString(key, str);
+	bool flag = GetKeyString(SectionName, Key, str);
 	if (!flag)
 		return false;
 

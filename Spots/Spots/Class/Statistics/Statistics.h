@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <string.h>
 using namespace std;
 // 用于生产计数，静态类，包括ACCESS数据库数据写入读取
@@ -30,7 +31,7 @@ public:
 
 	// 初始化统计数据，从数据库中读取历史记录
 	// 返回是否成功
-	static bool InitDate(string ACCDB_PATH = "src//..//瓷砖缺陷检测数据库.mdb");
+	static bool InitDate(string ACCDB_PATH);
 
 	//获得合格率
 	static double GetFineRate();

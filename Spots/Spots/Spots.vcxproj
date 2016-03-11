@@ -137,7 +137,6 @@
     <ClInclude Include="Class\Statistics\Statistics.h" />
     <ClInclude Include="Controller\Controller.h" />
     <ClInclude Include="Controller\HistoryController.h" />
-    <ClInclude Include="Controller\StatisticsController.h" />
     <ClInclude Include="CvvImage.h" />
     <ClInclude Include="Model\ImgScanner.h" />
     <ClInclude Include="Model\LogImgGenerator.h" />
@@ -169,7 +168,6 @@
     <ClCompile Include="Class\Statistics\Statistics.cpp" />
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="Controller\HistoryController.cpp" />
-    <ClCompile Include="Controller\StatisticsController.cpp" />
     <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="Model\ImgScanner.cpp" />
     <ClCompile Include="Model\LogImgGenerator.cpp" />

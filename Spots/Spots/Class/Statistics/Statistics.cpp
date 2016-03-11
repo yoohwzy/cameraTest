@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <Class\Access\ASqlHelper.h>
-#include <sstream>
 
 Statistics::Statistics()
 {

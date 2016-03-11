@@ -6,7 +6,6 @@
 #include "Spots.h"
 
 #include "Controller\Controller.h"
-#include "Controller\StatisticsController.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

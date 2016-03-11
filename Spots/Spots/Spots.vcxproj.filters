@@ -159,9 +159,6 @@
     <ClInclude Include="Model\Worker.h">
       <Filter>Model</Filter>
     </ClInclude>
-    <ClInclude Include="Controller\StatisticsController.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Access\ASqlHelper.h">
       <Filter>Class\Access</Filter>
     </ClInclude>
@@ -238,9 +235,6 @@
     </ClCompile>
     <ClCompile Include="Model\Worker.cpp">
       <Filter>Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\StatisticsController.cpp">
-      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Class\Access\ASqlHelper.cpp">
       <Filter>Class\Access</Filter>

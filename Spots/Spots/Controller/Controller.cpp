@@ -44,7 +44,7 @@ void Controller::init(){
 		accConnFlag = Statistics::InitDate(db_connstr);
 	else
 	{
-		accConnFlag = Statistics::InitDate();
+		accConnFlag = Statistics::InitDate("src//..//´É×©È±ÏÝ¼ì²âÊý¾Ý¿â.mdb");
 		SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//´É×©È±ÏÝ¼ì²âÊý¾Ý¿â.mdb");
 	}
 
