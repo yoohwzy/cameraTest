@@ -29,9 +29,9 @@ void Worker::work()
 		int startFrame = p_e2vbuffer->GetWriteIndex();
 		//加入延时时间
 		frameIndexAdd(startFrame, WaitTimeMS * 1000 / ImgScanner::FrameTimeUS);
-		if (startFrame >= E2VBuffer::BufferLength)
+		if (startFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
 			startFrame -= E2VBuffer::BufferLength;
-		//触发后等待一段时间，砖走到拍摄区域
+		//触发后等待一段时间，砖走到拍摄区域后再获取图像
 		image = getPhoto(startFrame, 0);
 		grayImg = image;
 	}
@@ -50,13 +50,22 @@ void Worker::work()
 	if (image.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
+	//开启线程保存图片
+	cv::normalize(grayImg, grayImg, 0, 100, cv::NORM_MINMAX);
+
 
 	//开始图像处理
-	//Synthesizer s = Synthesizer(0);
-	//Synthesizer::Status status  = s.Run(image);
+	Synthesizer s = Synthesizer(SN);
+	Synthesizer::Status status = s.Run(grayImg);
 	
-	//显示结果
-	P_Controller->ShowWorkResult(image, 1);
+	if (status != Synthesizer::Status::NotFound)
+	{
+		//绘制缺陷图像
+		drawFaults(grayImg, s.faults);
+
+		//显示结果
+		P_Controller->ShowWorkResult(grayImg, 1);
+	}
 
 	MyStatus = WorkerStatus::Done;
 	return;
@@ -124,67 +133,103 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 	startFrame += waitLength;
 
-	//TODO::三合一没有做
+	//三合一没有做 转入算法模块做预处理
 	return p_e2vbuffer->GetImage(startFrame, endFrame);
 }
 
 
+void Worker::drawFaults(cv::Mat& img, Faults& faults)
+{
+	if (img.channels() == 1)
+		cv::cvtColor(img, img, CV_GRAY2RGB);
 
+	if (faults.BrokenEdges.size() > 0)
+	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << SN << " 存在 " << faults.BrokenEdges.size() << " 处崩边缺陷，红色标出。" << endl;
+			MFCConsole::Output(ss.str());
+		}
+		for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
+		{
+			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+		}
+		//arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+	}
+	if (faults.BrokenCorners.size() > 0)
+	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << SN << " 存在 " << faults.BrokenCorners.size() << " 处崩角缺陷，洋红标出。" << endl;
+			MFCConsole::Output(ss.str());
+		}
 
-////length < 12000
-////取图范围 startFrame 到 endFrame，包括startFrame与endFrame两行
-//cv::Mat Worker::getPhoto(int startFrame, int length)
-//{
-//	if (length == 0)//采集固定长度
-//		length = Worker::frameCountsOut;
-//
-//	int endFrameAbso = startFrame;//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
-//	frameIndexAdd(endFrameAbso, length - 1);
-//	int endFrame = endFrameAbso;
-//
-//	GetPhotoOn = true;
-//	//wait capture end
-//	Sleep(100);
-//	while (GetPhotoOn)
-//	{
-//		//判断是否读够那么多行
-//		int now = p_e2vbuffer->GetWriteIndex();
-//		//因超时而退出
-//		if (
-//			(endFrameAbso > startFrame  && now >= endFrameAbso) ||
-//			(startFrame > endFrameAbso && now >= endFrameAbso && now < length)
-//			)
-//		{
-//			break;
-//		}
-//		Sleep(2);
-//	}
-//	if (GetPhotoOn == false)
-//	{
-//		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
-//		//此处重新计算endFrame
-//		endFrame = p_e2vbuffer->GetWriteIndex();
-//		frameIndexAdd(endFrame, WaitTimeMS * 1000 / ImgScanner::FrameTimeUS);
-//		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。		
-//	}
-//	while (true)
-//	{
-//		//判断是否读够那么多行
-//		int now = p_e2vbuffer->GetWriteIndex();
-//		//计数完成而退出
-//		if (
-//			(endFrame > startFrame  && now >= endFrame) ||
-//			(startFrame > endFrame && now >= endFrame && now < length)
-//			)
-//		{
-//			GetPhotoOn = false;
-//			break;
-//		}
-//		Sleep(2);
-//	}
-//
-//
-//
-//	//TODO::三合一没有做
-//	return p_e2vbuffer->GetImage(startFrame, endFrame);
-//}
+		for (size_t i = 0; i < faults.BrokenCorners.size(); i++)
+		{
+			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
+		}
+		//arm.AddAction(1, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+	}
+	//if (faults.SomethingBigs.size() > 0)
+	//{
+	//	if (MFCConsole::IsOpened)
+	//	{
+	//		stringstream ss;
+	//		ss << SN << " 存在 " << faults.BrokenEdges.size() << " 处崩角缺陷，洋红标出。" << endl;
+	//		MFCConsole::Output( << ss.str();
+	//	}
+
+	//	CString str;
+	//	str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), SN, faults.SomethingBigs.size());
+	//	m_Info += str;
+	//	clog += str;
+	//	for (size_t i = 0; i < faults.SomethingBigs.size(); i++)
+	//	{
+	//		cv::circle(img, faults.SomethingBigs[i].position, faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
+	//	}
+	//	//arm.AddAction(2, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+	//}
+	if (faults.Scratchs.size() > 0)
+	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << SN << " 存在 " << faults.Scratchs.size() << " 处划痕缺陷，绿色标出。" << endl;
+			MFCConsole::Output(ss.str());
+		}
+		for (size_t i = 0; i < faults.Scratchs.size(); i++)
+		{
+			cv::circle(img, faults.Scratchs[i].position, faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
+		}
+		//arm.AddAction(3, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
+	}
+	if (faults.Holes.size() > 0)
+	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << SN << " 存在 " << faults.Holes.size() << " 处凹点缺陷，黄色标出。" << endl;
+			MFCConsole::Output(ss.str());
+		}
+		for (size_t i = 0; i < faults.Holes.size(); i++)
+		{
+			cv::circle(img, faults.Holes[i].position, faults.Holes[i].diameter, cv::Scalar(0, 255, 255), 5);
+		}
+	}
+	if (faults.MarkPens.size() > 0)
+	{
+
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << SN << " 存在 " << faults.MarkPens.size() << " 处人工标记，橙色标出。" << endl;
+			MFCConsole::Output(ss.str());
+		}
+		for (size_t i = 0; i < faults.MarkPens.size(); i++)
+		{
+			cv::rectangle(img, faults.MarkPens[i].markposition, cv::Scalar(122, 0, 255), 5);
+		}
+	}
+}

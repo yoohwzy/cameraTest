@@ -160,6 +160,7 @@ void Controller::triggerWatcher()
 			ss << "Timespan:" << t << "ms" << endl;
 			MFCConsole::Output(ss.str());
 
+			// 标记工人停止采图
 			lastestWorker->GetPhotoOn = false;
 		}
 		else

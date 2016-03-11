@@ -38,6 +38,7 @@ public:
 
 	int ConsumerLedStartX = 0;
 	int ConsumerLedEndX = 4095;
+	Faults faults;
 private:
 	enum _Status
 	{
@@ -47,7 +48,6 @@ private:
 	};
 
 	Block *p_block = NULL;
-	Faults faults;
 
 	//瓷砖定位，返回是否找到瓷砖
 	_Status positioning(cv::Mat grayImg);

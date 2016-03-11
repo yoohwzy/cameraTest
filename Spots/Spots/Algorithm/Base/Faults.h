@@ -54,12 +54,12 @@ public:
 		double length;//划痕长度（毫米）
 		double angel;//角度°
 	};
-	//巨大缺陷，一遇到就判断为不合格品
-	struct SomethingBig
-	{
-		cv::Point position;//位置
-		double diameter;//直径（毫米）
-	};
+	////巨大缺陷，一遇到就判断为不合格品
+	//struct SomethingBig
+	//{
+	//	cv::Point position;//位置
+	//	double diameter;//直径（毫米）
+	//};
 	//人工标记
 	struct MarkPen
 	{
@@ -78,7 +78,7 @@ public:
 		Crazings.clear();//釉裂
 		Holes.clear();//凹点
 		Scratchs.clear();//划痕
-		SomethingBigs.clear();
+		//SomethingBigs.clear();
 		MarkPens.clear();
 	};
 
@@ -110,7 +110,7 @@ public:
 	vector<Crazing> Crazings;//釉裂
 	vector<Hole> Holes;//凹点
 	vector<Scratch> Scratchs;//划痕
-	vector<SomethingBig> SomethingBigs;//巨大缺陷，一遇到就判断为不合格品
+	//vector<SomethingBig> SomethingBigs;//巨大缺陷，一遇到就判断为不合格品
 	vector<MarkPen> MarkPens;//人工标记
 private:
 	double milliMeterPerPix_X = 0;//x轴每像素对应多少毫米

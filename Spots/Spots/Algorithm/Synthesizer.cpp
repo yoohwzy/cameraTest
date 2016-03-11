@@ -29,6 +29,7 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	if (grayImg.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
+
 	//定位
 	int status = positioning(grayImg);
 	if (status != Synthesizer::_Status::_NEXT)
@@ -53,18 +54,19 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 //瓷砖定位，返回是否找到瓷砖
 Synthesizer::_Status Synthesizer::positioning(cv::Mat grayImg)
 {
-	stringstream ss;
 	double t = 0;
 	if (MFCConsole::IsOpened)
 		t = cv::getTickCount();
 
 	//进行定位
 	BlockLocalizer bl = BlockLocalizer(grayImg, p_block, &faults);
-
+	p_block->Lines2ABCD();
 	if (MFCConsole::IsOpened)
 	{
+		stringstream ss;
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		cout << "定位算法BlockLocalizer：" << t << endl;
+		ss << "定位算法BlockLocalizer：" << t << endl;
+		MFCConsole::Output(ss.str());
 	}
 
 	if (bl.NotFoundBlockFlag == true)
@@ -84,6 +86,7 @@ Synthesizer::_Status Synthesizer::positioning(cv::Mat grayImg)
 		//cv::waitKey(0);
 		return _Status::_Edge_Broken;
 	}
+
 	return _Status::_NEXT;
 
 
@@ -141,7 +144,6 @@ Synthesizer::_Status Synthesizer::positioning(cv::Mat grayImg)
 //边缘缺陷检测
 Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 {
-	stringstream ss;
 	double t = 0;
 	if (MFCConsole::IsOpened)
 		t = cv::getTickCount();
@@ -151,8 +153,10 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 
 	if (MFCConsole::IsOpened)
 	{
+		stringstream ss;
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		cout << "定位算法BlockLocalizer：" << t << endl;
+		ss << "定位算法BlockEdgeDetector：" << t << endl;
+		MFCConsole::Output(ss.str());
 	}
 	return _Status::_NEXT;
 
@@ -206,17 +210,14 @@ Synthesizer::_Status Synthesizer::detectInner(cv::Mat grayImg)
 	Pretreatment p;
 	p.pretreatment(grayImg, p_block, &faults);
 
-
-
-
-
-
-	ss << SN << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
-	ss << SN << " " << "内部有凹点：" << faults.Holes.size() << endl;
-	ss << "瓷砖内部缺陷检测 结束" << endl;
-
-	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-	ss << SN << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-	MFCConsole::Output(ss.str());
+	if (MFCConsole::IsOpened)
+	{
+		ss << SN << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
+		ss << SN << " " << "内部有凹点：" << faults.Holes.size() << endl;
+		ss << "瓷砖内部缺陷检测 结束" << endl;
+		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+		ss << SN << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+		MFCConsole::Output(ss.str());
+	}
 	return _Status::_NEXT;
 }

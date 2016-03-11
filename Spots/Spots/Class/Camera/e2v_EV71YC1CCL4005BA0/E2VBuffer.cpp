@@ -45,9 +45,6 @@ cv::Mat E2VBuffer::GetImage(int startLine, int endLine)
 	{
 		int length = endLine - startLine + 1;
 		cv::Mat result = Buffer(cv::Rect(0, startLine, Buffer.cols, length)).clone();
-
-
-		result *= 3;
 		return result;
 	}
 	else
