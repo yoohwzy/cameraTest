@@ -1,5 +1,5 @@
 #include "SettingHelper.h"
-
+#include <Class\Helper\StringHelper.h>
 
 SettingHelper::SettingHelper()
 {
@@ -12,7 +12,7 @@ SettingHelper::~SettingHelper()
 void SettingHelper::Init()
 {
 	try{
-		remove(StringHelper::LPWSTR2String(path).c_str());
+		remove(StringHelper::LPWSTR2string(path).c_str());
 	}
 	catch (exception e)
 	{
@@ -118,19 +118,16 @@ bool SettingHelper::GetKeyDouble(string SectionName, string Key, double& value)
 }
 bool SettingHelper::GetKeyString(string SectionName, string Key, string& value)
 {
-	string strkey = getKeyName(key);
-	string strsection = getSectionName(key);
-
 	LPWSTR lwpstr;
 
-	size_t size = strsection.length();
+	size_t size = SectionName.length();
 	wchar_t *sectionbuffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, strsection.c_str(), size, sectionbuffer, size * sizeof(wchar_t));
+	MultiByteToWideChar(CP_ACP, 0, SectionName.c_str(), size, sectionbuffer, size * sizeof(wchar_t));
 	sectionbuffer[size] = 0;  // 确保以 '\0' 结尾 
 
-	size = strkey.length();
+	size = Key.length();
 	wchar_t *keybuffer = new wchar_t[size + 1];
-	MultiByteToWideChar(CP_ACP, 0, strkey.c_str(), size, keybuffer, size * sizeof(wchar_t));
+	MultiByteToWideChar(CP_ACP, 0, Key.c_str(), size, keybuffer, size * sizeof(wchar_t));
 	keybuffer[size] = 0;  // 确保以 '\0' 结尾 
 
 	char tmp[128];

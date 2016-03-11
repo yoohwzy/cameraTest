@@ -30,7 +30,7 @@ public:
 
 	// 初始化统计数据，从数据库中读取历史记录
 	// 返回是否成功
-	static bool InitDate();
+	static bool InitDate(string ACCDB_PATH = "src//..//瓷砖缺陷检测数据库.mdb");
 
 	//获得合格率
 	static double GetFineRate();

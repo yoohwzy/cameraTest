@@ -43,9 +43,6 @@
     <Filter Include="App">
       <UniqueIdentifier>{517733bb-2311-4085-86ca-f9ed29a58a7e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Class\Log">
-      <UniqueIdentifier>{8f1f70ef-af65-41a6-9642-0b7f6e23b27c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Algorithm">
       <UniqueIdentifier>{bf814ab1-8d41-4442-a3a6-7210be5759da}</UniqueIdentifier>
     </Filter>
@@ -60,6 +57,12 @@
     </Filter>
     <Filter Include="Class\Access">
       <UniqueIdentifier>{447d723e-a68a-4870-b928-0ba3daa77904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Statistics">
+      <UniqueIdentifier>{cad6d344-bcb6-42e8-9e8c-a62f46c5023f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Setting">
+      <UniqueIdentifier>{aea57a21-6039-4944-95f6-f1cb9a6582e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +171,12 @@
     <ClInclude Include="Model\LogImgGenerator.h">
       <Filter>Model</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Setting\SettingHelper.h">
+      <Filter>Class\Setting</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Statistics\Statistics.h">
+      <Filter>Class\Statistics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -241,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="Model\LogImgGenerator.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Setting\SettingHelper.cpp">
+      <Filter>Class\Setting</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Statistics\Statistics.cpp">
+      <Filter>Class\Statistics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

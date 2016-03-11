@@ -133,6 +133,8 @@
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h" />
     <ClInclude Include="Class\IOCard\PCI1761\compatibility.h" />
     <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h" />
+    <ClInclude Include="Class\Setting\SettingHelper.h" />
+    <ClInclude Include="Class\Statistics\Statistics.h" />
     <ClInclude Include="Controller\Controller.h" />
     <ClInclude Include="Controller\HistoryController.h" />
     <ClInclude Include="Controller\StatisticsController.h" />
@@ -163,6 +165,8 @@
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
     <ClCompile Include="Class\Debug\MFCConsole.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
+    <ClCompile Include="Class\Setting\SettingHelper.cpp" />
+    <ClCompile Include="Class\Statistics\Statistics.cpp" />
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="Controller\HistoryController.cpp" />
     <ClCompile Include="Controller\StatisticsController.cpp" />

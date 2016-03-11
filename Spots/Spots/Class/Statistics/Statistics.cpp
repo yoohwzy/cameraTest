@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <Class\Access\ASqlHelper.h>
+#include <sstream>
 
 Statistics::Statistics()
 {
@@ -32,9 +33,11 @@ int Statistics::YearRejected = 0;
 
 bool Statistics::accessDBHasOpened = false;
 
-bool Statistics::InitDate()
+bool Statistics::InitDate(string ACCDB_PATH)
 {
-	if (!ASqlHelper::SetConStr("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=E://项目资料//cameraTest//Spots//瓷砖缺陷检测数据库.mdb;Persist Security Info=False"))
+	stringstream ss;
+	ss << "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" << ACCDB_PATH << ";Persist Security Info=False";
+	if (!ASqlHelper::SetConStr(ss.str()))
 	{
 		accessDBHasOpened = false;
 		return false;

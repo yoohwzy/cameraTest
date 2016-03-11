@@ -2,6 +2,7 @@
 #	include <afxwin.h>
 #endif
 #include "Controller.h"
+#include <Class/Setting/SettingHelper.h>
 
 
 void Controller::init(){
@@ -37,14 +38,19 @@ void Controller::init(){
 
 
 	// 配置参数初始化
-
-
+	string db_connstr;
+	bool accConnFlag = false;
+	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_connstr))//读取数据库所在路径
+		accConnFlag = Statistics::InitDate(db_connstr);
+	else
+	{
+		accConnFlag = Statistics::InitDate();
+		SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+	}
 
 	// 统计数据初始化
-	if (Statistics::InitDate())
-	{
+	if (accConnFlag)
 		spotsMainView->UpdateStatistics();
-	}
 	else
 		AfxMessageBox(L"无法连接到数据库！");
 
@@ -62,7 +68,6 @@ void Controller::init(){
 		t_tiggerThread.detach();
 
 		spotsMainView->SwitchModel2Virtual(false);
-
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
