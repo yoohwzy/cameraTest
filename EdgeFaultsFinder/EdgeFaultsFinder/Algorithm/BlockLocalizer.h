@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BD_OUTPUT_DEBUG_INFO 1
+//#define BD_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像
@@ -19,6 +19,9 @@ public:
 	BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults);
 	~BlockLocalizer();
 
+	void Run();
+
+
 	bool NotFoundBlockFlag = true;//未找到瓷砖标记
 	bool BrokenEdgeFlag = false;//有崩边缺陷标记
 
@@ -30,7 +33,22 @@ public:
 	cv::Mat drowDebugResult;
 #endif
 
+
+	//parameter
+	int THRESHOD = 10;//二值化阈值
+	int ContinuePointCount = 30;//连续多少个点则判断为边缘
+
+
+
 private:
+	//parameter
+	const int COL_SPAN = 150;//x方向上定点间隔
+	const int ROW_SPAN = 150;//y方向上定点间隔
+	const int RANGE_DEFAULT = 400;//最大搜索高度
+	const int RANGE_MINI = 100;//最小搜索高度
+
+
+
 	cv::Mat img;
 	Faults *p_faults = NULL;
 	Block *p_block = NULL;

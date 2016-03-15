@@ -25,8 +25,10 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 		drowDebugResult = img.clone();
 	}
 #endif
+}
 
-
+void BlockLocalizer::Run()
+{
 	FindUp();
 	if (uppoints.size() < 5)
 	{
@@ -68,7 +70,6 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 #endif
 }
 
-
 BlockLocalizer::~BlockLocalizer()
 {
 	p_faults = NULL;
@@ -77,10 +78,6 @@ BlockLocalizer::~BlockLocalizer()
 
 void BlockLocalizer::FindUp()
 {
-	const int COL_SPAN = 150;
-	const int RANGE_DEFAULT = 400;
-	const int RANGE_MINI = 100;
-
 	cv::Point firstPoint(2048,0);
 	//先查找第一个点
 	if (1 == 1)
@@ -180,9 +177,6 @@ void BlockLocalizer::FindUp()
 }
 void BlockLocalizer::FindLeft()
 {
-	const int ROW_SPAN = 150;
-	const int RANGE_DEFAULT = 400;
-	const int RANGE_MINI = 100;
 	cv::Point firstPoint(uppoints[0].x, uppoints[0].y + 100);
 
 	//先查找第一个点
@@ -252,9 +246,6 @@ void BlockLocalizer::FindLeft()
 }
 void BlockLocalizer::FindRight()
 {
-	const int ROW_SPAN = 150;
-	const int RANGE_DEFAULT = 400;
-	const int RANGE_MINI = 100;
 	cv::Point firstPoint(uppoints[uppoints.size() - 1].x, uppoints[uppoints.size() - 1].y + 100);
 
 	//先查找第一个点
@@ -320,10 +311,6 @@ void BlockLocalizer::FindRight()
 }
 void BlockLocalizer::FindDown()
 {
-	const int COL_SPAN = 150;
-	const int RANGE_DEFAULT = 400;
-	const int RANGE_MINI = 100;
-
 	cv::Point firstPoint(leftpoints[leftpoints.size() - 1].x + 100, leftpoints[leftpoints.size() - 1].y);
 	//先查找第一个点
 	if (1 == 1)
@@ -384,10 +371,6 @@ void BlockLocalizer::FindDown()
 
 int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down)
 {
-	const int THRESHOD = 10;
-
-	const int continuePointCount = 30;//连续多少个点则判断为边缘
-	//const int roiHeight = continuePointCount * 2;//ROI高度
 	const int roiWidth = 11;//所取ROI宽度，一定为奇数，输入的x值为ROI的中心
 
 	//创建roi范围，并防止越界。
@@ -397,7 +380,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 
 	rectFix(roiRect);
 
-	if (roiRect.height > continuePointCount && roiRect.width > 2)
+	if (roiRect.height > ContinuePointCount && roiRect.width > 2)
 	{
 #ifdef BD_OUTPUT_DEBUG_INFO
 		if (range == 400)
@@ -431,7 +414,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 					else
 						break;
 
-					if (count > continuePointCount)
+					if (count > ContinuePointCount)
 					{
 						return (j + roiRect.y);
 					}
@@ -455,7 +438,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 					else
 						break;
 
-					if (count > continuePointCount)
+					if (count > ContinuePointCount)
 					{
 						return (j + roiRect.y);
 					}
@@ -467,8 +450,6 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 }
 int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2right)
 {
-	const int THRESHOD = 10;
-	const int continuePointCount = 30;//连续多少个点则判断为边缘
 	const int roiHeight = 11;//所取ROI宽度，一定为奇数，输入的x值为ROI的中心
 
 	//创建roi范围，并防止越界。
@@ -479,7 +460,7 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 	rectFix(roiRect);
 
 
-	if (roiRect.width > continuePointCount && roiRect.height > 2)
+	if (roiRect.width > ContinuePointCount && roiRect.height > 2)
 	{
 #ifdef BD_OUTPUT_DEBUG_INFO
 		if (range == 400)
@@ -511,7 +492,7 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 					else
 						break;
 
-					if (count > continuePointCount)
+					if (count > ContinuePointCount)
 					{
 						return (j + roiRect.x);
 					}
@@ -535,7 +516,7 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 					else
 						break;
 
-					if (count > continuePointCount)
+					if (count > ContinuePointCount)
 					{
 						return (j + roiRect.x);
 					}

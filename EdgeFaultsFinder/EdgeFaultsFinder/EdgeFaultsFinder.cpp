@@ -30,8 +30,8 @@ void main(int argc, _TCHAR* argv[])
 		ss << "D://出差//2015.12.29//2//" << index << "_o原图.jpg";
 		//ss << "D://出差//2015.12.30//2//" << index << "_o原图.jpg";
 
-		cv::Mat img = cv::imread(ss.str(), 0);
-		//cv::Mat img = cv::imread("D://出差//2015.12.30//2//12_o原图.jpg", 0);
+		//cv::Mat img = cv::imread(ss.str(), 0);
+		cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
 
 		if (img.rows == 0)
 		{
@@ -51,6 +51,10 @@ void main(int argc, _TCHAR* argv[])
 
 
 		BlockLocalizer bl = BlockLocalizer(img, &block, &faults);
+		bl.THRESHOD = 10;
+		bl.ContinuePointCount = 30;
+		bl.Run();
+
 
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 		cout << t << endl;
@@ -77,6 +81,10 @@ void main(int argc, _TCHAR* argv[])
 		}
 
 		BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
+		bed.DIFF_THRESHOLD = 7;
+		bed.FAULTS_SPAN = 4;
+		bed.FAULTS_COUNT = 5;
+		bed.Run();
 
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 		cout << t << endl;
