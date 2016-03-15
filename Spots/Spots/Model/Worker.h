@@ -5,7 +5,6 @@
 
 //引入算法综合器
 #include <Algorithm\Synthesizer.h>
-
 #include <Class\Debug\MFCConsole.h>
 
 extern class Controller;

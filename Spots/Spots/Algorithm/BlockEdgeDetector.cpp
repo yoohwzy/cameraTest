@@ -8,9 +8,11 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 		cv::cvtColor(image, image, CV_BGR2GRAY);
 	p_block = _block;
 	p_faults = _faults;
-
+}
+void BlockEdgeDetector::Run()
+{
 #ifdef BED_OUTPUT_DEBUG_INFO
-	drowDebugResult = _img.clone();
+	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
 	doUp();
@@ -28,7 +30,6 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	t4.join();
 #endif
 }
-
 
 BlockEdgeDetector::~BlockEdgeDetector()
 {
@@ -303,7 +304,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 			cv::Point maxLoc;
 			minMaxLoc(diffresult, NULL, &maxVal, NULL, &maxLoc);
 			if (maxdiff_X < maxVal) maxdiff_X = maxVal;//定标用统计
-			if (maxVal > JUDGEMENT_THRESHOLD)
+			if (maxVal > DIFF_THRESHOLD)
 			{
 				int count = 0;
 				int x = maxLoc.x;
@@ -313,7 +314,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD)
+					if (diffresult.ptr<float>(0)[j] > DIFF_THRESHOLD)
 					{
 						count++;
 						x = j;
@@ -326,7 +327,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(0)[j] > JUDGEMENT_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
+					if (diffresult.ptr<float>(0)[j] > DIFF_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
 					{
 						count++;
 						x = j;
@@ -334,8 +335,8 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				}
 				if (count > FAULTS_COUNT)
 				{
-					errorPointsIndex.push_back(i);
-					errorPointsDeep.push_back(count);
+					errorPointsIndex.push_back(i);//记录下是第几个reduceList
+					errorPointsDeep.push_back(count);//记录连续错误几个点
 #ifdef BED_OUTPUT_DEBUG_INFO
 						stringstream ss;
 						ss << i;
@@ -415,7 +416,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 			cv::Point maxLoc;
 			minMaxLoc(diffresult, NULL, &maxVal, NULL, &maxLoc);
 			if (maxdiff_Y < maxVal) maxdiff_Y = maxVal;//定标用统计
-			if (maxVal > JUDGEMENT_THRESHOLD)
+			if (maxVal > DIFF_THRESHOLD)
 			{
 				int count = 0;
 				int y = maxLoc.y;
@@ -424,7 +425,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 					//判断新点到上一错误点的距离
 					if (abs((float)j - y) > FAULTS_SPAN) break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(j)[0] > JUDGEMENT_THRESHOLD)
+					if (diffresult.ptr<float>(j)[0] > DIFF_THRESHOLD)
 					{
 						count++;
 						y = j;
@@ -436,7 +437,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 					//判断新点到上一错误点的距离
 					if (abs((float)j - y) > FAULTS_SPAN) break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(j)[0] > JUDGEMENT_THRESHOLD && abs((float)j - j) <= FAULTS_SPAN)
+					if (diffresult.ptr<float>(j)[0] > DIFF_THRESHOLD && abs((float)j - j) <= FAULTS_SPAN)
 					{
 						count++;
 						y = j;

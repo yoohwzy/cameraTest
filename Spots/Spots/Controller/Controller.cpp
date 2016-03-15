@@ -38,10 +38,10 @@ void Controller::init(){
 
 
 	// 配置参数初始化
-	string db_connstr;
+	string db_path;
 	bool accConnFlag = false;
-	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_connstr))//读取数据库所在路径
-		accConnFlag = Statistics::InitDate(db_connstr);
+	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
+		accConnFlag = Statistics::InitDate(db_path);
 	else
 	{
 		accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
