@@ -168,6 +168,9 @@
     <ClInclude Include="Algorithm\BlockLocalizer.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="UI\SpotsSystemSetDlg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -238,6 +241,9 @@
     </ClCompile>
     <ClCompile Include="Algorithm\BlockLocalizer.cpp">
       <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\SpotsSystemSetDlg.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

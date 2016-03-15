@@ -6,13 +6,15 @@
 
 #include <thread>
 
-#define BED_OUTPUT_DEBUG_INFO 1
+//#define BED_OUTPUT_DEBUG_INFO 1
 
 class BlockEdgeDetector
 {
 public:
 	BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults);
 	~BlockEdgeDetector();
+	void Run();
+
 
 #ifdef BED_OUTPUT_DEBUG_INFO
 	cv::Mat drowDebugResult;
@@ -21,7 +23,6 @@ public:
 	vector<cv::Mat> debug_lefts;
 	vector<cv::Mat> debug_rights;
 #endif
-
 	//统计数据，作为定标使用。
 
 	//水平方向（左右边）统计出的最大深度
@@ -33,10 +34,14 @@ public:
 	int maxdiff_X = 0;
 	//竖直方向（上下边）差值的最大值
 	int maxdiff_Y = 0;
+
+
+	//parameter
+	int DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
+	int FAULTS_SPAN = 4;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
+	int FAULTS_COUNT = 5;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+
 private:
-	const int JUDGEMENT_THRESHOLD = 7;//超过这个阈值则认为可能有缺陷
-	int FAULTS_SPAN = 4;//近邻像素 
-	int FAULTS_COUNT = 5;
 
 	cv::Mat image;
 	Faults *p_faults = NULL;

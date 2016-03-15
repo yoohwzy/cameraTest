@@ -56,12 +56,24 @@ void Worker::work()
 
 	//开始图像处理
 	Synthesizer s = Synthesizer(SN);
+	s.BlockLocalizer_THRESHOD = 10;
+	s.BlockLocalizer_ContinuePointCount = 30;
+	s.BlockEdgeDetector_DIFF_THRESHOLD = 7;
+	s.BlockEdgeDetector_FAULTS_SPAN = 4;
+	s.BlockEdgeDetector_FAULTS_COUNT = 5;
+
+
 	Synthesizer::Status status = s.Run(grayImg);
 	
 	if (status != Synthesizer::Status::NotFound)
 	{
 		//绘制缺陷图像
 		drawFaults(grayImg, s.faults);
+		cv::line(grayImg, cv::Point(0, s.p_block->UpLine.k * (0 - s.p_block->UpLine.x0) + s.p_block->UpLine.y0), cv::Point(grayImg.cols, s.p_block->UpLine.k * (grayImg.cols - s.p_block->UpLine.x0) + s.p_block->UpLine.y0), cv::Scalar(0, 0, 255), 1);
+		cv::line(grayImg, cv::Point(0, s.p_block->DownLine.k * (0 - s.p_block->DownLine.x0) + s.p_block->DownLine.y0), cv::Point(grayImg.cols, s.p_block->DownLine.k * (grayImg.cols - s.p_block->DownLine.x0) + s.p_block->DownLine.y0), cv::Scalar(0, 255, 255), 1);
+		cv::line(grayImg, cv::Point((grayImg.rows - s.p_block->LeftLine.y0) / s.p_block->LeftLine.k + s.p_block->LeftLine.x0, grayImg.rows), cv::Point((0 - s.p_block->LeftLine.y0) / s.p_block->LeftLine.k + s.p_block->LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
+		cv::line(grayImg, cv::Point((grayImg.rows - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, grayImg.rows), cv::Point((0 - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
+
 
 		//显示结果
 		P_Controller->ShowWorkResult(grayImg, 1);

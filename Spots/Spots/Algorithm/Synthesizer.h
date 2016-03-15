@@ -31,14 +31,17 @@ public:
 
 	//编号
 	int SN = 0;
-	//二值化低阈值
-	int ConsumerThreshodLow = 5;
-	//二值化高阈值
-	int ConsumerThreshodHight = 9;
-
-	int ConsumerLedStartX = 0;
-	int ConsumerLedEndX = 4095;
 	Faults faults;
+	Block *p_block = NULL;
+
+	//parameter
+	int BlockLocalizer_THRESHOD = 10;
+	int BlockLocalizer_ContinuePointCount = 30;
+
+	int BlockEdgeDetector_DIFF_THRESHOLD = 7;
+	int BlockEdgeDetector_FAULTS_SPAN = 4;
+	int BlockEdgeDetector_FAULTS_COUNT = 5;
+
 private:
 	enum _Status
 	{
@@ -47,7 +50,6 @@ private:
 		_NEXT//崩边
 	};
 
-	Block *p_block = NULL;
 
 	//瓷砖定位，返回是否找到瓷砖
 	_Status positioning(cv::Mat grayImg);

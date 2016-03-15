@@ -13,10 +13,8 @@
 #define new DEBUG_NEW
 #endif
 
-
+#include "SpotsSystemSetDlg.h"
 // CSpotsMainDlg ¶Ô»°¿ò
-
-
 
 CSpotsMainDlg::CSpotsMainDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CSpotsMainDlg::IDD, pParent)
@@ -148,8 +146,10 @@ void CSpotsMainDlg::OnBnClickedOk()
 	//FreeConsole();
 	//CloseHandle(hOutputHandle);
 
-	cv::Mat white(2, 2, CV_8UC3, cv::Scalar(255,0,0));
-	ShowLogImg(white);
+	//cv::Mat white(2, 2, CV_8UC3, cv::Scalar(255,0,0));
+	//ShowLogImg(white);
+	SpotsSystemSetDlg m;
+	m.DoModal();
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
