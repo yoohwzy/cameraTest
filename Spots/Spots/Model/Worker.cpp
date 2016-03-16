@@ -56,11 +56,19 @@ void Worker::work()
 
 	//开始图像处理
 	Synthesizer s = Synthesizer(SN);
+<<<<<<< HEAD
 	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 	s.BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 	s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 	s.BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+=======
+	s.BlockLocalizer_THRESHOD = 10;
+	s.BlockLocalizer_ContinuePointCount = 30;
+	s.BlockEdgeDetector_DIFF_THRESHOLD = 7;
+	s.BlockEdgeDetector_FAULTS_SPAN = 4;
+	s.BlockEdgeDetector_FAULTS_COUNT = 5;
+>>>>>>> 4cb43549a1df3d008d03ef5f67bfb35dcf83b631
 
 
 	Synthesizer::Status status = s.Run(grayImg);
