@@ -59,7 +59,18 @@ void Controller::init(){
 	{
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
+		//worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		//worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		//worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		//worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		//worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+
 		worker2 = new Worker(p_e2vbuffer);
+		//worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		//worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		//worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		//worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		//worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;

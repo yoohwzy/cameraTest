@@ -38,6 +38,8 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
+	ON_MESSAGE(WM_MENU_OPEN_SYS_SET_DLG, OnWM_MENU_OPEN_SYS_SET_DLG)
+	ON_COMMAND(ID_32773, &CSpotsMainDlg::On32773)
 END_MESSAGE_MAP()
 
 
@@ -286,7 +288,6 @@ void CSpotsMainDlg::OnMouseMove(UINT nFlags, CPoint point)
 	ShowImgROI(point);
 	CDialogEx::OnMouseMove(nFlags, point);
 }
-
 void CSpotsMainDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	img_big_flag = !img_big_flag;//标记放大/不放大图像
@@ -321,7 +322,6 @@ BOOL CSpotsMainDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
 	}
 	return CDialogEx::OnMouseWheel(nFlags, zDelta, point);
 }
-
 void CSpotsMainDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 {
 	if (img_on_show.rows > 0)
@@ -400,4 +400,19 @@ void CSpotsMainDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 			img_big_flag = false;//标记不放大图像
 		}
 	}
+}
+
+
+
+LRESULT CSpotsMainDlg::OnWM_MENU_OPEN_SYS_SET_DLG(WPARAM wParam, LPARAM lParam)
+{
+	SpotsSystemSetDlg s;
+	s.DoModal();
+	return 0;
+}
+
+void CSpotsMainDlg::On32773()
+{
+	SpotsSystemSetDlg m;
+	m.DoModal();
 }

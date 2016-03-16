@@ -52,3 +52,5 @@
 #endif
 
 
+#define WM_MENU_OPEN_SYS_SET_DLG WM_USER + 1
+#define WM_MENU_OPEN_EDGE_SET_DLG WM_USER + 2

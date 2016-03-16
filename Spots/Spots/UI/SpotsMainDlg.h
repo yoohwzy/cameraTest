@@ -68,6 +68,7 @@ private:
 	afx_msg void OnBnClickedBtnvirtualtigger();
 
 
+	LRESULT OnWM_MENU_OPEN_SYS_SET_DLG(WPARAM wParam, LPARAM lParam);
 public:
 	afx_msg void OnBnClickedOk();
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
@@ -86,4 +87,5 @@ public:
 	void SwitchModel2Virtual(bool switchToV);
 
 	// ¹©Controllerµ÷ÓÃ END
+	afx_msg void On32773();
 };

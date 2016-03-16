@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "Spots.h"
-#include "E:\项目资料\cameraTest\Spots\Spots\UI\SpotsSystemSetDlg.h"
+#include "SpotsSystemSetDlg.h"
 #include "afxdialogex.h"
 
 
