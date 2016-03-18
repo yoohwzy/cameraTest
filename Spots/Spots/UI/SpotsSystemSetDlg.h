@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Class/Setting/SettingHelper.h>
 
 // SpotsSystemSetDlg ¶Ô»°¿ò
 

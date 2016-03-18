@@ -5,6 +5,7 @@
 #include "Spots.h"
 #include "SpotsSystemSetDlg.h"
 #include "afxdialogex.h"
+#include <Class/Setting/SettingHelper.h>
 
 
 // SpotsSystemSetDlg ¶Ô»°¿ò

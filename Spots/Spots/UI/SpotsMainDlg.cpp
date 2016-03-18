@@ -14,6 +14,9 @@
 #endif
 
 #include "SpotsSystemSetDlg.h"
+#include "SpotsEdgeParameterSetDlg.h"
+
+
 // CSpotsMainDlg ¶Ô»°¿ò
 
 CSpotsMainDlg::CSpotsMainDlg(CWnd* pParent /*=NULL*/)
@@ -40,6 +43,7 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_WM_MOUSEWHEEL()
 	ON_MESSAGE(WM_MENU_OPEN_SYS_SET_DLG, OnWM_MENU_OPEN_SYS_SET_DLG)
 	ON_COMMAND(ID_32773, &CSpotsMainDlg::On32773)
+	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnBtnMenuEdgeset)
 END_MESSAGE_MAP()
 
 
@@ -415,4 +419,14 @@ void CSpotsMainDlg::On32773()
 {
 	SpotsSystemSetDlg m;
 	m.DoModal();
+}
+
+void CSpotsMainDlg::OnBtnMenuEdgeset()
+{
+	SpotsEdgeParameterSetDlg m;
+	if (m.DoModal() == IDOK)
+	{
+		// ¿ØÖÆÆ÷
+		// p_contrller->
+	}
 }

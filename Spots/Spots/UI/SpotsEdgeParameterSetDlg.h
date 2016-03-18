@@ -1,6 +1,7 @@
 #pragma once
 
-
+#include <string>
+using namespace std;
 // SpotsEdgeParameterSetDlg ¶Ô»°¿ò
 
 class SpotsEdgeParameterSetDlg : public CDialogEx
@@ -21,4 +22,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+public:
+	afx_msg void OnBnClickedOk();
+
+	void saveParameter(int IDC, string SectionName, string key);
 };
