@@ -42,6 +42,11 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 	else
 		((CButton*)GetDlgItem(IDC_CB_EnableAccess))->SetCheck(1);
 
+	if (SettingHelper::GetKeyInt("SYS", "SAVE_IMG", accEnable))//读取数据库所在路径
+		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(accEnable != 0);
+	else
+		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(0);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -105,6 +110,7 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	CString cstr;
 	GetDlgItem(IDC_TB_AccessPath)->GetWindowTextW(cstr);
 	SettingHelper::AddKey("DATABASE", "ACCDB_PATH", StringHelper::CString2string(cstr));
-
+	pBtn = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
+	SettingHelper::AddKey("SYS", "SAVE_IMG", pBtn->GetCheck());
 	CDialogEx::OnOK();
 }

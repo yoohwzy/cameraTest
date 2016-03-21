@@ -88,6 +88,8 @@ public:
 	int BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	int BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
+	bool SAVE_IMG = false;
+
 private:
 	void release();
 	//HWND handle_mainWindow;

@@ -423,7 +423,13 @@ LRESULT CSpotsMainDlg::OnWM_MENU_OPEN_SYS_SET_DLG(WPARAM wParam, LPARAM lParam)
 void CSpotsMainDlg::On32773()
 {
 	SpotsSystemSetDlg m;
-	m.DoModal();
+	if (m.DoModal() == IDOK)
+	{
+		int si = 0;
+		SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
+		p_contrller->SAVE_IMG = si;
+		p_contrller->ResetParameter();
+	}
 }
 
 void CSpotsMainDlg::OnBtnMenuEdgeset()
@@ -437,7 +443,6 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", p_contrller->BlockEdgeDetector_DIFF_THRESHOLD);
 		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
 		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
-
-
+		p_contrller->ResetParameter();
 	}
 }

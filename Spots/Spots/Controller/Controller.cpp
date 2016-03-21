@@ -155,10 +155,12 @@ void Controller::ImageGetCallBack(cv::Mat img)
 	//	t_saveimg.detach();
 	//}
 
-
-	std::thread t_tiggerThread(std::mem_fn(&Controller::imageSave), this, img);
-	t_tiggerThread.detach();
-	//imageSave(img);
+	if (SAVE_IMG)
+	{
+		std::thread t_tiggerThread(std::mem_fn(&Controller::imageSave), this, img);
+		t_tiggerThread.detach();
+		//imageSave(img);
+	}
 }
 
 
