@@ -145,8 +145,8 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
-#include <shlwapi.h>
-#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
+//#include <shlwapi.h>
+//#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
 void CSpotsMainDlg::OnBnClickedOk()
 {
 	//if (!PathIsDirectory(L"Images"))
