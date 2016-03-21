@@ -93,7 +93,6 @@ void Controller::init(){
 		else if (!e2vInitFlag)
 			AfxMessageBox(L"线阵相机初始化失败！");
 
-
 		//开启虚拟相机
 		cv::Mat virtualImg;
 		worker1 = new Worker(NULL);

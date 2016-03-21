@@ -16,6 +16,7 @@
 
 #include "SpotsSystemSetDlg.h"
 #include "SpotsEdgeParameterSetDlg.h"
+#include "SpotsClassifySet.h"
 
 
 
@@ -46,6 +47,7 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_MESSAGE(WM_MENU_OPEN_SYS_SET_DLG, OnWM_MENU_OPEN_SYS_SET_DLG)
 	ON_COMMAND(ID_32773, &CSpotsMainDlg::On32773)
 	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnBtnMenuEdgeset)
+	ON_COMMAND(ID_32778, &CSpotsMainDlg::OnMenuClassiySetClick)
 END_MESSAGE_MAP()
 
 
@@ -444,5 +446,13 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
 		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
 		p_contrller->ResetParameter();
+	}
+}
+void CSpotsMainDlg::OnMenuClassiySetClick()
+{
+	CSpotsClassifySet m;
+	if (m.DoModal() == IDOK)
+	{
+
 	}
 }

@@ -89,4 +89,5 @@ public:
 	// ¹©Controllerµ÷ÓÃ END
 	afx_msg void On32773();
 	afx_msg void OnBtnMenuEdgeset();
+	afx_msg void OnMenuClassiySetClick();
 };
