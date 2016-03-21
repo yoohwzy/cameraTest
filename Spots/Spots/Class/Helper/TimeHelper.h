@@ -4,6 +4,10 @@
 #	include <afxwin.h>
 #endif
 
+#include <string>
+#include <sstream>
+
+#include "StringHelper.h"
 using namespace std;
 
 
@@ -69,6 +73,16 @@ public:
 		int milliseconds = cts.GetTotalSeconds() * 1000;
 		int diff = st1.wMilliseconds - st2.wMilliseconds;
 		return (milliseconds + diff);
+	}
+
+	static CString GetYear_Month_Day()
+	{
+		CString str; //获取系统时间 　
+		CTime cm;
+		cm = CTime::GetCurrentTime();
+		stringstream ss;
+		str = cm.Format("%Y_%m_%d");
+		return str;
 	}
 private:
 	static CTime SYSTEMTIME2CTime(SYSTEMTIME st)

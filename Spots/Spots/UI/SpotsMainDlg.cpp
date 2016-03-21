@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 
 #include <Class\Statistics\Statistics.h>
+#include <Class/Setting/SettingHelper.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,6 +16,7 @@
 
 #include "SpotsSystemSetDlg.h"
 #include "SpotsEdgeParameterSetDlg.h"
+
 
 
 // CSpotsMainDlg 对话框
@@ -140,22 +142,19 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
+
+#include <shlwapi.h>
+#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
 void CSpotsMainDlg::OnBnClickedOk()
 {
-	//AllocConsole();//为进程创造一个新的控制台
-	//HANDLE hOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);//获得控制台输出句柄
-	//freopen("CON", "w", stdout);
-	//printf("test");
-	////lstrcpy(buf, _T("Hello"));
-	////WriteConsole(hOutputHandle, buf, lstrlen(buf), &nRet, NULL);
-	////system("pause");
-	//FreeConsole();
-	//CloseHandle(hOutputHandle);
-
-	//cv::Mat white(2, 2, CV_8UC3, cv::Scalar(255,0,0));
-	//ShowLogImg(white);
-	SpotsSystemSetDlg m;
-	m.DoModal();
+	//if (!PathIsDirectory(L"Images"))
+	//{
+	//	CreateDirectory(L"Images", NULL);
+	//}
+	//if (!PathIsDirectory(L"Images\\2016_03_12"))
+	//{
+	//	CreateDirectory(L"Images\\2016_03_12", NULL);
+	//}
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {
@@ -251,9 +250,15 @@ void CSpotsMainDlg::OnBnClickedBtnRun()
 {
 	isRunning = !isRunning;
 	if (!isRunning)
+	{
+		p_contrller->StopWatch();
 		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始");
+	}
 	else
+	{
+		p_contrller->StartWatch();
 		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停");
+	}
 }
 
 
@@ -427,6 +432,12 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 	if (m.DoModal() == IDOK)
 	{
 		// 控制器
-		// p_contrller->
+		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", p_contrller->BlockLocalizer_THRESHOD);
+		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", p_contrller->BlockLocalizer_ContinuePointCount);
+		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", p_contrller->BlockEdgeDetector_DIFF_THRESHOLD);
+		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
+		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
+
+
 	}
 }

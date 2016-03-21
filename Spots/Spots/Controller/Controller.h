@@ -42,6 +42,10 @@ public:
 
 	void init();
 
+	void StartWatch();
+	void StopWatch();
+
+
 	//处理结束后显示处理结果
 	//结果图像
 	//产品类型，1A 2B 3C 4Rejcet
@@ -63,6 +67,11 @@ public:
 		spotsMainView->UpdateStatistics();
 		ui_lock.unlock();
 	}
+	void ImageGetCallBack(cv::Mat);//采图完成后回调，用于将图片保存至硬盘
+
+	// 在设置中调整了系统参数后，调用本接口将参数更新至算法中。
+	void ResetParameter();
+
 
 	/*****************虚拟相机模式方法*****************/
 	void VirtualSelectImg(cv::Mat);
@@ -70,9 +79,19 @@ public:
 
 	/*****************虚拟相机模式方法 End*****************/
 
+
+	/*****************参数*****************/
+	int BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
+	int BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
+
+	int BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
+	int BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
+	int BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+
 private:
 	void release();
 	//HWND handle_mainWindow;
+	bool isRealModel = 1;
 
 	E2VBuffer *p_e2vbuffer = NULL;
 	ImgScanner *p_imgscanner = NULL;
@@ -91,9 +110,12 @@ private:
 
 
 	std::mutex ui_lock;
+	std::mutex watcher_lock;
+	std::mutex image_write_lock;
 
-	bool exitFlag = false;
+	bool exitFlag = false;//triggerWatcher 结束标志
 	void triggerWatcher();
-	void jobWatcher();
-	void workerCallBack();
+	//void jobWatcher();	
+	//void workerCallBack();	//算法结束后回调，显示运算结果
+	void imageSave(cv::Mat img);
 };

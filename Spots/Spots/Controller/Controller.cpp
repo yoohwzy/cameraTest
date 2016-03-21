@@ -3,7 +3,9 @@
 #endif
 #include "Controller.h"
 #include <Class/Setting/SettingHelper.h>
-
+#include <Class\Helper\StringHelper.h>
+#include <shlwapi.h>
+#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
 
 void Controller::init(){
 
@@ -57,32 +59,33 @@ void Controller::init(){
 	// 初始化工作线程
 	if (e2vInitFlag && pci1761InitFlag)
 	{
+		isRealModel = 1;
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
-		//worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		//worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		//worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		//worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		//worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 		worker2 = new Worker(p_e2vbuffer);
-		//worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		//worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		//worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		//worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		//worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
-		//开始监控触发
-		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcher), this);
-		t_tiggerThread.detach();
+
+		StartWatch();
 
 		spotsMainView->SwitchModel2Virtual(false);
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
 	{
+		isRealModel = 0;
 		if (!e2vInitFlag && !pci1761InitFlag)
 			AfxMessageBox(L"线阵相机&pci1761初始化失败！");
 		else if (!pci1761InitFlag)
@@ -108,6 +111,111 @@ void Controller::init(){
 	spotsMainView->ShowBigImg(white);
 	spotsMainView->ShowLogImg(logImg.DrawingBoard);
 }
+
+
+void Controller::StartWatch()
+{
+	if (isRealModel)
+	{
+		watcher_lock.lock();
+
+		exitFlag = false;
+		//开始监控触发
+		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcher), this);
+		t_tiggerThread.detach();
+
+		watcher_lock.unlock();
+	}
+}
+
+void Controller::StopWatch()
+{
+	if (isRealModel)
+	{
+		watcher_lock.lock();
+
+		exitFlag = true;
+
+		watcher_lock.unlock();
+	}
+}
+
+void Controller::ImageGetCallBack(cv::Mat img)
+{
+	//异步保存底片
+	//int index = p_twag->GrabbingIndex;
+	//cv::Mat img = p_twag->OriginalImage.clone();
+	//if (IsDlgButtonChecked(IDC_CB_SAVE_IMG) == BST_CHECKED)
+	//{
+	//	thread t_saveimg = thread([index,img]{
+	//		stringstream ss;
+	//		ss << "samples/" << index << "_o原图.jpg";
+	//		cv::imwrite(ss.str(), img);
+	//	});
+	//	t_saveimg.detach();
+	//}
+
+
+	std::thread t_tiggerThread(std::mem_fn(&Controller::imageSave), this, img);
+	t_tiggerThread.detach();
+	//imageSave(img);
+}
+
+
+/*********************  虚拟模式方法  ***********************/
+
+void Controller::VirtualSelectImg(cv::Mat image)
+{
+	if (image.cols == 0)
+		MessageBox(0, L"图片读取失败！", L"错误", 0);
+	else
+	{
+		worker1->image = image;
+	}
+}
+void Controller::VirtualWorkerStart()
+{
+	if (worker1->image.cols == 0)
+	{
+		MessageBox(0, L"请先加载虚拟底片！", L"错误", 0);
+		return;
+	}
+	if (worker1->MyStatus == Worker::Done || worker1->MyStatus == Worker::Free)
+	{
+		worker1->StartWork();
+	}
+	else
+	{
+		MessageBox(0, L"上一轮处理尚未结束！", L"警告", 0);
+	}
+}
+/*********************虚拟模式方法结束***********************/
+
+void Controller::ResetParameter()
+{
+	if (worker1 != NULL)
+	{
+		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+	}
+	if (worker2 != NULL)
+	{
+		worker2->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+		worker2->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+		worker2->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		worker2->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		worker2->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+	}
+}
+
+
+
+
+//private:
+
 void Controller::release()
 {
 	p_e2vbuffer = NULL;
@@ -156,8 +264,8 @@ void Controller::triggerWatcher()
 			}
 			else
 			{
-				MFCConsole::Output("worker2 Start Work\r\n");  
-				 
+				MFCConsole::Output("worker2 Start Work\r\n");
+
 				worker2->StartWork();
 				lastestWorker = worker2;
 			}
@@ -179,33 +287,42 @@ void Controller::triggerWatcher()
 	}
 }
 
-
-
-/*********************  虚拟模式方法  ***********************/
-
-void Controller::VirtualSelectImg(cv::Mat image)
+void Controller::imageSave(cv::Mat img)
 {
-	if (image.cols == 0)
-		MessageBox(0, L"图片读取失败！", L"错误", 0);
-	else
+	image_write_lock.lock();
+
+	//判断文件夹是否存在
+	CString folderMonthName;
+	CString folderDayName;
+	CString imageName;
+	CTime t = CTime::GetCurrentTime();
+
+	folderMonthName = L"Images\\" + t.Format("%Y_%m");
+	folderDayName = folderMonthName + "\\" + t.Format("%d");
+	imageName = folderDayName + "\\" + t.Format("%Y_%m_%d__%H_%M_%S");
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	CString millsec;
+	millsec.Format(L"%d", (int)st.wMilliseconds);
+	imageName += (L"_" + millsec + L".jpg");
+
+	if (!PathIsDirectory(L"Images"))
 	{
-		worker1->image = image;
+		CreateDirectory(L"Images", NULL);
 	}
+	if (!PathIsDirectory(folderMonthName))
+	{
+		CreateDirectory(folderMonthName, NULL);
+	}
+	if (!PathIsDirectory(folderDayName))
+	{
+		CreateDirectory(folderDayName, NULL);
+	}
+
+	cv::Mat img2 = img.clone();
+	stringstream ss;
+
+	cv::imwrite(StringHelper::CString2string(imageName), img2);
+
+	image_write_lock.unlock();
 }
-void Controller::VirtualWorkerStart()
-{
-	if (worker1->image.cols == 0)
-	{
-		MessageBox(0, L"请先加载虚拟底片！", L"错误", 0);
-		return;
-	}
-	if (worker1->MyStatus == Worker::Done || worker1->MyStatus == Worker::Free)
-	{
-		worker1->StartWork();
-	}
-	else
-	{
-		MessageBox(0, L"上一轮处理尚未结束！", L"警告", 0);
-	}
-}
-/*********************虚拟模式方法结束***********************/

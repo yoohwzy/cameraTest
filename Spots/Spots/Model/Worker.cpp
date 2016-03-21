@@ -51,6 +51,8 @@ void Worker::work()
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
 	//开启线程保存图片
+	P_Controller->ImageGetCallBack(grayImg);
+
 	cv::normalize(grayImg, grayImg, 0, 100, cv::NORM_MINMAX);
 
 
