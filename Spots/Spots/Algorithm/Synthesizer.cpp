@@ -46,7 +46,7 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	}
 
 	//±Ì√Ê»±œ›
-
+	detectInner(grayImg);
 	return Status::TypeA;
 }
 
