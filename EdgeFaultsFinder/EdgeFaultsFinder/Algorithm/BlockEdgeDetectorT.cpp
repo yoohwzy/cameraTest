@@ -59,6 +59,14 @@ void BlockEdgeDetectorT::doUp()
 	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY);
 	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY);
 
+	cv::Canny(highTI, highTI, 125, 125);
+	cv::Canny(lowTI, lowTI, 125, 125);
+
+	vector<vector<cv::Point>> tmpcontoursL;
+	cv::findContours(lowTI, tmpcontoursL, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+
+
+
 	//cv::Mat img = lowTI;
 	////±ß½ç×·×Ù
 	//cv::Point startpoint;
@@ -70,7 +78,7 @@ void BlockEdgeDetectorT::doUp()
 	//	for (int j = 0; j < img.rows; j++)//ÐÐ
 	//	{
 	//		if (img.ptr<uchar>(j)[i] > 0)
-	//		{
+	//		{w
 	//			startpoint.y = j;
 	//			startpoint.x = i;
 	//			flag = 1;
