@@ -59,12 +59,77 @@ void BlockEdgeDetectorT::doUp()
 	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY);
 	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY);
 
+	//cv::Mat img = lowTI;
+	////边界追踪
+	//cv::Point startpoint;
+	////寻找第一个点
+	//for (int i = 0; i < img.cols; i++)//列
+	//{
+	//	bool flag = 0;
+	//	//循环查找边界
+	//	for (int j = 0; j < img.rows; j++)//行
+	//	{
+	//		if (img.ptr<uchar>(j)[i] > 0)
+	//		{
+	//			startpoint.y = j;
+	//			startpoint.x = i;
+	//			flag = 1;
+	//			break;
+	//		}
+	//	}
+	//	if (flag)
+	//		break;
+	//}
+	//vector<cv::Point> contours;
+	//contours.push_back(startpoint);
+	//int imgwidth = img.cols;
+	//int imgheight = img.rows;
+	//while (true)
+	//{
+	//	cv::Point lastpoint(contours[contours.size() - 1]);
+	//	if (lastpoint.x > 0 && lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x - 1] > 0)//左上
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x - 1, lastpoint.y - 1));
+	//		continue;
+	//	}
+	//	else if (lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x] > 0)//上
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x, lastpoint.y - 1));
+	//		continue;
+	//	}
+	//	else if (lastpoint.x < (imgwidth - 1) && lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x + 1] > 0)//右上
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y - 1));
+	//		continue;
+	//	}
+	//	else if (lastpoint.x < (imgwidth - 1) && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x + 1] > 0)//右
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y));
+	//		continue;
+	//	}
+	//	else if (lastpoint.x < (imgwidth - 1) && lastpoint.y < (imgheight - 1) && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x + 1] > 0)//右下
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y + 1));
+	//		continue;
+	//	}
+	//	else if (lastpoint.x > 0 && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x - 1] > 0)
+	//	{
+	//		contours.push_back(cv::Point(lastpoint.x - 1, lastpoint.y));
+	//		continue;
+	//	}
+	//}
+
+
 	//cv::Canny(highTI, highTI, 125, 125);
 	//cv::Canny(lowTI, lowTI, 125, 125);
 
-	vector<vector<cv::Point>> contoursL;
-	cv::findContours(lowTI, contoursL, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-
+	//vector<vector<cv::Point>> tmpcontoursL;
+	//cv::findContours(lowTI, tmpcontoursL, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	//vector<cv::Point> contoursL;
+	//for (size_t i = 0; i < tmpcontoursL[0].size(); i++)
+	//{
+	//	if()
+	//}
 
 //	//上边界
 //	int startX = p_block->A.x + 100;
