@@ -9,6 +9,7 @@
 
 #include "Algorithm\BlockLocalizer.h"
 #include "Algorithm\BlockEdgeDetector.h"
+#include "Algorithm\BlockEdgeDetectorT.h"
 
 using namespace std;
 
@@ -31,7 +32,7 @@ void main(int argc, _TCHAR* argv[])
 		//ss << "D://出差//2015.12.30//2//" << index << "_o原图.jpg";
 
 		//cv::Mat img = cv::imread(ss.str(), 0);
-		cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
+		cv::Mat img = cv::imread("D://16_o原图6.jpg", 0);
 
 		if (img.rows == 0)
 		{
@@ -80,7 +81,7 @@ void main(int argc, _TCHAR* argv[])
 			continue;
 		}
 
-		BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
+		BlockEdgeDetectorT bed = BlockEdgeDetectorT(img, &block, &faults);
 		bed.DIFF_THRESHOLD = 7;
 		bed.FAULTS_SPAN = 4;
 		bed.FAULTS_COUNT = 5;

@@ -42,6 +42,9 @@
     <ClInclude Include="Algorithm\BlockEdgeDetector.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\BlockEdgeDetectorT.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,6 +60,9 @@
       <Filter>Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\BlockEdgeDetector.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\BlockEdgeDetectorT.cpp">
       <Filter>Algorithm</Filter>
     </ClCompile>
   </ItemGroup>

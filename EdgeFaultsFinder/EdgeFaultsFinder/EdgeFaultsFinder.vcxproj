@@ -89,6 +89,7 @@
     <ClInclude Include="Algorithm\Base\Block.h" />
     <ClInclude Include="Algorithm\Base\Faults.h" />
     <ClInclude Include="Algorithm\BlockEdgeDetector.h" />
+    <ClInclude Include="Algorithm\BlockEdgeDetectorT.h" />
     <ClInclude Include="Algorithm\BlockLocalizer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClCompile Include="Algorithm\Base\Block.cpp" />
     <ClCompile Include="Algorithm\BlockEdgeDetector.cpp" />
+    <ClCompile Include="Algorithm\BlockEdgeDetectorT.cpp" />
     <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
     <ClCompile Include="EdgeFaultsFinder.cpp" />
     <ClCompile Include="stdafx.cpp" />
