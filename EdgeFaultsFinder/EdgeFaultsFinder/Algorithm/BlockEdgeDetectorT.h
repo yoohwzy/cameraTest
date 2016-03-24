@@ -56,6 +56,15 @@ private:
 	void doLeft();
 	void doRight();
 
+
+	void getContoursUpDown(cv::Mat binaryImage, vector<cv::Point>& contours);
+
+	//处理边缘点数据
+	//参数1：
+	void process(vector<vector<cv::Point>> contours);
+
+
+
 	void processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points);
 	void processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points);
 };

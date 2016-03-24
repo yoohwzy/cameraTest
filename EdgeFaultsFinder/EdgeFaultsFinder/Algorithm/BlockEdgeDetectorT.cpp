@@ -1,5 +1,8 @@
 #include "BlockEdgeDetectorT.h"
+#include <math.h>
 
+#include <iostream>
+#include <fstream>
 
 BlockEdgeDetectorT::BlockEdgeDetectorT(cv::Mat& _img, Block* _block, Faults* _faults)
 {
@@ -36,6 +39,157 @@ BlockEdgeDetectorT::~BlockEdgeDetectorT()
 	p_faults = NULL;
 	p_block = NULL;
 }
+
+
+void BlockEdgeDetectorT::process(vector<vector<cv::Point>> contours)
+{
+	vector<double> angles;
+	for (int i = 0; i < contours.size(); i++)
+	{
+		if (contours[i].size() < 500)
+			continue;
+		else
+		{
+			const int _SPAN = 5;
+
+			int startj = -1;
+			for (int j = 0; j < contours[i].size() - _SPAN; j++)
+				if (contours[i][j].x != 1)
+					continue;
+				else
+				{
+					startj = j;
+					break;
+				}
+
+			if (startj != -1)
+				for (int j = startj + _SPAN; j < contours[i].size() - _SPAN; j++)
+				{
+					//找到折返点
+					if (contours[i][j - 1] == contours[i][j + 1])
+						break;
+					if (contours[i][j - _SPAN].y == contours[i][j + _SPAN].y)
+						angles.push_back(0);
+					else if (contours[i][j - _SPAN].x == contours[i][j + _SPAN].x)
+						angles.push_back(90);
+					else
+					{
+						double k = (-1) * (double)(contours[i][j + _SPAN].y - contours[i][j - _SPAN].y) / (double)(contours[i][j + _SPAN].x - contours[i][j - _SPAN].x);
+						double  angle = atan(k) / CV_PI * 180;
+						angles.push_back(angle);
+					}
+				}
+		}
+	}
+
+
+	ofstream ofs("up.txt", ios::out);
+	ofs << "L2R,";
+	for (int i = 0; i < angles.size(); i++)
+	{
+		ofs << angles[i] << ",";
+	}
+}
+void BlockEdgeDetectorT::getContoursUpDown(cv::Mat binaryImage, vector<cv::Point>& contour)
+{
+	cv::Mat img = binaryImage;
+	int imgwidth = img.cols;
+	int imgheight = img.rows;
+	//边界追踪
+	cv::Point startpoint;
+	//寻找第一个点
+	for (int i = 0; i < imgwidth; i++)//列
+	{
+		bool flag = 0;
+		//循环查找边界
+		for (int j = 0; j < imgheight; j++)//行
+		{
+			if (img.ptr<uchar>(j)[i] > 0)
+			{
+				startpoint.y = j;
+				startpoint.x = i;
+				flag = 1;
+				break;
+			}
+		}
+		if (flag)
+			break;
+	}
+
+	contour.clear();
+	contour.push_back(startpoint);
+	cv::Point v[8];
+	v[0] = cv::Point(-1, -1);//左上
+	v[1] = cv::Point(0, -1);//上
+	v[2] = cv::Point(1, -1);//右上
+	v[3] = cv::Point(1, 0);//右
+	v[4] = cv::Point(1, 1);//右下
+	v[5] = cv::Point(0, 1);//下
+	v[6] = cv::Point(-1, 1);//左下
+	v[7] = cv::Point(-1, 0);//左
+	while (true)
+	{
+		cv::Point lastpoint(contour[contour.size() - 1]);
+		cv::Point lastlastpoint = lastpoint;
+		if (contour.size() > 1)
+			lastlastpoint = contour[contour.size() - 2];
+
+		//追到左边界或者右边界时退出
+		if (lastpoint.x == (imgwidth - 1) || lastpoint.y == (imgheight - 1))
+			break;
+
+		//寻找上一点的右边那一点（八邻域范围）
+		int start = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			if ((lastpoint + v[i]) == lastlastpoint)
+			{
+				if (i == 7)
+					start = 0;
+				else
+					start = i + 1;
+				break;
+			}
+		}
+
+		int count = 0;
+		bool flag = 0;//当取到v[7]时，表示边界追踪开始往左，则退出。
+		while (true)
+		{
+			int i = count + start;
+			if (i >= 8) i -= 8;
+			cv::Point nextpoint = lastpoint + v[i];
+			if (//nextpoint != lastlastpoint &&
+				nextpoint.x >= 0 && nextpoint.y >= 0 &&
+				nextpoint.x < imgwidth && nextpoint.y < imgheight &&
+				img.ptr<uchar>(nextpoint.y)[nextpoint.x] > 0)
+			{
+				if (i == 7)
+					flag = 1;
+				contour.push_back(nextpoint);
+				break;
+			}
+			count++;
+			if (count >= 8)
+				break;
+		}
+
+		if (flag)
+			break;
+	}
+
+#ifdef BED_OUTPUT_DEBUG_INFO
+	//验证绘图
+	cv::Mat draw(imgheight,imgwidth,CV_8U, cv::Scalar(0));
+	for (int i = 0; i < contour.size(); i++)
+	{
+		draw.ptr<uchar>(contour[i].y)[contour[i].x] = 255;
+	}
+#endif
+
+	int s = contour.size();
+}
+
 void BlockEdgeDetectorT::doUp()
 {
 	const int ROI_WIDTH = 50;
@@ -55,167 +209,29 @@ void BlockEdgeDetectorT::doUp()
 	x2 = p_block->B.x - 100;
 	cv::Mat roi = image(cv::Rect(cv::Point(x1, y1), cv::Point(x2, y2))).clone();
 	cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
+	//cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
 	cv::Mat lowTI, highTI;
 	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY);
 	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY);
 
-	cv::Canny(highTI, highTI, 125, 125);
-	cv::Canny(lowTI, lowTI, 125, 125);
+	vector<cv::Point> tmpcontourLow;
+	getContoursUpDown(lowTI, tmpcontourLow);
+	vector<cv::Point> tmpcontourHeight;
+	getContoursUpDown(highTI, tmpcontourHeight);
 
-	vector<vector<cv::Point>> tmpcontoursL;
-	cv::findContours(lowTI, tmpcontoursL, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-
-
-
-	//cv::Mat img = lowTI;
-	////边界追踪
-	//cv::Point startpoint;
-	////寻找第一个点
-	//for (int i = 0; i < img.cols; i++)//列
-	//{
-	//	bool flag = 0;
-	//	//循环查找边界
-	//	for (int j = 0; j < img.rows; j++)//行
-	//	{
-	//		if (img.ptr<uchar>(j)[i] > 0)
-	//		{w
-	//			startpoint.y = j;
-	//			startpoint.x = i;
-	//			flag = 1;
-	//			break;
-	//		}
-	//	}
-	//	if (flag)
-	//		break;
-	//}
-	//vector<cv::Point> contours;
-	//contours.push_back(startpoint);
-	//int imgwidth = img.cols;
-	//int imgheight = img.rows;
-	//while (true)
-	//{
-	//	cv::Point lastpoint(contours[contours.size() - 1]);
-	//	if (lastpoint.x > 0 && lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x - 1] > 0)//左上
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x - 1, lastpoint.y - 1));
-	//		continue;
-	//	}
-	//	else if (lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x] > 0)//上
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x, lastpoint.y - 1));
-	//		continue;
-	//	}
-	//	else if (lastpoint.x < (imgwidth - 1) && lastpoint.y > 0 && lowTI.ptr<uchar>(lastpoint.y - 1)[lastpoint.x + 1] > 0)//右上
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y - 1));
-	//		continue;
-	//	}
-	//	else if (lastpoint.x < (imgwidth - 1) && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x + 1] > 0)//右
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y));
-	//		continue;
-	//	}
-	//	else if (lastpoint.x < (imgwidth - 1) && lastpoint.y < (imgheight - 1) && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x + 1] > 0)//右下
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x + 1, lastpoint.y + 1));
-	//		continue;
-	//	}
-	//	else if (lastpoint.x > 0 && lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x - 1] > 0)
-	//	{
-	//		contours.push_back(cv::Point(lastpoint.x - 1, lastpoint.y));
-	//		continue;
-	//	}
-	//}
 
 
 	//cv::Canny(highTI, highTI, 125, 125);
 	//cv::Canny(lowTI, lowTI, 125, 125);
-
 	//vector<vector<cv::Point>> tmpcontoursL;
-	//cv::findContours(lowTI, tmpcontoursL, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-	//vector<cv::Point> contoursL;
-	//for (size_t i = 0; i < tmpcontoursL[0].size(); i++)
-	//{
-	//	if()
-	//}
+	//cv::findContours(lowTI.clone(), tmpcontoursL, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+	//process(tmpcontoursL);
+	//vector<vector<cv::Point>> tmpcontoursH;
+	//cv::findContours(highTI.clone(), tmpcontoursH, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+	//process(tmpcontoursH);
 
-//	//上边界
-//	int startX = p_block->A.x + 100;
-//	int endX = p_block->B.x - 100;
-//	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
-//	{
-//		int offsetx = x;
-//		if (x < 0 || x >= image.cols)
-//			continue;
-//		if ((x + ROI_WIDTH) >= endX)
-//			offsetx = endX - ROI_WIDTH - 1;
-//		if ((x + ROI_WIDTH) >= image.cols)
-//			offsetx = image.cols - ROI_WIDTH - 1;
-//
-//		int offsety = p_block->GetPonintByX(offsetx, &p_block->UpLine).y;
-//		if (offsety < 0 || offsety >= image.rows)
-//			continue;
-//
-//		cv::Mat tmpROI = image(cv::Rect(offsetx, offsety, ROI_WIDTH, ROI_HEIGHT)).clone();
-//		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-//#ifdef BED_OUTPUT_DEBUG_INFO
-//		debug_ups.push_back(tmpROI);
-//		cv::rectangle(drowDebugResult, cv::Rect(offsetx, offsety, ROI_WIDTH, ROI_HEIGHT), cv::Scalar(0, 0, 255), 1);
-//#endif
-//
-//		cv::Mat lowTI, highTI;
-//		cv::threshold(tmpROI, lowTI, 12, 255, CV_THRESH_BINARY);
-//		cv::threshold(tmpROI, highTI, 30, 255, CV_THRESH_BINARY);
-//
-//		//cv::Sobel(lowTI,lowTI,lowTI.depth(),0,1,5);
-//		cv::Canny(highTI, highTI, 125, 125);
-//		cv::Canny(lowTI, lowTI, 125, 125);
-//		vector<cv::Point> contoursL;
-//		if (pointsL.size() > 0)
-//			contoursL.push_back(cv::Point(pointsL[pointsL.size() - 1].x - offsetx, pointsL[pointsL.size() - 1].y - offsety));
-//
-//		for (int i = 0; i < lowTI.cols; i++)//列
-//		{
-//			cv::Point p(i, lowTI.rows - 1);
-//
-//			//八连通查找边界左上 上 右上 右的顺序
-//			if (contoursL.size() > 0)
-//			{
-//				cv::Point lastpoint = contoursL[contoursL.size() - 1];
-//				if (lowTI.ptr<uchar>(lastpoint.y)[lastpoint.x] > 0)
-//				{
-//
-//				}
-//			}
-//
-//			//循环查找边界
-//			for (int j = 0; j < lowTI.rows; j++)//行
-//			{
-//				if (lowTI.ptr<uchar>(j)[i] > 0)
-//				{
-//					p.y = j;
-//					break;
-//				}
-//			}
-//			contoursL.push_back(p);
-//		}
-//		vector<vector<cv::Point>> contoursL;
-//		cv::findContours(lowTI,contoursL,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
-//
-//#ifdef SAVE_IMG
-//		//保存图片
-//		char num[10];
-//		sprintf(num, "%03d", index);
-//		string strnum(num);
-//		stringstream ss;
-//		ss << "EdgeInner\\U\\上_" << strnum << "_reduce.jpg";
-//		cv::imwrite(ss.str(), reduceImg);
-//		ss.str("");
-//		ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
-//		cv::imwrite(ss.str(), tmpROI);
-//#endif
-//		points.push_back(p_block->GetPonintByX(x, &p_block->DownLine));
-//	}
+
+
 
 #ifdef BED_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
@@ -256,7 +272,7 @@ void BlockEdgeDetectorT::doDown()
 
 		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
 
-		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
+		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(11,11), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_downs.push_back(tmpROI);
 #endif
