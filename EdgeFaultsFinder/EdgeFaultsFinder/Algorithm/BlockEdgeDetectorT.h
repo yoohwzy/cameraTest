@@ -57,13 +57,14 @@ private:
 	void doRight();
 
 
-	void getContoursUpDown(cv::Mat binaryImage, vector<cv::Point>& contours);
+	void getContoursUpDown(cv::Mat binaryImage, vector<cv::Point2f>& contours);
 
 	//处理边缘点数据
 	//参数1：
 	void process(vector<vector<cv::Point>> contours);
+	void process(vector<cv::Point2f> contours);
 
-
+	void testag(vector<cv::Point2f> contour);//实验算法，分段拟合，找出其中拟合斜率有古怪的再做细致分析；
 
 	void processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points);
 	void processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points);

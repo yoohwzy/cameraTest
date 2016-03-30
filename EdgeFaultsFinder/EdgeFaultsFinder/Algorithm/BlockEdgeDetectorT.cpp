@@ -18,8 +18,8 @@ void BlockEdgeDetectorT::Run()
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
-	doUp();
-	//doDown();
+	//doUp();
+	doDown();
 	//doLeft();
 	//doRight();
 #else
@@ -41,46 +41,25 @@ BlockEdgeDetectorT::~BlockEdgeDetectorT()
 }
 
 
-void BlockEdgeDetectorT::process(vector<vector<cv::Point>> contours)
+void BlockEdgeDetectorT::process(vector<cv::Point2f> contour)
 {
 	vector<double> angles;
-	for (int i = 0; i < contours.size(); i++)
+
+	const int _SPAN = 1;
+	for (int j = _SPAN; j < contour.size() - _SPAN; j++)
 	{
-		if (contours[i].size() < 500)
-			continue;
+		if (contour[j - _SPAN].y == contour[j + _SPAN].y)
+			angles.push_back(0);
+		else if (contour[j - _SPAN].x == contour[j + _SPAN].x)
+			angles.push_back(90);
 		else
 		{
-			const int _SPAN = 5;
-
-			int startj = -1;
-			for (int j = 0; j < contours[i].size() - _SPAN; j++)
-				if (contours[i][j].x != 1)
-					continue;
-				else
-				{
-					startj = j;
-					break;
-				}
-
-			if (startj != -1)
-				for (int j = startj + _SPAN; j < contours[i].size() - _SPAN; j++)
-				{
-					//找到折返点
-					if (contours[i][j - 1] == contours[i][j + 1])
-						break;
-					if (contours[i][j - _SPAN].y == contours[i][j + _SPAN].y)
-						angles.push_back(0);
-					else if (contours[i][j - _SPAN].x == contours[i][j + _SPAN].x)
-						angles.push_back(90);
-					else
-					{
-						double k = (-1) * (double)(contours[i][j + _SPAN].y - contours[i][j - _SPAN].y) / (double)(contours[i][j + _SPAN].x - contours[i][j - _SPAN].x);
-						double  angle = atan(k) / CV_PI * 180;
-						angles.push_back(angle);
-					}
-				}
+			double k = (-1) * (double)(contour[j + _SPAN].y - contour[j - _SPAN].y) / (double)(contour[j + _SPAN].x - contour[j - _SPAN].x);
+			double  angle = atan(k) / CV_PI * 180;
+			angles.push_back(angle);
 		}
 	}
+
 
 
 	ofstream ofs("up.txt", ios::out);
@@ -89,8 +68,112 @@ void BlockEdgeDetectorT::process(vector<vector<cv::Point>> contours)
 	{
 		ofs << angles[i] << ",";
 	}
+
+
+
+	vector<int> updown;
+	for (int j = 1; j < contour.size(); j++)
+	{
+		if (contour[j].y == contour[j - 1].y)
+			updown.push_back(0);
+		else
+			updown.push_back(contour[j].y - contour[j - 1].y);
+	}
+	for (int i = 0; i < updown.size(); i++)
+	{
+		if (i < 5)
+			updown[i] = 0;
+		else
+		{
+
+		}
+	}
+
+
+	ofstream ofs2("up_updown.txt", ios::out);
+	for (int i = 0; i < updown.size(); i++)
+	{
+		ofs2 << updown[i] << ",";
+	}
 }
-void BlockEdgeDetectorT::getContoursUpDown(cv::Mat binaryImage, vector<cv::Point>& contour)
+
+
+//void BlockEdgeDetectorT::process(vector<vector<cv::Point>> contours)
+//{
+//	vector<double> angles;
+//	for (int i = 0; i < contours.size(); i++)
+//	{
+//		if (contours[i].size() < 500)
+//			continue;
+//		else
+//		{
+//			const int _SPAN = 5;
+//
+//			int startj = -1;
+//			for (int j = 0; j < contours[i].size() - _SPAN; j++)
+//				if (contours[i][j].x != 1)
+//					continue;
+//				else
+//				{
+//					startj = j;
+//					break;
+//				}
+//
+//			if (startj != -1)
+//				for (int j = startj + _SPAN; j < contours[i].size() - _SPAN; j++)
+//				{
+//					//找到折返点
+//					if (contours[i][j - 1] == contours[i][j + 1])
+//						break;
+//					if (contours[i][j - _SPAN].y == contours[i][j + _SPAN].y)
+//						angles.push_back(0);
+//					else if (contours[i][j - _SPAN].x == contours[i][j + _SPAN].x)
+//						angles.push_back(90);
+//					else
+//					{
+//						double k = (-1) * (double)(contours[i][j + _SPAN].y - contours[i][j - _SPAN].y) / (double)(contours[i][j + _SPAN].x - contours[i][j - _SPAN].x);
+//						double  angle = atan(k) / CV_PI * 180;
+//						angles.push_back(angle);
+//					}
+//				}
+//		}
+//	}
+//
+//
+//	ofstream ofs("up.txt", ios::out);
+//	ofs << "L2R,";
+//	for (int i = 0; i < angles.size(); i++)
+//	{
+//		ofs << angles[i] << ",";
+//	}
+//}
+
+void BlockEdgeDetectorT::testag(vector<cv::Point2f> contour)
+{
+	vector<double> partk;
+	const int partspan = 100;
+	partk.push_back(p_block->UpLine.k);
+	for (int i = 0; i + partspan < contour.size(); i += partspan)
+	{
+		vector<cv::Point> points;
+		for (int j = i; j < i + partspan; j+= 10)
+		{
+			points.push_back(contour[j]);
+		}
+		cv::Vec4f line4f;
+		fitLine(cv::Mat(points), line4f, CV_DIST_L2, 0, 0.01, 0.01);
+
+		double dx = line4f[0];
+		double dy = line4f[1];
+		partk.push_back(dy / dx);
+	}
+
+	for (int i = 0; i < partk.size(); i++)
+	{
+
+	}
+}
+void BlockEdgeDetectorT::getContoursUpDown(cv::Mat binaryImage, vector<cv::Point2f>& contour)
 {
 	cv::Mat img = binaryImage;
 	int imgwidth = img.cols;
@@ -177,13 +260,31 @@ void BlockEdgeDetectorT::getContoursUpDown(cv::Mat binaryImage, vector<cv::Point
 		if (flag)
 			break;
 	}
+	//平滑滤波
+	//for (size_t i = 1; i < contour.size() - 1; i++)
+	//{
+	//	contour[i].x = (contour[i - 1].x + contour[i + 1].x) / 2;
+	//	contour[i].y = (contour[i - 1].y + contour[i + 1].y) / 2;
+	//}
+	//for (size_t i = 1; i < contour.size() - 1; i++)
+	//{
+	//	contour[i].x = (contour[i - 1].x + contour[i + 1].x) / 2;
+	//	contour[i].y = (contour[i - 1].y + contour[i + 1].y) / 2;
+	//}
+
+
+
+	//for (int i = 0; i < contour.size(); i++)
+	//{
+	//	contour[i].y = 30 + contour[i].y - ((int)(p_block->UpLine.k*(i - 0)) + contour[0].y);
+	//}
 
 #ifdef BED_OUTPUT_DEBUG_INFO
 	//验证绘图
 	cv::Mat draw(imgheight,imgwidth,CV_8U, cv::Scalar(0));
 	for (int i = 0; i < contour.size(); i++)
 	{
-		draw.ptr<uchar>(contour[i].y)[contour[i].x] = 255;
+		draw.ptr<uchar>((int)contour[i].y)[(int)contour[i].x] = 255;
 	}
 #endif
 
@@ -205,8 +306,18 @@ void BlockEdgeDetectorT::doUp()
 	y1 = p_block->A.y < p_block->B.y ? p_block->A.y : p_block->B.y;
 	x1 = p_block->A.x + 100;
 	y2 = p_block->A.y > p_block->B.y ? p_block->A.y : p_block->B.y;
-	y2 += ROI_HEIGHT;
+	y2 += ROI_HEIGHT / 2;
 	x2 = p_block->B.x - 100;
+
+	if (x1 <0 || x1 > image.rows ||
+		y1 <0 || y1 > image.cols ||
+		x2 <0 || x2 > image.rows ||
+		y2 <0 || y2 > image.cols)
+	{
+		return;
+	}
+
+
 	cv::Mat roi = image(cv::Rect(cv::Point(x1, y1), cv::Point(x2, y2))).clone();
 	cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
 	//cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
@@ -214,11 +325,13 @@ void BlockEdgeDetectorT::doUp()
 	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY);
 	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY);
 
-	vector<cv::Point> tmpcontourLow;
+	vector<cv::Point2f> tmpcontourLow;
 	getContoursUpDown(lowTI, tmpcontourLow);
-	vector<cv::Point> tmpcontourHeight;
+	//process(tmpcontourLow);
+	testag(tmpcontourLow);
+	vector<cv::Point2f> tmpcontourHeight;
 	getContoursUpDown(highTI, tmpcontourHeight);
-
+	process(tmpcontourHeight);
 
 
 	//cv::Canny(highTI, highTI, 125, 125);
@@ -246,62 +359,46 @@ void BlockEdgeDetectorT::doUp()
 void BlockEdgeDetectorT::doDown()
 {
 	const int ROI_WIDTH = 50;
-	const int ROI_HEIGHT = 66;
-	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
+	const int ROI_HEIGHT = 100;
+	int inc = ROI_WIDTH - 1;
 
 	int index = 0;
-	vector<cv::Mat> reduceList;
 	vector<cv::Point> points;
+	vector<cv::Point> pointsL;//低阈值边界点
+	vector<cv::Point> pointsH;//高阈值边界点
+
+
 	//下边界
-	int startX = p_block->D.x + 50;
-	int endX = p_block->C.x - 50;
-	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
+	int x1, y1, x2, y2;
+	y1 = p_block->D.y < p_block->C.y ? p_block->D.y : p_block->C.y;
+	x1 = p_block->D.x + 100;
+	y1 -= ROI_HEIGHT / 2;
+	y2 = p_block->D.y > p_block->C.y ? p_block->D.y : p_block->C.y;
+	y2 += ROI_HEIGHT / 2;
+	x2 = p_block->C.x - 100;
+
+	if (x1 <0 || x1 > image.cols ||
+		y1 <0 || y1 > image.rows || 
+		x2 <0 || x2 > image.cols ||
+		y2 <0 || y2 > image.rows)
 	{
-		int x1 = x;
-		if (x < 0 || x >= image.cols)
-			continue;
-		if ((x + ROI_WIDTH) >= endX)
-			x1 = endX - ROI_WIDTH - 1;
-		if ((x + ROI_WIDTH) >= image.cols)
-			x1 = image.cols - ROI_WIDTH - 1;
-
-
-		int y = p_block->GetPonintByX(x1, &p_block->DownLine).y;
-		if (y < 0 || y >= image.rows)
-			continue;
-
-		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
-
-		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(11,11), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
-		debug_downs.push_back(tmpROI);
-#endif
-		tmpROI.convertTo(tmpROI, CV_32F);
-
-		cv::Mat reduceImg;
-		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
-
-		reduceImg = reduceImg.t();
-#ifdef SAVE_IMG
-		//保存图片
-		char num[10];
-		sprintf(num, "%03d", index);
-		string strnum(num);
-		stringstream ss;
-		ss << "EdgeInner\\D\\下_" << strnum << "_reduce.jpg";
-		cv::imwrite(ss.str(), reduceImg);
-		ss.str("");
-		ss << "EdgeInner\\D\\下_" << strnum << ".jpg";
-		cv::imwrite(ss.str(), tmpROI);
-#endif
-
-		tmpROI.release();
-
-		reduceList.push_back(reduceImg);
-		points.push_back(p_block->GetPonintByX(x, &p_block->DownLine));
+		return;
 	}
-	processUpDown(reduceList, points);
+
+	cv::Mat roi = image(cv::Rect(cv::Point(x1, y1), cv::Point(x2, y2))).clone();
+	cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
+	//cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
+	cv::Mat lowTI, highTI;
+	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY_INV);
+	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY_INV);
+
+	vector<cv::Point2f> tmpcontourLow;
+	getContoursUpDown(lowTI, tmpcontourLow);
+	//process(tmpcontourLow);
+	testag(tmpcontourLow);
+	vector<cv::Point2f> tmpcontourHeight;
+	getContoursUpDown(highTI, tmpcontourHeight);
+	process(tmpcontourHeight);
 }
 void BlockEdgeDetectorT::doLeft()
 {
