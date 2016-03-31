@@ -82,7 +82,7 @@ void main(int argc, _TCHAR* argv[])
 			continue;
 		}
 
-		BlockEdgeDetectorT bed = BlockEdgeDetectorT(img, &block, &faults);
+		BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
 		bed.DIFF_THRESHOLD = 7;
 		bed.FAULTS_SPAN = 4;
 		bed.FAULTS_COUNT = 5;

@@ -6,7 +6,7 @@
 
 #include <thread>
 
-//#define BED_OUTPUT_DEBUG_INFO 1
+#define BED_OUTPUT_DEBUG_INFO 1
 
 class BlockEdgeDetector
 {
@@ -37,7 +37,7 @@ public:
 
 
 	//parameter
-	int DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
+	double DIFF_THRESHOLD = 7;	//两点差值百分比超过这个阈值则认为可能有缺陷
 	int FAULTS_SPAN = 4;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	int FAULTS_COUNT = 5;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 

@@ -16,7 +16,7 @@ void BlockEdgeDetector::Run()
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
 	doUp();
-	doDown();
+	doDown(); 
 	doLeft();
 	doRight();
 #else
@@ -300,21 +300,24 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 //#endif
 			cv::Mat diffresult;
 			cv::absdiff(reduceList[i], reduceList[i + 1], diffresult);
+
+			cv::Mat percent = diffresult / reduceList[i];
+
 			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
 			cv::Point maxLoc;
-			minMaxLoc(diffresult, NULL, &maxVal, NULL, &maxLoc);
+			minMaxLoc(percent, NULL, &maxVal, NULL, &maxLoc);
 			if (maxdiff_X < maxVal) maxdiff_X = maxVal;//定标用统计
 			if (maxVal > DIFF_THRESHOLD)
 			{
 				int count = 0;
 				int x = maxLoc.x;
-				for (int j = maxLoc.x; j < diffresult.cols; j++)
+				for (int j = maxLoc.x; j < percent.cols; j++)
 				{
 					//判断新点到上一错误点的距离
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(0)[j] > DIFF_THRESHOLD)
+					if (percent.ptr<float>(0)[j] > DIFF_THRESHOLD)
 					{
 						count++;
 						x = j;
@@ -327,7 +330,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 					if (abs((float)j - x) > FAULTS_SPAN)
 						break;
 					//判断值是否大于阈值
-					if (diffresult.ptr<float>(0)[j] > DIFF_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
+					if (percent.ptr<float>(0)[j] > DIFF_THRESHOLD && abs((float)j - x) <= FAULTS_SPAN)
 					{
 						count++;
 						x = j;
