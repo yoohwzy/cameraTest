@@ -58,6 +58,7 @@ private:
 
 
 	void getContoursUpDown(cv::Mat binaryImage, vector<cv::Point2f>& contours);
+	void getContoursLeftRight(cv::Mat binaryImage, vector<cv::Point2f>& contours);
 
 	//处理边缘点数据
 	//参数1：

@@ -19,7 +19,8 @@ void BlockEdgeDetectorT::Run()
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
 	//doUp();
-	doDown();
+	//doDown();
+	doLeft();
 	//doLeft();
 	//doRight();
 #else
@@ -290,7 +291,123 @@ void BlockEdgeDetectorT::getContoursUpDown(cv::Mat binaryImage, vector<cv::Point
 
 	int s = contour.size();
 }
+void BlockEdgeDetectorT::getContoursLeftRight(cv::Mat binaryImage, vector<cv::Point2f>& contour)
+{
+	cv::Mat img = binaryImage;
+	int imgwidth = img.cols;
+	int imgheight = img.rows;
+	//边界追踪
+	cv::Point startpoint;
+	//寻找第一个点
+	for (int i = 0; i < imgheight; i++)//行
+	{
+		bool flag = 0;
+		//循环查找边界
+		for (int j = imgwidth - 1; j > 0; j--)//列
+		{
+			if (img.ptr<uchar>(i)[j] > 0)
+			{
+				startpoint.y = i;
+				startpoint.x = j;
+				flag = 1;
+				break;
+			}
+		}
+		if (flag)
+			break;
+	}
 
+	contour.clear();
+	contour.push_back(startpoint);
+	cv::Point v[8];
+	v[0] = cv::Point(-1, -1);//左上
+	v[1] = cv::Point(0, -1);//上
+	v[2] = cv::Point(1, -1);//右上
+	v[3] = cv::Point(1, 0);//右
+	v[4] = cv::Point(1, 1);//右下
+	v[5] = cv::Point(0, 1);//下
+	v[6] = cv::Point(-1, 1);//左下
+	v[7] = cv::Point(-1, 0);//左
+	while (true)
+	{
+		cv::Point lastpoint(contour[contour.size() - 1]);
+		cv::Point lastlastpoint = lastpoint;
+		if (contour.size() > 1)
+			lastlastpoint = contour[contour.size() - 2];
+
+		//追到边界时退出
+		if (lastpoint.x  == 0 || lastpoint.x == (imgwidth - 1) || lastpoint.y == (imgheight - 1))
+			break;
+
+		//寻找上一点的右边那一点（八邻域范围）
+		int start = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			if ((lastpoint + v[i]) == lastlastpoint)
+			{
+				if (i == 7)
+					start = 0;
+				else
+					start = i + 1;
+				break;
+			}
+		}
+
+		int count = 0;
+		bool flag = 0;//当取到v[7]时，表示边界追踪开始往左，则退出。
+		while (true)
+		{
+			int i = count + start;
+			if (i >= 8) i -= 8;
+			cv::Point nextpoint = lastpoint + v[i];
+			if (//nextpoint != lastlastpoint &&
+				nextpoint.x >= 0 && nextpoint.y >= 0 &&
+				nextpoint.x < imgwidth && nextpoint.y < imgheight &&
+				img.ptr<uchar>(nextpoint.y)[nextpoint.x] > 0)
+			{
+				if (i == 7)
+					flag = 1;
+				contour.push_back(nextpoint);
+				break;
+			}
+			count++;
+			if (count >= 8)
+				break;
+		}
+
+		if (flag)
+			break;
+	}
+	//平滑滤波
+	//for (size_t i = 1; i < contour.size() - 1; i++)
+	//{
+	//	contour[i].x = (contour[i - 1].x + contour[i + 1].x) / 2;
+	//	contour[i].y = (contour[i - 1].y + contour[i + 1].y) / 2;
+	//}
+	//for (size_t i = 1; i < contour.size() - 1; i++)
+	//{
+	//	contour[i].x = (contour[i - 1].x + contour[i + 1].x) / 2;
+	//	contour[i].y = (contour[i - 1].y + contour[i + 1].y) / 2;
+	//}
+
+
+
+	//for (int i = 0; i < contour.size(); i++)
+	//{
+	//	contour[i].y = 30 + contour[i].y - ((int)(p_block->UpLine.k*(i - 0)) + contour[0].y);
+	//}
+
+#ifdef BED_OUTPUT_DEBUG_INFO
+	//验证绘图
+	cv::Mat draw(imgheight, imgwidth, CV_8U, cv::Scalar(0));
+	for (int i = 0; i < contour.size(); i++)
+	{
+		draw.ptr<uchar>((int)contour[i].y)[(int)contour[i].x] = 255;
+	}
+#endif
+
+	int s = contour.size();
+}
 void BlockEdgeDetectorT::doUp()
 {
 	const int ROI_WIDTH = 50;
@@ -402,63 +519,45 @@ void BlockEdgeDetectorT::doDown()
 }
 void BlockEdgeDetectorT::doLeft()
 {
-	const int ROI_WIDTH = 66;
+	const int ROI_WIDTH = 100;
 	const int ROI_HEIGHT = 50;
-	int inc = 25;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	int inc = ROI_WIDTH - 1;
 
 	int index = 0;
-	vector<cv::Mat> reduceList;
 	vector<cv::Point> points;
-	//左边界
-	int startY = p_block->A.y + 150;
-	int endY = p_block->D.y - 150;
-	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
+	vector<cv::Point> pointsL;//低阈值边界点
+	vector<cv::Point> pointsH;//高阈值边界点
+
+	int x1, y1, x2, y2;
+	y1 = p_block->A.y + 100;
+	x1 = p_block->A.x < p_block->D.x ? p_block->A.x : p_block->D.x;
+	x1 -= ROI_WIDTH / 2;
+	y2 = p_block->D.y - 100;
+	x2 = p_block->D.x > p_block->A.x ? p_block->D.x : p_block->A.x; 
+	x2 += ROI_WIDTH / 2;
+
+	if (x1 <0 || x1 > image.cols ||
+		y1 <0 || y1 > image.rows ||
+		x2 <0 || x2 > image.cols ||
+		y2 <0 || y2 > image.rows)
 	{
-		int y1 = y;
-		if (y1 < 0 || y1 >= image.rows)
-			continue;
-		if ((y1 + ROI_HEIGHT) >= endY)
-			y1 = endY - ROI_HEIGHT - 1;
-		if ((y1 + ROI_HEIGHT) >= image.rows)
-			y1 = image.rows - ROI_HEIGHT - 1;
-
-		int x = p_block->GetPonintByY(y1, &p_block->LeftLine).x;
-		if (x < 0 || x >= image.cols)
-			continue;
-
-		cv::Mat tmpROI = image(cv::Rect(x, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
-		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(9, 9), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
-		debug_lefts.push_back(tmpROI);
-#endif
-		tmpROI.convertTo(tmpROI, CV_32F);
-
-		cv::Mat reduceImg;
-		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
-
-#ifdef SAVE_IMG
-		//保存图片
-		char num[10];
-		sprintf(num, "%03d", index);
-		string strnum(num);
-		stringstream ss;
-		ss << "EdgeInner\\L\\左_" << strnum << "_reduce.jpg";
-		cv::imwrite(ss.str(), reduceImg);
-		ss.str("");
-		ss << "EdgeInner\\L\\左_" << strnum << ".jpg";
-		cv::imwrite(ss.str(), tmpROI);
-#endif
-
-		//tmpROI.release();
-
-		//reduceImg.convertTo(reduceImg, CV_32F);
-		reduceList.push_back(reduceImg);
-		points.push_back(p_block->GetPonintByY(y, &p_block->LeftLine));
-
+		return;
 	}
-	processLeftRight(reduceList, points);
-	//processAndSaveData(reduceList, points, "L\\左");
+
+	cv::Mat roi = image(cv::Rect(cv::Point(x1, y1), cv::Point(x2, y2))).clone();
+	cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
+	//cv::GaussianBlur(roi, roi, cv::Size(5, 5), 0);
+	cv::Mat lowTI, highTI;
+	cv::threshold(roi, lowTI, 10, 255, CV_THRESH_BINARY_INV);
+	cv::threshold(roi, highTI, 30, 255, CV_THRESH_BINARY_INV);
+
+	vector<cv::Point2f> tmpcontourLow;
+	getContoursLeftRight(lowTI, tmpcontourLow);
+	//process(tmpcontourLow);
+	testag(tmpcontourLow);
+	vector<cv::Point2f> tmpcontourHeight;
+	getContoursLeftRight(highTI, tmpcontourHeight);
+	process(tmpcontourHeight);
 }
 void BlockEdgeDetectorT::doRight()
 {
