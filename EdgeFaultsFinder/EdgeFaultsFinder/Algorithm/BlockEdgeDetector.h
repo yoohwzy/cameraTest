@@ -31,9 +31,9 @@ public:
 	int maxDeep_Y = 0;
 
 	//水平方向（左右边）差值的最大值
-	int maxdiff_X = 0;
+	double maxdiff_X = 0;
 	//竖直方向（上下边）差值的最大值
-	int maxdiff_Y = 0;
+	double maxdiff_Y = 0;
 
 
 	//parameter

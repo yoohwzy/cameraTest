@@ -81,12 +81,12 @@ public:
 
 
 	/*****************参数*****************/
-	int BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
-	int BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
+	double BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
+	double BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
 
-	int BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
-	int BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
-	int BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+	double BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
+	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
+	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
 	bool SAVE_IMG = false;
 
