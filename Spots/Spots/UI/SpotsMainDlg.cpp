@@ -440,11 +440,11 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 	if (m.DoModal() == IDOK)
 	{
 		// ¿ØÖÆÆ÷
-		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", p_contrller->BlockLocalizer_THRESHOD);
-		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", p_contrller->BlockLocalizer_ContinuePointCount);
-		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", p_contrller->BlockEdgeDetector_DIFF_THRESHOLD);
-		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
-		SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
+		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", p_contrller->BlockLocalizer_THRESHOD);
+		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", p_contrller->BlockLocalizer_ContinuePointCount);
+		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", p_contrller->BlockEdgeDetector_DIFF_THRESHOLD);
+		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
+		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
 		p_contrller->ResetParameter();
 	}
 }
