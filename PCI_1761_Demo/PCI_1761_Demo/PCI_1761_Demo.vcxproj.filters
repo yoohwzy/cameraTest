@@ -47,6 +47,9 @@
     <ClCompile Include="PCI_1761_Demo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Class\IOCard\PCI1761.cpp">
+      <Filter>Class\IOCard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="Adsapi32.lib">

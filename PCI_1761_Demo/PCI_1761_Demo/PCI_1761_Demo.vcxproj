@@ -89,6 +89,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Class\IOCard\PCI1761.cpp" />
     <ClCompile Include="PCI_1761_Demo.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
