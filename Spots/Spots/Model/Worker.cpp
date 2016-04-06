@@ -27,11 +27,32 @@ void Worker::work()
 		MyStatus = WorkerStatus::Busy;
 
 		int startFrame = p_e2vbuffer->GetWriteIndex();
+		int firstFrame = startFrame;//记录触发时所写行号
+
 		//加入延时时间
-		frameIndexAdd(startFrame, WaitTimeMS * 1000 / ImgScanner::FrameTimeUS);
-		if (startFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
-			startFrame -= E2VBuffer::BufferLength;
+		frameIndexAdd(startFrame, WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS);
 		//触发后等待一段时间，砖走到拍摄区域后再获取图像
+
+		//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
+		for (size_t i = 0; i < 10; i++)
+			if (p_e2vbuffer->GetWriteIndex() > startFrame)
+				Sleep(10);
+			else
+				break;
+		//第二个循环是等待拍摄到起始行
+		int nowFrame = p_e2vbuffer->GetWriteIndex();
+		while (
+			!(
+			(startFrame >= firstFrame && (nowFrame > startFrame || nowFrame < firstFrame)) ||//第一种情况，startFrame未换页，则有两种可能，1.nowFrame也没换页则要求nowFrame>startFrame，2.或nowFrame换页了(即nowFrame<firstFrame)则立即判定为通过。
+			(startFrame < firstFrame && (nowFrame > startFrame))//第二种情况，startFrame换页了，则判定nowFrame > startFrame即可
+			)
+			)
+		{
+			Sleep(10);
+			nowFrame = p_e2vbuffer->GetWriteIndex();
+		}
+
+
 		image = getPhoto(startFrame, 0);
 		grayImg = image;
 	}
@@ -92,14 +113,12 @@ void Worker::work()
 //取图范围 startFrame 到 endFrame，包括startFrame与endFrame两行
 cv::Mat Worker::getPhoto(int startFrame, int length)
 {
-	//等待相机进入拍摄区要等待的行数
-	int waitLength = WaitTimeMS * 1000 / ImgScanner::FrameTimeUS;
-
-
+	int waitLength = WaitTimeMSOut * 1000 / ImgScanner::FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
 	if (length == 0)//采集固定长度
 		length = Worker::frameCountsOut;
 
-	int endFrameAbso = startFrame + length + waitLength;//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
+	int endFrameAbso = startFrame;
+	frameIndexAdd(endFrameAbso, length + waitLength);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
 	int endFrame = endFrameAbso;
 
 
@@ -110,11 +129,13 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 	{
 		//判断是否读够那么多行
 		int now = p_e2vbuffer->GetWriteIndex();
-		if (now < startFrame)
-			now += E2VBuffer::BufferLength;
+		//if (now <= startFrame)
+		//	now += E2VBuffer::BufferLength;
 
 		//因超时而退出
-		if (now >= endFrameAbso)
+		if (
+			now > startFrame && now >= endFrameAbso
+			)
 		{
 			break;
 		}
