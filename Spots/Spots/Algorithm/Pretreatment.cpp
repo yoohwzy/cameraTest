@@ -119,6 +119,25 @@ bool Fourier(Mat &Img)
 		return 0;
 }
 
+bool line_core(Mat &_Img)
+{
+	Mat line_background(_Img.size(), CV_8UC1, Scalar(0));
+	Mat line_temp,line_result;
+	medianBlur(_Img, _Img, 3);
+	Canny(_Img, _Img, 40, 120);
+	dilate(_Img, line_temp, Mat(), Point(-1, -1));
+	erode(line_temp, line_temp, Mat(), Point(-1, -1));
+	vector<vector<Point>>lineround;
+	findContours(line_temp, lineround, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	drawContours(line_background, lineround,-1,Scalar(255),-1);
+	bitwise_not(_Img, line_result, line_background);
+	int numcount = countNonZero(line_result);
+	if (numcount < _Img.cols&&numcount < _Img.rows)
+		return 0;
+	else
+		return 1;
+}
+
 bool defect_YoN(Mat &_Img)
 {
 	Mat NorImg(STAMP_WIDTH, STAMP_HEIGHT, CV_8U);
@@ -155,12 +174,12 @@ bool line_YoN(Rect _linesrect)
 		_linesrect.width = min(int(1.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
 		_linesrect.height = min(int(0.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
 	}
-	Mat tempt = original_Img_L(_linesrect);
-	bool flagbit = Fourier(original_Img_L(_linesrect));
+	Mat tempt = LMidImg(_linesrect);
+	bool flagbit = line_core(LMidImg(_linesrect));
 	if (flagbit)
-		return 1;
+		return 1;//是划痕
 	else
-		return 0;
+		return 0;//不是划痕
 }
 
 bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//判断是否为line的核心部分
@@ -740,7 +759,10 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
-	Mat b_cannyImg = CannyImg.clone();
+	resize(LMidImg, CannyImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
+	Canny(CannyImg, CannyImg, 40, 120);
+	rectangle(CannyImg, Rect(Point(0, 0), Point(CannyImg.cols - 1, 100)), Scalar(0), -1);
+	rectangle(CannyImg, Rect(Point(0, CannyImg.rows - 101), Point(CannyImg.cols - 1, CannyImg.rows - 1)), Scalar(0), -1);//去除上下伪边缘
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	for (int i = 0; i < linescontours.size(); i++)
@@ -748,10 +770,10 @@ void Pretreatment::linedetect()
 		if (linescontours[i].size() > 60)
 		{
 			Rect linerect = boundingRect(linescontours[i]);
-			linerect.x = 2 * linerect.x;
-			linerect.y = 2 * linerect.y;
-			linerect.width = 2 * linerect.width;
-			linerect.height = 2 * linerect.height;
+			linerect.x = 3 * linerect.x;
+			linerect.y = 3 * linerect.y;
+			linerect.width = 3 * linerect.width;
+			linerect.height = 3 * linerect.height;
 			if (line_YoN(linerect))
 			{
 				Faults::Scratch scratch;
@@ -774,22 +796,13 @@ void Pretreatment::data_import()//模板轮廓匹配预处理线程
 	cv::findContours(LineImg, Linecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
 }
 
-void Pretreatment::img2zoom()//划痕检测缩放预处理
-{
-	/*equalizeHist(MidImg, MidImg);*/
-	resize(MidImg, CannyImg, Size(MidImg.cols / 4, MidImg.rows / 4), 0, 0, INTER_AREA);
-	blur(CannyImg, BlurImg, Size(3, 3));
-	Canny(BlurImg, BlurImg, 7, 20);
-	/*bilateralFilter(CannyImg, BlurImg, 6, 12, 3);*/
-}
+
 
 void Pretreatment::line2preprocess()
 {
-	resize(MidImg, CannyImg, Size(MidImg.cols / 2, MidImg.rows / 2), 0, 0, INTER_AREA);
-	/*medianBlur(CannyImg, CannyImg, 3);*/
-	Canny(CannyImg, CannyImg, 40, 120);
-	rectangle(CannyImg, Rect(Point(0, 0), Point(CannyImg.cols - 1, 100)), Scalar(0), -1);
-	rectangle(CannyImg, Rect(Point(0, CannyImg.rows - 101), Point(CannyImg.cols - 1, CannyImg.rows - 1)), Scalar(0), -1);//去除上下伪边缘
+	
+	original_Img_L = original_Img_D.clone();//划痕检测原图
+	LMidImg = MidImg.clone();
 }
 
 
@@ -821,24 +834,23 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	recImg = boundingRect(pointlist);//截取瓷砖区域,对拍摄不全的区域也进行截取
 
 	MidImg = E_image(Rect(recImg));
-	std::thread preline(std::mem_fn(&Pretreatment::line2preprocess), this);
 
 	original_Img_D = image(Rect(recImg));//缺陷检测原图
-	original_Img_L = image(Rect(recImg));//划痕检测原图
+
+	std::thread linepreprocess(std::mem_fn(&Pretreatment::line2preprocess), this);
 	resize(MidImg, re_Img_small, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
 
 	Handwriting(re_Img_small);
-	
-	preline.join();
 
+	linepreprocess.join();
 	InitItemRepository(&gItemRepository);
-	//std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
-	//std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
+	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
+	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
 	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
-	//producer.join();
-	//consumer.join();
+	producer.join();
+	consumer.join();
 	line.join();
 	needContour.clear();
 	dilateneedcontours.clear();

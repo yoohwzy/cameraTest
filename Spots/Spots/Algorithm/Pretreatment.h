@@ -60,8 +60,6 @@ public:
 	void ProcessArea(Block *blockin);//确定瓷砖表面内部位置，A是左上，顺时针
 	int Maxdistance(vector<Point> vec);//给一组点集求出任意两点间的最大距离时间复杂度为nlogn
 	void Handwriting(Mat &_img);//判断是否存在人工笔迹
-	void img2clone();
-	void img2zoom();
 	void line2preprocess();
 	void linedetect();
 	void data_import();
