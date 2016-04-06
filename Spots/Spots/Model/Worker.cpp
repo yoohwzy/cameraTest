@@ -134,7 +134,8 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 		//因超时而退出
 		if (
-			now > startFrame && now >= endFrameAbso
+			(endFrameAbso >= startFrame && now >= endFrameAbso) ||
+			(endFrameAbso < startFrame && now >= endFrameAbso && now < startFrame)
 			)
 		{
 			break;
@@ -145,18 +146,20 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 	{
 		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
 		//此处重新计算endFrame
-		endFrame = p_e2vbuffer->GetWriteIndex() + waitLength;
+		endFrame = p_e2vbuffer->GetWriteIndex();
+		endFrame = endFrame > endFrameAbso ? endFrame : endFrameAbso;
+		frameIndexAdd(endFrame, waitLength);
 		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。
 
 		while (true)
 		{
 			//判断是否读够那么多行
 			int now = p_e2vbuffer->GetWriteIndex();
-			if (now < startFrame)
-				now += E2VBuffer::BufferLength;
-
 			//计数完成而退出
-			if (now >= endFrameAbso)
+			if (
+				endFrame >= startFrame && now >= endFrame ||
+				(endFrame < startFrame && now >= endFrame && now < startFrame)
+				)
 			{
 				GetPhotoOn = false;
 				break;
