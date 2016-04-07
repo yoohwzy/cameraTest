@@ -13,7 +13,7 @@ using namespace std;
 #define STAMP_HEIGHT	30
 #define STAMP_SIZE		STAMP_WIDTH*STAMP_HEIGHT
 int kItemsToProduce = 10;   // 生产者生产的总数
-Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, PMidImg, re_Img_small;
+Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small;
 vector<Rect> needContour;
 CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
@@ -123,16 +123,54 @@ bool line_core(Mat &_Img)
 {
 	Mat line_background(_Img.size(), CV_8UC1, Scalar(0));
 	Mat line_temp,line_result;
-	medianBlur(_Img, _Img, 3);
-	Canny(_Img, _Img, 40, 120);
-	dilate(_Img, line_temp, Mat(), Point(-1, -1));
-	erode(line_temp, line_temp, Mat(), Point(-1, -1));
-	vector<vector<Point>>lineround;
-	findContours(line_temp, lineround, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	drawContours(line_background, lineround,-1,Scalar(255),-1);
-	bitwise_not(_Img, line_result, line_background);
-	int numcount = countNonZero(line_result);
-	if (numcount < _Img.cols&&numcount < _Img.rows)
+	vector<int> flagline;
+	if (_Img.cols > _Img.rows)
+	{
+		transpose(_Img, line_temp);
+		for (int i = 0; i < _Img.cols; i++)
+		{
+			uchar* data = line_temp.ptr<uchar>(i);
+			int flagbit = 0;
+			for (int j = 0; j < _Img.rows-1; j++)
+			{
+				if (data[j] != 0 && data[j+1] == 0)
+				{
+					if (flagbit == 0)
+						flagbit = 1;
+				}
+				if (flagbit == 1 && data[j] != 0)
+					flagbit = 2;
+			}
+			if (flagbit == 2)
+				flagline.push_back(1);
+			else
+				flagline.push_back(0);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < _Img.cols; i++)
+		{
+			uchar* data = _Img.ptr<uchar>(i);
+			int flagbit = 0;
+			for (int j = 0; j < _Img.rows - 1; j++)
+			{
+				if (data[j] != 0 && data[j + 1] == 0)
+				{
+					if (flagbit == 0)
+						flagbit = 1;
+				}
+				if (flagbit == 1 && data[j] != 0)
+					flagbit = 2;
+			}
+			if (flagbit == 2)
+				flagline.push_back(1);
+			else
+				flagline.push_back(0);
+		}
+	}	
+	int numcount = count(flagline.begin(), flagline.end(),1);
+	if (numcount < int(0.7*_Img.cols)&&numcount < int(0.7*_Img.rows))
 		return 0;
 	else
 		return 1;
@@ -160,22 +198,22 @@ bool defect_YoN(Mat &_Img)
 
 bool line_YoN(Rect _linesrect)
 {
-	if (_linesrect.width>_linesrect.height)
-	{
-		_linesrect.x = max(int(_linesrect.x + 0.3*_linesrect.width), 0);
-		_linesrect.y = max(int(_linesrect.y - 0.3*_linesrect.height), 0);
-		_linesrect.width = min(int(0.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
-		_linesrect.height = min(int(1.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
-	}
-	else
-	{
-		_linesrect.x = max(int(_linesrect.x - 0.3*_linesrect.width), 0);
-		_linesrect.y = max(int(_linesrect.y + 0.3*_linesrect.height), 0);
-		_linesrect.width = min(int(1.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
-		_linesrect.height = min(int(0.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
-	}
-	Mat tempt = LMidImg(_linesrect);
-	bool flagbit = line_core(LMidImg(_linesrect));
+	//if (_linesrect.width>_linesrect.height)
+	//{
+	//	_linesrect.x = max(int(_linesrect.x + 0.3*_linesrect.width), 0);
+	//	_linesrect.y = max(int(_linesrect.y - 0.3*_linesrect.height), 0);
+	//	_linesrect.width = min(int(0.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
+	//	_linesrect.height = min(int(1.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
+	//}
+	//else
+	//{
+	//	_linesrect.x = max(int(_linesrect.x - 0.3*_linesrect.width), 0);
+	//	_linesrect.y = max(int(_linesrect.y + 0.3*_linesrect.height), 0);
+	//	_linesrect.width = min(int(1.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
+	//	_linesrect.height = min(int(0.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
+	//}
+	Mat tempt = CannyImg(_linesrect);
+	bool flagbit = line_core(CannyImg(_linesrect));
 	if (flagbit)
 		return 1;//是划痕
 	else
@@ -763,19 +801,20 @@ void Pretreatment::linedetect()
 	Canny(CannyImg, CannyImg, 40, 120);
 	rectangle(CannyImg, Rect(Point(0, 0), Point(CannyImg.cols - 1, 100)), Scalar(0), -1);
 	rectangle(CannyImg, Rect(Point(0, CannyImg.rows - 101), Point(CannyImg.cols - 1, CannyImg.rows - 1)), Scalar(0), -1);//去除上下伪边缘
+	Mat Canny_contoursImg = CannyImg.clone();
 	vector<vector<cv::Point>> linescontours;
-	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	findContours(Canny_contoursImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	for (int i = 0; i < linescontours.size(); i++)
 	{
 		if (linescontours[i].size() > 60)
 		{
 			Rect linerect = boundingRect(linescontours[i]);
-			linerect.x = 3 * linerect.x;
-			linerect.y = 3 * linerect.y;
-			linerect.width = 3 * linerect.width;
-			linerect.height = 3 * linerect.height;
 			if (line_YoN(linerect))
 			{
+				linerect.x = 3 * linerect.x;
+				linerect.y = 3 * linerect.y;
+				linerect.width = 3 * linerect.width;
+				linerect.height = 3 * linerect.height;
 				Faults::Scratch scratch;
 				scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
 				scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;

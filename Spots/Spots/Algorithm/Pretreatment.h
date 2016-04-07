@@ -50,7 +50,7 @@ private:
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
-	Mat Mask_result_big, Mask_result_small, CannyImg, BlurImg, lookUpTable, lookUpTable_main;
+	Mat Mask_result_big, Mask_result_small, BlurImg, lookUpTable, lookUpTable_main;
 	
 public:
 	
