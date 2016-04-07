@@ -1,5 +1,5 @@
 #include "E2VBuffer.h"
-
+#include <Class/Debug/MFCConsole.h>
 
 E2VBuffer::E2VBuffer(int width, bool isGray)
 {
@@ -30,6 +30,7 @@ void E2VBuffer::WriteData(cv::Mat oneline)
 
 cv::Mat E2VBuffer::GetImage(int startLine, int endLine)
 {
+	double t = cv::getTickCount();
 	//Ô½½ç·µ»Ø¿Õ
 	if (startLine >= E2VBuffer::BufferLength ||
 		startLine < 0 ||
@@ -45,6 +46,11 @@ cv::Mat E2VBuffer::GetImage(int startLine, int endLine)
 	{
 		int length = endLine - startLine + 1;
 		cv::Mat result = Buffer(cv::Rect(0, startLine, Buffer.cols, length)).clone();
+
+		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+		stringstream ss;
+		ss << "GetImage :" << t << "ms " << result.rows << " * " << result.cols << endl;
+		MFCConsole::Output(ss.str());
 		return result;
 	}
 	else
@@ -58,8 +64,10 @@ cv::Mat E2VBuffer::GetImage(int startLine, int endLine)
 		Buffer(cv::Rect(0, startLine, Buffer.cols, length1)).copyTo(roi1);	//debug 2Î¢Ãë release 1.5Î¢Ãë
 		Buffer(cv::Rect(0, 0, Buffer.cols, length2)).copyTo(roi2);
 
-
-		result *= 3;
+		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+		stringstream ss;
+		ss << "GetImage :" << t << "ms " << result.rows << " * " << result.cols << endl;
+		MFCConsole::Output(ss.str());
 		return result;
 	}
 }

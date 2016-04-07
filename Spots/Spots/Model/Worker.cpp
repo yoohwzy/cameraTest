@@ -1,6 +1,8 @@
 #include "Worker.h"
 #include <Controller\Controller.h>
+#include <Class/Debug/MFCConsole.h>
 
+#define WORKER_DEBUG
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
 	p_e2vbuffer = _e2vbuffer;
@@ -28,9 +30,17 @@ void Worker::work()
 
 		int startFrame = p_e2vbuffer->GetWriteIndex();
 		int firstFrame = startFrame;//记录触发时所写行号
-
+#ifdef WORKER_DEBUG
+		stringstream ss;
+		ss << "startFrame =" << startFrame << endl;
+#endif
 		//加入延时时间
 		frameIndexAdd(startFrame, WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS);
+#ifdef WORKER_DEBUG
+		ss << "startFrame(after frameIndexAdd()) =" << startFrame << endl;
+		MFCConsole::Output(ss.str());
+#endif
+
 		//触发后等待一段时间，砖走到拍摄区域后再获取图像
 
 		//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
@@ -68,6 +78,10 @@ void Worker::work()
 		MessageBox(0, L"硬件初始化失败，请设置好再试。", L"警告", 0);
 		return;
 	}
+
+	/********************************************/
+	//开始图像处理
+
 	if (image.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
@@ -123,6 +137,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 
 	GetPhotoOn = true;
+	bool overtimeflag = false;
 	//wait capture end
 	Sleep(100);
 	while (GetPhotoOn)
@@ -138,22 +153,48 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 			(endFrameAbso < startFrame && now >= endFrameAbso && now < startFrame)
 			)
 		{
+#ifdef WORKER_DEBUG
+			if (1 == 1)
+			{
+				stringstream ss;
+				ss << "worker get endFrameAbso,endFrameAbso =" << endFrameAbso << endl;
+				MFCConsole::Output(ss.str());
+			}
+#endif
+			overtimeflag = true;
 			break;
 		}
 		Sleep(2);
 	}
-	if (GetPhotoOn == false)
+	if (GetPhotoOn == false && overtimeflag == false)
 	{
 		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
 		//此处重新计算endFrame
 		endFrame = p_e2vbuffer->GetWriteIndex();
-		endFrame = endFrame > endFrameAbso ? endFrame : endFrameAbso;
+#ifdef WORKER_DEBUG
+		if (1 == 1)
+		{
+			stringstream ss;
+			ss << "endFrame =" << endFrameAbso << endl;
+			MFCConsole::Output(ss.str());
+		}
+#endif
 		frameIndexAdd(endFrame, waitLength);
+#ifdef WORKER_DEBUG
+		if (1 == 1)
+		{
+			stringstream ss;
+			ss << "endFrame(after frameIndexAdd()) =" << endFrameAbso << endl;
+			MFCConsole::Output(ss.str());
+		}
+#endif
+
+
 		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。
 
 		while (true)
 		{
-			//判断是否读够那么多行 
+			//判断是否读够那么多行
 			int now = p_e2vbuffer->GetWriteIndex();
 			//计数完成而退出
 			if (

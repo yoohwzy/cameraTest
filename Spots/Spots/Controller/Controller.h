@@ -4,7 +4,6 @@
 #include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 #include <Class/IOCard/PCI1761/PCI1761.h>
 #include <Class/Statistics/Statistics.h>
-#include <Class/Debug/MFCConsole.h>
 
 #include <View/SpotsMainView.h>
 
