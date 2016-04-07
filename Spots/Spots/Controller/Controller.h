@@ -4,7 +4,6 @@
 #include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 #include <Class/IOCard/PCI1761/PCI1761.h>
 #include <Class/Statistics/Statistics.h>
-#include <Class/Debug/MFCConsole.h>
 
 #include <View/SpotsMainView.h>
 
@@ -87,6 +86,10 @@ public:
 	double BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+
+	int Worker_WaitTimeMSIn = 100;
+	int Worker_WaitTimeMSOut = 250;
+	int Worker_FrameTimeOut = 2000;
 
 	bool SAVE_IMG = false;
 

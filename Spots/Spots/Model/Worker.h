@@ -12,8 +12,9 @@ class Worker
 {
 public:
 	//需要设置的参数
-	int WaitTimeMS = 50;//等待瓷砖进入拍摄区的时间
-
+	int WaitTimeMSIn = 50;//等待瓷砖进入拍摄区的时间
+	int WaitTimeMSOut = 50;//等待瓷砖离开拍摄区的时间
+	int FrameTimeOut = 2000;//拍摄超时时间
 	// 瓷砖序列号
 	int SN = 0;
 
@@ -57,13 +58,10 @@ private:
 	// 绘制缺陷
 	void drawFaults(cv::Mat&, Faults& faults);
 
-	// 超过该长度直接退出
-	static const int frameCountsOut = 12000;
-	
 	void frameIndexAdd(int& oldFrame, int add)
 	{
 		oldFrame += add;
-		if (oldFrame >= E2VBuffer::BufferLength)
+		if (oldFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
 			oldFrame -= E2VBuffer::BufferLength;
 	}
 };

@@ -5,7 +5,8 @@
 #include <Class/Setting/SettingHelper.h>
 #include <Class\Helper\StringHelper.h>
 #include <shlwapi.h>
-#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
+#include <Class/Debug/MFCConsole.h>
+#pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
 void Controller::init(){
 
@@ -39,41 +40,36 @@ void Controller::init(){
 
 
 
-	// 配置参数初始化
-	string db_path;
-	bool accConnFlag = false;
-	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
-		accConnFlag = Statistics::InitDate(db_path);
-	else
+	// 配置数据库初始化
+	if (1 == 1)
 	{
-		accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
-		SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+		int accEnable = 0;
+		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);
+		if (accEnable != 0)
+		{
+			string db_path;
+			bool accConnFlag = false;
+			if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
+				accConnFlag = Statistics::InitDate(db_path);
+			else
+			{
+				accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
+				SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+			}
+			// 统计数据初始化
+			if (accConnFlag)
+				spotsMainView->UpdateStatistics();
+			else
+				AfxMessageBox(L"无法连接到数据库！");
+		}
 	}
-
-	// 统计数据初始化
-	if (accConnFlag)
-		spotsMainView->UpdateStatistics();
-	else
-		AfxMessageBox(L"无法连接到数据库！");
-
 	// 初始化工作线程
 	if (e2vInitFlag && pci1761InitFlag)
 	{
 		isRealModel = 1;
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
-		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-
 		worker2 = new Worker(p_e2vbuffer);
-		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
@@ -103,6 +99,20 @@ void Controller::init(){
 
 		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
+
+	//读取参数配置
+	int si = 0;
+	SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
+	SAVE_IMG = si;
+
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", this->BlockLocalizer_ContinuePointCount);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", this->BlockEdgeDetector_DIFF_THRESHOLD);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", this->BlockEdgeDetector_FAULTS_SPAN);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", this->BlockEdgeDetector_FAULTS_COUNT);
+	//设置工人算法参数
+	ResetParameter();
+
 
 	//初始化UI
 	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
@@ -201,6 +211,10 @@ void Controller::ResetParameter()
 		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+
+		worker1->WaitTimeMSIn = Worker_WaitTimeMSIn;
+		worker1->WaitTimeMSOut = Worker_WaitTimeMSOut;
+		worker1->FrameTimeOut = Worker_FrameTimeOut;
 	}
 	if (worker2 != NULL)
 	{
@@ -209,6 +223,10 @@ void Controller::ResetParameter()
 		worker2->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 		worker2->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 		worker2->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+
+		worker2->WaitTimeMSIn = Worker_WaitTimeMSIn;
+		worker2->WaitTimeMSOut = Worker_WaitTimeMSOut;
+		worker2->FrameTimeOut = Worker_FrameTimeOut;
 	}
 }
 
@@ -259,13 +277,13 @@ void Controller::triggerWatcher()
 
 			if (tiggerindex % 2 == 1)
 			{
-				MFCConsole::Output("worker1 Start Work\r\n");
+				MFCConsole::Output("\r\n\r\n-------------------------Worker1 Start Work\r\n");
 				worker1->StartWork();
 				lastestWorker = worker1;
 			}
 			else
 			{
-				MFCConsole::Output("worker2 Start Work\r\n");
+				MFCConsole::Output("\r\n\r\n-------------------------Worker2 Start Work\r\n");
 
 				worker2->StartWork();
 				lastestWorker = worker2;
@@ -274,10 +292,9 @@ void Controller::triggerWatcher()
 		}
 		else if (pci1761.GetTrailingEdgeIDI(7))//下降沿结束采图
 		{
-			MFCConsole::Output("Stop Work\r\n");
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			stringstream ss;
-			ss << "Timespan:" << t << "ms" << endl;
+			ss << "Worker Stop : Timespan:" << t << "ms" << endl;
 			MFCConsole::Output(ss.str());
 
 			// 标记工人停止采图

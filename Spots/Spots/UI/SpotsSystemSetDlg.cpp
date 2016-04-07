@@ -27,25 +27,41 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	string db_path;
-	bool accConnFlag = false;
 	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
-	{
 		GetDlgItem(IDC_TB_AccessPath)->SetWindowText(StringHelper::string2LPWSTR(db_path));
-	}
 	else
-	{
 		GetDlgItem(IDC_TB_AccessPath)->SetWindowText(L"src//..//瓷砖缺陷检测数据库.mdb");
-	}
+
 	int accEnable = 0;
-	if (SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable))//读取数据库所在路径
+	if (SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable))
 		((CButton*)GetDlgItem(IDC_CB_EnableAccess))->SetCheck(accEnable != 0);
 	else
-		((CButton*)GetDlgItem(IDC_CB_EnableAccess))->SetCheck(1);
+		((CButton*)GetDlgItem(IDC_CB_EnableAccess))->SetCheck(0);
 
-	if (SettingHelper::GetKeyInt("SYS", "SAVE_IMG", accEnable))//读取数据库所在路径
-		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(accEnable != 0);
+	/********************************采图参数**********************************/
+	int saveImgFlag = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "SAVE_IMG", saveImgFlag))
+		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(saveImgFlag != 0);
 	else
 		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(0);
+
+	int Worker_WaitTimeMSIn = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", Worker_WaitTimeMSIn))
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(StringHelper::Int2CString(Worker_WaitTimeMSIn));
+	else
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(L"100");
+
+	int Worker_WaitTimeMSOut = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", Worker_WaitTimeMSOut))
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(StringHelper::Int2CString(Worker_WaitTimeMSOut));
+	else
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(L"250");
+
+	int Worker_FrameTimeOut = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", Worker_FrameTimeOut))
+		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(StringHelper::Int2CString(Worker_FrameTimeOut));
+	else
+		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(L"2000");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -107,10 +123,23 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	//保存数据库设置
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_EnableAccess);
 	SettingHelper::AddKey("DATABASE", "ACCDB_ENABLE", pBtn->GetCheck());
-	CString cstr;
-	GetDlgItem(IDC_TB_AccessPath)->GetWindowTextW(cstr);
-	SettingHelper::AddKey("DATABASE", "ACCDB_PATH", StringHelper::CString2string(cstr));
+	saveParameter(IDC_TB_AccessPath, "DATABASE", "ACCDB_PATH");
 	pBtn = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
-	SettingHelper::AddKey("SYS", "SAVE_IMG", pBtn->GetCheck());
+	//采图设置
+	SettingHelper::AddKey("SYS_IMG_CAPTURE", "SAVE_IMG", pBtn->GetCheck());
+	saveParameter(IDC_TB_Worker_WaitTimeMSIn, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn");
+	saveParameter(IDC_TB_Worker_WaitTimeMSOut, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut");
+	saveParameter(IDC_TB_Worker_FrameTimeOut, "SYS_IMG_CAPTURE", "Worker_FrameTimeOut");
+
+
+
+
 	CDialogEx::OnOK();
+}
+void SpotsSystemSetDlg::saveParameter(int IDC, string SectionName, string key)
+{
+	//保存设置
+	CString cstr;
+	GetDlgItem(IDC)->GetWindowTextW(cstr);
+	SettingHelper::AddKey(SectionName, key, StringHelper::CString2string(cstr));
 }
