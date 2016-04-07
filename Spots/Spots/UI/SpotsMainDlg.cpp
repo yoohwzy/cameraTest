@@ -430,6 +430,10 @@ void CSpotsMainDlg::On32773()
 		int si = 0;
 		SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
 		p_contrller->SAVE_IMG = si;
+
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", p_contrller->Worker_WaitTimeMSIn);
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", p_contrller->Worker_WaitTimeMSOut);
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", p_contrller->Worker_FrameTimeOut);
 		p_contrller->ResetParameter();
 	}
 }

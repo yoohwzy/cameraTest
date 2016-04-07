@@ -129,7 +129,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 {
 	int waitLength = WaitTimeMSOut * 1000 / ImgScanner::FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
 	if (length == 0)//采集固定长度
-		length = Worker::frameCountsOut;
+		length = FrameTimeOut * 1000 / ImgScanner::FrameTimeUS;
 
 	int endFrameAbso = startFrame;
 	frameIndexAdd(endFrameAbso, length);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
@@ -140,13 +140,10 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 	bool overtimeflag = false;
 	//wait capture end
 	Sleep(100);
+	//循环等待下降沿或采图超时
 	while (GetPhotoOn)
 	{
-		//判断是否读够那么多行
 		int now = p_e2vbuffer->GetWriteIndex();
-		//if (now <= startFrame)
-		//	now += E2VBuffer::BufferLength;
-
 		//因超时而退出
 		if (
 			(endFrameAbso >= startFrame && now >= endFrameAbso) ||
@@ -166,6 +163,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 		}
 		Sleep(2);
 	}
+	//判断是否获取到了下降沿
 	if (GetPhotoOn == false && overtimeflag == false)
 	{
 		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
