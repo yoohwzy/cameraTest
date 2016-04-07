@@ -66,8 +66,19 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	// 打开控制台
 	if (__argc > 1)
 	{ 
-		MFCConsole::Init();
-		MFCConsole::Output("Debug start.\r\n");
+		for (size_t i = 0; i < __argc; i++)
+		{
+			CString targv = __targv[i];
+			if (targv == L"debug")//输出命令台 
+			{
+				MFCConsole::Init();
+				MFCConsole::Output("Debug start.\r\n");
+			}
+			if (targv == L"virtual")
+			{
+				p_contrller->IsRealModel = 0;
+			}
+		}
 	}
 
 	// 添加菜单栏
@@ -133,7 +144,20 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	CString ClassName;
 	GetClassName(pWnd->GetSafeHwnd(), ClassName.GetBuffer(255), 255);
 
-	//if (ClassName.Find(_T("Static"), 0) >= 0 || ClassName.Find(_T("Static"), 0) >= 0 || pWnd->GetDlgCtrlID() == IDC_LB1)
+	if (pWnd->GetDlgCtrlID() == IDC_BTN_RUN)
+	{
+		if (isRunning)
+		{
+			pDC->SetTextColor(RGB(255, 0, 0));  //设置字体颜色
+			return (HBRUSH)::GetStockObject(BLACK_BRUSH);  // 设置背景色
+		}
+		else
+		{
+			pDC->SetTextColor(RGB(0, 0, 0));  //设置字体颜色
+			return (HBRUSH)::GetStockObject(WHITE_BRUSH);  // 设置背景色
+		}
+	}
+	else
 	{
 		//pDC->SetBkMode(TRANSPARENT);
 		pDC->SetBkColor(RGB(255, 255, 255));
@@ -142,6 +166,21 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)GetStockObject(WHITE_BRUSH);
 	}
 	return hbr;
+}
+
+
+BOOL CSpotsMainDlg::PreTranslateMessage(MSG* pMsg)
+{
+	//屏蔽ESC关闭窗体/
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE) return TRUE;
+	//屏蔽回车关闭窗体,但会导致回车在窗体上失效.
+	//if(pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_RETURN && pMsg->wParam) return TRUE;
+	else
+		return CDialog::PreTranslateMessage(pMsg);
+}
+void CSpotsMainDlg::OnOK()
+{
+	//CDialogEx::OnOK();
 }
 
 
@@ -254,12 +293,12 @@ void CSpotsMainDlg::OnBnClickedBtnRun()
 	if (!isRunning)
 	{
 		p_contrller->StopWatch();
-		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始");
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始运行");
 	}
 	else
 	{
 		p_contrller->StartWatch();
-		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停");
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停程序");
 	}
 }
 
@@ -430,6 +469,10 @@ void CSpotsMainDlg::On32773()
 		int si = 0;
 		SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
 		p_contrller->SAVE_IMG = si;
+
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", p_contrller->Worker_WaitTimeMSIn);
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", p_contrller->Worker_WaitTimeMSOut);
+		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", p_contrller->Worker_FrameTimeOut);
 		p_contrller->ResetParameter();
 	}
 }

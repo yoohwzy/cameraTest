@@ -40,60 +40,56 @@ void Controller::init(){
 
 
 
-	// 配置参数初始化
-	string db_path;
-	bool accConnFlag = false;
-	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
-		accConnFlag = Statistics::InitDate(db_path);
-	else
+	// 配置数据库初始化
+	if (1 == 1)
 	{
-		accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
-		SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+		int accEnable = 0;
+		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);
+		if (accEnable != 0)
+		{
+			string db_path;
+			bool accConnFlag = false;
+			if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
+				accConnFlag = Statistics::InitDate(db_path);
+			else
+			{
+				accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
+				SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+			}
+			// 统计数据初始化
+			if (accConnFlag)
+				spotsMainView->UpdateStatistics();
+			else
+				AfxMessageBox(L"无法连接到数据库！");
+		}
 	}
-
-	// 统计数据初始化
-	if (accConnFlag)
-		spotsMainView->UpdateStatistics();
-	else
-		AfxMessageBox(L"无法连接到数据库！");
-
 	// 初始化工作线程
-	if (e2vInitFlag && pci1761InitFlag)
+	if (e2vInitFlag && pci1761InitFlag && IsRealModel)
 	{
-		isRealModel = 1;
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
-		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-
 		worker2 = new Worker(p_e2vbuffer);
-		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
 
-		StartWatch();
+		//StartWatch();
 
 		spotsMainView->SwitchModel2Virtual(false);
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
 	{
-		isRealModel = 0;
-		if (!e2vInitFlag && !pci1761InitFlag)
-			AfxMessageBox(L"线阵相机&pci1761初始化失败！");
-		else if (!pci1761InitFlag)
-			AfxMessageBox(L"pci1761初始化失败！");
-		else if (!e2vInitFlag)
-			AfxMessageBox(L"线阵相机初始化失败！");
-
+		if (IsRealModel)
+		{
+			IsRealModel = 0;
+			if (!e2vInitFlag && !pci1761InitFlag)
+				AfxMessageBox(L"线阵相机&pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!pci1761InitFlag)
+				AfxMessageBox(L"pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!e2vInitFlag)
+				AfxMessageBox(L"线阵相机初始化失败！已切换到虚拟相机模式。");
+		}
 		//开启虚拟相机
 		cv::Mat virtualImg;
 		worker1 = new Worker(NULL);
@@ -105,6 +101,20 @@ void Controller::init(){
 		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
 
+	//读取参数配置
+	int si = 0;
+	SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
+	SAVE_IMG = si;
+
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", this->BlockLocalizer_ContinuePointCount);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", this->BlockEdgeDetector_DIFF_THRESHOLD);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", this->BlockEdgeDetector_FAULTS_SPAN);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", this->BlockEdgeDetector_FAULTS_COUNT);
+	//设置工人算法参数
+	ResetParameter();
+
+
 	//初始化UI
 	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
 	logImg.InitDrawingBoard();
@@ -115,7 +125,7 @@ void Controller::init(){
 
 void Controller::StartWatch()
 {
-	if (isRealModel)
+	if (IsRealModel)
 	{
 		watcher_lock.lock();
 
@@ -130,7 +140,7 @@ void Controller::StartWatch()
 
 void Controller::StopWatch()
 {
-	if (isRealModel)
+	if (IsRealModel)
 	{
 		watcher_lock.lock();
 
@@ -202,6 +212,10 @@ void Controller::ResetParameter()
 		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+
+		worker1->WaitTimeMSIn = Worker_WaitTimeMSIn;
+		worker1->WaitTimeMSOut = Worker_WaitTimeMSOut;
+		worker1->FrameTimeOut = Worker_FrameTimeOut;
 	}
 	if (worker2 != NULL)
 	{
@@ -210,6 +224,10 @@ void Controller::ResetParameter()
 		worker2->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 		worker2->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 		worker2->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+
+		worker2->WaitTimeMSIn = Worker_WaitTimeMSIn;
+		worker2->WaitTimeMSOut = Worker_WaitTimeMSOut;
+		worker2->FrameTimeOut = Worker_FrameTimeOut;
 	}
 }
 

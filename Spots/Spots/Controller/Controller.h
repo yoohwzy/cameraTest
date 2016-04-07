@@ -38,6 +38,7 @@ public:
 
 		release();
 	}
+	bool IsRealModel = 1;
 
 	void init();
 
@@ -87,12 +88,15 @@ public:
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
+	int Worker_WaitTimeMSIn = 100;
+	int Worker_WaitTimeMSOut = 250;
+	int Worker_FrameTimeOut = 2000;
+
 	bool SAVE_IMG = false;
 
 private:
 	void release();
 	//HWND handle_mainWindow;
-	bool isRealModel = 1;
 
 	E2VBuffer *p_e2vbuffer = NULL;
 	ImgScanner *p_imgscanner = NULL;
