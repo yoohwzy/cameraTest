@@ -153,7 +153,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 		while (true)
 		{
-			//判断是否读够那么多行
+			//判断是否读够那么多行 
 			int now = p_e2vbuffer->GetWriteIndex();
 			//计数完成而退出
 			if (
