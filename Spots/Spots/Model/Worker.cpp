@@ -132,7 +132,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 		length = Worker::frameCountsOut;
 
 	int endFrameAbso = startFrame;
-	frameIndexAdd(endFrameAbso, length + waitLength);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
+	frameIndexAdd(endFrameAbso, length);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
 	int endFrame = endFrameAbso;
 
 
