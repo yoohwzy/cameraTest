@@ -260,13 +260,13 @@ void Controller::triggerWatcher()
 
 			if (tiggerindex % 2 == 1)
 			{
-				MFCConsole::Output("worker1 Start Work\r\n");
+				MFCConsole::Output("\r\n\r\n-------------------------Worker1 Start Work\r\n");
 				worker1->StartWork();
 				lastestWorker = worker1;
 			}
 			else
 			{
-				MFCConsole::Output("worker2 Start Work\r\n");
+				MFCConsole::Output("\r\n\r\n-------------------------Worker2 Start Work\r\n");
 
 				worker2->StartWork();
 				lastestWorker = worker2;

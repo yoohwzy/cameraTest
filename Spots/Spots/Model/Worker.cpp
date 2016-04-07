@@ -175,7 +175,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 		if (1 == 1)
 		{
 			stringstream ss;
-			ss << "endFrame =" << endFrameAbso << endl;
+			ss << "endFrame =" << endFrame << endl;
 			MFCConsole::Output(ss.str());
 		}
 #endif
@@ -184,7 +184,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 		if (1 == 1)
 		{
 			stringstream ss;
-			ss << "endFrame(after frameIndexAdd()) =" << endFrameAbso << endl;
+			ss << "endFrame(after frameIndexAdd()) =" << endFrame << endl;
 			MFCConsole::Output(ss.str());
 		}
 #endif
@@ -208,8 +208,6 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 			Sleep(2);
 		}
 	}
-
-	startFrame += waitLength;
 
 	//三合一没有做 转入算法模块做预处理
 	return p_e2vbuffer->GetImage(startFrame, endFrame);
