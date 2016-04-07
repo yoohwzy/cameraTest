@@ -1,5 +1,6 @@
 #include "Worker.h"
 #include <Controller\Controller.h>
+#include <Class/Debug/MFCConsole.h>
 
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
@@ -123,6 +124,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 
 	GetPhotoOn = true;
+	bool overtimeflag = false;
 	//wait capture end
 	Sleep(100);
 	while (GetPhotoOn)
@@ -138,11 +140,13 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 			(endFrameAbso < startFrame && now >= endFrameAbso && now < startFrame)
 			)
 		{
+			MFCConsole::Output("worker get endFrameAbso/r/n");
+			overtimeflag = true;
 			break;
 		}
 		Sleep(2);
 	}
-	if (GetPhotoOn == false)
+	if (GetPhotoOn == false && overtimeflag == false)
 	{
 		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
 		//此处重新计算endFrame
@@ -153,7 +157,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 		while (true)
 		{
-			//判断是否读够那么多行 
+			//判断是否读够那么多行
 			int now = p_e2vbuffer->GetWriteIndex();
 			//计数完成而退出
 			if (

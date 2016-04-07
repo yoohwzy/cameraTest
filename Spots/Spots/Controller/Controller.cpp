@@ -5,7 +5,8 @@
 #include <Class/Setting/SettingHelper.h>
 #include <Class\Helper\StringHelper.h>
 #include <shlwapi.h>
-#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
+#include <Class/Debug/MFCConsole.h>
+#pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
 void Controller::init(){
 
@@ -274,10 +275,9 @@ void Controller::triggerWatcher()
 		}
 		else if (pci1761.GetTrailingEdgeIDI(7))//下降沿结束采图
 		{
-			MFCConsole::Output("Stop Work\r\n");
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			stringstream ss;
-			ss << "Timespan:" << t << "ms" << endl;
+			ss << "Worker Stop : Timespan:" << t << "ms" << endl;
 			MFCConsole::Output(ss.str());
 
 			// 标记工人停止采图
