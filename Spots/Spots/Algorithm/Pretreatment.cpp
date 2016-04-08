@@ -198,20 +198,6 @@ bool defect_YoN(Mat &_Img)
 
 bool line_YoN(Rect _linesrect)
 {
-	//if (_linesrect.width>_linesrect.height)
-	//{
-	//	_linesrect.x = max(int(_linesrect.x + 0.3*_linesrect.width), 0);
-	//	_linesrect.y = max(int(_linesrect.y - 0.3*_linesrect.height), 0);
-	//	_linesrect.width = min(int(0.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
-	//	_linesrect.height = min(int(1.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
-	//}
-	//else
-	//{
-	//	_linesrect.x = max(int(_linesrect.x - 0.3*_linesrect.width), 0);
-	//	_linesrect.y = max(int(_linesrect.y + 0.3*_linesrect.height), 0);
-	//	_linesrect.width = min(int(1.4 * _linesrect.width), original_Img_L.cols - _linesrect.x);
-	//	_linesrect.height = min(int(0.4 * _linesrect.height), original_Img_L.rows - _linesrect.y);
-	//}
 	Mat tempt = CannyImg(_linesrect);
 	bool flagbit = line_core(CannyImg(_linesrect));
 	if (flagbit)
@@ -808,7 +794,11 @@ void Pretreatment::linedetect()
 	{
 		if (linescontours[i].size() > 60)
 		{
+			vector<Point> km_contours;
+			convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
 			Rect linerect = boundingRect(linescontours[i]);
+			if (linerect.width*linerect.height < 2 * contourArea(km_contours))//检测是否为类划痕形状
+				continue;
 			if (line_YoN(linerect))
 			{
 				linerect.x = 3 * linerect.x;
