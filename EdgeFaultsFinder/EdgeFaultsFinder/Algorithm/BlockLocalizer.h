@@ -6,7 +6,7 @@
 
 #include <thread>
 
-//#define BD_OUTPUT_DEBUG_INFO 1
+#define BD_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像

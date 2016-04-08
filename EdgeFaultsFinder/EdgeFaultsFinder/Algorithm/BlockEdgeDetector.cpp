@@ -227,7 +227,7 @@ void BlockEdgeDetector::doRight()
 	int startY = p_block->B.y + 150;
 	int endY = p_block->D.y - 150;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
-	{
+	{	
 		int y1 = y;
 		if (y1 < 0 || y1 >= image.rows)
 			continue;
