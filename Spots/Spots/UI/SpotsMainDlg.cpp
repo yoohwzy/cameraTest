@@ -66,8 +66,19 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	// 打开控制台
 	if (__argc > 1)
 	{ 
-		MFCConsole::Init();
-		MFCConsole::Output("Debug start.\r\n");
+		for (size_t i = 0; i < __argc; i++)
+		{
+			CString targv = __targv[i];
+			if (targv == L"debug")//输出命令台 
+			{
+				MFCConsole::Init();
+				MFCConsole::Output("Debug start.\r\n");
+			}
+			if (targv == L"virtual")
+			{
+				p_contrller->IsRealModel = 0;
+			}
+		}
 	}
 
 	// 添加菜单栏
@@ -133,7 +144,20 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	CString ClassName;
 	GetClassName(pWnd->GetSafeHwnd(), ClassName.GetBuffer(255), 255);
 
-	//if (ClassName.Find(_T("Static"), 0) >= 0 || ClassName.Find(_T("Static"), 0) >= 0 || pWnd->GetDlgCtrlID() == IDC_LB1)
+	if (pWnd->GetDlgCtrlID() == IDC_BTN_RUN)
+	{
+		if (isRunning)
+		{
+			pDC->SetTextColor(RGB(255, 0, 0));  //设置字体颜色
+			return (HBRUSH)::GetStockObject(BLACK_BRUSH);  // 设置背景色
+		}
+		else
+		{
+			pDC->SetTextColor(RGB(0, 0, 0));  //设置字体颜色
+			return (HBRUSH)::GetStockObject(WHITE_BRUSH);  // 设置背景色
+		}
+	}
+	else
 	{
 		//pDC->SetBkMode(TRANSPARENT);
 		pDC->SetBkColor(RGB(255, 255, 255));
@@ -142,6 +166,21 @@ HBRUSH CSpotsMainDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)GetStockObject(WHITE_BRUSH);
 	}
 	return hbr;
+}
+
+
+BOOL CSpotsMainDlg::PreTranslateMessage(MSG* pMsg)
+{
+	//屏蔽ESC关闭窗体/
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE) return TRUE;
+	//屏蔽回车关闭窗体,但会导致回车在窗体上失效.
+	//if(pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_RETURN && pMsg->wParam) return TRUE;
+	else
+		return CDialog::PreTranslateMessage(pMsg);
+}
+void CSpotsMainDlg::OnOK()
+{
+	//CDialogEx::OnOK();
 }
 
 
@@ -187,23 +226,23 @@ void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 
 void CSpotsMainDlg::UpdateStatistics()
 {
-	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll));
-	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(Statistics::TodayA));
-	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(Statistics::TodayB));
-	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(Statistics::TodayC));
-	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll - Statistics::TodayRejected));
+	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::int2CString(Statistics::TodayAll));
+	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::int2CString(Statistics::TodayA));
+	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::int2CString(Statistics::TodayB));
+	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::int2CString(Statistics::TodayC));
+	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::int2CString(Statistics::TodayAll - Statistics::TodayRejected));
 
-	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll));
-	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(Statistics::MonthA));
-	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(Statistics::MonthB));
-	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(Statistics::MonthC));
-	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll - Statistics::MonthRejected));
+	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::int2CString(Statistics::MonthAll));
+	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::int2CString(Statistics::MonthA));
+	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::int2CString(Statistics::MonthB));
+	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::int2CString(Statistics::MonthC));
+	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::int2CString(Statistics::MonthAll - Statistics::MonthRejected));
 
-	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll));
-	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(Statistics::YearA));
-	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(Statistics::YearB));
-	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(Statistics::YearC));
-	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll - Statistics::YearRejected));
+	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::int2CString(Statistics::YearAll));
+	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::int2CString(Statistics::YearA));
+	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::int2CString(Statistics::YearB));
+	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::int2CString(Statistics::YearC));
+	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::int2CString(Statistics::YearAll - Statistics::YearRejected));
 
 	if (Statistics::TodayAll > 0)
 	{
@@ -254,12 +293,12 @@ void CSpotsMainDlg::OnBnClickedBtnRun()
 	if (!isRunning)
 	{
 		p_contrller->StopWatch();
-		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始");
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始运行");
 	}
 	else
 	{
 		p_contrller->StartWatch();
-		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停");
+		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停程序");
 	}
 }
 

@@ -64,9 +64,8 @@ void Controller::init(){
 		}
 	}
 	// 初始化工作线程
-	if (e2vInitFlag && pci1761InitFlag)
+	if (e2vInitFlag && pci1761InitFlag && IsRealModel)
 	{
-		isRealModel = 1;
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
 		worker2 = new Worker(p_e2vbuffer);
@@ -74,21 +73,23 @@ void Controller::init(){
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
 
-		StartWatch();
+		//StartWatch();
 
 		spotsMainView->SwitchModel2Virtual(false);
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
 	{
-		isRealModel = 0;
-		if (!e2vInitFlag && !pci1761InitFlag)
-			AfxMessageBox(L"线阵相机&pci1761初始化失败！");
-		else if (!pci1761InitFlag)
-			AfxMessageBox(L"pci1761初始化失败！");
-		else if (!e2vInitFlag)
-			AfxMessageBox(L"线阵相机初始化失败！");
-
+		if (IsRealModel)
+		{
+			IsRealModel = 0;
+			if (!e2vInitFlag && !pci1761InitFlag)
+				AfxMessageBox(L"线阵相机&pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!pci1761InitFlag)
+				AfxMessageBox(L"pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!e2vInitFlag)
+				AfxMessageBox(L"线阵相机初始化失败！已切换到虚拟相机模式。");
+		}
 		//开启虚拟相机
 		cv::Mat virtualImg;
 		worker1 = new Worker(NULL);
@@ -124,7 +125,7 @@ void Controller::init(){
 
 void Controller::StartWatch()
 {
-	if (isRealModel)
+	if (IsRealModel)
 	{
 		watcher_lock.lock();
 
@@ -139,7 +140,7 @@ void Controller::StartWatch()
 
 void Controller::StopWatch()
 {
-	if (isRealModel)
+	if (IsRealModel)
 	{
 		watcher_lock.lock();
 

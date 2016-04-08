@@ -38,6 +38,7 @@ public:
 
 		release();
 	}
+	bool IsRealModel = 1;
 
 	void init();
 
@@ -96,7 +97,6 @@ public:
 private:
 	void release();
 	//HWND handle_mainWindow;
-	bool isRealModel = 1;
 
 	E2VBuffer *p_e2vbuffer = NULL;
 	ImgScanner *p_imgscanner = NULL;

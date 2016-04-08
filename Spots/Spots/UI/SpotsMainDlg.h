@@ -29,8 +29,9 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-
-
+//屏蔽ESC
+	virtual BOOL PreTranslateMessage(MSG* pMsg);  // PreTranslateMessage是消息在送给TranslateMessage函数之前被调用的
+	virtual void OnOK();
 // 实现
 protected:
 	HICON m_hIcon;

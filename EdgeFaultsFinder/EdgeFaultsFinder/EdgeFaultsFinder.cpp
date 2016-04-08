@@ -32,7 +32,8 @@ void main(int argc, _TCHAR* argv[])
 		//ss << "D://出差//2015.12.30//2//" << index << "_o原图.jpg";
 
 		//cv::Mat img = cv::imread(ss.str(), 0);
-		cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
+		//cv::Mat img = cv::imread("D://16_o原图.jpg", 0);
+		cv::Mat img = cv::imread("D://6_2_o原图.jpg", 0);
 		//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//2_o原图.jpg", 0);
 
 		if (img.rows == 0)
