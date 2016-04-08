@@ -226,23 +226,23 @@ void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 
 void CSpotsMainDlg::UpdateStatistics()
 {
-	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll));
-	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::Int2CString(Statistics::TodayA));
-	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::Int2CString(Statistics::TodayB));
-	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::Int2CString(Statistics::TodayC));
-	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::Int2CString(Statistics::TodayAll - Statistics::TodayRejected));
+	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::int2CString(Statistics::TodayAll));
+	GetDlgItem(IDC_LB_todayA)->SetWindowText(StringHelper::int2CString(Statistics::TodayA));
+	GetDlgItem(IDC_LB_todayB)->SetWindowText(StringHelper::int2CString(Statistics::TodayB));
+	GetDlgItem(IDC_LB_todayC)->SetWindowText(StringHelper::int2CString(Statistics::TodayC));
+	GetDlgItem(IDC_LB_todayGood)->SetWindowText(StringHelper::int2CString(Statistics::TodayAll - Statistics::TodayRejected));
 
-	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll));
-	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::Int2CString(Statistics::MonthA));
-	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::Int2CString(Statistics::MonthB));
-	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::Int2CString(Statistics::MonthC));
-	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::Int2CString(Statistics::MonthAll - Statistics::MonthRejected));
+	GetDlgItem(IDC_LB_monthTotal)->SetWindowText(StringHelper::int2CString(Statistics::MonthAll));
+	GetDlgItem(IDC_LB_monthA)->SetWindowText(StringHelper::int2CString(Statistics::MonthA));
+	GetDlgItem(IDC_LB_monthB)->SetWindowText(StringHelper::int2CString(Statistics::MonthB));
+	GetDlgItem(IDC_LB_monthC)->SetWindowText(StringHelper::int2CString(Statistics::MonthC));
+	GetDlgItem(IDC_LB_monthGood)->SetWindowText(StringHelper::int2CString(Statistics::MonthAll - Statistics::MonthRejected));
 
-	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll));
-	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::Int2CString(Statistics::YearA));
-	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::Int2CString(Statistics::YearB));
-	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::Int2CString(Statistics::YearC));
-	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::Int2CString(Statistics::YearAll - Statistics::YearRejected));
+	GetDlgItem(IDC_LB_yearTotal)->SetWindowText(StringHelper::int2CString(Statistics::YearAll));
+	GetDlgItem(IDC_LB_yearA)->SetWindowText(StringHelper::int2CString(Statistics::YearA));
+	GetDlgItem(IDC_LB_yearB)->SetWindowText(StringHelper::int2CString(Statistics::YearB));
+	GetDlgItem(IDC_LB_yearC)->SetWindowText(StringHelper::int2CString(Statistics::YearC));
+	GetDlgItem(IDC_LB_yearGood)->SetWindowText(StringHelper::int2CString(Statistics::YearAll - Statistics::YearRejected));
 
 	if (Statistics::TodayAll > 0)
 	{

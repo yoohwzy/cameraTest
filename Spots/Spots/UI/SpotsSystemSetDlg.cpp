@@ -47,19 +47,19 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 
 	int Worker_WaitTimeMSIn = 0;
 	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", Worker_WaitTimeMSIn))
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(StringHelper::Int2CString(Worker_WaitTimeMSIn));
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(StringHelper::int2CString(Worker_WaitTimeMSIn));
 	else
 		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(L"100");
 
 	int Worker_WaitTimeMSOut = 0;
 	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", Worker_WaitTimeMSOut))
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(StringHelper::Int2CString(Worker_WaitTimeMSOut));
+		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(StringHelper::int2CString(Worker_WaitTimeMSOut));
 	else
 		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(L"250");
 
 	int Worker_FrameTimeOut = 0;
 	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", Worker_FrameTimeOut))
-		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(StringHelper::Int2CString(Worker_FrameTimeOut));
+		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(StringHelper::int2CString(Worker_FrameTimeOut));
 	else
 		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(L"2000");
 

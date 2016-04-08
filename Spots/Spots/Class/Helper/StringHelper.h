@@ -18,9 +18,19 @@ public:
 		ss << i;
 		return ss.str();
 	}
-	static CString Int2CString(int i)
+	static string double2string(double d)
+	{
+		stringstream ss;
+		ss << d;
+		return ss.str();
+	}
+	static CString int2CString(int i)
 	{
 		return string2CString(int2string(i));
+	}
+	static CString double2CString(double d)
+	{
+		return string2CString(double2string(d));
 	}
 	static string CString2string(CString cstr)
 	{
