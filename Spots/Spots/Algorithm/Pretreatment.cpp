@@ -1,6 +1,6 @@
 #include "Pretreatment.h"
-#include "Judgement.h"
-
+#include <Eigen/Dense>
+#include <opencv2/core/eigen.hpp>
 
 using namespace cv;
 using namespace std;
@@ -13,7 +13,7 @@ using namespace std;
 #define STAMP_HEIGHT	30
 #define STAMP_SIZE		STAMP_WIDTH*STAMP_HEIGHT
 int kItemsToProduce = 10;   // 生产者生产的总数
-Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small;
+Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 vector<Rect> needContour;
 CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
@@ -198,7 +198,6 @@ bool defect_YoN(Mat &_Img)
 
 bool line_YoN(Rect _linesrect)
 {
-	Mat tempt = CannyImg(_linesrect);
 	bool flagbit = line_core(CannyImg(_linesrect));
 	if (flagbit)
 		return 1;//是划痕
@@ -308,7 +307,17 @@ Mat Pretreatment::Equalize(Mat &_Img)
 	Mat work_Img;
 	GaussianBlur(re_Img_small, re_Img_temp, Size(15, 15), 0, 0);//高斯模糊
 	resize(re_Img_temp, re_Img_big, Size(_Img.cols, _Img.rows), 0, 0, INTER_LINEAR);
+	Timer timer;
+	timer.start();
+	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> a;
+	cv2eigen(_Img, a);*/
+	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> b;
+	cv2eigen(re_Img_big, b);
+	a = a - b;*/
+	/*Mat work_Img(_Img.size(),CV_8UC1,sharpened.data());*/
 	absdiff(_Img, re_Img_big, work_Img);//求绝对差值预处理好的大图
+	timer.stop();
+	cout<<timer.getElapsedTimeInMilliSec()<<"ms"<<endl;
 	LUT(work_Img, E_lookUpTable, work_Img);
 	/*LUT(re_Img_small, E_lookUpTable, re_Img_small);*/
 	
@@ -423,6 +432,7 @@ void Pretreatment::Handwriting(Mat &_img)
 			mask_rect.width = (16 * mask_rect.width + 128 < Mask_result_small.cols) ? 16 * mask_rect.width + 128 : Mask_result_small.cols;
 			mask_rect.height = (16 * mask_rect.height + 128 < Mask_result_small.rows) ? 16 * mask_rect.height + 128 : Mask_result_small.rows;
 			rectangle(Mask_result_big, mask_rect, Scalar(255), -1);//制作掩膜
+
 			Faults::MarkPen markpen;
 			mask_rect.x += recImg.x;
 			mask_rect.y += recImg.y;
@@ -445,7 +455,6 @@ void Pretreatment::Handwriting(Mat &_img)
 					_faults->MarkPens.push_back(markpen);
 		}
 	}
-
 }
 
 //局部二值化的阈值选取
@@ -716,10 +725,7 @@ void Pretreatment::ProducerTask() // 生产者任务
 	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
 	if (_faults->MarkPens.size() != 0)
 	{
-		double t = (double)cv::getTickCount();
 		cv::max(MidImg, Mask_result_big, MidImg);
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		cout << t << endl;
 	}
 
 	Mat ThImgROI, MidImgROI;
@@ -783,8 +789,10 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
+	resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
 	resize(LMidImg, CannyImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
 	Canny(CannyImg, CannyImg, 40, 120);
+	bitwise_xor(CannyImg, Mask_result_line, CannyImg);
 	rectangle(CannyImg, Rect(Point(0, 0), Point(CannyImg.cols - 1, 100)), Scalar(0), -1);
 	rectangle(CannyImg, Rect(Point(0, CannyImg.rows - 101), Point(CannyImg.cols - 1, CannyImg.rows - 1)), Scalar(0), -1);//去除上下伪边缘
 	Mat Canny_contoursImg = CannyImg.clone();
@@ -815,22 +823,10 @@ void Pretreatment::linedetect()
 	}
 }
 
-void Pretreatment::data_import()//模板轮廓匹配预处理线程
-{
-	Mat cirlceImg(160, 160, CV_8UC1, Scalar(0));
-	ellipse(cirlceImg, Point(80, 80), Size(40, 30), 90.0, 0, 360, Scalar(255), -1, 8);//画椭圆
-	cv::findContours(cirlceImg, ecliptours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
-	Mat LineImg(160, 160, CV_8UC1, Scalar(0));
-	line(LineImg, Point(4, 80), Point(156, 80), Scalar(255), 2, 8);//画直线
-	cv::findContours(LineImg, Linecontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);//比较轮廓的标准
-}
-
 
 
 void Pretreatment::line2preprocess()
 {
-	
-	original_Img_L = original_Img_D.clone();//划痕检测原图
 	LMidImg = MidImg.clone();
 }
 
@@ -875,12 +871,12 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
-	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
+	//std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
 	producer.join();
 	consumer.join();
-	line.join();
+	/*line.join();*/
 	needContour.clear();
 	dilateneedcontours.clear();
 	CneedContours.clear();
