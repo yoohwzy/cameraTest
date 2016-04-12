@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <fstream>
+#include <omp.h>
 #include "Timer.h"  
 #include <mutex>
 #include <thread>

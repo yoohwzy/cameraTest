@@ -133,13 +133,18 @@ bool line_core(Mat &_Img)
 			int flagbit = 0;
 			for (int j = 0; j < _Img.rows-1; j++)
 			{
-				if (data[j] != 0 && data[j+1] == 0)
+				if (flagbit == 0)
 				{
-					if (flagbit == 0)
+					if (data[j] != 0 && data[j + 1] == 0)
+					{
 						flagbit = 1;
+					}
 				}
-				if (flagbit == 1 && data[j] != 0)
+				else if (data[j] != 0)
+				{
 					flagbit = 2;
+					break;
+				}
 			}
 			if (flagbit == 2)
 				flagline.push_back(1);
@@ -155,13 +160,18 @@ bool line_core(Mat &_Img)
 			int flagbit = 0;
 			for (int j = 0; j < _Img.rows - 1; j++)
 			{
-				if (data[j] != 0 && data[j + 1] == 0)
+				if (flagbit == 0)
 				{
-					if (flagbit == 0)
+					if (data[j] != 0 && data[j + 1] == 0)
+					{
 						flagbit = 1;
+					}
 				}
-				if (flagbit == 1 && data[j] != 0)
+				else if (data[j] != 0)
+				{
 					flagbit = 2;
+					break;
+				}	
 			}
 			if (flagbit == 2)
 				flagline.push_back(1);
@@ -170,10 +180,10 @@ bool line_core(Mat &_Img)
 		}
 	}	
 	int numcount = count(flagline.begin(), flagline.end(),1);
-	if (numcount < int(0.7*_Img.cols)&&numcount < int(0.7*_Img.rows))
-		return 0;
-	else
+	if (numcount > int(0.7*_Img.cols) && numcount > int(0.7*_Img.rows))
 		return 1;
+	else
+		return 0;
 }
 
 bool defect_YoN(Mat &_Img)
@@ -793,19 +803,18 @@ void Pretreatment::linedetect()
 	resize(LMidImg, CannyImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
 	Canny(CannyImg, CannyImg, 40, 120);
 	bitwise_xor(CannyImg, Mask_result_line, CannyImg);
-	rectangle(CannyImg, Rect(Point(0, 0), Point(CannyImg.cols - 1, 100)), Scalar(0), -1);
-	rectangle(CannyImg, Rect(Point(0, CannyImg.rows - 101), Point(CannyImg.cols - 1, CannyImg.rows - 1)), Scalar(0), -1);//去除上下伪边缘
 	Mat Canny_contoursImg = CannyImg.clone();
 	vector<vector<cv::Point>> linescontours;
 	findContours(Canny_contoursImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	for (int i = 0; i < linescontours.size(); i++)
 	{
+		Rect linerect = boundingRect(linescontours[i]);
+		Mat tempt = CannyImg(linerect);
 		if (linescontours[i].size() > 60)
 		{
 			vector<Point> km_contours;
 			convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
-			Rect linerect = boundingRect(linescontours[i]);
-			if (linerect.width*linerect.height < 2 * contourArea(km_contours))//检测是否为类划痕形状
+			if ((linerect.width-1)*(linerect.height-1) < 2 * int(contourArea(km_contours)))//检测是否为类划痕形状
 				continue;
 			if (line_YoN(linerect))
 			{
@@ -871,12 +880,12 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
-	//std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
+	std::thread line(std::mem_fn(&Pretreatment::linedetect), this);//划痕检测 
 	/*auto tn = line.native_handle();
 	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);*///线程优先级调整
 	producer.join();
 	consumer.join();
-	/*line.join();*/
+	line.join();
 	needContour.clear();
 	dilateneedcontours.clear();
 	CneedContours.clear();
