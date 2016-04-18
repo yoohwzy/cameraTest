@@ -124,8 +124,8 @@ Synthesizer::_Status Synthesizer::detectInner(cv::Mat grayImg)
 
 	//´É×©ÄÚ²¿È±ÏÝ¼ì²â
 	//ss << "´É×©ÄÚ²¿È±ÏÝ¼ì²â ¿ªÊ¼" << endl;
-	Pretreatment p;
-	p.pretreatment(grayImg, p_block, &faults);
+	//Pretreatment p;
+	//p.pretreatment(grayImg, p_block, &faults);
 
 	if (MFCConsole::IsOpened)
 	{

@@ -6,7 +6,7 @@
 #include <Algorithm/Base/Faults.h>
 
 
-#include <Algorithm/Pretreatment.h>
+//#include <Algorithm/Pretreatment.h>
 
 #include <Class\Debug\MFCConsole.h>
 

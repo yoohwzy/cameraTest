@@ -1,7 +1,7 @@
-#include "BlockEdgeDetector.h"
+#include "BlockEdgeLineDetector.h"
 
 
-BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults)
+BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	image = _img;
 	if (image.channels() == 3)
@@ -9,7 +9,7 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	p_block = _block;
 	p_faults = _faults;
 }
-void BlockEdgeDetector::Run()
+void BlockEdgeLineDetector::Run()
 {
 #ifdef BED_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
@@ -20,10 +20,10 @@ void BlockEdgeDetector::Run()
 	doLeft();
 	doRight();
 #else
-	thread t1 = thread(std::mem_fn(&BlockEdgeDetector::doUp), this);
-	thread t2 = thread(std::mem_fn(&BlockEdgeDetector::doDown), this);
-	thread t3 = thread(std::mem_fn(&BlockEdgeDetector::doLeft), this);
-	thread t4 = thread(std::mem_fn(&BlockEdgeDetector::doRight), this);
+	thread t1 = thread(std::mem_fn(&BlockEdgeLineDetector::doUp), this);
+	thread t2 = thread(std::mem_fn(&BlockEdgeLineDetector::doDown), this);
+	thread t3 = thread(std::mem_fn(&BlockEdgeLineDetector::doLeft), this);
+	thread t4 = thread(std::mem_fn(&BlockEdgeLineDetector::doRight), this);
 	t1.join();
 	t2.join();
 	t3.join();
@@ -31,76 +31,52 @@ void BlockEdgeDetector::Run()
 #endif
 }
 
-BlockEdgeDetector::~BlockEdgeDetector()
+BlockEdgeLineDetector::~BlockEdgeLineDetector()
 {
 	p_faults = NULL;
 	p_block = NULL;
 }
-void BlockEdgeDetector::doUp()
+void BlockEdgeLineDetector::doUp()
 {
-	const int ROI_WIDTH = 50;
-	const int ROI_HEIGHT = 66;
-	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
-
-	int index = 0;
-	vector<cv::Mat> reduceList;
-	vector<cv::Point> points;
-
-	//上边界
-	int startX = p_block->A.x + 50;
+	int lengthmm = 300;//边长（毫米）
+	Block::Line line = p_block->UpLine;
+	vector<cv::Point> dubiousPoints;
+	int startX = p_block->A.x + 5;
 	if (startX < 0)
 		startX = 0;
-	int endX = p_block->B.x - 50;
+	int endX = p_block->B.x - 5;
 	if (endX >= image.cols)
 		endX = image.cols - 1;
+	int inc = (float)(endX - startX) / lengthmm + 0.5;//范围增量
 
-
-	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
+	//粗略查找崩边
+	for (int x = startX; x < endX && x < image.cols; x += inc)
 	{
-		int x1 = x;
-		if (x < 0 || x >= image.cols)
-			continue;
-		if ((x + ROI_WIDTH) >= endX)
-			x1 = endX - ROI_WIDTH - 1;
-		if ((x + ROI_WIDTH) >= image.cols)
-			x1 = image.cols - ROI_WIDTH - 1;
+		int point_x = x;
+		int point_y = p_block->GetPonintByX(x, &line).y;
+		int deep = 0;
+		for (; deep < 100; deep++)
+		{
+			if (image.ptr<uchar>(point_y)[point_x + deep] > THRESHOD &&
+				image.ptr<uchar>(point_y)[point_x + deep + 1] > THRESHOD &&
+				image.ptr<uchar>(point_y)[point_x + deep + 2] > THRESHOD
+				)
+			{
+				break;
+			}
+		}
 
-		int y = p_block->GetPonintByX(x1, &p_block->UpLine).y;
-		if (y < 0 || y >= image.rows)
-			continue;
-
-		cv::Mat tmpROI = image(cv::Rect(x1, y, ROI_WIDTH, ROI_HEIGHT)).clone();
-		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
-		debug_ups.push_back(tmpROI);
-#endif
-		tmpROI.convertTo(tmpROI, CV_32F);
-
-		cv::Mat reduceImg;
-		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
-
-#ifdef SAVE_IMG
-		//保存图片
-		char num[10];
-		sprintf(num, "%03d", index);
-		string strnum(num);
-		stringstream ss;
-		ss << "EdgeInner\\U\\上_" << strnum << "_reduce.jpg";
-		cv::imwrite(ss.str(), reduceImg);
-		ss.str("");
-		ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
-		cv::imwrite(ss.str(), tmpROI);
-#endif
-		tmpROI.release();
-
-		reduceImg = reduceImg.t();
-		reduceList.push_back(reduceImg);
-		points.push_back(cv::Point(x, p_block->GetPonintByX(x, &p_block->UpLine).y));
+		if (deep > DEEP_THRESHOD)
+			dubiousPoints.push_back(cv::Point(point_x, point_y));
 	}
-	processUpDown(reduceList, points);
+	//细找崩边
 }
-void BlockEdgeDetector::doDown()
+int BlockEdgeLineDetector::getDeepUp(cv::Point p)
+{
+
+	return 0;
+}
+void BlockEdgeLineDetector::doDown()
 {
 	const int ROI_WIDTH = 50;
 	const int ROI_HEIGHT = 66;
@@ -111,12 +87,7 @@ void BlockEdgeDetector::doDown()
 	vector<cv::Point> points;
 	//下边界
 	int startX = p_block->D.x + 50;
-	if (startX < 0)
-		startX = 0;
 	int endX = p_block->C.x - 50;
-	if (endX >= image.cols)
-		endX = image.cols - 1;
-
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
 		int x1 = x;
@@ -165,7 +136,7 @@ void BlockEdgeDetector::doDown()
 	}
 	processUpDown(reduceList, points);
 }
-void BlockEdgeDetector::doLeft()
+void BlockEdgeLineDetector::doLeft()
 {
 	const int ROI_WIDTH = 66;
 	const int ROI_HEIGHT = 50;
@@ -176,11 +147,7 @@ void BlockEdgeDetector::doLeft()
 	vector<cv::Point> points;
 	//左边界
 	int startY = p_block->A.y + 150;
-	if (startY < 0)
-		startY = 0;
 	int endY = p_block->D.y - 150;
-	if (endY >= image.rows)
-		endY = image.rows - 1;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{
 		int y1 = y;
@@ -229,7 +196,7 @@ void BlockEdgeDetector::doLeft()
 	processLeftRight(reduceList, points);
 	//processAndSaveData(reduceList, points, "L\\左");
 }
-void BlockEdgeDetector::doRight()
+void BlockEdgeLineDetector::doRight()
 {
 	const int ROI_WIDTH = 66;
 	const int ROI_HEIGHT = 50;
@@ -240,11 +207,7 @@ void BlockEdgeDetector::doRight()
 	vector<cv::Point> points;
 	//右边界
 	int startY = p_block->B.y + 150;
-	if (startY < 0)
-		startY = 0;
 	int endY = p_block->D.y - 150;
-	if (endY >= image.rows)
-		endY = image.rows - 1;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{	
 		int y1 = y;
@@ -292,7 +255,7 @@ void BlockEdgeDetector::doRight()
 
 
 
-void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points)
+void BlockEdgeLineDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points)
 {
 #ifdef BED_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
@@ -325,7 +288,6 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
 			cv::Point maxLoc;
 			minMaxLoc(percent, NULL, &maxVal, NULL, &maxLoc);
-			if (maxdiff_X < maxVal) maxdiff_X = maxVal;//定标用统计
 			if (maxVal > DIFF_THRESHOLD)
 			{
 				int count = 0;
@@ -367,7 +329,6 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 						cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
 #endif
 				}
-				if (maxDeep_X < count) maxDeep_X = count;//定标用统计
 			}
 			continue;
 		}
@@ -415,7 +376,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 		}
 	}
 }
-void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points)
+void BlockEdgeLineDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points)
 {
 #ifdef BED_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
@@ -440,7 +401,6 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 			double maxVal = 0; //最大值一定要赋初值，否则运行时会报错
 			cv::Point maxLoc;
 			minMaxLoc(percent, NULL, &maxVal, NULL, &maxLoc);
-			if (maxdiff_Y < maxVal) maxdiff_Y = maxVal;//定标用统计
 			if (maxVal > DIFF_THRESHOLD)
 			{
 				int count = 0;
@@ -479,7 +439,6 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 					cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
 #endif
 				}
-				if (maxDeep_Y < count) maxDeep_Y = count;//定标用统计
 			}
 			continue;
 		}

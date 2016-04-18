@@ -117,12 +117,6 @@
     <ClInclude Include="UI\SpotsMainDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\Judgement.h">
-      <Filter>Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\Pretreatment.h">
-      <Filter>Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\Processor.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
@@ -202,12 +196,6 @@
     </ClCompile>
     <ClCompile Include="UI\SpotsMainDlg.cpp">
       <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\Judgement.cpp">
-      <Filter>Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\Pretreatment.cpp">
-      <Filter>Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\Processor.cpp">
       <Filter>Algorithm</Filter>
