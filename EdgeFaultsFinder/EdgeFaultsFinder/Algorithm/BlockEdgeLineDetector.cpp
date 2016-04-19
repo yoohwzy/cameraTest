@@ -16,9 +16,9 @@ void BlockEdgeLineDetector::Run()
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
 	doUp();
-	doDown(); 
-	doLeft();
-	doRight();
+	//doDown(); 
+	//doLeft();
+	//doRight();
 #else
 	thread t1 = thread(std::mem_fn(&BlockEdgeLineDetector::doUp), this);
 	thread t2 = thread(std::mem_fn(&BlockEdgeLineDetector::doDown), this);
@@ -38,7 +38,7 @@ BlockEdgeLineDetector::~BlockEdgeLineDetector()
 }
 void BlockEdgeLineDetector::doUp()
 {
-	int lengthmm = 300;//边长（毫米）
+	int lengthmm = 600;//边长（毫米）
 	Block::Line line = p_block->UpLine;
 	vector<cv::Point> dubiousPoints;
 	int startX = p_block->A.x + 5;
@@ -50,31 +50,97 @@ void BlockEdgeLineDetector::doUp()
 	int inc = (float)(endX - startX) / lengthmm + 0.5;//范围增量
 
 	//粗略查找崩边
-	for (int x = startX; x < endX && x < image.cols; x += inc)
+	for (int point_x = startX; point_x < endX && point_x < image.cols; point_x += inc)
 	{
-		int point_x = x;
-		int point_y = p_block->GetPonintByX(x, &line).y;
-		int deep = 0;
-		for (; deep < 100; deep++)
-		{
-			if (image.ptr<uchar>(point_y)[point_x + deep] > THRESHOD &&
-				image.ptr<uchar>(point_y)[point_x + deep + 1] > THRESHOD &&
-				image.ptr<uchar>(point_y)[point_x + deep + 2] > THRESHOD
-				)
-			{
-				break;
-			}
-		}
+		if (point_x < 0 || point_x >= image.cols)
+			continue;
 
+		int point_y = p_block->GetPonintByX(point_x, &line).y;
+		if (point_y < 0 || point_y >= image.rows)
+			continue;
+		int deep = getDeepUp(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 			dubiousPoints.push_back(cv::Point(point_x, point_y));
 	}
-	//细找崩边
+
+	//细找崩边，统计崩边长度
+	int lastend = 0;//上一轮循环的终点
+	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
+	for (int i = 0; i < dubiousPoints.size(); i++)
+	{
+		int start = dubiousPoints[i].x - inc - inc + 1;
+
+		if (start < lastend) 
+			start = lastend + 1;
+		else//如果崩边检测没有接上上一次的，则标记brokenEdgeIndex = -1
+			brokenEdgeIndex = -1;
+
+		if (start < startX)start = startX;
+
+		int end = dubiousPoints[i].x + inc + inc - 1;
+		if (end > endX)end = endX;
+		lastend = end;
+
+		for (int point_x = start; point_x <= end; point_x ++)
+		{
+			int point_y = p_block->GetPonintByX(point_x, &line).y;
+			if (point_y < 0 || point_y >= image.rows)
+				continue;
+			int deep = getDeepUp(cv::Point(point_x, point_y));
+			if (deep > DEEP_THRESHOD)
+			{
+#ifdef BED_OUTPUT_DEBUG_INFO
+				drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
+#endif
+				if (brokenEdgeIndex == -1)
+				{
+					Faults::BrokenEdge b;
+					b.deep = deep;
+					b.length = 1;
+					b.position = cv::Point(point_x, point_y);
+					p_faults->BrokenEdges.push_back(b);
+					brokenEdgeIndex = p_faults->BrokenEdges.size() - 1;
+				}
+				else
+				{
+					if (p_faults->BrokenEdges[brokenEdgeIndex].deep < deep)
+						p_faults->BrokenEdges[brokenEdgeIndex].deep = deep;
+					p_faults->BrokenEdges[brokenEdgeIndex].length++;
+					p_faults->BrokenEdges[brokenEdgeIndex].position = cv::Point(point_x - p_faults->BrokenEdges[brokenEdgeIndex].length / 2, point_y);
+				}
+			}
+			else
+			{
+				//一个崩边缺陷的结束
+				brokenEdgeIndex = -1;
+			}
+		}
+	}
 }
 int BlockEdgeLineDetector::getDeepUp(cv::Point p)
 {
+	int point_x = p.x;
+	int point_y = p.y;
 
-	return 0;
+	if (point_x < 0 || point_x >= image.cols)
+		return 0;
+	if (point_y < 0 || point_y >= image.rows)
+		return 0;
+
+	int deep = 0;
+	for (; deep < 50; deep++)
+	{
+		if (point_y + deep + 4 >= image.cols)
+			break;
+		if (image.ptr<uchar>(point_y + deep)[point_x] >= THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 1)[point_x] >= THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 2)[point_x] >= THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 3)[point_x] >= THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 4)[point_x] >= THRESHOD
+			)
+			break;
+	}
+	return deep;
 }
 void BlockEdgeLineDetector::doDown()
 {

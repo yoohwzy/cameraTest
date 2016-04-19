@@ -9,7 +9,8 @@
 
 #include "Algorithm\BlockLocalizer.h"
 #include "Algorithm\BlockEdgeDetector.h"
-#include "Algorithm\BlockEdgeDetectorT.h"
+//#include "Algorithm\BlockEdgeDetectorT.h"
+#include "Algorithm\BlockEdgeLineDetector.h"
 
 using namespace std;
 
@@ -88,6 +89,9 @@ void main(int argc, _TCHAR* argv[])
 		bed.FAULTS_SPAN = 4;
 		bed.FAULTS_COUNT = 5;
 		bed.Run();
+
+		BlockEdgeLineDetector beld = BlockEdgeLineDetector(img, &block, &faults);
+		beld.Run();
 
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 		cout << t << endl;
