@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BED_OUTPUT_DEBUG_INFO 1
+#define BELD_OUTPUT_DEBUG_INFO 1
 
 
 //崩边检测
@@ -18,7 +18,7 @@ public:
 	void Run();
 
 
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 	cv::Mat drowDebugResult;
 	vector<cv::Mat> debug_ups;
 	vector<cv::Mat> debug_downs;
@@ -26,11 +26,8 @@ public:
 	vector<cv::Mat> debug_rights;
 #endif
 
-	int THRESHOD = 10;//二值化阈值
 	//parameter
-	double DIFF_THRESHOLD = 7;	//两点差值百分比超过这个阈值则认为可能有缺陷
-	int FAULTS_SPAN = 4;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
-	int FAULTS_COUNT = 5;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+	int THRESHOD = 5;//边界确定阈值
 	int DEEP_THRESHOD = 5;//崩边超过这个深度
 private:
 
@@ -47,11 +44,14 @@ private:
 	void doRight();
 
 	int getDeepUp(cv::Point p);
+	int getDeepDown(cv::Point p);
+	int getDeepLeft(cv::Point p);
+	int getDeepRight(cv::Point p);
+	
 	//获得某点到左边的距离
 	//返回距离（pix）
 	int getDeepLeft(int x);
 
-	void processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points);
-	void processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points);
+	void processVBS(vector<Faults::BrokenEdge> vbs);
 };
 

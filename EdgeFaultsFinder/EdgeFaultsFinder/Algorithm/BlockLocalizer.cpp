@@ -10,7 +10,7 @@ BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 	NotFoundBlockFlag = true;//Î´ÕÒµ½´É×©±ê¼Ç
 	BrokenEdgeFlag = false;//ÓÐ±À±ßÈ±ÏÝ±ê¼Ç
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	bool test = 1;
 	if (img.channels() == 1)
 	{
@@ -34,7 +34,7 @@ void BlockLocalizer::Run()
 	{
 		return;
 	}
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	FindLeft();
 	FindRight();
 #else
@@ -57,7 +57,7 @@ void BlockLocalizer::Run()
 	NotFoundBlockFlag = false;
 
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).UpLine.k * (0 - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Point(drowDebugResult.cols, (*p_block).UpLine.k * (drowDebugResult.cols - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Scalar(0, 0, 255), 1);
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).DownLine.k * (0 - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Point(drowDebugResult.cols, (*p_block).DownLine.k * (drowDebugResult.cols - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Scalar(0, 255, 255), 1);
 	cv::line(drowDebugResult, cv::Point((drowDebugResult.rows - (*p_block).LeftLine.y0) / (*p_block).LeftLine.k + (*p_block).LeftLine.x0, drowDebugResult.rows), cv::Point((0 - (*p_block).LeftLine.y0) / (*p_block).LeftLine.k + (*p_block).LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
@@ -168,7 +168,7 @@ void BlockLocalizer::FindUp()
 
 
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	//debug»æÍ¼
 	for (int i = 0; i < uppoints.size(); i++)
 	{
@@ -238,7 +238,7 @@ void BlockLocalizer::FindLeft()
 	std::unique(leftpoints.begin(), leftpoints.end());
 
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	//debug»æÍ¼
 	for (int i = 0; i < leftpoints.size(); i++)
 	{
@@ -303,7 +303,7 @@ void BlockLocalizer::FindRight()
 	std::unique(rightpoints.begin(), rightpoints.end());
 
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	//debug»æÍ¼
 	for (int i = 0; i < rightpoints.size(); i++)
 	{
@@ -363,7 +363,7 @@ void BlockLocalizer::FindDown()
 	std::sort(downpoints.begin(), downpoints.end(), ORDER_BY_X_ASC);
 	std::unique(downpoints.begin(), downpoints.end());
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	//debug»æÍ¼
 	for (int i = 0; i < downpoints.size(); i++)
 	{
@@ -385,7 +385,7 @@ int BlockLocalizer::getYOnLine(cv::Point startPoint, int range, bool scanUp2Down
 
 	if (roiRect.height > ContinuePointCount && roiRect.width > 2)
 	{
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 		if (range == 400)
 			cv::rectangle(drowDebugDetectUD, roiRect, cv::Scalar(0, 0, 255));
 		else
@@ -465,7 +465,7 @@ int BlockLocalizer::getXOnRow(cv::Point startPoint, int range, bool scanLeft2rig
 
 	if (roiRect.width > ContinuePointCount && roiRect.height > 2)
 	{
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 		if (range == 400)
 			cv::rectangle(drowDebugDetectLR, roiRect, cv::Scalar(0, 0, 255));
 		else
@@ -696,7 +696,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		//be.position.y += updown ? be.deep / 2 : be.length;
 		p_faults->BrokenEdges.push_back(be);
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 		//debug»æÍ¼
 		for (int i = 0; i < errorPointIndex.size(); i++)
 		{
@@ -714,7 +714,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			be.deep = PIX_OFFSET;
 			be.length = ROW_SPAN;
 			p_faults->BrokenEdges.push_back(be);
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 			//debug»æÍ¼
 			cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
 #endif

@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BD_OUTPUT_DEBUG_INFO 1
+#define BL_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像
@@ -26,7 +26,7 @@ public:
 	bool BrokenEdgeFlag = false;//有崩边缺陷标记
 
 
-#ifdef BD_OUTPUT_DEBUG_INFO
+#ifdef BL_OUTPUT_DEBUG_INFO
 	//检测过程中的图片
 	cv::Mat drowDebugDetectLR;
 	cv::Mat drowDebugDetectUD;
