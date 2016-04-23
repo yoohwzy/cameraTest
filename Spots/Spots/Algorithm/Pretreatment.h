@@ -13,9 +13,6 @@
 #include "Base\Block.h"
 
 
-
-
-
 using namespace cv;
 using namespace std;
 
@@ -46,24 +43,21 @@ private:
 	vector<Point> locationpoints;
 	vector<Rect> CneedContours;
 	vector<vector<Rect>> Warehousecontours;
-	vector<vector<Point>> Linecontours;
-	vector<vector<cv::Point>> ecliptours;
 	float hranges[2];
 	const float *ranges[1];
 	int channels;
-	Mat Mask_result_big, Mask_result_small, BlurImg, lookUpTable, lookUpTable_main;
+	Mat Mask_result_big, Mask_result_small;
 	
 public:
 	
-	Mat Grow(Mat &image, Point seedpoint, int th_v);//种子点区域生长
-	int otsuThreshold(Mat &frame, MatND hist);//局部寻找可靠阈值
-	Mat Equalize(Mat &_Img);//瓷砖表面预处理高斯差分滤波与直方图均衡化
+	Mat Grow(Mat &image, const Point &seedpoint, const int th_v);//种子点区域生长
+	Mat Equalize(const Mat &_Img);//瓷砖表面预处理高斯差分滤波与直方图均衡化
 	void ProcessArea(Block *blockin);//确定瓷砖表面内部位置，A是左上，顺时针
-	int Maxdistance(vector<Point> vec);//给一组点集求出任意两点间的最大距离时间复杂度为nlogn
-	void Handwriting(Mat &_img);//判断是否存在人工笔迹
+	int otsuThreshold(const Mat &frame, const MatND &hist);//局部寻找可靠阈值
+	int Maxdistance(vector<Point> const &vec);//给一组点集求出任意两点间的最大距离时间复杂度为nlogn
+	void Handwriting(const Mat &_img);//判断是否存在人工笔迹
 	void line2preprocess();
 	void linedetect();
-	void data_import();
 	void ProduceItem(ItemRepository *ir, int item);
 	void ProducerTask();
 	int ConsumeItem(ItemRepository *ir);
