@@ -8,7 +8,6 @@
 #include "afxdialogex.h"
 
 #include <Class\Statistics\Statistics.h>
-#include <Class/Setting/SettingHelper.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -466,13 +465,6 @@ void CSpotsMainDlg::On32773()
 	SpotsSystemSetDlg m;
 	if (m.DoModal() == IDOK)
 	{
-		int si = 0;
-		SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
-		p_contrller->SAVE_IMG = si;
-
-		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", p_contrller->Worker_WaitTimeMSIn);
-		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", p_contrller->Worker_WaitTimeMSOut);
-		SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", p_contrller->Worker_FrameTimeOut);
 		p_contrller->ResetParameter();
 	}
 }
@@ -483,11 +475,6 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 	if (m.DoModal() == IDOK)
 	{
 		// ¿ØÖÆÆ÷
-		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", p_contrller->BlockLocalizer_THRESHOD);
-		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", p_contrller->BlockLocalizer_ContinuePointCount);
-		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", p_contrller->BlockEdgeDetector_DIFF_THRESHOLD);
-		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", p_contrller->BlockEdgeDetector_FAULTS_SPAN);
-		SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", p_contrller->BlockEdgeDetector_FAULTS_COUNT);
 		p_contrller->ResetParameter();
 	}
 }

@@ -95,10 +95,12 @@ void Worker::work()
 	Synthesizer s = Synthesizer(SN);
 	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+	s.BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
 	s.BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 	s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 	s.BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
+	s.BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
 
 	Synthesizer::Status status = s.Run(grayImg);
 	

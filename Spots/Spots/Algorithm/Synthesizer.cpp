@@ -1,6 +1,7 @@
 #include "Synthesizer.h"
 #include <Algorithm/BlockLocalizer.h>
 #include <Algorithm/BlockEdgeDetector.h>
+#include <Algorithm/BlockEdgeLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
 
 Synthesizer::Synthesizer(int _SN)
@@ -96,23 +97,39 @@ Synthesizer::_Status Synthesizer::positioning(cv::Mat grayImg)
 Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 {
 	double t = 0;
-	if (MFCConsole::IsOpened)
-		t = cv::getTickCount();
 	p_block->Lines2ABCD();
-	//进行定位
-	BlockEdgeDetector bed = BlockEdgeDetector(grayImg, p_block, &faults);
-	bed.DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-	bed.FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-	bed.FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-	bed.Run();
-
-
-	if (MFCConsole::IsOpened)
+	if (BlockEdgeDetector_Enable != 0)
 	{
-		stringstream ss;
-		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		ss << "定位算法BlockEdgeDetector：" << t << endl;
-		MFCConsole::Output(ss.str());
+		if (MFCConsole::IsOpened)
+			t = cv::getTickCount();
+		BlockEdgeDetector bed = BlockEdgeDetector(grayImg, p_block, &faults);
+		bed.DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		bed.FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		bed.FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+		bed.Run();
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+			ss << "算法BlockEdgeDetector：" << t << endl;
+			MFCConsole::Output(ss.str());
+		}
+	}
+	if (BlockEdgeLineDetector_Enable != 0)
+	{
+		if (MFCConsole::IsOpened)
+			t = cv::getTickCount();
+		BlockEdgeLineDetector  beld = BlockEdgeLineDetector(grayImg, p_block, &faults);
+		beld.DEEP_THRESHOD = 5;
+		beld.THRESHOD = 5;
+		beld.Run();
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+			ss << "算法BlockEdgeLineDetector：" << t << endl;
+			MFCConsole::Output(ss.str());
+		}
 	}
 	return _Status::_NEXT;
 }

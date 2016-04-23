@@ -124,8 +124,8 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_EnableAccess);
 	SettingHelper::AddKey("DATABASE", "ACCDB_ENABLE", pBtn->GetCheck());
 	saveParameter(IDC_TB_AccessPath, "DATABASE", "ACCDB_PATH");
-	pBtn = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
 	//²ÉÍ¼ÉèÖÃ
+	pBtn = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
 	SettingHelper::AddKey("SYS_IMG_CAPTURE", "SAVE_IMG", pBtn->GetCheck());
 	saveParameter(IDC_TB_Worker_WaitTimeMSIn, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn");
 	saveParameter(IDC_TB_Worker_WaitTimeMSOut, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut");

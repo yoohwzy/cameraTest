@@ -31,31 +31,43 @@ BOOL SpotsEdgeParameterSetDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	int BlockLocalizer_THRESHOD;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", BlockLocalizer_THRESHOD))//读取数据库所在路径
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", BlockLocalizer_THRESHOD))
 		GetDlgItem(IDC_TB_BlockLocalizer_THRESHOD)->SetWindowText(StringHelper::int2CString(BlockLocalizer_THRESHOD));
 	else
 		GetDlgItem(IDC_TB_BlockLocalizer_THRESHOD)->SetWindowText(L"10");
 
 	int BlockLocalizer_ContinuePointCount;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", BlockLocalizer_ContinuePointCount))//读取数据库所在路径
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", BlockLocalizer_ContinuePointCount))
 		GetDlgItem(IDC_TB_BlockLocalizer_ContinuePointCount)->SetWindowText(StringHelper::int2CString(BlockLocalizer_ContinuePointCount));
 	else
 		GetDlgItem(IDC_TB_BlockLocalizer_ContinuePointCount)->SetWindowText(L"30");
 
+
+
+
+
+
+	/*****边缘相似度算法*****/
+	int bedEnable = 1;
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_Enable", bedEnable))
+		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector))->SetCheck(bedEnable != 0);
+	else
+		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector))->SetCheck(1);
+
 	double BlockEdgeDetector_DIFF_THRESHOLD;
-	if (SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", BlockEdgeDetector_DIFF_THRESHOLD))//读取数据库所在路径
+	if (SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", BlockEdgeDetector_DIFF_THRESHOLD))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD)->SetWindowText(StringHelper::double2CString(BlockEdgeDetector_DIFF_THRESHOLD));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD)->SetWindowText(L"7");
 
 	int BlockEdgeDetector_FAULTS_SPAN;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", BlockEdgeDetector_FAULTS_SPAN))//读取数据库所在路径
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", BlockEdgeDetector_FAULTS_SPAN))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_SPAN)->SetWindowText(StringHelper::int2CString(BlockEdgeDetector_FAULTS_SPAN));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_SPAN)->SetWindowText(L"4");
 
 	int BlockEdgeDetector_FAULTS_COUNT;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", BlockEdgeDetector_FAULTS_COUNT))//读取数据库所在路径
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", BlockEdgeDetector_FAULTS_COUNT))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_COUNT)->SetWindowText(StringHelper::int2CString(BlockEdgeDetector_FAULTS_COUNT));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_COUNT)->SetWindowText(L"5");
@@ -115,6 +127,10 @@ void SpotsEdgeParameterSetDlg::OnBnClickedOk()
 	//保存设置
 	saveParameter(IDC_TB_BlockLocalizer_THRESHOD, "EDGE_PARAMETER", "IDC_TB_BlockLocalizer_THRESHOD");
 	saveParameter(IDC_TB_BlockLocalizer_ContinuePointCount, "EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount");
+
+
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector);
+	SettingHelper::AddKey("EDGE_PARAMETER", "BlockEdgeDetector_Enable", pBtn->GetCheck());
 	saveParameter(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD, "EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD");
 	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_SPAN, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN");
 	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_COUNT, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT");

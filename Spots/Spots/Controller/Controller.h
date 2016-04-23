@@ -71,7 +71,7 @@ public:
 
 	// 在设置中调整了系统参数后，调用本接口将参数更新至算法中。
 	void ResetParameter();
-
+	void LoadParameterFromIni();
 
 	/*****************虚拟相机模式方法*****************/
 	void VirtualSelectImg(cv::Mat);
@@ -80,17 +80,21 @@ public:
 	/*****************虚拟相机模式方法 End*****************/
 
 
+
 	/*****************参数*****************/
+	int Worker_WaitTimeMSIn = 100;
+	int Worker_WaitTimeMSOut = 250;
+	int Worker_FrameTimeOut = 2000;
+
 	double BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
 	double BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
 
+	int  BlockEdgeDetector_Enable = 1;
 	double BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
-	int Worker_WaitTimeMSIn = 100;
-	int Worker_WaitTimeMSOut = 250;
-	int Worker_FrameTimeOut = 2000;
+	int BlockEdgeLineDetector_Enable = 1;
 
 	bool SAVE_IMG = false;
 

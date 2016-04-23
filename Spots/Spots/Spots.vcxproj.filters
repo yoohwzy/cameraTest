@@ -171,6 +171,9 @@
     <ClInclude Include="UI\SpotsClassifySet.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\BlockEdgeLineDetector.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -244,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="UI\SpotsClassifySet.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\BlockEdgeLineDetector.cpp">
+      <Filter>Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
