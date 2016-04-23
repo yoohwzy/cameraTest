@@ -27,51 +27,51 @@ BOOL CSpotsClassifySet::OnInitDialog()
 
 	//缺边 长
 
-	int TB_EDGE_SINGLE_LENGTH_A;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_LENGTH_A", TB_EDGE_SINGLE_LENGTH_A))//读取数据库所在路径
+	double TB_EDGE_SINGLE_LENGTH_A;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_A", TB_EDGE_SINGLE_LENGTH_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_A)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_LENGTH_A));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_A)->SetWindowText(L"0");
 
-	int TB_EDGE_SINGLE_LENGTH_B;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_LENGTH_B", TB_EDGE_SINGLE_LENGTH_B))//读取数据库所在路径
+	double TB_EDGE_SINGLE_LENGTH_B;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_B", TB_EDGE_SINGLE_LENGTH_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_B)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_LENGTH_B));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_B)->SetWindowText(L"4");
 
-	int TB_EDGE_SINGLE_LENGTH_C;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_LENGTH_C", TB_EDGE_SINGLE_LENGTH_C))//读取数据库所在路径
+	double TB_EDGE_SINGLE_LENGTH_C;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_C", TB_EDGE_SINGLE_LENGTH_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_C)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_LENGTH_C));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_C)->SetWindowText(L"15");
 
-	int TB_EDGE_SINGLE_LENGTH_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_LENGTH_ACCEPT", TB_EDGE_SINGLE_LENGTH_ACCEPT))//读取数据库所在路径
+	double TB_EDGE_SINGLE_LENGTH_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_ACCEPT", TB_EDGE_SINGLE_LENGTH_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_LENGTH_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_LENGTH_ACCEPT)->SetWindowText(L"15");
 
 	//总长
-	int TB_EDGE_TOTAL_LENGTH_A;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_LENGTH_A", TB_EDGE_TOTAL_LENGTH_A))//读取数据库所在路径
+	double TB_EDGE_TOTAL_LENGTH_A;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_LENGTH_A", TB_EDGE_TOTAL_LENGTH_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_A)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_LENGTH_A));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_A)->SetWindowText(L"0");
 
-	int TB_EDGE_TOTAL_LENGTH_B;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_LENGTH_B", TB_EDGE_TOTAL_LENGTH_B))//读取数据库所在路径
+	double TB_EDGE_TOTAL_LENGTH_B;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_LENGTH_B", TB_EDGE_TOTAL_LENGTH_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_B)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_LENGTH_B));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_B)->SetWindowText(L"4");
 
-	int TB_EDGE_TOTAL_LENGTH_C;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_LENGTH_C", TB_EDGE_TOTAL_LENGTH_C))//读取数据库所在路径
+	double TB_EDGE_TOTAL_LENGTH_C;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_LENGTH_C", TB_EDGE_TOTAL_LENGTH_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_C)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_LENGTH_C));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_C)->SetWindowText(L"22");
 
-	int TB_EDGE_TOTAL_LENGTH_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_LENGTH_ACCEPT", TB_EDGE_TOTAL_LENGTH_ACCEPT))//读取数据库所在路径
+	double TB_EDGE_TOTAL_LENGTH_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_LENGTH_ACCEPT", TB_EDGE_TOTAL_LENGTH_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_LENGTH_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_LENGTH_ACCEPT)->SetWindowText(L"22");
@@ -79,51 +79,51 @@ BOOL CSpotsClassifySet::OnInitDialog()
 
 
 	//深度
-	int TB_EDGE_SINGLE_DEEP_A;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_DEEP_A", TB_EDGE_SINGLE_DEEP_A))//读取数据库所在路径
+	double TB_EDGE_SINGLE_DEEP_A;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_DEEP_A", TB_EDGE_SINGLE_DEEP_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_A)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_DEEP_A));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_A)->SetWindowText(L"0");
 
-	int TB_EDGE_SINGLE_DEEP_B;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_DEEP_B", TB_EDGE_SINGLE_DEEP_B))//读取数据库所在路径
+	double TB_EDGE_SINGLE_DEEP_B;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_DEEP_B", TB_EDGE_SINGLE_DEEP_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_B)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_DEEP_B));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_B)->SetWindowText(L"2");
 
-	int TB_EDGE_SINGLE_DEEP_C;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_DEEP_C", TB_EDGE_SINGLE_DEEP_C))//读取数据库所在路径
+	double TB_EDGE_SINGLE_DEEP_C;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_DEEP_C", TB_EDGE_SINGLE_DEEP_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_C)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_DEEP_C));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_C)->SetWindowText(L"2");
 
-	int TB_EDGE_SINGLE_DEEP_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_SINGLE_DEEP_ACCEPT", TB_EDGE_SINGLE_DEEP_ACCEPT))//读取数据库所在路径
+	double TB_EDGE_SINGLE_DEEP_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_DEEP_ACCEPT", TB_EDGE_SINGLE_DEEP_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_EDGE_SINGLE_DEEP_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_EDGE_SINGLE_DEEP_ACCEPT)->SetWindowText(L"2");
 
 	//总深度
-	int TB_EDGE_TOTAL_DEEP_A;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_DEEP_A", TB_EDGE_TOTAL_DEEP_A))//读取数据库所在路径
+	double TB_EDGE_TOTAL_DEEP_A;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_DEEP_A", TB_EDGE_TOTAL_DEEP_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_A)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_DEEP_A));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_A)->SetWindowText(L"0");
 
-	int TB_EDGE_TOTAL_DEEP_B;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_DEEP_B", TB_EDGE_TOTAL_DEEP_B))//读取数据库所在路径
+	double TB_EDGE_TOTAL_DEEP_B;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_DEEP_B", TB_EDGE_TOTAL_DEEP_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_B)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_DEEP_B));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_B)->SetWindowText(L"5");
 
-	int TB_EDGE_TOTAL_DEEP_C;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_DEEP_C", TB_EDGE_TOTAL_DEEP_C))//读取数据库所在路径
+	double TB_EDGE_TOTAL_DEEP_C;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_DEEP_C", TB_EDGE_TOTAL_DEEP_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_C)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_DEEP_C));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_C)->SetWindowText(L"5");
 
-	int TB_EDGE_TOTAL_DEEP_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "EDGE_TOTAL_DEEP_ACCEPT", TB_EDGE_TOTAL_DEEP_ACCEPT))//读取数据库所在路径
+	double TB_EDGE_TOTAL_DEEP_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "EDGE_TOTAL_DEEP_ACCEPT", TB_EDGE_TOTAL_DEEP_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_EDGE_TOTAL_DEEP_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_EDGE_TOTAL_DEEP_ACCEPT)->SetWindowText(L"5");
@@ -132,52 +132,52 @@ BOOL CSpotsClassifySet::OnInitDialog()
 
 	//凹凸
 
-	int TB_HOAL_DIAMETER_A;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_DIAMETER_A", TB_HOAL_DIAMETER_A))//读取数据库所在路径
+	double TB_HOAL_DIAMETER_A;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_DIAMETER_A", TB_HOAL_DIAMETER_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_A)->SetWindowText(StringHelper::int2CString(TB_HOAL_DIAMETER_A));
 	else
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_A)->SetWindowText(L"0");
 
-	int TB_HOAL_DIAMETER_B;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_DIAMETER_B", TB_HOAL_DIAMETER_B))//读取数据库所在路径
+	double TB_HOAL_DIAMETER_B;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_DIAMETER_B", TB_HOAL_DIAMETER_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_B)->SetWindowText(StringHelper::int2CString(TB_HOAL_DIAMETER_B));
 	else
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_B)->SetWindowText(L"1");
 
-	int TB_HOAL_DIAMETER_C;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_DIAMETER_C", TB_HOAL_DIAMETER_C))//读取数据库所在路径
+	double TB_HOAL_DIAMETER_C;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_DIAMETER_C", TB_HOAL_DIAMETER_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_C)->SetWindowText(StringHelper::int2CString(TB_HOAL_DIAMETER_C));
 	else
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_C)->SetWindowText(L"1");
 
-	int TB_HOAL_DIAMETER_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_DIAMETER_ACCEPT", TB_HOAL_DIAMETER_ACCEPT))//读取数据库所在路径
+	double TB_HOAL_DIAMETER_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_DIAMETER_ACCEPT", TB_HOAL_DIAMETER_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_HOAL_DIAMETER_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_HOAL_DIAMETER_ACCEPT)->SetWindowText(L"1");
 
 
 
-	int TB_HOAL_COUNT_A;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_COUNT_A", TB_HOAL_COUNT_A))//读取数据库所在路径
+	double TB_HOAL_COUNT_A;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_COUNT_A", TB_HOAL_COUNT_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_COUNT_A)->SetWindowText(StringHelper::int2CString(TB_HOAL_COUNT_A));
 	else
 		GetDlgItem(IDC_TB_HOAL_COUNT_A)->SetWindowText(L"0");
 
-	int TB_HOAL_COUNT_B;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_COUNT_B", TB_HOAL_COUNT_B))//读取数据库所在路径
+	double TB_HOAL_COUNT_B;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_COUNT_B", TB_HOAL_COUNT_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_COUNT_B)->SetWindowText(StringHelper::int2CString(TB_HOAL_COUNT_B));
 	else
 		GetDlgItem(IDC_TB_HOAL_COUNT_B)->SetWindowText(L"3");
 
-	int TB_HOAL_COUNT_C;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_COUNT_C", TB_HOAL_COUNT_C))//读取数据库所在路径
+	double TB_HOAL_COUNT_C;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_COUNT_C", TB_HOAL_COUNT_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_COUNT_C)->SetWindowText(StringHelper::int2CString(TB_HOAL_COUNT_C));
 	else
 		GetDlgItem(IDC_TB_HOAL_COUNT_C)->SetWindowText(L"10");
 
-	int TB_HOAL_COUNT_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "HOAL_COUNT_ACCEPT", TB_HOAL_COUNT_ACCEPT))//读取数据库所在路径
+	double TB_HOAL_COUNT_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "HOAL_COUNT_ACCEPT", TB_HOAL_COUNT_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_HOAL_COUNT_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_HOAL_COUNT_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_HOAL_COUNT_ACCEPT)->SetWindowText(L"10");
@@ -187,51 +187,51 @@ BOOL CSpotsClassifySet::OnInitDialog()
 
 	//划痕 长
 
-	int TB_SCRATCH_SINGLE_LENGTH_A;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_SINGLE_LENGTH_A", TB_SCRATCH_SINGLE_LENGTH_A))//读取数据库所在路径
+	double TB_SCRATCH_SINGLE_LENGTH_A;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_SINGLE_LENGTH_A", TB_SCRATCH_SINGLE_LENGTH_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_A)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_SINGLE_LENGTH_A));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_A)->SetWindowText(L"20");
 
-	int TB_SCRATCH_SINGLE_LENGTH_B;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_SINGLE_LENGTH_B", TB_SCRATCH_SINGLE_LENGTH_B))//读取数据库所在路径
+	double TB_SCRATCH_SINGLE_LENGTH_B;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_SINGLE_LENGTH_B", TB_SCRATCH_SINGLE_LENGTH_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_B)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_SINGLE_LENGTH_B));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_B)->SetWindowText(L"30");
 
-	int TB_SCRATCH_SINGLE_LENGTH_C;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_SINGLE_LENGTH_C", TB_SCRATCH_SINGLE_LENGTH_C))//读取数据库所在路径
+	double TB_SCRATCH_SINGLE_LENGTH_C;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_SINGLE_LENGTH_C", TB_SCRATCH_SINGLE_LENGTH_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_C)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_SINGLE_LENGTH_C));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_C)->SetWindowText(L"50");
 
-	int TB_SCRATCH_SINGLE_LENGTH_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_SINGLE_LENGTH_ACCEPT", TB_SCRATCH_SINGLE_LENGTH_ACCEPT))//读取数据库所在路径
+	double TB_SCRATCH_SINGLE_LENGTH_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_SINGLE_LENGTH_ACCEPT", TB_SCRATCH_SINGLE_LENGTH_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_SINGLE_LENGTH_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_SINGLE_LENGTH_ACCEPT)->SetWindowText(L"50");
 
 	//总长
-	int TB_SCRATCH_TOTAL_LENGTH_A;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_TOTAL_LENGTH_A", TB_SCRATCH_TOTAL_LENGTH_A))//读取数据库所在路径
+	double TB_SCRATCH_TOTAL_LENGTH_A;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_TOTAL_LENGTH_A", TB_SCRATCH_TOTAL_LENGTH_A))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_A)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_TOTAL_LENGTH_A));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_A)->SetWindowText(L"30");
 
-	int TB_SCRATCH_TOTAL_LENGTH_B;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_TOTAL_LENGTH_B", TB_SCRATCH_TOTAL_LENGTH_B))//读取数据库所在路径
+	double TB_SCRATCH_TOTAL_LENGTH_B;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_TOTAL_LENGTH_B", TB_SCRATCH_TOTAL_LENGTH_B))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_B)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_TOTAL_LENGTH_B));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_B)->SetWindowText(L"60");
 
-	int TB_SCRATCH_TOTAL_LENGTH_C;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_TOTAL_LENGTH_C", TB_SCRATCH_TOTAL_LENGTH_C))//读取数据库所在路径
+	double TB_SCRATCH_TOTAL_LENGTH_C;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_TOTAL_LENGTH_C", TB_SCRATCH_TOTAL_LENGTH_C))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_C)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_TOTAL_LENGTH_C));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_C)->SetWindowText(L"100");
 
-	int TB_SCRATCH_TOTAL_LENGTH_ACCEPT;
-	if (SettingHelper::GetKeyInt("Classify", "SCRATCH_TOTAL_LENGTH_ACCEPT", TB_SCRATCH_TOTAL_LENGTH_ACCEPT))//读取数据库所在路径
+	double TB_SCRATCH_TOTAL_LENGTH_ACCEPT;
+	if (SettingHelper::GetKeyDouble("Classify", "SCRATCH_TOTAL_LENGTH_ACCEPT", TB_SCRATCH_TOTAL_LENGTH_ACCEPT))//读取数据库所在路径
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_ACCEPT)->SetWindowText(StringHelper::int2CString(TB_SCRATCH_TOTAL_LENGTH_ACCEPT));
 	else
 		GetDlgItem(IDC_TB_SCRATCH_TOTAL_LENGTH_ACCEPT)->SetWindowText(L"100");

@@ -110,11 +110,55 @@ void Worker::work()
 		cv::line(grayImg, cv::Point(0, s.p_block->DownLine.k * (0 - s.p_block->DownLine.x0) + s.p_block->DownLine.y0), cv::Point(grayImg.cols, s.p_block->DownLine.k * (grayImg.cols - s.p_block->DownLine.x0) + s.p_block->DownLine.y0), cv::Scalar(0, 255, 255), 1);
 		cv::line(grayImg, cv::Point((grayImg.rows - s.p_block->LeftLine.y0) / s.p_block->LeftLine.k + s.p_block->LeftLine.x0, grayImg.rows), cv::Point((0 - s.p_block->LeftLine.y0) / s.p_block->LeftLine.k + s.p_block->LeftLine.x0, 0), cv::Scalar(0, 255, 0), 1);
 		cv::line(grayImg, cv::Point((grayImg.rows - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, grayImg.rows), cv::Point((0 - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
+
+
+		int type = 1;
+		//产品分级
+		if (1 == 1)//崩边
+		{
+			int _EDGE_TOTAL_LENGTH = 0;//崩边总长度
+			int _EDGE_SINGLE_DEEP = 0;//崩边总深度
+			for (int i = 0; i < s.faults.BrokenEdges.size(); i++)
+			{
+				if (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_ACCEPT || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_ACCEPT)
+				{
+					type = 4;
+					break;
+				}
+				if (type < 3 && (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_C || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_C))
+				{
+					type = 3;
+				}
+				if (type < 2 && (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_B || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_B))
+				{
+					type = 2;
+				}
+				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length;
+				_EDGE_SINGLE_DEEP += s.faults.BrokenEdges[i].deep;
+			}
+			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_ACCEPT || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_ACCEPT)
+				type = 4;
+			if (type < 3 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_C || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_C))
+				type = 3;
+			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_B || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_B))
+				type = 2;
+		}
+
+		if (type != 4)
+		for (size_t i = 0; i < s.faults.Crazings.size(); i++)
+		{
+
+		}
+		P_Controller->ShowWorkResult(grayImg, type);
+	}
+	else
+	{
+
 	}
 
-	//显示结果
-	P_Controller->ShowWorkResult(grayImg, 1);
 
+
+	//显示结果
 	MyStatus = WorkerStatus::Done;
 	return;
 }

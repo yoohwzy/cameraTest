@@ -47,6 +47,54 @@ public:
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
+
+	/**************分级参数*************/
+
+	//边参数
+	double Classify_EDGE_SINGLE_LENGTH_A = 0;
+	double Classify_EDGE_SINGLE_LENGTH_B = 0;
+	double Classify_EDGE_SINGLE_LENGTH_C = 0;
+	double Classify_EDGE_SINGLE_LENGTH_ACCEPT = 0;
+
+	double Classify_EDGE_TOTAL_LENGTH_A = 0;
+	double Classify_EDGE_TOTAL_LENGTH_B = 0;
+	double Classify_EDGE_TOTAL_LENGTH_C = 0;
+	double Classify_EDGE_TOTAL_LENGTH_ACCEPT = 0;
+
+	double Classify_EDGE_SINGLE_DEEP_A = 0;
+	double Classify_EDGE_SINGLE_DEEP_B = 0;
+	double Classify_EDGE_SINGLE_DEEP_C = 0;
+	double Classify_EDGE_SINGLE_DEEP_ACCEPT = 0;
+
+	double Classify_EDGE_TOTAL_DEEP_A = 0;
+	double Classify_EDGE_TOTAL_DEEP_B = 0;
+	double Classify_EDGE_TOTAL_DEEP_C = 0;
+	double Classify_EDGE_TOTAL_DEEP_ACCEPT = 0;
+
+	//凹坑参数
+	double Classify_HOAL_DIAMETER_A = 0;
+	double Classify_HOAL_DIAMETER_B = 0;
+	double Classify_HOAL_DIAMETER_C = 0;
+	double Classify_HOAL_DIAMETER_ACCEPT = 0;
+
+	double Classify_HOAL_COUNT_A = 0;
+	double Classify_HOAL_COUNT_B = 0;
+	double Classify_HOAL_COUNT_C = 0;
+	double Classify_HOAL_COUNT_ACCEPT = 0;
+
+
+	//划痕
+	double Classify_SCRATCH_SINGLE_LENGTH_A = 0;
+	double Classify_SCRATCH_SINGLE_LENGTH_B = 0;
+	double Classify_SCRATCH_SINGLE_LENGTH_C = 0;
+	double Classify_SCRATCH_SINGLE_LENGTH_ACCEPT = 0;
+
+	double Classify_SCRATCH_TOTAL_LENGTH_A = 0;
+	double Classify_SCRATCH_TOTAL_LENGTH_B = 0;
+	double Classify_SCRATCH_TOTAL_LENGTH_C = 0;
+	double Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = 0;
+
+
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
 	// 直接读取N张图片

@@ -94,6 +94,54 @@ public:
 
 	bool SAVE_IMG = false;
 
+
+	/**************分级参数*************/
+
+	//边参数
+	double Classify_EDGE_SINGLE_LENGTH_A = -1;
+	double Classify_EDGE_SINGLE_LENGTH_B = -1;
+	double Classify_EDGE_SINGLE_LENGTH_C = -1;
+	double Classify_EDGE_SINGLE_LENGTH_ACCEPT = -1;
+
+	double Classify_EDGE_TOTAL_LENGTH_A = -1;
+	double Classify_EDGE_TOTAL_LENGTH_B = -1;
+	double Classify_EDGE_TOTAL_LENGTH_C = -1;
+	double Classify_EDGE_TOTAL_LENGTH_ACCEPT = -1;
+
+	double Classify_EDGE_SINGLE_DEEP_A = -1;
+	double Classify_EDGE_SINGLE_DEEP_B = -1;
+	double Classify_EDGE_SINGLE_DEEP_C = -1;
+	double Classify_EDGE_SINGLE_DEEP_ACCEPT = -1;
+
+	double Classify_EDGE_TOTAL_DEEP_A = -1;
+	double Classify_EDGE_TOTAL_DEEP_B = -1;
+	double Classify_EDGE_TOTAL_DEEP_C = -1;
+	double Classify_EDGE_TOTAL_DEEP_ACCEPT = -1;
+
+	//凹坑参数
+	double Classify_HOAL_DIAMETER_A = -1;
+	double Classify_HOAL_DIAMETER_B = -1;
+	double Classify_HOAL_DIAMETER_C = -1;
+	double Classify_HOAL_DIAMETER_ACCEPT = -1;
+
+	double Classify_HOAL_COUNT_A = -1;
+	double Classify_HOAL_COUNT_B = -1;
+	double Classify_HOAL_COUNT_C = -1;
+	double Classify_HOAL_COUNT_ACCEPT = -1;
+
+
+	//划痕
+	double Classify_SCRATCH_SINGLE_LENGTH_A = -1;
+	double Classify_SCRATCH_SINGLE_LENGTH_B = -1;
+	double Classify_SCRATCH_SINGLE_LENGTH_C = -1;
+	double Classify_SCRATCH_SINGLE_LENGTH_ACCEPT = -1;
+
+	double Classify_SCRATCH_TOTAL_LENGTH_A = -1;
+	double Classify_SCRATCH_TOTAL_LENGTH_B = -1;
+	double Classify_SCRATCH_TOTAL_LENGTH_C = -1;
+	double Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = -1;
+
+
 private:
 	void release();
 	//HWND handle_mainWindow;
