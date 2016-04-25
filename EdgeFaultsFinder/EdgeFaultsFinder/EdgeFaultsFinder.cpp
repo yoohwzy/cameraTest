@@ -61,7 +61,7 @@ void main(int argc, _TCHAR* argv[])
 
 
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		cout << t << endl;
+		cout << "BlockLocalizer:" << t << endl;
 		t = cv::getTickCount();
 
 		if (bl.NotFoundBlockFlag == true)
@@ -83,18 +83,23 @@ void main(int argc, _TCHAR* argv[])
 			cv::waitKey(0);
 			continue;
 		}
-
+		t = cv::getTickCount();
 		BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
 		bed.DIFF_THRESHOLD = 0.4;
 		bed.FAULTS_SPAN = 4;
 		bed.FAULTS_COUNT = 5;
 		bed.Run();
+		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+		cout << "BlockEdgeDetector:" << t << endl;
+		t = cv::getTickCount();
+
+
 
 		BlockEdgeLineDetector beld = BlockEdgeLineDetector(img, &block, &faults);
 		beld.Run();
 
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		cout << t << endl;
+		cout << "BlockEdgeLineDetector:" << t << endl;
 		t = cv::getTickCount();
 
 
@@ -109,7 +114,7 @@ void main(int argc, _TCHAR* argv[])
 		{
 			for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
 			{
-				cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+				cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 5);
 			}
 			//arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 		}
