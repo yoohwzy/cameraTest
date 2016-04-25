@@ -56,8 +56,8 @@ void BlockLocalizer::Run()
 	p_block->Lines2ABCD();
 	NotFoundBlockFlag = false;
 
-	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
-	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
+	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (double)(abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
+	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (double)(abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
 #ifdef BL_OUTPUT_DEBUG_INFO
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).UpLine.k * (0 - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Point(drowDebugResult.cols, (*p_block).UpLine.k * (drowDebugResult.cols - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Scalar(0, 0, 255), 1);
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).DownLine.k * (0 - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Point(drowDebugResult.cols, (*p_block).DownLine.k * (drowDebugResult.cols - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Scalar(0, 255, 255), 1);

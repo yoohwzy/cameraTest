@@ -11,7 +11,7 @@ BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Fault
 }
 void BlockEdgeLineDetector::Run()
 {
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
@@ -58,7 +58,7 @@ void BlockEdgeLineDetector::doUp()
 		int deep = getDeepUp(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -109,7 +109,7 @@ void BlockEdgeLineDetector::doDown()
 		int deep = getDeepDown(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -160,7 +160,7 @@ void BlockEdgeLineDetector::doLeft()
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -210,7 +210,7 @@ void BlockEdgeLineDetector::doRight()
 		int deep = getDeepRight(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -345,7 +345,7 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUp
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
-		if (vbs[i].length < 3)
+		if (vbs[i].length < 10 && vbs[i].deep  < 10)
 			continue;
 		else
 		{

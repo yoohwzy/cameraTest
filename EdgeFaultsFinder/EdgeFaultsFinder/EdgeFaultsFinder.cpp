@@ -33,8 +33,8 @@ void main(int argc, _TCHAR* argv[])
 		//ss << "D://出差//2015.12.30//2//" << index << "_o原图.jpg";
 
 		//cv::Mat img = cv::imread(ss.str(), 0);
-		cv::Mat img = cv::imread("D://16_o原图7.jpg", 0);
-		//cv::Mat img = cv::imread("D://6_2_o原图.jpg", 0);
+		//cv::Mat img = cv::imread("D://16_o原图7.jpg", 0);
+		cv::Mat img = cv::imread("D://6_2_o原图.jpg", 0);
 		//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//2_o原图.jpg", 0);
 
 		if (img.rows == 0)
@@ -49,6 +49,8 @@ void main(int argc, _TCHAR* argv[])
 		double t = cv::getTickCount();
 		Faults faults;
 		Block block = Block(img.cols, img.rows);
+		block.Real_LengthMM = 600;
+		block.Real_WidthMM = 300;
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 		cout << t << endl;
 		t = cv::getTickCount();
