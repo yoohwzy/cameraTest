@@ -408,7 +408,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
 				be.deep_mm = be.deep * p_block->Axis_X_mmPerPix;
-				be.length = be.length * p_block->Axis_Y_mmPerPix;
+				be.length_mm = be.length * p_block->Axis_Y_mmPerPix;
 
 				p_faults->BrokenEdges.push_back(be);
 
@@ -523,7 +523,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
 				be.deep_mm = be.deep * p_block->Axis_Y_mmPerPix;
-				be.length = be.length * p_block->Axis_X_mmPerPix;
+				be.length_mm = be.length * p_block->Axis_X_mmPerPix;
 
 				p_faults->BrokenEdges.push_back(be);
 				startIndex = errorPointsIndex[i];

@@ -82,6 +82,8 @@ public:
 
 
 	/*****************参数*****************/
+	int Real_WidthMM = 600;//图像中瓷砖的横长
+	int Real_LengthMM = 300;//图像中瓷砖的纵长
 	int Worker_WaitTimeMSIn = 100;
 	int Worker_WaitTimeMSOut = 250;
 	int Worker_FrameTimeOut = 2000;

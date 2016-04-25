@@ -201,7 +201,8 @@ void Controller::LoadParameterFromIni()
 	int si = 0;
 	SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
 	this->SAVE_IMG = si;
-
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", this->Worker_WaitTimeMSIn);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", this->Worker_WaitTimeMSOut);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", this->Worker_FrameTimeOut);
@@ -268,6 +269,8 @@ void Controller::ResetParameter()
 	LoadParameterFromIni();
 	if (worker1 != NULL)
 	{
+		worker1->Real_WidthMM = Real_WidthMM;
+		worker1->Real_LengthMM = Real_LengthMM;
 		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 		worker1->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
@@ -330,6 +333,8 @@ void Controller::ResetParameter()
 	}
 	if (worker2 != NULL)
 	{
+		worker2->Real_WidthMM = Real_WidthMM;
+		worker2->Real_LengthMM = Real_LengthMM;
 		worker2->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 		worker2->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 		worker2->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;

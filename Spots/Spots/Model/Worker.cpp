@@ -92,7 +92,7 @@ void Worker::work()
 
 
 	//开始图像处理
-	Synthesizer s = Synthesizer(SN);
+	Synthesizer s = Synthesizer(SN, Real_WidthMM, Real_LengthMM);
 	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 	s.BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
@@ -118,32 +118,36 @@ void Worker::work()
 		//产品分级
 		if (1 == 1)//崩边
 		{
-			int _EDGE_TOTAL_LENGTH = 0;//崩边总长度
-			int _EDGE_SINGLE_DEEP = 0;//崩边总深度
+			double _EDGE_TOTAL_LENGTH = 0;//崩边总长度
+			double _EDGE_TOTAL_DEEP = 0;//崩边总深度
 			for (int i = 0; i < s.faults.BrokenEdges.size(); i++)
 			{
-				if (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_ACCEPT || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_ACCEPT)
+				if (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_ACCEPT || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_ACCEPT)
 				{
 					type = 4;
 					break;
 				}
-				if (type < 3 && (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_C || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_C))
+				if (type < 3 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_C || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_C))
 				{
 					type = 3;
 				}
-				if (type < 2 && (s.faults.BrokenEdges[i].length > Classify_EDGE_SINGLE_LENGTH_B || s.faults.BrokenEdges[i].deep > Classify_EDGE_SINGLE_DEEP_B))
+				if (type < 2 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_B || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_B))
 				{
 					type = 2;
 				}
-				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length;
-				_EDGE_SINGLE_DEEP += s.faults.BrokenEdges[i].deep;
+				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length_mm;
+				_EDGE_TOTAL_DEEP += s.faults.BrokenEdges[i].deep_mm;
 			}
-			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_ACCEPT || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_ACCEPT)
+			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_ACCEPT || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_ACCEPT)
 				type = 4;
-			if (type < 3 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_C || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_C))
+			if (type < 3 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_C || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_C))
 				type = 3;
-			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_B || _EDGE_SINGLE_DEEP > Classify_EDGE_SINGLE_DEEP_B))
+			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_B || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_B))
 				type = 2;
+			stringstream ss;
+			ss << "崩边总长=" << _EDGE_TOTAL_LENGTH << "mm" << endl;
+			ss << "崩边总深=" << _EDGE_TOTAL_DEEP << "mm" << endl;
+			MFCConsole::Output(ss.str());
 		}
 
 		if (type != 4)
@@ -157,7 +161,6 @@ void Worker::work()
 	{
 
 	}
-
 
 
 	//显示结果

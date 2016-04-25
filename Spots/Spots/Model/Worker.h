@@ -11,14 +11,6 @@ extern class Controller;
 class Worker
 {
 public:
-	//需要设置的参数
-	int WaitTimeMSIn = 50;//等待瓷砖进入拍摄区的时间
-	int WaitTimeMSOut = 50;//等待瓷砖离开拍摄区的时间
-	int FrameTimeOut = 2000;//拍摄超时时间
-	// 瓷砖序列号
-	int SN = 0;
-
-
 	//初始化时若传入指针为NULL，则表示使用虚拟相机。
 	Worker(E2VBuffer *_e2vbuffer = NULL);
 	~Worker();
@@ -39,7 +31,19 @@ public:
 
 	Controller *P_Controller = NULL;
 
+
+
+	//需要设置的参数
+	int Real_WidthMM = 600;//图像中瓷砖的横长
+	int Real_LengthMM = 300;//图像中瓷砖的纵长
+	int WaitTimeMSIn = 50;//等待瓷砖进入拍摄区的时间
+	int WaitTimeMSOut = 50;//等待瓷砖离开拍摄区的时间
+	int FrameTimeOut = 2000;//拍摄超时时间
+	// 瓷砖序列号
+	int SN = 0;
+
 	//edge 参数
+
 	double BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
 	double BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
 
@@ -98,6 +102,9 @@ public:
 
 
 private:
+	//double axis_x_mmPerPix = 1;//x轴方向上每像素代表多少毫米
+	//double axis_y_mmPerPix = 1;//y轴方向上每像素代表多少毫米
+
 	E2VBuffer *p_e2vbuffer = NULL;
 	// 直接读取N张图片
 	void work();

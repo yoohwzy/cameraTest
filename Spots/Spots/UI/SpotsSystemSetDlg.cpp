@@ -63,6 +63,21 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 	else
 		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(L"2000");
 
+
+
+	int Real_WidthMM = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM))
+		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(StringHelper::int2CString(Real_WidthMM));
+	else
+		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(L"600");
+
+	int Real_LengthMM = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM))
+		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(StringHelper::int2CString(Real_LengthMM));
+	else
+		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(L"300");
+
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -130,8 +145,8 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	saveParameter(IDC_TB_Worker_WaitTimeMSIn, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn");
 	saveParameter(IDC_TB_Worker_WaitTimeMSOut, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut");
 	saveParameter(IDC_TB_Worker_FrameTimeOut, "SYS_IMG_CAPTURE", "Worker_FrameTimeOut");
-
-
+	saveParameter(IDC_TB_Real_WidthMM, "SYS_IMG_CAPTURE", "Real_WidthMM");
+	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Real_LengthMM");
 
 
 	CDialogEx::OnOK();
