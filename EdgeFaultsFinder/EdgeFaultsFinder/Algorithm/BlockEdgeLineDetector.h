@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BELD_OUTPUT_DEBUG_INFO 1
+//#define BELD_OUTPUT_DEBUG_INFO 1
 
 
 //±¿±ﬂºÏ≤‚
@@ -52,6 +52,6 @@ private:
 	//∑µªÿæ‡¿Î£®pix£©
 	int getDeepLeft(int x);
 
-	void processVBS(vector<Faults::BrokenEdge> vbs);
+	void processVBS(vector<Faults::BrokenEdge> vbs, bool isUpDown);
 };
 

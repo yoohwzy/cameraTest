@@ -84,7 +84,7 @@ void BlockEdgeLineDetector::doUp()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 1);
 }
 
 void BlockEdgeLineDetector::doDown()
@@ -135,7 +135,7 @@ void BlockEdgeLineDetector::doDown()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 1);
 }
 
 void BlockEdgeLineDetector::doLeft()
@@ -186,7 +186,7 @@ void BlockEdgeLineDetector::doLeft()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 0);
 }
 void BlockEdgeLineDetector::doRight()
 {
@@ -236,7 +236,7 @@ void BlockEdgeLineDetector::doRight()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 0);
 }
 
 int BlockEdgeLineDetector::getDeepUp(cv::Point p)
@@ -341,7 +341,7 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	return deep;
 }
 
-void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs)
+void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUpDown)
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
@@ -349,6 +349,16 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs)
 			continue;
 		else
 		{
+			if (isUpDown)
+			{
+				vbs[i].length_mm = vbs[i].length * p_block->Axis_X_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_Y_mmPerPix;
+			}
+			else
+			{
+				vbs[i].length_mm = vbs[i].length * p_block->Axis_Y_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_X_mmPerPix;
+			}
 			p_faults->BrokenEdges.push_back(vbs[i]);
 		}
 	}

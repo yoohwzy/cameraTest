@@ -56,7 +56,8 @@ void BlockLocalizer::Run()
 	p_block->Lines2ABCD();
 	NotFoundBlockFlag = false;
 
-
+	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
+	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
 #ifdef BL_OUTPUT_DEBUG_INFO
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).UpLine.k * (0 - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Point(drowDebugResult.cols, (*p_block).UpLine.k * (drowDebugResult.cols - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Scalar(0, 0, 255), 1);
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).DownLine.k * (0 - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Point(drowDebugResult.cols, (*p_block).DownLine.k * (drowDebugResult.cols - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Scalar(0, 255, 255), 1);
@@ -605,6 +606,17 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			}
 			else
 			{
+				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
+				if (i > 5 && i < count - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				{
+					if (abs(dy[i - 2] - dy[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
+					{
+						vector<cv::Point>::iterator it = points.begin() + i;
+						points.erase(it);
+						continue;
+					}
+				}
+
 				diffs.push_back(dy[i]);
 				diffsCount.push_back(1);
 				errorPointIndex.push_back(i);
@@ -636,10 +648,12 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			else
 			{
 				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (i > 5 && i < count - 6)
+				if (i > 5 && i < count - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
 				{
-					if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET)
+					if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
 					{
+						vector<cv::Point>::iterator it = points.begin() + i;
+						points.erase(it);
 						continue;
 					}
 				}
@@ -655,24 +669,8 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 	{
 		return;
 	}
-	////斜率只有一个点的波动
-	//if (errorPointIndex.size() <= 2)
-	//{
-	//	int smallcount = 0;
-	//	for (int i = 0; i < diffs.size(); i++)
-	//		if (diffs[i] == 1)
-	//			smallcount++;
-	//	if ((smallcount + 1) == diffs.size())
-	//		return;
-	//}
-	
-
 
 	//添加缺陷信息
-
-	//int dx = 0;
-	//int dy = 0;
-
 	//计算各种情况下的length 与  deep值
 	//errorPoint在边缘附近的情况
 	if (errorPointIndex[0] < (points.size() / 3) || errorPointIndex[errorPointIndex.size() - 1] > (points.size() / 3 * 2))
@@ -689,6 +687,17 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		//根据水平还是竖直方向分配length 与  deep
 		be.length = l1 < l2 ? l1 : l2;
 		be.deep = l1 < l2 ? d1 : d2;
+		if (updown)
+		{
+			be.length_mm = be.length*p_block->Axis_X_mmPerPix;
+			be.deep_mm = be.deep*p_block->Axis_Y_mmPerPix;
+		}
+		else
+		{
+			be.length_mm = be.length*p_block->Axis_Y_mmPerPix;
+			be.deep_mm = be.deep*p_block->Axis_X_mmPerPix;
+		}
+
 
 		be.position.x = l1 < l2 ? abs(points[0].x + points[errorPointIndex[errorPointIndex.size() - 1]].x) / 2 : abs(points[points.size() - 1].x + points[errorPointIndex[0]].x) / 2;
 		be.position.y = l1 < l2 ? abs(points[0].y + points[errorPointIndex[errorPointIndex.size() - 1]].y) / 2 : abs(points[points.size() - 1].y + points[errorPointIndex[0]].y) / 2;

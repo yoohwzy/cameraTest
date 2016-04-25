@@ -407,6 +407,9 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				be.position = cv::Point(x, y);
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
+				be.deep_mm = be.deep * p_block->Axis_X_mmPerPix;
+				be.length = be.length * p_block->Axis_Y_mmPerPix;
+
 				p_faults->BrokenEdges.push_back(be);
 
 				startIndex = errorPointsIndex[i];
@@ -493,7 +496,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 		int endIndex = errorPointsIndex[0];
 		for (int i = 0; i < errorPointsIndex.size(); i++)
 		{
-			if (errorPointsIndex[i] - startIndex < 3)
+			if (errorPointsIndex[i] - startIndex < 3)//查找合并连续的缺陷
 			{
 				endIndex = errorPointsIndex[i];
 				absolutDeep = errorPointsDeep[i] > absolutDeep ? errorPointsDeep[i] : absolutDeep;
@@ -519,8 +522,10 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 				be.position = cv::Point(x, y);
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
-				p_faults->BrokenEdges.push_back(be);
+				be.deep_mm = be.deep * p_block->Axis_Y_mmPerPix;
+				be.length = be.length * p_block->Axis_X_mmPerPix;
 
+				p_faults->BrokenEdges.push_back(be);
 				startIndex = errorPointsIndex[i];
 			}
 		}
