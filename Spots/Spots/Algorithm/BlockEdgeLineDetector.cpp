@@ -11,7 +11,7 @@ BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Fault
 }
 void BlockEdgeLineDetector::Run()
 {
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef BED_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
@@ -58,7 +58,7 @@ void BlockEdgeLineDetector::doUp()
 		int deep = getDeepUp(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef BED_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -84,7 +84,7 @@ void BlockEdgeLineDetector::doUp()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 1);
 }
 
 void BlockEdgeLineDetector::doDown()
@@ -109,7 +109,7 @@ void BlockEdgeLineDetector::doDown()
 		int deep = getDeepDown(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef BED_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -135,7 +135,7 @@ void BlockEdgeLineDetector::doDown()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 1);
 }
 
 void BlockEdgeLineDetector::doLeft()
@@ -160,7 +160,7 @@ void BlockEdgeLineDetector::doLeft()
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef BED_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -186,7 +186,7 @@ void BlockEdgeLineDetector::doLeft()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 0);
 }
 void BlockEdgeLineDetector::doRight()
 {
@@ -210,7 +210,7 @@ void BlockEdgeLineDetector::doRight()
 		int deep = getDeepRight(cv::Point(point_x, point_y));
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef BED_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -236,7 +236,7 @@ void BlockEdgeLineDetector::doRight()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs);
+	processVBS(vbs, 0);
 }
 
 int BlockEdgeLineDetector::getDeepUp(cv::Point p)
@@ -341,7 +341,7 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	return deep;
 }
 
-void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs)
+void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUpDown)
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
@@ -349,6 +349,16 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs)
 			continue;
 		else
 		{
+			if (isUpDown)
+			{
+				vbs[i].length_mm = vbs[i].length * p_block->Axis_X_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_Y_mmPerPix;
+			}
+			else
+			{
+				vbs[i].length_mm = vbs[i].length * p_block->Axis_Y_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_X_mmPerPix;
+			}
 			p_faults->BrokenEdges.push_back(vbs[i]);
 		}
 	}

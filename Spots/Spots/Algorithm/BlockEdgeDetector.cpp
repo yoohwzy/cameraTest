@@ -11,7 +11,7 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 }
 void BlockEdgeDetector::Run()
 {
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
@@ -48,7 +48,13 @@ void BlockEdgeDetector::doUp()
 
 	//上边界
 	int startX = p_block->A.x + 50;
+	if (startX < 0)
+		startX = 0;
 	int endX = p_block->B.x - 50;
+	if (endX >= image.cols)
+		endX = image.cols - 1;
+
+
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
 		int x1 = x;
@@ -65,7 +71,7 @@ void BlockEdgeDetector::doUp()
 
 		cv::Mat tmpROI = image(cv::Rect(x1, y, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 		debug_ups.push_back(tmpROI);
 #endif
 		tmpROI.convertTo(tmpROI, CV_32F);
@@ -105,7 +111,12 @@ void BlockEdgeDetector::doDown()
 	vector<cv::Point> points;
 	//下边界
 	int startX = p_block->D.x + 50;
+	if (startX < 0)
+		startX = 0;
 	int endX = p_block->C.x - 50;
+	if (endX >= image.cols)
+		endX = image.cols - 1;
+
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
 		int x1 = x;
@@ -124,7 +135,7 @@ void BlockEdgeDetector::doDown()
 		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
 
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 		debug_downs.push_back(tmpROI);
 #endif
 		tmpROI.convertTo(tmpROI, CV_32F);
@@ -165,7 +176,11 @@ void BlockEdgeDetector::doLeft()
 	vector<cv::Point> points;
 	//左边界
 	int startY = p_block->A.y + 150;
+	if (startY < 0)
+		startY = 0;
 	int endY = p_block->D.y - 150;
+	if (endY >= image.rows)
+		endY = image.rows - 1;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{
 		int y1 = y;
@@ -182,7 +197,7 @@ void BlockEdgeDetector::doLeft()
 
 		cv::Mat tmpROI = image(cv::Rect(x, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(9, 9), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 		debug_lefts.push_back(tmpROI);
 #endif
 		tmpROI.convertTo(tmpROI, CV_32F);
@@ -225,7 +240,11 @@ void BlockEdgeDetector::doRight()
 	vector<cv::Point> points;
 	//右边界
 	int startY = p_block->B.y + 150;
+	if (startY < 0)
+		startY = 0;
 	int endY = p_block->D.y - 150;
+	if (endY >= image.rows)
+		endY = image.rows - 1;
 	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
 	{	
 		int y1 = y;
@@ -242,7 +261,7 @@ void BlockEdgeDetector::doRight()
 
 		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 		debug_rights.push_back(tmpROI);
 #endif
 		tmpROI.convertTo(tmpROI, CV_32F);
@@ -275,7 +294,7 @@ void BlockEdgeDetector::doRight()
 
 void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points)
 {
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
 	{
 		stringstream ss;
@@ -292,7 +311,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 	{
 		for (int i = 0; i < reduceList.size() - 2; i++)
 		{
-//#ifdef BED_OUTPUT_DEBUG_INFO
+//#ifdef BELD_OUTPUT_DEBUG_INFO
 //			cv::Mat img1 = debug_lefts[i];
 //			cv::Mat img2 = debug_lefts[i + 1];
 //			cv::Mat r1 = reduceList[i];
@@ -341,7 +360,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				{
 					errorPointsIndex.push_back(i);//记录下是第几个reduceList
 					errorPointsDeep.push_back(count);//记录连续错误几个点
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 						stringstream ss;
 						ss << i;
 						cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));
@@ -388,6 +407,9 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 				be.position = cv::Point(x, y);
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
+				be.deep_mm = be.deep * p_block->Axis_X_mmPerPix;
+				be.length = be.length * p_block->Axis_Y_mmPerPix;
+
 				p_faults->BrokenEdges.push_back(be);
 
 				startIndex = errorPointsIndex[i];
@@ -398,7 +420,7 @@ void BlockEdgeDetector::processLeftRight(vector<cv::Mat> reduceList, vector<cv::
 }
 void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points)
 {
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
 	{
 		stringstream ss;
@@ -453,7 +475,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 				{
 					errorPointsIndex.push_back(i);
 					errorPointsDeep.push_back(count);
-#ifdef BED_OUTPUT_DEBUG_INFO
+#ifdef BELD_OUTPUT_DEBUG_INFO
 					stringstream ss;
 					ss << i;
 					cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));
@@ -474,7 +496,7 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 		int endIndex = errorPointsIndex[0];
 		for (int i = 0; i < errorPointsIndex.size(); i++)
 		{
-			if (errorPointsIndex[i] - startIndex < 3)
+			if (errorPointsIndex[i] - startIndex < 3)//查找合并连续的缺陷
 			{
 				endIndex = errorPointsIndex[i];
 				absolutDeep = errorPointsDeep[i] > absolutDeep ? errorPointsDeep[i] : absolutDeep;
@@ -500,8 +522,10 @@ void BlockEdgeDetector::processUpDown(vector<cv::Mat> reduceList, vector<cv::Poi
 				be.position = cv::Point(x, y);
 				be.deep = absolutDeep;
 				be.length = abs(points[endIndex].y - points[startIndex].y);
-				p_faults->BrokenEdges.push_back(be);
+				be.deep_mm = be.deep * p_block->Axis_Y_mmPerPix;
+				be.length = be.length * p_block->Axis_X_mmPerPix;
 
+				p_faults->BrokenEdges.push_back(be);
 				startIndex = errorPointsIndex[i];
 			}
 		}

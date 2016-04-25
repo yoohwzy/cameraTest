@@ -30,6 +30,11 @@ public:
 	Line UpLine;
 	Line DownLine;
 
+	int Real_WidthMM = 600;//图像中瓷砖的横长
+	int Real_LengthMM = 300;//图像中瓷砖的纵长
+	double Axis_X_mmPerPix = 1;//x轴方向上每像素代表多少毫米
+	double Axis_Y_mmPerPix = 1;//y轴方向上每像素代表多少毫米
+
 	//根据四个边算出ABCD四个点 若四个点位置不对，返回false
 	bool Lines2ABCD();
 	//根据ABCD四个点算出四个边
@@ -40,6 +45,7 @@ public:
 	cv::Point GetPonintByX(int x, Line *l);
 	cv::Point GetPonintByY(int y, Line *l);
 
+	//图像大小
 	int imageWidth = 0;
 	int imageHeight = 0;
 };

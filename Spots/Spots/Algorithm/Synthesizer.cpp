@@ -4,9 +4,11 @@
 #include <Algorithm/BlockEdgeLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
 
-Synthesizer::Synthesizer(int _SN)
+Synthesizer::Synthesizer(int _SN, int _Real_WidthMM, int _Real_LengthMM)
 {
 	SN = _SN;
+	Real_WidthMM = _Real_WidthMM;
+	Real_LengthMM = _Real_LengthMM;
 }
 
 
@@ -19,6 +21,8 @@ Synthesizer::~Synthesizer()
 Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 {
 	p_block = new Block(TileImg.size().width, TileImg.size().height);
+	p_block->Real_WidthMM = Real_WidthMM;
+	p_block->Real_LengthMM = Real_LengthMM;
 
 	////获取二值化图像
 	if (TileImg.cols == 0)
