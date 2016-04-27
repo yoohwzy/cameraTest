@@ -35,6 +35,10 @@ private:
 
 	typedef struct ItemRepository ItemRepository;
 	int size;
+	float hranges[2];
+	const float *ranges[1];
+	int channels;
+
 	Faults *_faults;//各类缺陷集
 	vector<Point> pointlist;//瓷砖内部定位坐标集
 	vector<Point> pointlist_r;//原始定位坐标集
@@ -43,14 +47,10 @@ private:
 	vector<Point> locationpoints;
 	vector<Rect> CneedContours;
 	vector<vector<Rect>> Warehousecontours;
-	float hranges[2];
-	const float *ranges[1];
-	int channels;
 	Mat Mask_result_big, Mask_result_small;
-	
-public:
-	
-	Mat Grow(Mat &image, const Point &seedpoint, const int th_v);//种子点区域生长
+
+
+	Mat Grow(const Mat &image, const Point &seedpoint, const int th_v);//种子点区域生长
 	Mat Equalize(const Mat &_Img);//瓷砖表面预处理高斯差分滤波与直方图均衡化
 	void ProcessArea(Block *blockin);//确定瓷砖表面内部位置，A是左上，顺时针
 	int otsuThreshold(const Mat &frame, const MatND &hist);//局部寻找可靠阈值
@@ -63,7 +63,10 @@ public:
 	int ConsumeItem(ItemRepository *ir);
 	void ConsumerTask();
 	void InitItemRepository(ItemRepository *ir);
-	void pretreatment(Mat &image, Block *_block, Faults *faults);
+	inline void Dataload();
+	bool defect_YoN(const Mat &_Img);
+
+public:
 	Pretreatment()
 	{
 		size = 256;
@@ -73,6 +76,14 @@ public:
 		channels = 0;
 	}
 	~Pretreatment();
+
+	void pretreatment(Mat &image, Block *_block, Faults *faults);
+
+};
+
+class Truemethod
+{
+
 
 };
 

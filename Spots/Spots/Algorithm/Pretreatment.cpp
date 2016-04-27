@@ -6,31 +6,31 @@ using namespace cv;
 using namespace std;
 
 
-#define STAMP_WIDTH		30
-#define STAMP_HEIGHT	30
-#define STAMP_SIZE		STAMP_WIDTH*STAMP_HEIGHT
-int kItemsToProduce = 10;   // Éú²úÕßÉú²úµÄ×ÜÊı
+static const int STAMP_WIDTH = 30;
+static const int  STAMP_HEIGHT = 30;
+static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
+static const int kItemsToProduce = 10;   // Éú²úÕßÉú²úµÄ×ÜÊı
 int flagdata = 0;
 Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 vector<Rect> needContour;
-CvKNearest knn;
+static CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
 
 
 //PointĞÍË³ĞòÅÅÁĞËã×Ó
-bool SortBysize(const vector<Point>v1, const vector<Point>v2)
+inline bool SortBysize(vector<Point>const &v1, vector<Point>const &v2)
 {
 	return v1.size() > v2.size();//½µĞòÅÅÁĞ  
 }
 
 //intĞÍË³ĞòÅÅÁĞËã×Ó  
-bool SortBysize_int(const vector<int>v1, const vector<int>v2)
+inline bool SortBysize_int(vector<int>const &v1, vector<int>const &v2)
 {
 	return v1.size() > v2.size();//½µĞòÅÅÁĞ  
 }
 
 //Êı¾İ¼°²ÎÊı³õÊ¼»¯
-inline void Dataload()
+inline void Pretreatment::Dataload()
 {
 	FileStorage fs("Data//data.yaml", FileStorage::READ);
 	Mat dataMat, labelMat;
@@ -40,7 +40,7 @@ inline void Dataload()
 	flagdata = 1;
 }
 
-bool Fourier(Mat &Img)
+bool Fourier(const Mat &Img)
 {
 	Mat src = Img.clone();
 
@@ -184,7 +184,7 @@ bool line_core(Mat &_Img)
 		return 0;
 }
 
-bool defect_YoN(Mat &_Img)
+bool Pretreatment::defect_YoN(const Mat &_Img)
 {
 	Mat NorImg(STAMP_WIDTH, STAMP_HEIGHT, CV_8U);
 	resize(_Img, NorImg, Size(STAMP_WIDTH, STAMP_HEIGHT), 0, 0, INTER_LINEAR);
@@ -204,7 +204,7 @@ bool defect_YoN(Mat &_Img)
 	return int(resepone);
 }
 
-bool line_YoN(Rect _linesrect)
+bool line_YoN(const Rect &_linesrect)
 {
 	bool flagbit = line_core(LMidImg(_linesrect));
 	if (flagbit)
@@ -213,7 +213,7 @@ bool line_YoN(Rect _linesrect)
 		return 0;//²»ÊÇ»®ºÛ
 }
 
-bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅĞ¶ÏÊÇ·ñÎªlineµÄºËĞÄ²¿·Ö
+bool WhetherLine(const Mat &oneImg, const Mat &G_Img, bool cor, bool boe)//ÅĞ¶ÏÊÇ·ñÎªlineµÄºËĞÄ²¿·Ö
 {
 	vector<Point> maxV_white_Points;
 	if (countNonZero(oneImg) >= 1)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
@@ -270,7 +270,7 @@ bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅĞ¶ÏÊÇ·ñÎªlineµÄº
 }
 
 //¼ÆËãÂÖÀªÖØĞÄ
-Point barycenter1(vector<Point> contoursi)
+Point barycenter1(vector<Point> const &contoursi)
 {
 	Moments m = moments(contoursi);
 	Point center = Point(0, 0);
@@ -317,12 +317,6 @@ Mat Pretreatment::Equalize(const Mat &_Img)
 	resize(re_Img_temp, re_Img_big, Size(_Img.cols, _Img.rows), 0, 0, INTER_LINEAR);
 	Timer timer;
 	timer.start();
-	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> a;
-	cv2eigen(_Img, a);*/
-	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> b;
-	cv2eigen(re_Img_big, b);
-	a = a - b;*/
-	/*Mat work_Img(_Img.size(),CV_8UC1,sharpened.data());*/
 	absdiff(_Img, re_Img_big, work_Img);//Çó¾ø¶Ô²îÖµÔ¤´¦ÀíºÃµÄ´óÍ¼
 	timer.stop();
 	cout<<timer.getElapsedTimeInMilliSec()<<"ms"<<endl;
@@ -441,10 +435,10 @@ void Pretreatment::Handwriting(const Mat &_img)
 			mask_rect.height = (16 * mask_rect.height + 128 < Mask_result_small.rows) ? 16 * mask_rect.height + 128 : Mask_result_small.rows;
 			rectangle(Mask_result_big, mask_rect, Scalar(255), -1);//ÖÆ×÷ÑÚÄ¤
 
-			Faults::MarkPen markpen;
+			
 			mask_rect.x += recImg.x;
 			mask_rect.y += recImg.y;
-			markpen.markposition = mask_rect;
+			
 			Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);//×óÉÏ£¬ÓÒÏÂ
 			Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);//ÓÒÉÏ£¬×óÏÂ
 			
@@ -460,7 +454,11 @@ void Pretreatment::Handwriting(const Mat &_img)
 
 			if (pointPolygonTest(pointlist_r, outpoint_a, 0) == 1 && pointPolygonTest(pointlist_r, outpoint_b, 0) == 1)//¼ì²â¸Ã±ê¼ÇÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãĞ±ÎóÅĞ
 				if (pointPolygonTest(pointlist_r, outpoint_c, 0) == 1 && pointPolygonTest(pointlist_r, outpoint_d, 0) == 1)
+				{
+					Faults::MarkPen markpen;
+					markpen.markposition = mask_rect;
 					_faults->MarkPens.push_back(markpen);
+				}		
 		}
 	}
 }
@@ -556,7 +554,7 @@ int Pretreatment::otsuThreshold(const Mat &frame, const MatND &hist)
 }
 
 //ÇøÓòÉú³¤Í¼ÏñÖÖ×ÓµãÃÅÏŞ
-Mat Pretreatment::Grow(Mat &image, const Point &seedpoint, const int th_v)
+Mat Pretreatment::Grow(const Mat &image, const Point &seedpoint, const int th_v)
 {
 	Mat HyImg = image.clone();
 	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
@@ -797,7 +795,6 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
-	Faults::Scratch scratch;
 	resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
 	Canny(LMidImg, LMidImg, 40, 120);
 	bitwise_xor(LMidImg, Mask_result_line, CannyImg);
@@ -819,6 +816,7 @@ void Pretreatment::linedetect()
 				linerect.y = 3 * linerect.y;
 				linerect.width = 3 * linerect.width;
 				linerect.height = 3 * linerect.height;
+				Faults::Scratch scratch;
 				scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
 				scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;
 				scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
@@ -849,7 +847,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	if (image.channels() == 3)//ÅĞ¶ÏÊÇ·ñÎª²ÊÍ¼
 		cvtColor(image, image, CV_RGB2GRAY);
 
-	//Ö±·½Í¼¾ùºâ»¯
+	//Ö±·½Í¼±ä»»
 	Mat E_image=Equalize(image);
 	//ÇóÄÚ²¿Ğ¡¾ØĞÎ
 	ProcessArea(_block);
