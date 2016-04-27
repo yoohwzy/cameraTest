@@ -102,6 +102,24 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 {
 	double t = 0;
 	p_block->Lines2ABCD();
+
+	if (BlockEdgeLineDetector_Enable != 0)
+	{
+		if (MFCConsole::IsOpened)
+			t = cv::getTickCount();
+		BlockEdgeLineDetector  beld = BlockEdgeLineDetector(grayImg, p_block, &faults);
+		beld.BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
+		beld.DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
+		beld.LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
+		beld.Run();
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+			ss << "Ëã·¨BlockEdgeLineDetector£º" << t << endl;
+			MFCConsole::Output(ss.str());
+		}
+	}
 	if (BlockEdgeDetector_Enable != 0)
 	{
 		if (MFCConsole::IsOpened)
@@ -116,22 +134,6 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 			stringstream ss;
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 			ss << "Ëã·¨BlockEdgeDetector£º" << t << endl;
-			MFCConsole::Output(ss.str());
-		}
-	}
-	if (BlockEdgeLineDetector_Enable != 0)
-	{
-		if (MFCConsole::IsOpened)
-			t = cv::getTickCount();
-		BlockEdgeLineDetector  beld = BlockEdgeLineDetector(grayImg, p_block, &faults);
-		beld.DEEP_THRESHOD = 5;
-		beld.THRESHOD = 5;
-		beld.Run();
-		if (MFCConsole::IsOpened)
-		{
-			stringstream ss;
-			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << "Ëã·¨BlockEdgeLineDetector£º" << t << endl;
 			MFCConsole::Output(ss.str());
 		}
 	}

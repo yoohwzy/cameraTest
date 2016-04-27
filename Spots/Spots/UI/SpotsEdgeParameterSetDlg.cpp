@@ -72,6 +72,34 @@ BOOL SpotsEdgeParameterSetDlg::OnInitDialog()
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_COUNT)->SetWindowText(L"5");
 
+
+	/*****±ßÔµÉ¨ÃèËã·¨*****/
+	int beldEnable = 1;
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", beldEnable))
+		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeLineDetector))->SetCheck(beldEnable != 0);
+	else
+		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeLineDetector))->SetCheck(1);
+
+	//¶þÖµ»¯ãÐÖµ
+	int BlockEdgeLineDetector_BINARY_THRESHOD;
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_BINARY_THRESHOD", BlockEdgeLineDetector_BINARY_THRESHOD))
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_BINARY_THRESHOD)->SetWindowText(StringHelper::double2CString(BlockEdgeLineDetector_BINARY_THRESHOD));
+	else
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_BINARY_THRESHOD)->SetWindowText(L"5");
+	//±À±ß³¤ãÐÖµ
+	int BlockEdgeLineDetector_LENGTH_THRESHOD;
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD", BlockEdgeLineDetector_LENGTH_THRESHOD))
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_LENGTH_THRESHOD)->SetWindowText(StringHelper::double2CString(BlockEdgeLineDetector_LENGTH_THRESHOD));
+	else
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_LENGTH_THRESHOD)->SetWindowText(L"5");
+	//±À±ßÉîãÐÖµ
+	int BlockEdgeLineDetector_DEEP_THRESHOD;
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD", BlockEdgeLineDetector_DEEP_THRESHOD))
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_DEEP_THRESHOD)->SetWindowText(StringHelper::double2CString(BlockEdgeLineDetector_DEEP_THRESHOD));
+	else
+		GetDlgItem(IDC_TB_BlockEdgeLineDetector_DEEP_THRESHOD)->SetWindowText(L"5");
+
+
 	return TRUE;
 }
 void SpotsEdgeParameterSetDlg::OnPaint()
@@ -134,6 +162,18 @@ void SpotsEdgeParameterSetDlg::OnBnClickedOk()
 	saveParameter(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD, "EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD");
 	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_SPAN, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN");
 	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_COUNT, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT");
+
+
+
+
+
+	/*****±ßÔµÉ¨ÃèËã·¨*****/
+	pBtn = (CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeLineDetector);
+	SettingHelper::AddKey("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", pBtn->GetCheck());
+	saveParameter(IDC_TB_BlockEdgeLineDetector_BINARY_THRESHOD, "EDGE_PARAMETER", "BlockEdgeLineDetector_BINARY_THRESHOD");
+	saveParameter(IDC_TB_BlockEdgeLineDetector_LENGTH_THRESHOD, "EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD");
+	saveParameter(IDC_TB_BlockEdgeLineDetector_DEEP_THRESHOD, "EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD");
+
 	CDialogEx::OnOK();
 }
 

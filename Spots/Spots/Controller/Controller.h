@@ -81,22 +81,32 @@ public:
 
 
 
-	/*****************参数*****************/
+	/**********************************/
+	/*                                */
+	/*                参数            */
+	/*                                */
+	/**********************************/
+
 	int Real_WidthMM = 600;//图像中瓷砖的横长
 	int Real_LengthMM = 300;//图像中瓷砖的纵长
 	int Worker_WaitTimeMSIn = 100;
 	int Worker_WaitTimeMSOut = 250;
 	int Worker_FrameTimeOut = 2000;
 
+
+	/******************边缘缺陷参数***************/
 	double BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
 	double BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
 
 	int  BlockEdgeDetector_Enable = 1;
-	double BlockEdgeDetector_DIFF_THRESHOLD = 7;	//两图之差超过这个阈值则认为可能有缺陷
+	double BlockEdgeDetector_DIFF_THRESHOLD = 0.4;	//两图之差超过这个阈值则认为可能有缺陷
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
-	int BlockEdgeLineDetector_Enable = 1;
+	int BlockEdgeLineDetector_Enable = 1;			//
+	int BlockEdgeLineDetector_BINARY_THRESHOD = 5;	//二值化阈值
+	int BlockEdgeLineDetector_LENGTH_THRESHOD = 5;	//超过这个长度才认为是缺陷（pix）
+	int BlockEdgeLineDetector_DEEP_THRESHOD = 5;	//超过这个深度才认为是缺陷（pix）
 
 	bool SAVE_IMG = false;
 

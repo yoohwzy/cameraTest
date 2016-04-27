@@ -6,7 +6,7 @@
 
 #include <thread>
 
-//#define BELD_OUTPUT_DEBUG_INFO 1
+#define BELD_OUTPUT_DEBUG_INFO 1
 
 
 //崩边检测
@@ -27,8 +27,9 @@ public:
 #endif
 
 	//parameter
-	int THRESHOD = 5;//边界确定阈值
-	int DEEP_THRESHOD = 5;//崩边超过这个深度
+	int BINARY_THRESHOD = 5;//边界确定阈值
+	int LENGTH_THRESHOD = 10;//崩边长度要超过这个
+	int DEEP_THRESHOD = 5;//崩边深度要超过这个
 private:
 
 	cv::Mat image;

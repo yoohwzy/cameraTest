@@ -95,6 +95,12 @@ void Worker::work()
 	Synthesizer s = Synthesizer(SN, Real_WidthMM, Real_LengthMM);
 	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+
+	s.BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+	s.BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
+	s.BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
+	s.BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
+
 	s.BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
 	s.BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
 	s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;

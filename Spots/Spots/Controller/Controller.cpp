@@ -186,6 +186,7 @@ void Controller::VirtualWorkerStart()
 	}
 	if (worker1->MyStatus == Worker::Done || worker1->MyStatus == Worker::Free)
 	{
+		worker1->SN = Statistics::TodayAll + 1;
 		worker1->StartWork();
 	}
 	else
@@ -207,9 +208,10 @@ void Controller::LoadParameterFromIni()
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", this->Worker_WaitTimeMSOut);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", this->Worker_FrameTimeOut);
 
-
+	/*************边缘缺陷检测参数***********/
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", this->BlockLocalizer_ContinuePointCount);
+
 	int _BlockEdgeDetector_Enable = 1;
 	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_Enable", _BlockEdgeDetector_Enable);
 	this->BlockEdgeDetector_Enable = _BlockEdgeDetector_Enable;
@@ -217,9 +219,13 @@ void Controller::LoadParameterFromIni()
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", this->BlockEdgeDetector_DIFF_THRESHOLD);
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", this->BlockEdgeDetector_FAULTS_SPAN);
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", this->BlockEdgeDetector_FAULTS_COUNT);
+
 	int _BlockEdgeLineDetector_Enable = 1;
 	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", _BlockEdgeLineDetector_Enable);
 	this->BlockEdgeLineDetector_Enable = _BlockEdgeLineDetector_Enable;
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_BINARY_THRESHOD", this->BlockEdgeLineDetector_BINARY_THRESHOD);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD", this->BlockEdgeLineDetector_LENGTH_THRESHOD);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD", this->BlockEdgeLineDetector_DEEP_THRESHOD);
 
 	/**************分类参数****************/
 	//缺边 长
@@ -267,132 +273,82 @@ void Controller::LoadParameterFromIni()
 void Controller::ResetParameter()
 {
 	LoadParameterFromIni();
-	if (worker1 != NULL)
+	for (int i = 0; i < 2; i++)
 	{
-		worker1->Real_WidthMM = Real_WidthMM;
-		worker1->Real_LengthMM = Real_LengthMM;
-		worker1->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker1->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker1->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
-		worker1->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker1->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker1->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-		worker1->BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+		Worker *w = NULL;
+		if (i == 0)
+			w = worker1;
+		else
+			w = worker2;
+		if (w!=NULL)
+		{
+			w->Real_WidthMM = Real_WidthMM;
+			w->Real_LengthMM = Real_LengthMM;
+			w->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+			w->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 
-		worker1->WaitTimeMSIn = Worker_WaitTimeMSIn;
-		worker1->WaitTimeMSOut = Worker_WaitTimeMSOut;
-		worker1->FrameTimeOut = Worker_FrameTimeOut;
+			w->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
+			w->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+			w->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+			w->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
+			w->BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+			w->BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
+			w->BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
+			w->BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
 
-		/**************分级参数*************/
-
-		//边参数
-		worker1->Classify_EDGE_SINGLE_LENGTH_A = Classify_EDGE_SINGLE_LENGTH_A;
-		worker1->Classify_EDGE_SINGLE_LENGTH_B = Classify_EDGE_SINGLE_LENGTH_B;
-		worker1->Classify_EDGE_SINGLE_LENGTH_C = Classify_EDGE_SINGLE_LENGTH_C;
-		worker1->Classify_EDGE_SINGLE_LENGTH_ACCEPT = Classify_EDGE_SINGLE_LENGTH_ACCEPT;
-
-		worker1->Classify_EDGE_TOTAL_LENGTH_A = Classify_EDGE_TOTAL_LENGTH_A;
-		worker1->Classify_EDGE_TOTAL_LENGTH_B = Classify_EDGE_TOTAL_LENGTH_B;
-		worker1->Classify_EDGE_TOTAL_LENGTH_C = Classify_EDGE_TOTAL_LENGTH_C;
-		worker1->Classify_EDGE_TOTAL_LENGTH_ACCEPT = Classify_EDGE_TOTAL_LENGTH_ACCEPT;
-
-		worker1->Classify_EDGE_SINGLE_DEEP_A = Classify_EDGE_SINGLE_DEEP_A;
-		worker1->Classify_EDGE_SINGLE_DEEP_B = Classify_EDGE_SINGLE_DEEP_B;
-		worker1->Classify_EDGE_SINGLE_DEEP_C = Classify_EDGE_SINGLE_DEEP_C;
-		worker1->Classify_EDGE_SINGLE_DEEP_ACCEPT = Classify_EDGE_SINGLE_DEEP_ACCEPT;
-
-		worker1->Classify_EDGE_TOTAL_DEEP_A = Classify_EDGE_TOTAL_DEEP_A;
-		worker1->Classify_EDGE_TOTAL_DEEP_B = Classify_EDGE_TOTAL_DEEP_B;
-		worker1->Classify_EDGE_TOTAL_DEEP_C = Classify_EDGE_TOTAL_DEEP_C;
-		worker1->Classify_EDGE_TOTAL_DEEP_ACCEPT = Classify_EDGE_TOTAL_DEEP_ACCEPT;
-
-		//凹坑参数
-		worker1->Classify_HOAL_DIAMETER_A = Classify_HOAL_DIAMETER_A;
-		worker1->Classify_HOAL_DIAMETER_B = Classify_HOAL_DIAMETER_B;
-		worker1->Classify_HOAL_DIAMETER_C = Classify_HOAL_DIAMETER_C;
-		worker1->Classify_HOAL_DIAMETER_ACCEPT = Classify_HOAL_DIAMETER_ACCEPT;
-
-		worker1->Classify_HOAL_COUNT_A = Classify_HOAL_COUNT_A;
-		worker1->Classify_HOAL_COUNT_B = Classify_HOAL_COUNT_B;
-		worker1->Classify_HOAL_COUNT_C = Classify_HOAL_COUNT_C;
-		worker1->Classify_HOAL_COUNT_ACCEPT = Classify_HOAL_COUNT_ACCEPT;
+			w->WaitTimeMSIn = Worker_WaitTimeMSIn;
+			w->WaitTimeMSOut = Worker_WaitTimeMSOut;
+			w->FrameTimeOut = Worker_FrameTimeOut;
 
 
-		//划痕
-		worker1->Classify_SCRATCH_SINGLE_LENGTH_A = Classify_SCRATCH_SINGLE_LENGTH_A;
-		worker1->Classify_SCRATCH_SINGLE_LENGTH_B = Classify_SCRATCH_SINGLE_LENGTH_B;
-		worker1->Classify_SCRATCH_SINGLE_LENGTH_C = Classify_SCRATCH_SINGLE_LENGTH_C;
-		worker1->Classify_SCRATCH_SINGLE_LENGTH_ACCEPT = Classify_SCRATCH_SINGLE_LENGTH_ACCEPT;
+			/**************分级参数*************/
 
-		worker1->Classify_SCRATCH_TOTAL_LENGTH_A = Classify_SCRATCH_TOTAL_LENGTH_A;
-		worker1->Classify_SCRATCH_TOTAL_LENGTH_B = Classify_SCRATCH_TOTAL_LENGTH_B;
-		worker1->Classify_SCRATCH_TOTAL_LENGTH_C = Classify_SCRATCH_TOTAL_LENGTH_C;
-		worker1->Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = Classify_SCRATCH_TOTAL_LENGTH_ACCEPT;
+			//边参数
+			w->Classify_EDGE_SINGLE_LENGTH_A = Classify_EDGE_SINGLE_LENGTH_A;
+			w->Classify_EDGE_SINGLE_LENGTH_B = Classify_EDGE_SINGLE_LENGTH_B;
+			w->Classify_EDGE_SINGLE_LENGTH_C = Classify_EDGE_SINGLE_LENGTH_C;
+			w->Classify_EDGE_SINGLE_LENGTH_ACCEPT = Classify_EDGE_SINGLE_LENGTH_ACCEPT;
 
-	}
-	if (worker2 != NULL)
-	{
-		worker2->Real_WidthMM = Real_WidthMM;
-		worker2->Real_LengthMM = Real_LengthMM;
-		worker2->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-		worker2->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-		worker2->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
-		worker2->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		worker2->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		worker2->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-		worker2->BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+			w->Classify_EDGE_TOTAL_LENGTH_A = Classify_EDGE_TOTAL_LENGTH_A;
+			w->Classify_EDGE_TOTAL_LENGTH_B = Classify_EDGE_TOTAL_LENGTH_B;
+			w->Classify_EDGE_TOTAL_LENGTH_C = Classify_EDGE_TOTAL_LENGTH_C;
+			w->Classify_EDGE_TOTAL_LENGTH_ACCEPT = Classify_EDGE_TOTAL_LENGTH_ACCEPT;
 
-		worker2->WaitTimeMSIn = Worker_WaitTimeMSIn;
-		worker2->WaitTimeMSOut = Worker_WaitTimeMSOut;
-		worker2->FrameTimeOut = Worker_FrameTimeOut;
+			w->Classify_EDGE_SINGLE_DEEP_A = Classify_EDGE_SINGLE_DEEP_A;
+			w->Classify_EDGE_SINGLE_DEEP_B = Classify_EDGE_SINGLE_DEEP_B;
+			w->Classify_EDGE_SINGLE_DEEP_C = Classify_EDGE_SINGLE_DEEP_C;
+			w->Classify_EDGE_SINGLE_DEEP_ACCEPT = Classify_EDGE_SINGLE_DEEP_ACCEPT;
 
+			w->Classify_EDGE_TOTAL_DEEP_A = Classify_EDGE_TOTAL_DEEP_A;
+			w->Classify_EDGE_TOTAL_DEEP_B = Classify_EDGE_TOTAL_DEEP_B;
+			w->Classify_EDGE_TOTAL_DEEP_C = Classify_EDGE_TOTAL_DEEP_C;
+			w->Classify_EDGE_TOTAL_DEEP_ACCEPT = Classify_EDGE_TOTAL_DEEP_ACCEPT;
 
+			//凹坑参数
+			w->Classify_HOAL_DIAMETER_A = Classify_HOAL_DIAMETER_A;
+			w->Classify_HOAL_DIAMETER_B = Classify_HOAL_DIAMETER_B;
+			w->Classify_HOAL_DIAMETER_C = Classify_HOAL_DIAMETER_C;
+			w->Classify_HOAL_DIAMETER_ACCEPT = Classify_HOAL_DIAMETER_ACCEPT;
 
-		//边参数
-		worker2->Classify_EDGE_SINGLE_LENGTH_A = Classify_EDGE_SINGLE_LENGTH_A;
-		worker2->Classify_EDGE_SINGLE_LENGTH_B = Classify_EDGE_SINGLE_LENGTH_B;
-		worker2->Classify_EDGE_SINGLE_LENGTH_C = Classify_EDGE_SINGLE_LENGTH_C;
-		worker2->Classify_EDGE_SINGLE_LENGTH_ACCEPT = Classify_EDGE_SINGLE_LENGTH_ACCEPT;
-
-		worker2->Classify_EDGE_TOTAL_LENGTH_A = Classify_EDGE_TOTAL_LENGTH_A;
-		worker2->Classify_EDGE_TOTAL_LENGTH_B = Classify_EDGE_TOTAL_LENGTH_B;
-		worker2->Classify_EDGE_TOTAL_LENGTH_C = Classify_EDGE_TOTAL_LENGTH_C;
-		worker2->Classify_EDGE_TOTAL_LENGTH_ACCEPT = Classify_EDGE_TOTAL_LENGTH_ACCEPT;
-
-		worker2->Classify_EDGE_SINGLE_DEEP_A = Classify_EDGE_SINGLE_DEEP_A;
-		worker2->Classify_EDGE_SINGLE_DEEP_B = Classify_EDGE_SINGLE_DEEP_B;
-		worker2->Classify_EDGE_SINGLE_DEEP_C = Classify_EDGE_SINGLE_DEEP_C;
-		worker2->Classify_EDGE_SINGLE_DEEP_ACCEPT = Classify_EDGE_SINGLE_DEEP_ACCEPT;
-
-		worker2->Classify_EDGE_TOTAL_DEEP_A = Classify_EDGE_TOTAL_DEEP_A;
-		worker2->Classify_EDGE_TOTAL_DEEP_B = Classify_EDGE_TOTAL_DEEP_B;
-		worker2->Classify_EDGE_TOTAL_DEEP_C = Classify_EDGE_TOTAL_DEEP_C;
-		worker2->Classify_EDGE_TOTAL_DEEP_ACCEPT = Classify_EDGE_TOTAL_DEEP_ACCEPT;
-
-		//凹坑参数
-		worker2->Classify_HOAL_DIAMETER_A = Classify_HOAL_DIAMETER_A;
-		worker2->Classify_HOAL_DIAMETER_B = Classify_HOAL_DIAMETER_B;
-		worker2->Classify_HOAL_DIAMETER_C = Classify_HOAL_DIAMETER_C;
-		worker2->Classify_HOAL_DIAMETER_ACCEPT = Classify_HOAL_DIAMETER_ACCEPT;
-
-		worker2->Classify_HOAL_COUNT_A = Classify_HOAL_COUNT_A;
-		worker2->Classify_HOAL_COUNT_B = Classify_HOAL_COUNT_B;
-		worker2->Classify_HOAL_COUNT_C = Classify_HOAL_COUNT_C;
-		worker2->Classify_HOAL_COUNT_ACCEPT = Classify_HOAL_COUNT_ACCEPT;
+			w->Classify_HOAL_COUNT_A = Classify_HOAL_COUNT_A;
+			w->Classify_HOAL_COUNT_B = Classify_HOAL_COUNT_B;
+			w->Classify_HOAL_COUNT_C = Classify_HOAL_COUNT_C;
+			w->Classify_HOAL_COUNT_ACCEPT = Classify_HOAL_COUNT_ACCEPT;
 
 
-		//划痕
-		worker2->Classify_SCRATCH_SINGLE_LENGTH_A = Classify_SCRATCH_SINGLE_LENGTH_A;
-		worker2->Classify_SCRATCH_SINGLE_LENGTH_B = Classify_SCRATCH_SINGLE_LENGTH_B;
-		worker2->Classify_SCRATCH_SINGLE_LENGTH_C = Classify_SCRATCH_SINGLE_LENGTH_C;
-		worker2->Classify_SCRATCH_SINGLE_LENGTH_ACCEPT = Classify_SCRATCH_SINGLE_LENGTH_ACCEPT;
+			//划痕
+			w->Classify_SCRATCH_SINGLE_LENGTH_A = Classify_SCRATCH_SINGLE_LENGTH_A;
+			w->Classify_SCRATCH_SINGLE_LENGTH_B = Classify_SCRATCH_SINGLE_LENGTH_B;
+			w->Classify_SCRATCH_SINGLE_LENGTH_C = Classify_SCRATCH_SINGLE_LENGTH_C;
+			w->Classify_SCRATCH_SINGLE_LENGTH_ACCEPT = Classify_SCRATCH_SINGLE_LENGTH_ACCEPT;
 
-		worker2->Classify_SCRATCH_TOTAL_LENGTH_A = Classify_SCRATCH_TOTAL_LENGTH_A;
-		worker2->Classify_SCRATCH_TOTAL_LENGTH_B = Classify_SCRATCH_TOTAL_LENGTH_B;
-		worker2->Classify_SCRATCH_TOTAL_LENGTH_C = Classify_SCRATCH_TOTAL_LENGTH_C;
-		worker2->Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = Classify_SCRATCH_TOTAL_LENGTH_ACCEPT;
-
+			w->Classify_SCRATCH_TOTAL_LENGTH_A = Classify_SCRATCH_TOTAL_LENGTH_A;
+			w->Classify_SCRATCH_TOTAL_LENGTH_B = Classify_SCRATCH_TOTAL_LENGTH_B;
+			w->Classify_SCRATCH_TOTAL_LENGTH_C = Classify_SCRATCH_TOTAL_LENGTH_C;
+			w->Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = Classify_SCRATCH_TOTAL_LENGTH_ACCEPT;
+		}
+		w = NULL;
 	}
 }
 
@@ -436,7 +392,7 @@ void Controller::triggerWatcher()
 		if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
 		{
 			t = cv::getTickCount();
-
+			
 			tiggerindex++;
 			if (tiggerindex >= 100)
 				tiggerindex = 0;
@@ -444,6 +400,7 @@ void Controller::triggerWatcher()
 			if (tiggerindex % 2 == 1)
 			{
 				MFCConsole::Output("\r\n\r\n-------------------------Worker1 Start Work\r\n");
+				worker1->SN = Statistics::TodayAll + 1;
 				worker1->StartWork();
 				lastestWorker = worker1;
 			}
@@ -451,6 +408,7 @@ void Controller::triggerWatcher()
 			{
 				MFCConsole::Output("\r\n\r\n-------------------------Worker2 Start Work\r\n");
 
+				worker2->SN = Statistics::TodayAll + 1;
 				worker2->StartWork();
 				lastestWorker = worker2;
 			}
