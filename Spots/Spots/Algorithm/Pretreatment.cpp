@@ -728,7 +728,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 
 void Pretreatment::ProducerTask() // 生产者任务
 {
-	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
+	//ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
 	if (_faults->MarkPens.size() != 0)
 	{
 		(cv::max)(MidImg, Mask_result_big, MidImg);
@@ -751,7 +751,7 @@ void Pretreatment::ProducerTask() // 生产者任务
 			MidImgROI = MidImg(Rect(ThRect));
 			/*medianBlur(MidImgROI, MidImgROI,7);*/
 
-			ThImgROI = ThImg(Rect(ThRect));
+			/*ThImgROI = ThImg(Rect(ThRect));*/
 
 			MatND histolist;
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);//获得灰度分布

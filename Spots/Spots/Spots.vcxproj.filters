@@ -171,6 +171,12 @@
     <ClInclude Include="UI\SpotsClassifySet.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\Pretreatment.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Timer.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -244,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="UI\SpotsClassifySet.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Pretreatment.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Timer.cpp">
+      <Filter>Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

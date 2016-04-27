@@ -2,6 +2,7 @@
 #include <Algorithm/BlockLocalizer.h>
 #include <Algorithm/BlockEdgeDetector.h>
 #include <Class\Debug\MFCConsole.h>
+#include "Pretreatment.h"
 
 Synthesizer::Synthesizer(int _SN)
 {
@@ -46,7 +47,7 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	}
 
 	//表面缺陷
-	//detectInner(grayImg);
+	detectInner(grayImg);
 	return Status::TypeA;
 }
 
@@ -123,9 +124,9 @@ Synthesizer::_Status Synthesizer::detectInner(cv::Mat grayImg)
 	double t = (double)cv::getTickCount();
 
 	//瓷砖内部缺陷检测
-	//ss << "瓷砖内部缺陷检测 开始" << endl;
-	//Pretreatment p;
-	//p.pretreatment(grayImg, p_block, &faults);
+	ss << "瓷砖内部缺陷检测 开始" << endl;
+	Pretreatment p;
+	p.pretreatment(grayImg, p_block, &faults);
 
 	if (MFCConsole::IsOpened)
 	{

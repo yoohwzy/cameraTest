@@ -60,6 +60,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Work\All Library file\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -88,6 +90,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Work\All Library file\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,8 +122,10 @@
     <ClInclude Include="Algorithm\Base\Faults.h" />
     <ClInclude Include="Algorithm\BlockEdgeDetector.h" />
     <ClInclude Include="Algorithm\BlockLocalizer.h" />
+    <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
     <ClInclude Include="Algorithm\Synthesizer.h" />
+    <ClInclude Include="Algorithm\Timer.h" />
     <ClInclude Include="Class\Access\ASqlHelper.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h" />
@@ -152,8 +158,10 @@
     <ClCompile Include="Algorithm\Base\Block.cpp" />
     <ClCompile Include="Algorithm\BlockEdgeDetector.cpp" />
     <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
+    <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />
     <ClCompile Include="Algorithm\Synthesizer.cpp" />
+    <ClCompile Include="Algorithm\Timer.cpp" />
     <ClCompile Include="Class\Access\ASqlHelper.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
