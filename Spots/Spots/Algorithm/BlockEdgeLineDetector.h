@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BELD_OUTPUT_DEBUG_INFO 1
+//#define BELD_OUTPUT_DEBUG_INFO 1
 
 
 //±À±ß¼ì²â

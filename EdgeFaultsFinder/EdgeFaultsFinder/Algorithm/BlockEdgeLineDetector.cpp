@@ -254,11 +254,11 @@ int BlockEdgeLineDetector::getDeepUp(cv::Point p)
 	{
 		if (point_y + deep + 4 >= image.cols)
 			break;
-		if (image.ptr<uchar>(point_y + deep)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y + deep + 1)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y + deep + 2)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y + deep + 3)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y + deep + 4)[point_x] >= THRESHOD
+		if (image.ptr<uchar>(point_y + deep)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 1)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 2)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 3)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y + deep + 4)[point_x] >= BINARY_THRESHOD
 			)
 			break;
 	}
@@ -279,11 +279,11 @@ int BlockEdgeLineDetector::getDeepDown(cv::Point p)
 	{
 		if (point_y + deep + 4 >= image.cols)
 			break;
-		if (image.ptr<uchar>(point_y - deep)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y - deep - 1)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y - deep - 2)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y - deep - 3)[point_x] >= THRESHOD &&
-			image.ptr<uchar>(point_y - deep - 4)[point_x] >= THRESHOD
+		if (image.ptr<uchar>(point_y - deep)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y - deep - 1)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y - deep - 2)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y - deep - 3)[point_x] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y - deep - 4)[point_x] >= BINARY_THRESHOD
 			)
 			break;
 	}
@@ -304,11 +304,11 @@ int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
 	{
 		if (point_y + deep + 4 >= image.cols)
 			break;
-		if (image.ptr<uchar>(point_y)[point_x + deep] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x + deep + 1] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x + deep + 2] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x + deep + 3] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x + deep + 4] >= THRESHOD
+		if (image.ptr<uchar>(point_y)[point_x + deep] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 1] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 2] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 3] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 4] >= BINARY_THRESHOD
 			)
 			break;
 	}
@@ -330,11 +330,11 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	{
 		if (point_y + deep + 4 >= image.cols)
 			break;
-		if (image.ptr<uchar>(point_y)[point_x - deep] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x - deep - 1] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x - deep - 2] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x - deep - 3] >= THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x - deep - 4] >= THRESHOD
+		if (image.ptr<uchar>(point_y)[point_x - deep] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x - deep - 1] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x - deep - 2] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x - deep - 3] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x - deep - 4] >= BINARY_THRESHOD
 			)
 			break;
 	}
@@ -345,7 +345,7 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUp
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
-		if (vbs[i].length < 10 && vbs[i].deep  < 10)
+		if (vbs[i].length < LENGTH_THRESHOD)
 			continue;
 		else
 		{
