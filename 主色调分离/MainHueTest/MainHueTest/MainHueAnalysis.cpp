@@ -11,7 +11,7 @@ MainHueAnalysis::MainHueAnalysis(cv::Mat img)
 
 	//预处理，将亮度低或饱和度低的点的hue置于360°之外
 
-	float dropV = 0.08;		//低灰度阈值，低于此灰度值的均视为黑色点
+	float dropV = 0.1;		//低灰度阈值，低于此灰度值的均视为黑色点
 	float dropS = 0.05;		//低饱和度阈值，低于此饱和度的均视为灰色点
 	float dropV2 = 0.6;		//低灰度阈值，低于此灰度值的均视为黑色点
 	float dropS2 = 0.6;		//低饱和度阈值，低于此饱和度的均视为灰色点
