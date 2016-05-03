@@ -13,6 +13,9 @@ MainHueAnalysis::MainHueAnalysis(cv::Mat img)
 
 	float dropV = 0.08;		//低灰度阈值，低于此灰度值的均视为黑色点
 	float dropS = 0.05;		//低饱和度阈值，低于此饱和度的均视为灰色点
+	float dropV2 = 0.6;		//低灰度阈值，低于此灰度值的均视为黑色点
+	float dropS2 = 0.6;		//低饱和度阈值，低于此饱和度的均视为灰色点
+
 	for (int i = 0; i < imageHSV.rows; i++)
 	{
 		for (int j = 0; j < imageHSV.cols; j++)
@@ -22,6 +25,8 @@ MainHueAnalysis::MainHueAnalysis(cv::Mat img)
 			float v = imageHSV.ptr<float>(i)[j * 3 + 2];
 			if (s < dropS || v < dropV)
 				imageHSV.ptr<float>(i)[j * 3 + 0] = 400;//将饱和度低的像素点的Hue值置为400（超出原范围[0，360]）
+			else if (v > dropV2)
+				imageHSV.ptr<float>(i)[j * 3 + 0] = 500;
 		}
 	}
 
@@ -36,8 +41,11 @@ MainHueAnalysis::MainHueAnalysis(cv::Mat img)
 	cv::Mat hist_img = drawHist(hist);
 
 
-	const int matTotalPixCount = cv::sum(hist_img)[0];//经过预处理后一共还有多少个点
-
+	int matTotalPixCount = 0;//经过预处理后一共还有多少个点
+	for (size_t i = 0; i < hist.cols; i++)
+	{
+		matTotalPixCount += hist.ptr<long>(0)[i];
+	}
 
 	const int dx = 10;
 	while (true)
@@ -63,13 +71,64 @@ MainHueAnalysis::MainHueAnalysis(cv::Mat img)
 		else
 			break;
 
-		// 排序 [6/6/2012 Isaac]
-		std::sort((this->colorProperties).begin(), (this->colorProperties).end(), [](const ColorProp& l, const ColorProp& r)->bool
+
+	}
+
+	// 排序 [6/6/2012 Isaac]
+	std::sort((this->colorProperties).begin(), (this->colorProperties).end(), [](const ColorProp& l, const ColorProp& r)->bool
+	{
+		return l.percentage>r.percentage;
+	});
+
+
+
+	vector<float> vS((this->colorProperties).size(), 0);
+	vector<float> vV((this->colorProperties).size(), 0);
+	vector<int> vCount((this->colorProperties).size(), 0);
+
+	for (auto it = imageHSV.begin<cv::Vec3f>(); it != imageHSV.end<cv::Vec3f>(); ++it)	//遍历图像
+	{
+		cv::Vec3f& vHSV = *it;
+		//对每个点看它的色调是否在某一主调范围内
+		for (int k = 0; k < (this->colorProperties).size(); k++)
 		{
-			return l.percentage>r.percentage;
-		});
+			float mainH = (this->colorProperties)[k].h;
 
-
+			if (mainH - dx < 0)
+			{
+				if (vHSV[0] > 360 - (dx - mainH) || vHSV[0] < mainH + dx)
+				{
+					vS[k] += vHSV[1];
+					vV[k] += vHSV[2];
+					vCount[k]++;
+					break;
+				}
+			}
+			else if (mainH + dx > 360)
+			{
+				if (vHSV[0] > mainH - dx || vHSV[0] < dx - (360 - mainH))
+				{
+					vS[k] += vHSV[1];
+					vV[k] += vHSV[2];
+					vCount[k]++;
+					break;
+				}
+			}
+			else if (vHSV[0] > mainH - dx && vHSV[0] < mainH + dx)
+			{
+				vS[k] += vHSV[1];
+				vV[k] += vHSV[2];
+				vCount[k]++;
+				break;
+			}
+		}
+	}
+	for (int i = 0; i<(this->colorProperties).size(); i++)
+	{
+		float finalS = vS[i] / vCount[i];	//计算平均饱和度
+		float finalV = vV[i] / vCount[i];	//计算平均亮度
+		(this->colorProperties)[i].s = finalS;
+		(this->colorProperties)[i].v = finalV;
 	}
 }
 
@@ -151,8 +210,12 @@ int MainHueAnalysis::getHistSum(cv::Mat& hist, int leftIndex, int rightIndex)
 	else
 	{
 		
-		//cv::Mat s = hist(cv::Rect(leftIndex, 0, rightIndex - leftIndex + 1, 1));//cv::Rect(cv::Point(leftIndex, 0), cv::Point(rightIndex, 0))
-		return cv::sum(hist(cv::Rect(leftIndex, 0, rightIndex - leftIndex, 1)))[0];
+		int sum = 0;
+		for (size_t i = leftIndex; i < rightIndex; i++)
+		{
+			sum += hist.ptr<long>(0)[i];
+		}
+		return sum;
 	}
 	return acc;
 }

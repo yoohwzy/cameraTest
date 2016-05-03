@@ -13,8 +13,9 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//cv::Mat image = cv::imread("red_autumn_2-wallpaper-1920x1080.jpg");
-	cv::Mat image = cv::imread("新建位图图像.bmp");
+	cv::Mat image = cv::imread("b14杂质222.jpg");
+	//cv::Mat image = cv::imread("b14杂质_x3.jpg");
+	//cv::Mat image = cv::imread("新建位图图像.bmp");
 
 	MainHueAnalysis m(image);
 	return 0;
