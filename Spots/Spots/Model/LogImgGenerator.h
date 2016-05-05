@@ -16,12 +16,13 @@ public:
 	int BoardWidth = 600;
 	int BoardHeight = 400;
 
-	const int ItemCount = 10;
-	const int ItemWidth = 60;
-	const int ItemHeight = 100;
-	const int ItemRowSpan = 4;
-	const int ItemColSpan = 2;
-	const int ItemRows = 2;
+	
+	const int ItemCount = 5;//一行显示多少个缩略图
+	const int ItemWidth = 100;//缩略图宽
+	const int ItemHeight = 60;//缩略图高
+	const int ItemRowSpan = 4;//缩略图之间间隔
+	const int ItemColSpan = 2;//行间隔
+	const int ItemRows = 4;//行数
 
 	void InitDrawingBoard();
 

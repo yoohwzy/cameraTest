@@ -122,7 +122,6 @@ void Worker::work()
 		int type = 1;//产品级别  1 A级 2 B级 3 C级 4 不合格
 		//直接判断为不合格的情况，若有则type=4
 
-
 		//产品分级
 		if (type != 4)//崩边分级
 		{
@@ -130,6 +129,8 @@ void Worker::work()
 			double _EDGE_TOTAL_DEEP = 0;//崩边总深度
 			for (int i = 0; i < s.faults.BrokenEdges.size(); i++)
 			{
+				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length_mm;
+				_EDGE_TOTAL_DEEP += s.faults.BrokenEdges[i].deep_mm;
 				if (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_ACCEPT || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_ACCEPT)
 				{
 					type = 4;
@@ -143,8 +144,6 @@ void Worker::work()
 				{
 					type = 2;
 				}
-				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length_mm;
-				_EDGE_TOTAL_DEEP += s.faults.BrokenEdges[i].deep_mm;
 			}
 			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_ACCEPT || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_ACCEPT)
 				type = 4;
@@ -152,6 +151,7 @@ void Worker::work()
 				type = 3;
 			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_B || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_B))
 				type = 2;
+
 			stringstream ss;
 			ss << "崩边总长=" << _EDGE_TOTAL_LENGTH << "mm" << endl;
 			ss << "崩边总深=" << _EDGE_TOTAL_DEEP << "mm" << endl;

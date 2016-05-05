@@ -163,6 +163,8 @@ void Controller::ImageGetCallBack(cv::Mat img)
 		t_tiggerThread.detach();
 		//imageSave(img);
 	}
+	else
+		MFCConsole::Output("当前为不保存图片模式\r\n");
 }
 
 
@@ -200,7 +202,7 @@ void Controller::VirtualWorkerStart()
 void Controller::LoadParameterFromIni()
 {
 	int si = 0;
-	SettingHelper::GetKeyInt("SYS", "SAVE_IMG", si);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "SAVE_IMG", si);
 	this->SAVE_IMG = si;
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM);

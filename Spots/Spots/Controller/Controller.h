@@ -83,7 +83,7 @@ public:
 
 	/**********************************/
 	/*                                */
-	/*                参数            */
+	/*            检测参数            */
 	/*                                */
 	/**********************************/
 
@@ -108,7 +108,7 @@ public:
 	int BlockEdgeLineDetector_LENGTH_THRESHOD = 5;	//超过这个长度才认为是缺陷（pix）
 	int BlockEdgeLineDetector_DEEP_THRESHOD = 5;	//超过这个深度才认为是缺陷（pix）
 
-	bool SAVE_IMG = false;
+	bool SAVE_IMG = false;//是否保存图片到硬盘
 
 
 	/**************分级参数*************/
