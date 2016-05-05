@@ -1,5 +1,5 @@
 #include "BlockEdgeLineDetector.h"
-
+#include <Class\Debug\MFCConsole.h>
 
 BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
@@ -29,6 +29,11 @@ void BlockEdgeLineDetector::Run()
 	t3.join();
 	t4.join();
 #endif
+
+
+	stringstream ss;
+	ss << "定标消息：最大崩边长度=" << maxLengthPix << "pix，最大深度 = " << maxDeepPix << "pix" << endl;
+	MFCConsole::Output(ss.str());
 }
 
 BlockEdgeLineDetector::~BlockEdgeLineDetector()
@@ -56,6 +61,7 @@ void BlockEdgeLineDetector::doUp()
 		if (point_y < 0 || point_y >= image.rows)
 			continue;
 		int deep = getDeepUp(cv::Point(point_x, point_y));
+		if (deep > maxDeepPix) maxDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -107,6 +113,7 @@ void BlockEdgeLineDetector::doDown()
 		if (point_y < 0 || point_y >= image.rows)
 			continue;
 		int deep = getDeepDown(cv::Point(point_x, point_y));
+		if (deep > maxDeepPix) maxDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -158,6 +165,7 @@ void BlockEdgeLineDetector::doLeft()
 		if (point_x < 0 || point_x >= image.cols)
 			continue;
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
+		if (deep > maxDeepPix) maxDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -208,6 +216,7 @@ void BlockEdgeLineDetector::doRight()
 		if (point_x < 0 || point_x >= image.cols)
 			continue;
 		int deep = getDeepRight(cv::Point(point_x, point_y));
+		if (deep > maxDeepPix) maxDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -345,6 +354,7 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUp
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
+		if (vbs[i].length > maxLengthPix) maxLengthPix = vbs[i].length;
 		if (vbs[i].length < LENGTH_THRESHOD)
 			continue;
 		else

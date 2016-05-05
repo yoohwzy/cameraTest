@@ -25,6 +25,14 @@ public:
 	vector<cv::Mat> debug_lefts;
 	vector<cv::Mat> debug_rights;
 #endif
+	//统计数据，作为定标使用。
+
+	//统计出的最大深度
+	int maxDeepPix = 0;
+	//统计出的最大长度
+	int maxLengthPix = 0;
+
+
 
 	//parameter
 	int BINARY_THRESHOD = 5;//边界确定阈值

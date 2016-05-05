@@ -1,5 +1,5 @@
 #include "BlockEdgeDetector.h"
-
+#include <Class\Debug\MFCConsole.h>
 
 BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
@@ -29,6 +29,13 @@ void BlockEdgeDetector::Run()
 	t3.join();
 	t4.join();
 #endif
+
+
+	double maxdiff = (maxdiff_X > maxdiff_Y) ? maxdiff_X : maxdiff_Y;
+	int maxDeep = (maxDeep_X > maxDeep_Y) ? maxDeep_X : maxDeep_Y;
+	stringstream ss;
+	ss << "定标消息：最大不相似度=" << maxdiff << "，竖直方向缺陷最长长度 = " << maxDeep << "pix" << endl;
+	MFCConsole::Output(ss.str());
 }
 
 BlockEdgeDetector::~BlockEdgeDetector()
