@@ -35,13 +35,12 @@ void Worker::work()
 		ss << "startFrame =" << startFrame << endl;
 #endif
 		//加入延时时间
+		//触发后等待一段时间，砖走到拍摄区域后再获取图像
 		frameIndexAdd(startFrame, WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS);
 #ifdef WORKER_DEBUG
 		ss << "startFrame(after frameIndexAdd()) =" << startFrame << endl;
 		MFCConsole::Output(ss.str());
 #endif
-
-		//触发后等待一段时间，砖走到拍摄区域后再获取图像
 
 		//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
 		for (size_t i = 0; i < 10; i++)
@@ -49,7 +48,7 @@ void Worker::work()
 				Sleep(10);
 			else
 				break;
-		//第二个循环是等待拍摄到起始行
+		//第二个循环 等待相机拍摄到起始行（这样写的原因是加入了延时时间，可能存在相机还未拍摄到startFrame的情况）
 		int nowFrame = p_e2vbuffer->GetWriteIndex();
 		while (
 			!(
@@ -85,7 +84,7 @@ void Worker::work()
 	if (image.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
-	//开启线程保存图片
+	//开启线程保存图片至硬盘
 	P_Controller->ImageGetCallBack(grayImg);
 
 	cv::normalize(grayImg, grayImg, 0, 100, cv::NORM_MINMAX);
@@ -120,9 +119,12 @@ void Worker::work()
 		cv::line(grayImg, cv::Point((grayImg.rows - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, grayImg.rows), cv::Point((0 - s.p_block->RightLine.y0) / s.p_block->RightLine.k + s.p_block->RightLine.x0, 0), cv::Scalar(255, 0, 0), 1);
 
 
-		int type = 1;
+		int type = 1;//产品级别  1 A级 2 B级 3 C级 4 不合格
+		//直接判断为不合格的情况，若有则type=4
+
+
 		//产品分级
-		if (1 == 1)//崩边
+		if (type != 4)//崩边分级
 		{
 			double _EDGE_TOTAL_LENGTH = 0;//崩边总长度
 			double _EDGE_TOTAL_DEEP = 0;//崩边总深度
@@ -155,12 +157,14 @@ void Worker::work()
 			ss << "崩边总深=" << _EDGE_TOTAL_DEEP << "mm" << endl;
 			MFCConsole::Output(ss.str());
 		}
-
-		if (type != 4)
-		for (size_t i = 0; i < s.faults.Crazings.size(); i++)
+		if (type != 4)//内部缺陷分级
 		{
+			for (size_t i = 0; i < s.faults.Crazings.size(); i++)
+			{
 
+			}
 		}
+
 		P_Controller->ShowWorkResult(grayImg, type);
 	}
 	else
@@ -192,7 +196,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 
 
 	GetPhotoOn = true;
-	bool overtimeflag = false;
+	bool overtimeflag = false;//超时标记
 	//wait capture end
 	Sleep(100);
 	//循环等待下降沿或采图超时
@@ -213,7 +217,7 @@ cv::Mat Worker::getPhoto(int startFrame, int length)
 				MFCConsole::Output(ss.str());
 			}
 #endif
-			overtimeflag = true;
+			overtimeflag = true;//一直没有获得下降沿信号，标记超时
 			break;
 		}
 		Sleep(2);

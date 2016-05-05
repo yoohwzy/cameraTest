@@ -44,7 +44,7 @@ void Controller::init(){
 	if (1 == 1)
 	{
 		int accEnable = 0;
-		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);
+		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);//读取是否启用数据库模块
 		if (accEnable != 0)
 		{
 			string db_path;
@@ -73,8 +73,8 @@ void Controller::init(){
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
 
-		//StartWatch();
-
+		StartWatch();
+			
 		spotsMainView->SwitchModel2Virtual(false);
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
@@ -157,7 +157,7 @@ void Controller::ImageGetCallBack(cv::Mat img)
 	//	t_saveimg.detach();
 	//}
 
-	if (SAVE_IMG)
+	if (SAVE_IMG)//是否要保存图片
 	{
 		std::thread t_tiggerThread(std::mem_fn(&Controller::imageSave), this, img);
 		t_tiggerThread.detach();

@@ -24,7 +24,6 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	p_block->Real_WidthMM = Real_WidthMM;
 	p_block->Real_LengthMM = Real_LengthMM;
 
-	////获取二值化图像
 	if (TileImg.cols == 0)
 	{
 		MFCConsole::Output("Img Empty!\r\n");
