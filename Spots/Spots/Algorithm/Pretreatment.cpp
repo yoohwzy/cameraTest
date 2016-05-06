@@ -15,6 +15,9 @@ Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, r
 vector<Rect> needContour;
 static CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
+union luai_Cast { double l_d; long l_l; };
+#define double2int(d,i) \
+  { volatile union luai_Cast u; u.l_d = (d) + 6755399441055744.0; (i) = u.l_l; }
 
 
 //Point型顺序排列算子
@@ -414,7 +417,8 @@ void Pretreatment::Handwriting(const Mat &_img)
 	Mat Canny_Img;
 	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
 	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
-	GaussianBlur(_img, Canny_Img, Size(5, 5), 0, 0);
+	GaussianBlur(_img, Canny_Img, Size(3, 3), 0, 0);
+	copyMakeBorder(Canny_Img, Canny_Img, 1, 1, 1, 1, BORDER_CONSTANT, 0);
 	Canny(Canny_Img, Canny_Img, 40, 120);//存在平行双边强边缘
 	vector<vector<Point>> Maskcontours;
 	findContours(Canny_Img, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -424,7 +428,13 @@ void Pretreatment::Handwriting(const Mat &_img)
 		if (Maskcontours[i].size() > 5)
 		{
 			Rect mask_rect = boundingRect(Maskcontours[i]);
-			Mat watch_img = _img(mask_rect);
+			Mat watch_img = _img(mask_rect).clone();
+			threshold(watch_img, watch_img,100,255,CV_THRESH_OTSU);
+			double nonnum = countNonZero(watch_img);
+			long numlong;
+			double2int(nonnum, numlong);
+			if (numlong< watch_img.cols || numlong < watch_img.rows)
+				continue;
 			int compare_v = Maxdistance(Maskcontours[i]);
 			if (compare_v < 9)//给出点集中相距最远的两点之间的距离
 				continue;
