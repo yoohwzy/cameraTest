@@ -134,6 +134,7 @@
     <ClInclude Include="Class\Statistics\Statistics.h" />
     <ClInclude Include="Controller\Controller.h" />
     <ClInclude Include="CvvImage.h" />
+    <ClInclude Include="Model\Arm.h" />
     <ClInclude Include="Model\ImgScanner.h" />
     <ClInclude Include="Model\LogImgGenerator.h" />
     <ClInclude Include="Model\ModelVirtual.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="Class\Statistics\Statistics.cpp" />
     <ClCompile Include="Controller\Controller.cpp" />
     <ClCompile Include="CvvImage.cpp" />
+    <ClCompile Include="Model\Arm.cpp" />
     <ClCompile Include="Model\ImgScanner.cpp" />
     <ClCompile Include="Model\LogImgGenerator.cpp" />
     <ClCompile Include="Model\Worker.cpp" />

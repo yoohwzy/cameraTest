@@ -171,6 +171,9 @@
     <ClInclude Include="Algorithm\BlockEdgeLineDetector.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Arm.h">
+      <Filter>Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -244,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="Algorithm\BlockEdgeLineDetector.cpp">
       <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Arm.cpp">
+      <Filter>Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
