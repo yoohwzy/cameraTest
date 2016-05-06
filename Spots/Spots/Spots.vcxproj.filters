@@ -165,9 +165,6 @@
     <ClInclude Include="UI\SpotsEdgeParameterSetDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Controller\HistoryController.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
     <ClInclude Include="UI\SpotsClassifySet.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -241,9 +238,6 @@
     </ClCompile>
     <ClCompile Include="UI\SpotsEdgeParameterSetDlg.cpp">
       <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\HistoryController.cpp">
-      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="UI\SpotsClassifySet.cpp">
       <Filter>UI</Filter>

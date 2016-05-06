@@ -125,6 +125,7 @@ void Controller::init(){
 	logImg.InitDrawingBoard();
 	spotsMainView->ShowBigImg(white);
 	spotsMainView->ShowLogImg(logImg.DrawingBoard);
+
 }
 
 

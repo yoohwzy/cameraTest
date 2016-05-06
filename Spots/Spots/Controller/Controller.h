@@ -3,6 +3,7 @@
 
 #include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 #include <Class/IOCard/PCI1761/PCI1761.h>
+#include <Class/Helper/TimeHelper.h>
 #include <Class/Statistics/Statistics.h>
 
 #include <View/SpotsMainView.h>
@@ -14,6 +15,7 @@
 
 #include <Model\Worker.h>
 #include <Model\LogImgGenerator.h>
+#include <Model\Arm.h>
 
 
 using namespace std;
@@ -58,9 +60,13 @@ public:
 		case 1:Statistics::AddTodayA(); break;
 		case 2:Statistics::AddTodayB(); break;
 		case 3:Statistics::AddTodayC(); break;
-		case 4:Statistics::AddTodayRejected(); break;
+		case 4:
+			Statistics::AddTodayRejected(); 
+			arm.AddAction(0, TimeHelper::GetTimeNow(500));//0号output口再500ms后产生一个阶跃信号
+			break;
 		default:break;
 		}
+
 
 		spotsMainView->ShowBigImg(image);
 		logImg.AddItem(image,"test");
@@ -168,6 +174,7 @@ private:
 
 	PCI1761 pci1761;
 	LogImgGenerator logImg;
+	Arm arm;
 
 	//同时只允许两个工人工作，即只能两张图（两块砖）
 
