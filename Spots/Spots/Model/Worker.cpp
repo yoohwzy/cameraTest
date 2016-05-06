@@ -87,7 +87,7 @@ void Worker::work()
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
 
-
+	//TODO:暂时用正规化处理图片
 	cv::normalize(grayImg, grayImg, 0, 100, cv::NORM_MINMAX);
 
 
