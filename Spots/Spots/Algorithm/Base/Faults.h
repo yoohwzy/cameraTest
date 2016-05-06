@@ -63,12 +63,12 @@ public:
 		double length_mm;//划痕长度（pix）
 		double angel;//角度°
 	};
-	////巨大缺陷，一遇到就判断为不合格品
-	//struct SomethingBig
-	//{
-	//	cv::Point position;//位置
-	//	double diameter;//直径（pix）
-	//};
+	//巨大缺陷，一遇到就判断为不合格品
+	struct SomethingBig
+	{
+		cv::Point position;//位置
+		double diameter;//直径（pix）
+	};
 	//人工标记
 	struct MarkPen
 	{

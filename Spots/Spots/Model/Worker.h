@@ -7,6 +7,9 @@
 #include <Algorithm\Synthesizer.h>
 #include <Class\Debug\MFCConsole.h>
 
+
+//#define WORKER_DEBUG
+
 extern class Controller;
 class Worker
 {

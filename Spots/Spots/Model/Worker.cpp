@@ -2,7 +2,6 @@
 #include <Controller\Controller.h>
 #include <Class/Debug/MFCConsole.h>
 
-#define WORKER_DEBUG
 Worker::Worker(E2VBuffer *_e2vbuffer)
 {
 	p_e2vbuffer = _e2vbuffer;
