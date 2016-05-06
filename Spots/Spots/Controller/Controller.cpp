@@ -88,6 +88,9 @@ void Controller::init(){
 		StartWatch();
 			
 		spotsMainView->SwitchModel2Virtual(false);
+
+		p_arm = new Arm();
+
 		MFCConsole::Output("已切换到真实相机模式。\r\n");
 	}
 	else
@@ -396,6 +399,11 @@ void Controller::release()
 	{
 		delete p_e2vbuffer;
 		p_e2vbuffer = NULL;
+	}
+	if (p_arm != NULL)
+	{
+		delete p_arm;
+		p_arm = NULL;
 	}
 }
 

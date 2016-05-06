@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Class">
       <UniqueIdentifier>{869013a2-1177-41f4-bd6c-3fb231c4fd11}</UniqueIdentifier>
     </Filter>
@@ -64,6 +60,10 @@
     <Filter Include="Class\Setting">
       <UniqueIdentifier>{aea57a21-6039-4944-95f6-f1cb9a6582e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -82,9 +82,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Class\Helper\StringHelper.h">
-      <Filter>Class\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Class\Helper\TimeHelper.h">
       <Filter>Class\Helper</Filter>
     </ClInclude>
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h">
@@ -254,23 +251,23 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Spots.rc">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Spots.rc2">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\资源文件</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Spots.ico">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\资源文件</Filter>
     </Image>
     <Image Include="res\icon1.ico">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\资源文件</Filter>
     </Image>
     <Image Include="..\..\www.ico.la_1e1b5a5a662f603a3408675fa1b99252_64X64.ico">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\资源文件</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
