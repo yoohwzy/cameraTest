@@ -8,6 +8,8 @@ using namespace std;
 class E2VBuffer
 {
 public:
+	//创建线阵相机循环缓存
+	//参数：图像宽度（4k），是否为灰度图像（bool）
 	E2VBuffer(int width, bool isGray = false);
 	//E2VBuffer(int width, int length = 20000, bool isGray = false);
 	~E2VBuffer()

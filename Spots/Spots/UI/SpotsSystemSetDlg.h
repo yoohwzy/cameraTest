@@ -24,4 +24,6 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBnClickedOk();
 	void saveParameter(int IDC, string SectionName, string key);
+	afx_msg void OnBnClickedCbCamGray();
+	afx_msg void OnBnClickedCbCamBgr();
 };

@@ -115,7 +115,7 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 		{
 			stringstream ss;
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << "算法BlockEdgeLineDetector：" << t << endl;
+			ss << "算法BlockEdgeLineDetector用时：" << t << endl;
 			MFCConsole::Output(ss.str());
 		}
 	}
@@ -132,7 +132,7 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 		{
 			stringstream ss;
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << "算法BlockEdgeDetector：" << t << endl;
+			ss << "算法BlockEdgeDetector用时：" << t << endl;
 			MFCConsole::Output(ss.str());
 		}
 	}

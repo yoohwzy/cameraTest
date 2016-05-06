@@ -11,12 +11,14 @@ using namespace std;
 class ImgScanner
 {
 public:
-	ImgScanner(E2VBuffer *_e2vbuffer);
+	//初始化线阵相机，将线阵相机与采图缓存类关联，设置相机行频
+	//输入行频不应大于相机的物理行频（即e2v相机管理面板上设置的行频）
+	ImgScanner(E2VBuffer *_e2vbuffer, int FrameCountPerSecond = 5000);
 	~ImgScanner();
 
+	static int FrameTimeUS;//每隔多少微秒取一帧 = 10^6/FrameCountPerSecond
 	bool StartFlag = true;
 
-	static const int FrameTimeUS = 200;//每隔200微秒取一帧
 private:
 	E2VBuffer *p_e2vbuffer = NULL;
 	E2VCamera *p_e2v = NULL;

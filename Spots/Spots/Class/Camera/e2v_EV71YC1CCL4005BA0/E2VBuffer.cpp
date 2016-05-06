@@ -1,6 +1,7 @@
 #include "E2VBuffer.h"
 #include <Class/Debug/MFCConsole.h>
 
+
 E2VBuffer::E2VBuffer(int width, bool isGray)
 {
 	colorType = isGray ? CV_8U : CV_8UC3;

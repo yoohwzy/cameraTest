@@ -38,6 +38,7 @@ public:
 
 		release();
 	}
+	//是否为虚拟相机模式，本属性通过外部配置，在启动exe时若附加了virtual命令，则IsRealModel=0；
 	bool IsRealModel = 1;
 
 	void init();

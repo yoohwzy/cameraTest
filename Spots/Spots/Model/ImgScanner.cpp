@@ -2,8 +2,11 @@
 
 
 
-ImgScanner::ImgScanner(E2VBuffer *_e2vbuffer)
+ImgScanner::ImgScanner(E2VBuffer *_e2vbuffer, int FrameCountPerSecond)
 {
+	FrameTimeUS = 1000000 / FrameCountPerSecond;
+	if (FrameTimeUS < 10)
+		FrameTimeUS = 10;
 	p_e2vbuffer = _e2vbuffer;
 	p_e2v = new E2VCamera(p_e2vbuffer, 4096, ImgScanner::FrameTimeUS, p_e2vbuffer->GetColorType() == CV_8U ? E2VCamera::GRAY : E2VCamera::RGB, 0, PORT_A);
 	if (p_e2v->StartFlag)
@@ -40,3 +43,4 @@ void ImgScanner::release()
 		p_e2v = NULL;
 	}
 }
+int ImgScanner::FrameTimeUS = 200;

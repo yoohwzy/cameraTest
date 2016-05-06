@@ -78,14 +78,16 @@ void Worker::work()
 		return;
 	}
 
+	//开启线程保存图片至硬盘
+	P_Controller->ImageGetCallBack(grayImg);
+
+
 	/********************************************/
 	//开始图像处理
-
 	if (image.channels() == 3)
 		cv::cvtColor(grayImg, grayImg, CV_BGR2GRAY);
 
-	//开启线程保存图片至硬盘
-	P_Controller->ImageGetCallBack(grayImg);
+
 
 	cv::normalize(grayImg, grayImg, 0, 100, cv::NORM_MINMAX);
 

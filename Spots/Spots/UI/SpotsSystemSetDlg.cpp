@@ -26,6 +26,21 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	int COLOR_TYPE_IS_GRAY = 1;
+	SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
+	((CButton*)GetDlgItem(IDC_CB_CAM_GRAY))->SetCheck(COLOR_TYPE_IS_GRAY != 0);
+	((CButton*)GetDlgItem(IDC_CB_CAM_BGR))->SetCheck(COLOR_TYPE_IS_GRAY == 0);
+
+
+	int Cam_FrameCount_PerSecond = 0;
+	if (SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond))
+		GetDlgItem(IDC_TB_Cam_FrameCount_PerSecond)->SetWindowText(StringHelper::int2CString(Cam_FrameCount_PerSecond));
+	else
+		GetDlgItem(IDC_TB_Cam_FrameCount_PerSecond)->SetWindowText(L"5000");
+
+
+
+
 	string db_path;
 	if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
 		GetDlgItem(IDC_TB_AccessPath)->SetWindowText(StringHelper::string2LPWSTR(db_path));
@@ -127,6 +142,8 @@ BEGIN_MESSAGE_MAP(SpotsSystemSetDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDOK, &SpotsSystemSetDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_CB_CAM_GRAY, &SpotsSystemSetDlg::OnBnClickedCbCamGray)
+	ON_BN_CLICKED(IDC_CB_CAM_BGR, &SpotsSystemSetDlg::OnBnClickedCbCamBgr)
 END_MESSAGE_MAP()
 
 
@@ -135,8 +152,14 @@ END_MESSAGE_MAP()
 
 void SpotsSystemSetDlg::OnBnClickedOk()
 {
+	//E2V
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CAM_GRAY);
+	SettingHelper::AddKey("E2V", "COLOR_TYPE_IS_GRAY", pBtn->GetCheck());
+	saveParameter(IDC_TB_Cam_FrameCount_PerSecond, "E2V", "Cam_FrameCount_PerSecond");
+
+
 	//保存数据库设置
-	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_EnableAccess);
+	pBtn = (CButton*)GetDlgItem(IDC_CB_EnableAccess);
 	SettingHelper::AddKey("DATABASE", "ACCDB_ENABLE", pBtn->GetCheck());
 	saveParameter(IDC_TB_AccessPath, "DATABASE", "ACCDB_PATH");
 	//采图设置
@@ -157,4 +180,23 @@ void SpotsSystemSetDlg::saveParameter(int IDC, string SectionName, string key)
 	CString cstr;
 	GetDlgItem(IDC)->GetWindowTextW(cstr);
 	SettingHelper::AddKey(SectionName, key, StringHelper::CString2string(cstr));
+}
+
+void SpotsSystemSetDlg::OnBnClickedCbCamGray()
+{
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CAM_GRAY);
+	if (pBtn->GetCheck() > 0)
+		((CButton*)GetDlgItem(IDC_CB_CAM_BGR))->SetCheck(0);
+	else
+		((CButton*)GetDlgItem(IDC_CB_CAM_BGR))->SetCheck(1);
+}
+
+
+void SpotsSystemSetDlg::OnBnClickedCbCamBgr()
+{
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CAM_BGR);
+	if (pBtn->GetCheck() > 0)
+		((CButton*)GetDlgItem(IDC_CB_CAM_GRAY))->SetCheck(0);
+	else
+		((CButton*)GetDlgItem(IDC_CB_CAM_GRAY))->SetCheck(1);
 }

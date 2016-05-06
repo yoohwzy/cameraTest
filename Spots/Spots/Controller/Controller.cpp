@@ -13,12 +13,22 @@ void Controller::init(){
 	release();
 
 	//开启图像缓存
-	p_e2vbuffer = new E2VBuffer(4096, true);
-	p_imgscanner = new ImgScanner(p_e2vbuffer);
+	int COLOR_TYPE_IS_GRAY = 1;
+	SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
+	if (COLOR_TYPE_IS_GRAY != 0)
+		p_e2vbuffer = new E2VBuffer(4096, true);
+	else
+		p_e2vbuffer = new E2VBuffer(4096, false);
+
+	//初始化E2V相机
+	int Cam_FrameCount_PerSecond = 5000;
+	SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond);
+	p_imgscanner = new ImgScanner(p_e2vbuffer, Cam_FrameCount_PerSecond);
 	bool e2vInitFlag = true;
-	//初始化e2v_EV71YC1CCL4005BA0失败
 	if (!p_imgscanner->StartFlag)
 	{
+		//若初始化e2v_EV71YC1CCL4005BA0失败
+		//则删除已实例化的对象，切换为虚拟相机模式
 		if (p_imgscanner != NULL)
 		{
 			delete p_imgscanner;
@@ -40,7 +50,7 @@ void Controller::init(){
 
 
 
-	// 配置数据库初始化
+	// 数据库配置初始化
 	if (1 == 1)
 	{
 		int accEnable = 0;
@@ -66,6 +76,8 @@ void Controller::init(){
 	// 初始化工作线程
 	if (e2vInitFlag && pci1761InitFlag && IsRealModel)
 	{
+		//若为真实相机模式，则实例化两个工人，并启动触发器监视进程
+
 		//初始化工人
 		worker1 = new Worker(p_e2vbuffer);
 		worker2 = new Worker(p_e2vbuffer);
@@ -90,6 +102,7 @@ void Controller::init(){
 			else if (!e2vInitFlag)
 				AfxMessageBox(L"线阵相机初始化失败！已切换到虚拟相机模式。");
 		}
+		//若为虚拟相机模式，则实例化虚拟相机类与1个工人
 		//开启虚拟相机
 		cv::Mat virtualImg;
 		worker1 = new Worker(NULL);
