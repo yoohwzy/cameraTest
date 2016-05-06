@@ -50,7 +50,7 @@ public:
 	//处理结束后显示处理结果
 	//结果图像
 	//产品类型，1A 2B 3C 4Rejcet
-	void ShowWorkResult(cv::Mat image,int type)
+	void ImgProcessOverCallBack(cv::Mat image, int type)
 	{
 		ui_lock.lock();
 		switch (type)

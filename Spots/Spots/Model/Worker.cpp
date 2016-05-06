@@ -167,7 +167,7 @@ void Worker::work()
 			}
 		}
 
-		P_Controller->ShowWorkResult(grayImg, type);
+		P_Controller->ImgProcessOverCallBack(grayImg, type);
 	}
 	else
 	{
