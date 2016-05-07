@@ -132,25 +132,26 @@ void Worker::work()
 			{
 				_EDGE_TOTAL_LENGTH += s.faults.BrokenEdges[i].length_mm;
 				_EDGE_TOTAL_DEEP += s.faults.BrokenEdges[i].deep_mm;
-				if (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_ACCEPT || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_ACCEPT)
+				if (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_C || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_C)
 				{
 					type = 4;
 					break;
 				}
-				if (type < 3 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_C || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_C))
+				if (type < 3 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_B || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_B))
 				{
 					type = 3;
 				}
-				if (type < 2 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_B || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_B))
+
+				if (type < 2 && (s.faults.BrokenEdges[i].length_mm > Classify_EDGE_SINGLE_LENGTH_A || s.faults.BrokenEdges[i].deep_mm > Classify_EDGE_SINGLE_DEEP_A))
 				{
 					type = 2;
 				}
 			}
-			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_ACCEPT || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_ACCEPT)
+			if (_EDGE_TOTAL_LENGTH > Classify_EDGE_TOTAL_LENGTH_C || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_C)
 				type = 4;
-			if (type < 3 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_C || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_C))
+			if (type < 3 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_TOTAL_LENGTH_B || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_B))
 				type = 3;
-			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_SINGLE_LENGTH_B || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_B))
+			if (type < 2 && (_EDGE_TOTAL_LENGTH > Classify_EDGE_TOTAL_LENGTH_A || _EDGE_TOTAL_DEEP > Classify_EDGE_TOTAL_DEEP_A))
 				type = 2;
 
 			stringstream ss;
