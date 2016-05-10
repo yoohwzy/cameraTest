@@ -43,10 +43,10 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
-	ON_MESSAGE(WM_MENU_OPEN_SYS_SET_DLG, OnWM_MENU_OPEN_SYS_SET_DLG)
-	ON_COMMAND(ID_32773, &CSpotsMainDlg::On32773)
+	ON_COMMAND(ID_32773, &CSpotsMainDlg::OnMenu_OPEN_SYS_SET_DLG)
 	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnBtnMenuEdgeset)
 	ON_COMMAND(ID_32778, &CSpotsMainDlg::OnMenuClassiySetClick)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -88,10 +88,69 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	//系统初始化
 	p_contrller->init();
 
+	save1control(0);
+	
+	save1control(IDC_BTN_SelectVirtualImg);
+	save1control(IDC_BTN_virtualTigger);
+	save1control(IDC_BTN_RUN);
+	save1control(IDCANCEL);
+	save1control(IDC_GB_IMG_BIG);
+	save1control(IDC_IMG_BIG);
+	save1control(IDC_LABLE_IMG_INFO);
+	
+	save1control(IDC_GB_LogImg);
+	save1control(IDC_IMG_HISTORY);
 
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+	save1control(IDC_GB_STATISTIC);
+	save1control(IDC_LB11);
+	save1control(IDC_LB7);
+	save1control(IDC_LB8);
+	save1control(IDC_LB9);
+	save1control(IDC_LB10);
+	save1control(IDC_LB12);
+	save1control(IDC_LB4);
+	save1control(IDC_LB5);
+	save1control(IDC_LB6);
+
+
+	save1control(IDC_LB_todayTotal);
+	save1control(IDC_LB_todayA);
+	save1control(IDC_LB_todayB);
+	save1control(IDC_LB_todayC);
+	save1control(IDC_LB_todayGood);
+	save1control(IDC_LB_dayFineRate);
+
+	save1control(IDC_LB_monthTotal);
+	save1control(IDC_LB_monthA);
+	save1control(IDC_LB_monthB);
+	save1control(IDC_LB_monthC);
+	save1control(IDC_LB_monthGood);
+	save1control(IDC_LB_monthFineRate);
+
+	save1control(IDC_LB_yearTotal);
+	save1control(IDC_LB_yearA);
+	save1control(IDC_LB_yearB);
+	save1control(IDC_LB_yearC);
+	save1control(IDC_LB_yearGood);
+	save1control(IDC_LB_yearFineRate);
+
+	initEndFlag = true;
+	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE 
 }
-
+void CSpotsMainDlg::save1control(int id)
+{
+	CRect rect;
+	if (id > 0)
+	{
+		GetDlgItem(id)->GetWindowRect(&rect);//获取控件相对于屏幕的位置
+		ScreenToClient(rect);//转化为对话框上的相对位置
+	}
+	else
+	{
+		GetClientRect(rect);
+	}
+	controls.insert(pair<int, control>(id, control(id, rect.Width(), rect.Height(), rect.left, rect.top)));
+}
 // 如果向对话框添加最小化按钮，则需要下面的代码
 //  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
 //  这将由框架自动完成。
@@ -123,7 +182,8 @@ void CSpotsMainDlg::OnPaint()
 		dc.FillSolidRect(rect, RGB(255, 255, 255));
 		dc.FillPath();
 
-		CDialogEx::OnPaint();
+		ShowLogImg(img_on_log);
+		ShowBigImg(img_on_show);
 	}
 }
 
@@ -173,7 +233,7 @@ BOOL CSpotsMainDlg::PreTranslateMessage(MSG* pMsg)
 	//屏蔽ESC关闭窗体/
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE) return TRUE;
 	//屏蔽回车关闭窗体,但会导致回车在窗体上失效.
-	//if(pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_RETURN && pMsg->wParam) return TRUE;
+	if(pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_RETURN && pMsg->wParam) return TRUE;
 	else
 		return CDialog::PreTranslateMessage(pMsg);
 }
@@ -220,6 +280,7 @@ void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 }
 void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 {
+	img_on_log = img;
 	DrawPicToHDC(img, IDC_IMG_HISTORY);
 }
 
@@ -451,16 +512,7 @@ void CSpotsMainDlg::ShowImgROI(CPoint point = CPoint(0, 0))
 	}
 }
 
-
-
-LRESULT CSpotsMainDlg::OnWM_MENU_OPEN_SYS_SET_DLG(WPARAM wParam, LPARAM lParam)
-{
-	SpotsSystemSetDlg s;
-	s.DoModal();
-	return 0;
-}
-
-void CSpotsMainDlg::On32773()
+void CSpotsMainDlg::OnMenu_OPEN_SYS_SET_DLG()
 {
 	SpotsSystemSetDlg m;
 	if (m.DoModal() == IDOK)
@@ -484,5 +536,46 @@ void CSpotsMainDlg::OnMenuClassiySetClick()
 	if (m.DoModal() == IDOK)
 	{
 
+	}
+}
+
+
+void CSpotsMainDlg::OnSize(UINT nType, int cx, int cy)
+{
+	__super::OnSize(nType, cx, cy);
+
+
+	//UI随界面缩放
+	if (initEndFlag)
+	{
+		int key = 0;
+		while (!(controls.count(key) > 0))
+		{
+			if (key >= controls.size() - 1)break;
+			key++;
+		}
+		CRect rect;
+		GetClientRect(rect);
+		int newwidth = rect.Width();
+		int newheight = rect.Height();
+		int owidth = controls[key].owidth;
+		int oheight = controls[key].oheight;
+
+		double k1 = (double)newwidth / (double)owidth;
+		double k2 = (double)newheight / (double)oheight;
+
+
+		map<int, control>::iterator   it = controls.begin();
+		for (; it != controls.end(); ++it)
+		{
+			if (it->first > 0)
+			{
+				int width = it->second.owidth * k1;
+				int height = it->second.oheight * k2;
+				int x = it->second.ox * k1;
+				int y = it->second.oy * k2;
+				GetDlgItem(it->first)->MoveWindow(x, y, width, height);
+			}
+		}
 	}
 }

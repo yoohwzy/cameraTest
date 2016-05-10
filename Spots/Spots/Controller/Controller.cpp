@@ -113,7 +113,6 @@ void Controller::init(){
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
-
 		StartWatch();
 			
 		spotsMainView->SwitchModel2Virtual(false);

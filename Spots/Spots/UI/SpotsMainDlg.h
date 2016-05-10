@@ -40,6 +40,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -51,8 +52,9 @@ private:
 	BOOL mouse_in_img = false;
 	BOOL img_big_flag = false;
 	CPoint mouse_point;
-	int zoom = 1;//放大倍数
+	int zoom = 1;//缩小倍数
 	cv::Mat img_on_show;//全尺寸图
+	cv::Mat img_on_log;
 	//缩放显示图片
 	void ShowImgROI(CPoint point);
 
@@ -61,15 +63,32 @@ private:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-
-
 	afx_msg void OnBnClickedBtnRun();
 	afx_msg void OnBnClickedBtnSelectvirtualimg();
 	afx_msg void OnBnClickedBtnvirtualtigger();
 
 
-	LRESULT OnWM_MENU_OPEN_SYS_SET_DLG(WPARAM wParam, LPARAM lParam);
+	struct control//用于记录控件原始位置
+	{
+		control(){};
+		control(int _id, int _owidth, int _oheight, int _ox, int _oy)
+		{
+			id = _id;
+			owidth = _owidth;
+			oheight = _oheight;
+			ox = _ox;
+			oy = _oy;
+		};
+		int id;
+		int owidth;//原始宽度
+		int oheight;//原始高度
+		int ox;//原始位置，距离程序左上角
+		int oy;//原始位置，距离程序左上角
+	};
+	bool initEndFlag = false;//只有初始化完成后才在onsize中执行UI缩放
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	map<int, control> controls;
+	void save1control(int ID);
 public:
 	afx_msg void OnBnClickedOk();
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
@@ -79,7 +98,6 @@ public:
 	// 供Controller调用 //Override
 
 	void ShowBigImg(cv::Mat);
-
 	void ShowLogImg(cv::Mat);
 
 	// 更新UI上显示的记录数据
@@ -88,7 +106,7 @@ public:
 	void SwitchModel2Virtual(bool switchToV);
 
 	// 供Controller调用 END
-	afx_msg void On32773();
+	afx_msg void OnMenu_OPEN_SYS_SET_DLG();
 	afx_msg void OnBtnMenuEdgeset();
 	afx_msg void OnMenuClassiySetClick();
 };
