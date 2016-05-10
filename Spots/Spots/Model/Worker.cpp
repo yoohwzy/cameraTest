@@ -293,7 +293,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		}
 		for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
 		{
-			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 4);
 		}
 		//arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	}
@@ -308,7 +308,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 
 		for (size_t i = 0; i < faults.BrokenCorners.size(); i++)
 		{
-			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
+			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length, cv::Scalar(127, 0, 228), 5);
 		}
 		//arm.AddAction(1, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	}
