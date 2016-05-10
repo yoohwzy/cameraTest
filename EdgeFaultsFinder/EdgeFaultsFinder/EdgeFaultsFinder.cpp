@@ -29,12 +29,12 @@ void main(int argc, _TCHAR* argv[])
 	for (size_t index = 12; index < 52; index++)
 	{
 		stringstream ss;
-		ss << "D://出差//2015.12.29//2//" << index << "_o原图.jpg";
+		//ss << "D://出差//2015.12.29//2//" << index << "_o原图.jpg";
 		//ss << "D://出差//2015.12.30//2//" << index << "_o原图.jpg";
-
+	
 		//cv::Mat img = cv::imread(ss.str(), 0);
 		//cv::Mat img = cv::imread("D://16_o原图7.jpg", 0);
-		cv::Mat img = cv::imread("D://6_2_o原图.jpg", 0);
+		cv::Mat img = cv::imread("D://出差//2015.12.29//4崩边凹凸点//12_o原图 - 副本.jpg", 0);
 		//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//2_o原图.jpg", 0);
 
 		if (img.rows == 0)

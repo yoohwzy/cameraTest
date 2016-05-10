@@ -19,6 +19,12 @@
     <Filter Include="Algorithm\Base">
       <UniqueIdentifier>{c07e8f88-5312-4dd5-9382-549afaab0f86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Class">
+      <UniqueIdentifier>{54fe661c-3c85-47b3-80b5-4a1eb8cea27d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Debug">
+      <UniqueIdentifier>{4b7ea35b-9e00-49ae-b586-42cc6beea65a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -47,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="Algorithm\BlockEdgeLineDetector.h">
       <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Debug\MFCConsole.h">
+      <Filter>Class\Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

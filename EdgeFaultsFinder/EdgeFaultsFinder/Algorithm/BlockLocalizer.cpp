@@ -1,4 +1,5 @@
 #include "BlockLocalizer.h"
+#include <Class\Debug\MFCConsole.h>
 
 
 BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
@@ -52,9 +53,10 @@ void BlockLocalizer::Run()
 	{
 		return;
 	}
+	NotFoundBlockFlag = false;
+
 	Judgement();
 	p_block->Lines2ABCD();
-	NotFoundBlockFlag = false;
 
 	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (double)(abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
 	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (double)(abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
@@ -565,19 +567,6 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 	//确定每个点间的间隔
 	int spanX = 0;
 	int spanY = 0;
-	int iii = 0;
-	//之所以使用循环，是考虑到了第一个点有重复的情况，如0 1号点相同，那么spanY=0
-	while (spanY == 0 && iii < count)
-	{
-		spanY = abs(points[iii].y - points[iii + 1].y);
-		iii++;
-	}
-	iii = 0;
-	while (spanX == 0 && iii < count)
-	{
-		spanX = abs(points[iii].x - points[iii + 1].x);
-		iii++;
-	}
 
 	//循环检查相邻点之间的像素增量
 	//比较相邻增量间的差异是否大于阈值PIX_OFFSET，若大于则认为该点为转折点，diffs将push进一个新的像素增量
@@ -586,6 +575,13 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 	vector<int> errorPointIndex;//记录转折点索引
 	if (updown)
 	{
+		int iii = 0;
+		while (spanX == 0 && iii < count)
+		{
+			spanX = abs(points[iii].x - points[iii + 1].x);
+			iii++;
+		}
+
 		//算出相邻点的像素位置差即dy
 		vector<int> dy;
 		for (int i = 0; i < count; i++)
@@ -603,6 +599,8 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			{
 				diffs[diffs.size() - 1] = lastdiff * 0.7 + dy[i] * 0.3;//使用一定的遗忘系数来更新标准差值
 				diffsCount[diffsCount.size() - 1] += 1;
+				if (diffs.size() > 10)
+					break;
 			}
 			else
 			{
@@ -625,6 +623,13 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 	}
 	else if (!updown)
 	{
+		int iii = 0;
+		//之所以使用循环，是考虑到了第一个点有重复的情况，如0 1号点相同，那么spanY=0
+		while (spanY == 0 && iii < count)
+		{
+			spanY = abs(points[iii].y - points[iii + 1].y);
+			iii++;
+		}
 		//算出第一个点到第二个点的像素距离差，即dx
 		vector<int> dx;
 		for (int i = 0; i < count; i++)
@@ -644,6 +649,8 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			{
 				diffs[diffs.size() - 1] = lastdiff * 0.7 + dx[i] * 0.3;//更新权重
 				diffsCount[diffsCount.size() - 1] += 1;
+				if (diffs.size() > 10)
+					break;
 			}
 			else
 			{
@@ -667,6 +674,12 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 	//斜率全部一致
 	if (errorPointIndex.size() == 0)
 	{
+		return;
+	}
+	if (diffs.size() > 8)//表示找到的边缘点是乱的，所以
+	{
+		MFCConsole::Output("边界点混乱，认为未找到瓷砖！\r\n");
+		NotFoundBlockFlag = true;
 		return;
 	}
 
