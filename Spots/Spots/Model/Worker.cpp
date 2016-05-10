@@ -293,9 +293,8 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		}
 		for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
 		{
-			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length + 50, cv::Scalar(0, 0, 255), 10);
+			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 4);
 		}
-		//arm.AddAction(0, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	}
 	if (faults.BrokenCorners.size() > 0)
 	{
@@ -308,9 +307,8 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 
 		for (size_t i = 0; i < faults.BrokenCorners.size(); i++)
 		{
-			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length + 50, cv::Scalar(127, 0, 228), 5);
+			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length, cv::Scalar(127, 0, 228), 5);
 		}
-		//arm.AddAction(1, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	}
 	//if (faults.SomethingBigs.size() > 0)
 	//{
@@ -329,7 +327,6 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 	//	{
 	//		cv::circle(img, faults.SomethingBigs[i].position, faults.SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
 	//	}
-	//	//arm.AddAction(2, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	//}
 	if (faults.Scratchs.size() > 0)
 	{
@@ -343,7 +340,6 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		{
 			cv::circle(img, faults.Scratchs[i].position, faults.Scratchs[i].length, cv::Scalar(0, 255, 0), 5);
 		}
-		//arm.AddAction(3, TimeHelper::GetTimeNow(globle_var::TiggerActionWaitTimeMS));
 	}
 	if (faults.Holes.size() > 0)
 	{
