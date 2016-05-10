@@ -32,7 +32,8 @@ void BlockEdgeLineDetector::Run()
 
 
 	stringstream ss;
-	ss << "定标消息：最大崩边长度=" << maxLengthPix << "pix，最大深度 = " << maxDeepPix << "pix" << endl;
+	ss << "BLED定标消息：最大崩边长度=" << maxLengthPix << "pix，最大深度 = " << maxDeepPix << "pix" << endl;
+	ss << "BLED定标消息：最小崩边长度=" << minLengthPix << "pix，最小深度 = " << minDeepPix << "pix" << endl;
 	MFCConsole::Output(ss.str());
 }
 
@@ -62,6 +63,7 @@ void BlockEdgeLineDetector::doUp()
 			continue;
 		int deep = getDeepUp(cv::Point(point_x, point_y));
 		if (deep > maxDeepPix) maxDeepPix = deep;
+		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -81,7 +83,7 @@ void BlockEdgeLineDetector::doUp()
 				if (vbs[brokenEdgeIndex].deep < deep)
 					vbs[brokenEdgeIndex].deep = deep;
 				vbs[brokenEdgeIndex].length++;
-				vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
+				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
 			}
 		}
 		else
@@ -92,7 +94,6 @@ void BlockEdgeLineDetector::doUp()
 	}
 	processVBS(vbs, 1);
 }
-
 void BlockEdgeLineDetector::doDown()
 {
 	Block::Line line = p_block->DownLine;
@@ -114,6 +115,7 @@ void BlockEdgeLineDetector::doDown()
 			continue;
 		int deep = getDeepDown(cv::Point(point_x, point_y));
 		if (deep > maxDeepPix) maxDeepPix = deep;
+		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -133,7 +135,7 @@ void BlockEdgeLineDetector::doDown()
 				if (vbs[brokenEdgeIndex].deep < deep)
 					vbs[brokenEdgeIndex].deep = deep;
 				vbs[brokenEdgeIndex].length++;
-				vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
+				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
 			}
 		}
 		else
@@ -144,7 +146,6 @@ void BlockEdgeLineDetector::doDown()
 	}
 	processVBS(vbs, 1);
 }
-
 void BlockEdgeLineDetector::doLeft()
 {
 	Block::Line line = p_block->LeftLine;
@@ -166,6 +167,7 @@ void BlockEdgeLineDetector::doLeft()
 			continue;
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
 		if (deep > maxDeepPix) maxDeepPix = deep;
+		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -185,7 +187,7 @@ void BlockEdgeLineDetector::doLeft()
 				if (vbs[brokenEdgeIndex].deep < deep)
 					vbs[brokenEdgeIndex].deep = deep;
 				vbs[brokenEdgeIndex].length++;
-				vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
+				//vbs[brokenEdgeIndex].position = cv::Point(point_x, point_y - vbs[brokenEdgeIndex].length / 2);
 			}
 		}
 		else
@@ -202,7 +204,7 @@ void BlockEdgeLineDetector::doRight()
 	int startY = p_block->B.y + 5;
 	if (startY < 0)
 		startY = 0;
-	int endY = p_block->D.y - 5;
+	int endY = p_block->C.y - 5;
 	if (endY >= image.rows)
 		endY = image.rows - 1;
 
@@ -217,6 +219,7 @@ void BlockEdgeLineDetector::doRight()
 			continue;
 		int deep = getDeepRight(cv::Point(point_x, point_y));
 		if (deep > maxDeepPix) maxDeepPix = deep;
+		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
 #ifdef BELD_OUTPUT_DEBUG_INFO
@@ -236,7 +239,7 @@ void BlockEdgeLineDetector::doRight()
 				if (vbs[brokenEdgeIndex].deep < deep)
 					vbs[brokenEdgeIndex].deep = deep;
 				vbs[brokenEdgeIndex].length++;
-				vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
+				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
 			}
 		}
 		else
@@ -261,7 +264,7 @@ int BlockEdgeLineDetector::getDeepUp(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_y + deep + 4 >= image.rows)
 			break;
 		if (image.ptr<uchar>(point_y + deep)[point_x] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y + deep + 1)[point_x] >= BINARY_THRESHOD &&
@@ -286,7 +289,7 @@ int BlockEdgeLineDetector::getDeepDown(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_y - deep - 4 < 0)
 			break;
 		if (image.ptr<uchar>(point_y - deep)[point_x] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y - deep - 1)[point_x] >= BINARY_THRESHOD &&
@@ -311,7 +314,7 @@ int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_x + deep + 4 >= image.cols)
 			break;
 		if (image.ptr<uchar>(point_y)[point_x + deep] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y)[point_x + deep + 1] >= BINARY_THRESHOD &&
@@ -323,7 +326,6 @@ int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
 	}
 	return deep;
 }
-
 int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 {
 	int point_x = p.x;
@@ -337,7 +339,7 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_x - deep - 4 < 0)
 			break;
 		if (image.ptr<uchar>(point_y)[point_x - deep] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y)[point_x - deep - 1] >= BINARY_THRESHOD &&
@@ -354,7 +356,14 @@ void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUp
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << "BELD" << isUpDown << ":(" << vbs[i].position.x << "," << vbs[i].position.y << ") => length=" << vbs[i].length << ", maxdeep = " << vbs[i].deep << endl;
+			MFCConsole::Output(ss.str());
+		}
 		if (vbs[i].length > maxLengthPix) maxLengthPix = vbs[i].length;
+		if (vbs[i].length > 0 && vbs[i].length < minLengthPix) minLengthPix = vbs[i].length;
 		if (vbs[i].length < LENGTH_THRESHOD)
 			continue;
 		else

@@ -32,6 +32,10 @@ public:
 	//统计出的最大长度
 	int maxLengthPix = 0;
 
+	//统计出的最小深度
+	int minDeepPix = 9999;
+	//统计出的最小长度
+	int minLengthPix = 9999;
 
 
 	//parameter
