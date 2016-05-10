@@ -34,7 +34,7 @@ void main(int argc, _TCHAR* argv[])
 	
 		//cv::Mat img = cv::imread(ss.str(), 0);
 		//cv::Mat img = cv::imread("D://16_o原图7.jpg", 0);
-		cv::Mat img = cv::imread("D://出差//2015.12.29//4崩边凹凸点//12_o原图 - 副本.jpg", 0);
+		cv::Mat img = cv::imread("D://出差//2015.12.29//14凹点釉下杂质//12_o原图漏检左边沿凹点.jpg", 0);
 		//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//2_o原图.jpg", 0);
 
 		if (img.rows == 0)
@@ -86,6 +86,12 @@ void main(int argc, _TCHAR* argv[])
 			continue;
 		}
 		t = cv::getTickCount();
+		BlockEdgeLineDetector beld = BlockEdgeLineDetector(img, &block, &faults);
+		beld.Run();
+		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
+		cout << "BlockEdgeLineDetector:" << t << endl;
+
+		t = cv::getTickCount();
 		BlockEdgeDetector bed = BlockEdgeDetector(img, &block, &faults);
 		bed.DIFF_THRESHOLD = 0.4;
 		bed.FAULTS_SPAN = 4;
@@ -96,13 +102,6 @@ void main(int argc, _TCHAR* argv[])
 		t = cv::getTickCount();
 
 
-
-		BlockEdgeLineDetector beld = BlockEdgeLineDetector(img, &block, &faults);
-		beld.Run();
-
-		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-		cout << "BlockEdgeLineDetector:" << t << endl;
-		t = cv::getTickCount();
 
 
 		cv::cvtColor(img, img, CV_GRAY2BGR);

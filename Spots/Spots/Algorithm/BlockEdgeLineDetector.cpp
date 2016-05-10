@@ -261,7 +261,7 @@ int BlockEdgeLineDetector::getDeepUp(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_y + deep + 4 >= image.rows)
 			break;
 		if (image.ptr<uchar>(point_y + deep)[point_x] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y + deep + 1)[point_x] >= BINARY_THRESHOD &&
@@ -286,8 +286,6 @@ int BlockEdgeLineDetector::getDeepDown(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
-			break;
 		if (image.ptr<uchar>(point_y - deep)[point_x] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y - deep - 1)[point_x] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y - deep - 2)[point_x] >= BINARY_THRESHOD &&
@@ -337,7 +335,7 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	int deep = 0;
 	for (; deep < 50; deep++)
 	{
-		if (point_y + deep + 4 >= image.cols)
+		if (point_y - deep - 4 >= image.cols)
 			break;
 		if (image.ptr<uchar>(point_y)[point_x - deep] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y)[point_x - deep - 1] >= BINARY_THRESHOD &&
