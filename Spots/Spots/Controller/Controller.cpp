@@ -23,12 +23,21 @@ void Controller::init(){
 	bool e2vInitFlag = true;
 	bool pci1761InitFlag = true;
 
+	stringstream ss;
+	ss.str("");
+	ss << "IsRealModel = " << IsRealModel << endl;
+	MFCConsole::Output(ss.str());
+
 	if (IsRealModel)
 	{
 		int VirtualCamEnable = 1;
-		SettingHelper::GetKeyInt("E2V", "Virtual_Cam_Enable", VirtualCamEnable);
-		IsRealModel = VirtualCamEnable == 0;
+		if (SettingHelper::GetKeyInt("E2V", "Virtual_Cam_Enable", VirtualCamEnable))
+			IsRealModel = VirtualCamEnable == 0;
 	}
+
+	ss.str(""); 
+	ss << "IsRealModel = " << IsRealModel << endl;
+	MFCConsole::Output(ss.str());
 
 	if (IsRealModel)
 	{
@@ -65,16 +74,26 @@ void Controller::init(){
 	{
 		int accEnable = 0;
 		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);//读取是否启用数据库模块
+
+		ss.clear();
+		ss << "ACCDB_ENABLE = " << accEnable << endl;
+		MFCConsole::Output(ss.str());
 		if (accEnable != 0)
 		{
 			string db_path;
 			bool accConnFlag = false;
 			if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
+			{
 				accConnFlag = Statistics::InitDate(db_path);
+				MFCConsole::Output("db_path:");
+				MFCConsole::Output(db_path);
+				MFCConsole::Output("\r\n");
+			}
 			else
 			{
 				accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
 				SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+				MFCConsole::Output("db_path:src//..//瓷砖缺陷检测数据库.mdb\r\n");
 			}
 			// 统计数据初始化
 			if (accConnFlag)
@@ -115,16 +134,15 @@ void Controller::init(){
 			else if (!e2vInitFlag)
 				AfxMessageBox(L"线阵相机初始化失败！已切换到虚拟相机模式。");
 		}
+		else
+			MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 		//若为虚拟相机模式，则实例化虚拟相机类与1个工人
 		//开启虚拟相机
 		cv::Mat virtualImg;
 		worker1 = new Worker(NULL);
 		worker1->image = virtualImg;
 		worker1->P_Controller = this;
-
 		spotsMainView->SwitchModel2Virtual(true);
-
-		MFCConsole::Output("已切换到虚拟相机模式。\r\n");
 	}
 
 	//读取参数配置
