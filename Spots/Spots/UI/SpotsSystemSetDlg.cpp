@@ -26,6 +26,10 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	int VirtualCamEnable = 0;
+	SettingHelper::GetKeyInt("E2V", "Virtual_Cam_Enable", VirtualCamEnable);
+	((CButton*)GetDlgItem(IDC_CB_VirtualCam))->SetCheck(VirtualCamEnable != 0);
+
 	int COLOR_TYPE_IS_GRAY = 1;
 	SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
 	((CButton*)GetDlgItem(IDC_CB_CAM_GRAY))->SetCheck(COLOR_TYPE_IS_GRAY != 0);
@@ -156,7 +160,10 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_CAM_GRAY);
 	SettingHelper::AddKey("E2V", "COLOR_TYPE_IS_GRAY", pBtn->GetCheck());
 	saveParameter(IDC_TB_Cam_FrameCount_PerSecond, "E2V", "Cam_FrameCount_PerSecond");
-
+	//虚拟相机
+	pBtn = (CButton*)GetDlgItem(IDC_CB_VirtualCam);
+	SettingHelper::AddKey("E2V", "Virtual_Cam_Enable", pBtn->GetCheck());
+	
 
 	//保存数据库设置
 	pBtn = (CButton*)GetDlgItem(IDC_CB_EnableAccess);

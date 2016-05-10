@@ -20,34 +20,44 @@ void Controller::init(){
 	else
 		p_e2vbuffer = new E2VBuffer(4096, false);
 
-	//初始化E2V相机
-	int Cam_FrameCount_PerSecond = 5000;
-	SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond);
-	p_imgscanner = new ImgScanner(p_e2vbuffer, Cam_FrameCount_PerSecond);
 	bool e2vInitFlag = true;
-	if (!p_imgscanner->StartFlag)
-	{
-		//若初始化e2v_EV71YC1CCL4005BA0失败
-		//则删除已实例化的对象，切换为虚拟相机模式
-		if (p_imgscanner != NULL)
-		{
-			delete p_imgscanner;
-			p_imgscanner = NULL;
-		}
-		if (p_e2vbuffer != NULL)
-		{
-			delete p_e2vbuffer;
-			p_e2vbuffer = NULL;
-		}
-		e2vInitFlag = false;
-	}
-
 	bool pci1761InitFlag = true;
-	if (!pci1761.init())
+
+	if (IsRealModel)
 	{
-		pci1761InitFlag = false;
+		int VirtualCamEnable = 1;
+		SettingHelper::GetKeyInt("E2V", "Virtual_Cam_Enable", VirtualCamEnable);
+		IsRealModel = VirtualCamEnable == 0;
 	}
 
+	if (IsRealModel)
+	{
+		//初始化E2V相机
+		int Cam_FrameCount_PerSecond = 5000;
+		SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond);
+		p_imgscanner = new ImgScanner(p_e2vbuffer, Cam_FrameCount_PerSecond);
+		if (!p_imgscanner->StartFlag)
+		{
+			//若初始化e2v_EV71YC1CCL4005BA0失败
+			//则删除已实例化的对象，切换为虚拟相机模式
+			if (p_imgscanner != NULL)
+			{
+				delete p_imgscanner;
+				p_imgscanner = NULL;
+			}
+			if (p_e2vbuffer != NULL)
+			{
+				delete p_e2vbuffer;
+				p_e2vbuffer = NULL;
+			}
+			e2vInitFlag = false;
+		}
+
+		if (!pci1761.init())
+		{
+			pci1761InitFlag = false;
+		}
+	}
 
 
 	// 数据库配置初始化
