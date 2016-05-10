@@ -56,11 +56,18 @@ public:
 		ui_lock.lock();
 		switch (type)
 		{
-		case 1:Statistics::AddTodayA(); break;
-		case 2:Statistics::AddTodayB(); break;
-		case 3:Statistics::AddTodayC(); break;
+		case 1:Statistics::AddTodayA(); 
+			logImg.AddItem(image, "A");
+			break;
+		case 2:Statistics::AddTodayB(); 
+			logImg.AddItem(image, "B");
+			break;
+		case 3:Statistics::AddTodayC();
+			logImg.AddItem(image, "C");
+			break;
 		case 4:
 			Statistics::AddTodayRejected(); 
+			logImg.AddItem(image, "D");
 			if (p_arm != NULL)
 				p_arm->AddAction(0, 500);//0号output口在500ms后产生一个阶跃信号
 			break;
@@ -69,7 +76,6 @@ public:
 
 
 		spotsMainView->ShowBigImg(image);
-		logImg.AddItem(image,"test");
 		spotsMainView->ShowLogImg(logImg.DrawingBoard);
 		spotsMainView->UpdateStatistics();
 		ui_lock.unlock();

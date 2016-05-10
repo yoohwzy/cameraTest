@@ -166,7 +166,12 @@ void Worker::work()
 
 			}
 		}
-
+		if (1 == 1)
+		{
+			stringstream ss;
+			ss << "type=" << type << endl;
+			MFCConsole::Output(ss.str());
+		}
 		P_Controller->ImgProcessOverCallBack(grayImg, type);
 	}
 	else
