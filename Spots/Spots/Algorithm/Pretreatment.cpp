@@ -346,6 +346,11 @@ void Pretreatment::ProcessArea(Block *blockin)
 	pointlist.push_back(_C_remo);
 	pointlist.push_back(_D_remo);
 
+	//由于上下部分有阴影，当待检测标记边缘rect落在阴影中时不认为是标记
+	_A = _A + Point(0, 100);
+	_C = _C + Point(0, -100);
+	_D = _D + Point(0, -100);
+	_B = _B + Point(0, 100);
 	pointlist_r.push_back(_A);
 	pointlist_r.push_back(_B);
 	pointlist_r.push_back(_C);
