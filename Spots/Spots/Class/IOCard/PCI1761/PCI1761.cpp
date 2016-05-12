@@ -1,5 +1,6 @@
 #include "PCI1761.h"
 
+bool PCI1761::Inverter = false;
 
 int PCI1761::entityCount = 0;
 bool PCI1761::hasOpened = false;

@@ -563,7 +563,11 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 {
 	const int PIX_OFFSET = 20;//误差超过这个值，认为崩边。
 	int count = points.size() - 2;//点的数量
-
+	if (count < 3)
+	{
+		NotFoundBlockFlag = true;
+		return;
+	}
 	//确定每个点间的间隔
 	int spanX = 0;
 	int spanY = 0;
@@ -605,7 +609,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			else
 			{
 				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (i > 5 && i < count - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				if (dy.size() > 5 && i > 5 && i < dy.size() - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
 				{
 					if (abs(dy[i - 2] - dy[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
 					{
@@ -655,7 +659,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			else
 			{
 				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (i > 5 && i < count - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				if (dx.size() > 5 && i > 5 && i < dx.size() - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
 				{
 					if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
 					{
