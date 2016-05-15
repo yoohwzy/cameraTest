@@ -433,6 +433,8 @@ void Pretreatment::Handwriting(const Mat &_img)
 		if (Maskcontours[i].size() > 5)
 		{
 			Rect mask_rect = boundingRect(Maskcontours[i]);
+			mask_rect.x -= 1;
+			mask_rect.y -= 1;
 			Mat watch_img = _img(mask_rect).clone();
 			threshold(watch_img, watch_img,100,255,CV_THRESH_OTSU);
 			double nonnum = countNonZero(watch_img);
@@ -822,6 +824,15 @@ void Pretreatment::linedetect()
 			vector<Point> km_contours;
 			convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
 			Rect linerect = boundingRect(linescontours[i]);
+			Point a_sy = Point(0, 0);
+			Point b_sy = Point(0, 0);
+			if (linerect.width < 20 || linerect.height < 20)
+			{
+				a_sy = Point(linerect.x + linerect.width*0.25, linerect.y + linerect.height*0.75);
+				b_sy = Point(linerect.x + linerect.width*0.75, linerect.y + linerect.height*0.25);
+			}
+			if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))
+				continue;
 			if ((linerect.width-1)*(linerect.height-1) < 2 * int(contourArea(km_contours)))//检测是否为类划痕形状
 				continue;
 			if (line_YoN(linerect))
@@ -845,7 +856,7 @@ void Pretreatment::linedetect()
 
 void Pretreatment::line2preprocess()
 {
-	/*resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);*/
+	resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);
 	resize(MidImg, LMidImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
 }
 
