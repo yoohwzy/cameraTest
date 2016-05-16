@@ -1,94 +1,38 @@
-#include "E2VCamera.h"
+#include "E2VCameraModel.h"
 
-E2VCamera::E2VCamera(E2VBuffer *_e2vbuffer, int width, int height, int colorType, int frameTimeUS, int boardID, int Camport)
+E2VCameraModel::E2VCameraModel(int width, int height, int colorType, int boardID, int Camport)
 {
-	p_e2vbuffer = _e2vbuffer;
 	_width = width;
-	_frameTimeUS = frameTimeUS;
 	_colorType = colorType;
 	_nBoard = boardID;
 	_camPort = Camport;
 
-	if (!init_fg())
-	{
-		release();
-		StartFlag = false;
-	}
-	else
-		StartFlag = true;
+	ReInitFg();
 }
-E2VCamera::~E2VCamera()
+E2VCameraModel::~E2VCameraModel()
 {
 	release();
 }
-bool E2VCamera::FreeRun()
+
+
+bool E2VCameraModel::ReInitFg()
 {
-	//acquire one image per subbuffer
-	//1.fg
-	//2.采集卡口
-	//3.采集帧数
-	//4.？
-	//5.缓存地址
-	if ((Fg_AcquireEx(fg, _camPort, GRAB_INFINITE, ACQ_STANDARD, memHandle)) < 0) {
-		fprintf(stderr, "Fg_AcquireEx() failed: %s\n", Fg_getLastErrorDescription(fg));
-		errorMessageWait(); return false;
-	}
-
-	frameindex_t fcount = 0;
-	frameindex_t last_pic_nr = 0;
-	frameindex_t cur_pic_nr;
-
-	cv::Mat OriginalImage;
-
-	//连续运行
-	while (StartFlag)
+	release();
+	if (!init_fg())
 	{
-		double t1 = (double)cv::getTickCount();//采图用时 微秒
-		cur_pic_nr = Fg_getLastPicNumberBlockingEx(fg, last_pic_nr + 1, _camPort, 100, memHandle);
-		if (cur_pic_nr < 0)
-		{
-			Fg_stopAcquire(fg, _camPort);
-			errorMessageWait(); return false;
-		}
-		unsigned char *bytePtr = (unsigned char*)Fg_getImagePtrEx(fg, cur_pic_nr, 0, memHandle);
-		//if (nId != -1)
-		//	::DrawBuffer(nId, Fg_getImagePtrEx(fg, lastPicNr, 0, memHandle), (int)lastPicNr, "");
-
-		OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
-		if (_colorType == GRAY)
-		{
-			cv::cvtColor(OriginalImage, OriginalImage, CV_BGR2GRAY);
-		}
-		p_e2vbuffer->WriteData(OriginalImage);
-		t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
-
-
-		//等待满_frameTimeUS
-		if (_frameTimeUS > 0 && t1 < _frameTimeUS)
-		{
-			double t2 = (double)cv::getTickCount();
-			double tickCountSpan = (_frameTimeUS - t1) * cv::getTickFrequency() / 1000000;
-			while (((double)cv::getTickCount() - t2) < tickCountSpan)
-			{
-				//stringstream ss;
-				//ss << ((double)cv::getTickCount() - t2) << " " << tickCountSpan << endl;
-				//printf_globle(ss.str());
-			}
-		}
-		fcount++;
+		hasBeenInited = false;
+		release();
 	}
-
-	Fg_stopAcquireEx(fg, _camPort, memHandle, 0);
-	return true;
+	else
+	{
+		hasBeenInited = true;
+	}
+	return hasBeenInited;
 }
 
+/**********************保护*********************/
 
-
-
-
-/**********************私有*********************/
-
-bool E2VCamera::init_fg()
+bool E2VCameraModel::init_fg()
 {
 	// 初始化FG
 
@@ -134,7 +78,7 @@ bool E2VCamera::init_fg()
 }
 
 
-int E2VCamera::createDiplayBuffer()
+int E2VCameraModel::createDiplayBuffer()
 {
 	int format = 0;
 	Fg_getParameter(fg, FG_FORMAT, &format, _camPort);
@@ -169,7 +113,7 @@ int E2VCamera::createDiplayBuffer()
 	return dispId0;
 }
 
-bool E2VCamera::memoryAllocation()
+bool E2VCameraModel::memoryAllocation()
 {
 	// Memory allocation
 	int format = 0;
@@ -192,7 +136,7 @@ bool E2VCamera::memoryAllocation()
 	return true;
 }
 
-void E2VCamera::release()
+void E2VCameraModel::release()
 {
 	if (memHandle != NULL)
 	{
@@ -207,7 +151,7 @@ void E2VCamera::release()
 }
 
 //报错->退出
-void E2VCamera::errorMessageWait()
+void E2VCameraModel::errorMessageWait()
 {
 	int error = Fg_getLastErrorNumber(fg);
 	const char*	err_str = Fg_getLastErrorDescription(fg);
@@ -229,7 +173,7 @@ void E2VCamera::errorMessageWait()
 
 
 #pragma region 调试用函数
-int E2VCamera::getNrOfBoards()
+int E2VCameraModel::getNrOfBoards()
 {
 	int nrOfBoards = 0;
 	char buffer[256];
@@ -243,7 +187,7 @@ int E2VCamera::getNrOfBoards()
 	return nrOfBoards;
 
 }
-int E2VCamera::getBoardInfo()
+int E2VCameraModel::getBoardInfo()
 {
 	int boardType;
 	int i = 0;

@@ -177,6 +177,12 @@
     <ClInclude Include="Algorithm\Pretreatment.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.h">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.h">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -259,6 +265,12 @@
     </ClCompile>
     <ClCompile Include="Algorithm\Pretreatment.cpp">
       <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.cpp">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.cpp">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

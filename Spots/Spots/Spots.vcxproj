@@ -126,6 +126,8 @@
     <ClInclude Include="Class\Access\ASqlHelper.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h" />
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.h" />
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.h" />
     <ClInclude Include="Class\Debug\MFCConsole.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h" />
@@ -162,6 +164,8 @@
     <ClCompile Include="Class\Access\ASqlHelper.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp" />
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.cpp" />
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.cpp" />
     <ClCompile Include="Class\Debug\MFCConsole.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
     <ClCompile Include="Class\Setting\SettingHelper.cpp" />
