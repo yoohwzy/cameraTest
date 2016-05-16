@@ -103,9 +103,9 @@ E2VCameraCycleBuffer::E2VCameraCycleBuffer(int width, int colorType, int frameTi
 	: E2VCameraModel(width, 0, colorType, boardID, Camport)
 {
 	if (colorType == E2VCameraCycleBuffer::GRAY)
-		p_e2vCycleBuffer = new E2VCycleBuffer(4096, true);
+		P_CycleBuffer = new E2VCycleBuffer(4096, true);
 	else
-		p_e2vCycleBuffer = new E2VCycleBuffer(4096, false);
+		P_CycleBuffer = new E2VCycleBuffer(4096, false);
 
 
 	//启动采图循环
@@ -115,14 +115,19 @@ E2VCameraCycleBuffer::E2VCameraCycleBuffer(int width, int colorType, int frameTi
 	t_scanThread.detach();
 
 
-	_frameTimeUS = frameTimeUS;
+	FrameTimeUS = frameTimeUS;
 }
 E2VCameraCycleBuffer::~E2VCameraCycleBuffer()
 {
+	if (P_CycleBuffer != NULL)
+	{
+		delete P_CycleBuffer;
+		P_CycleBuffer = NULL;
+	}
 }
 bool E2VCameraCycleBuffer::freeRun()
 {
-	if (hasBeenInited)
+	if (HasBeenInited)
 	{
 		//acquire one image per subbuffer
 		//1.fg
@@ -160,15 +165,15 @@ bool E2VCameraCycleBuffer::freeRun()
 			{
 				cv::cvtColor(OriginalImage, OriginalImage, CV_BGR2GRAY);
 			}
-			p_e2vCycleBuffer->WriteData(OriginalImage);
+			P_CycleBuffer->WriteData(OriginalImage);
 			t1 = ((double)cv::getTickCount() - t1) * 1000000 / cv::getTickFrequency();
 
 
-			//等待满_frameTimeUS
-			if (_frameTimeUS > 0 && t1 < _frameTimeUS)
+			//等待满FrameTimeUS
+			if (FrameTimeUS > 0 && t1 < FrameTimeUS)
 			{
 				double t2 = (double)cv::getTickCount();
-				double tickCountSpan = (_frameTimeUS - t1) * cv::getTickFrequency() / 1000000;
+				double tickCountSpan = (FrameTimeUS - t1) * cv::getTickFrequency() / 1000000;
 				while (((double)cv::getTickCount() - t2) < tickCountSpan)
 				{
 					//stringstream ss;
@@ -184,12 +189,4 @@ bool E2VCameraCycleBuffer::freeRun()
 	}
 	else
 		return false;
-}
-cv::Mat E2VCameraCycleBuffer::GetImage(int startLine, int endLine)
-{
-	if (hasBeenInited)
-	{
-		return p_e2vCycleBuffer->GetImage(startLine, endLine);
-	}
-	return cv::Mat();
 }

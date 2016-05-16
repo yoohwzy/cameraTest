@@ -68,7 +68,7 @@ private:
 
 //E2V相机的操作类，为循环缓存采图版本
 //@author VShawn
-class E2VCameraCycleBuffer :protected E2VCameraModel
+class E2VCameraCycleBuffer :public E2VCameraModel
 {
 public:
 	//初始化采集参数
@@ -82,15 +82,11 @@ public:
 	E2VCameraCycleBuffer(int width, int colorType = RGB, int frameTimeUS = 0, int boardID = 0, int Camport = PORT_A);
 	~E2VCameraCycleBuffer();
 
-
-	//根据起始行索引，获取一副图像
-	//例，输入startLine = 0,endLine = 2，将获得一副0行开始，长度为3像素的图像
-	//输入startLine = 19000,endLine = 0，将获得一副19000行开始，长度为1001像素的图像
-	cv::Mat GetImage(int startLine, int endLine);
 	bool StartFlag = true;
+	E2VCycleBuffer *P_CycleBuffer = NULL;
+	//每帧时长（微秒）要求大于30，默认为0
+	int FrameTimeUS = 0;
 private:
-	E2VCycleBuffer *p_e2vCycleBuffer = NULL;
-	int _frameTimeUS = 0;
 
 
 	//开始循环采图

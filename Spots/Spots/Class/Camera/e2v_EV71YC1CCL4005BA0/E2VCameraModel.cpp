@@ -20,14 +20,14 @@ bool E2VCameraModel::ReInitFg()
 	release();
 	if (!init_fg())
 	{
-		hasBeenInited = false;
+		HasBeenInited = false;
 		release();
 	}
 	else
 	{
-		hasBeenInited = true;
+		HasBeenInited = true;
 	}
-	return hasBeenInited;
+	return HasBeenInited;
 }
 
 /**********************±£»¤*********************/

@@ -40,12 +40,12 @@ public:
 	virtual cv::Mat GetImage(){ return cv::Mat(); };
 
 	bool ReInitFg();//尝试重新初始化
+	bool HasBeenInited = false;		//是否已完成初始化
 
 protected:
 	Fg_Struct *fg = NULL;			//frame grabber
 	dma_mem *memHandle = NULL;		//Memory buffer
 
-	bool hasBeenInited = false;		//是否已完成初始化
 
 
 
