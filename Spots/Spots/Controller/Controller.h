@@ -1,6 +1,5 @@
 #pragma once
-
-#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCameraCycleBuffer.h>//必须放在这，否则会报错  XX定义不明确
 #include <Class/IOCard/PCI1761/PCI1761.h>
 #include <Class/Statistics/Statistics.h>
 
@@ -11,7 +10,6 @@
 #include <thread>
 #include <mutex>
 
-#include <Model\ImgScanner.h>
 #include <Model\Worker.h>
 #include <Model\LogImgGenerator.h>
 #include <Model\Arm.h>
@@ -179,12 +177,12 @@ private:
 	void release();
 	//HWND handle_mainWindow;
 
-	E2VBuffer *p_e2vbuffer = NULL;
-	ImgScanner *p_imgscanner = NULL;
 
 	PCI1761 pci1761;
 	LogImgGenerator logImg;
 	Arm *p_arm = NULL;
+	E2VCameraCycleBuffer *p_e2v = NULL;
+
 
 	//同时只允许两个工人工作，即只能两张图（两块砖）
 	//工人1
@@ -206,8 +204,8 @@ private:
 	void frameIndexAdd(int& oldFrame, int add)
 	{
 		oldFrame += add;
-		if (oldFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
-			oldFrame -= E2VBuffer::BufferLength;
+		if (oldFrame >= E2VCycleBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
+			oldFrame -= E2VCycleBuffer::BufferLength;
 	}
 
 

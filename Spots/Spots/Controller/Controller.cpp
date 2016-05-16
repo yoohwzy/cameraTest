@@ -12,14 +12,6 @@ void Controller::init(){
 
 	release();
 
-	//开启图像缓存
-	int COLOR_TYPE_IS_GRAY = 1;
-	SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
-	if (COLOR_TYPE_IS_GRAY != 0)
-		p_e2vbuffer = new E2VBuffer(4096, true);
-	else
-		p_e2vbuffer = new E2VBuffer(4096, false);
-
 	bool e2vInitFlag = true;
 	bool pci1761InitFlag = true;
 
@@ -44,20 +36,22 @@ void Controller::init(){
 		//初始化E2V相机
 		int Cam_FrameCount_PerSecond = 5000;
 		SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond);
-		p_imgscanner = new ImgScanner(p_e2vbuffer, Cam_FrameCount_PerSecond);
-		if (!p_imgscanner->StartFlag)
+		int COLOR_TYPE_IS_GRAY = 1;
+		SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
+		if (COLOR_TYPE_IS_GRAY != 0)
+			p_e2v = new	E2VCameraCycleBuffer(4096, CV_8U, 1000000 / Cam_FrameCount_PerSecond, 0, PORT_A);
+		else
+			p_e2v = new	E2VCameraCycleBuffer(4096, CV_8UC3, 1000000 / Cam_FrameCount_PerSecond, 0, PORT_A);
+
+
+		if (!p_e2v->HasBeenInited)
 		{
 			//若初始化e2v_EV71YC1CCL4005BA0失败
 			//则删除已实例化的对象，切换为虚拟相机模式
-			if (p_imgscanner != NULL)
+			if (p_e2v != NULL)
 			{
-				delete p_imgscanner;
-				p_imgscanner = NULL;
-			}
-			if (p_e2vbuffer != NULL)
-			{
-				delete p_e2vbuffer;
-				p_e2vbuffer = NULL;
+				delete p_e2v;
+				p_e2v = NULL;
 			}
 			e2vInitFlag = false;
 		}
@@ -409,7 +403,6 @@ void Controller::ResetParameter()
 
 void Controller::release()
 {
-	p_e2vbuffer = NULL;
 	if (worker1 != NULL)
 	{
 		delete worker1;
@@ -421,15 +414,10 @@ void Controller::release()
 		worker2 = NULL;
 	}
 
-	if (p_imgscanner != NULL)
+	if (p_e2v != NULL)
 	{
-		delete p_imgscanner;
-		p_imgscanner = NULL;
-	}
-	if (p_e2vbuffer != NULL)
-	{
-		delete p_e2vbuffer;
-		p_e2vbuffer = NULL;
+		delete p_e2v;
+		p_e2v = NULL;
 	}
 	if (p_arm != NULL)
 	{
@@ -499,20 +487,20 @@ void Controller::captureAndassembleThread()
 
 	//第一部分，确定起始行并等待相机写到该行
 	
-	int startFrame = p_e2vbuffer->GetWriteIndex();
+	int startFrame = p_e2v->P_CycleBuffer->GetWriteIndex();
 	int firstFrame = startFrame;//记录触发时所写行号
 	//加入延时时间
 	//触发后等待一段时间，砖走到拍摄区域后再获取图像
-	int addFrameCountIn = Worker_WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS;
+	int addFrameCountIn = Worker_WaitTimeMSIn * 1000 / p_e2v->FrameTimeUS;
 	frameIndexAdd(startFrame, addFrameCountIn);
 	//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
 	for (size_t i = 0; i < 10; i++)
-		if (p_e2vbuffer->GetWriteIndex() > startFrame)
+		if (p_e2v->P_CycleBuffer->GetWriteIndex() > startFrame)
 			Sleep(10);
 		else
 			break;
 	//第二个循环 等待相机拍摄到起始行（这样写的原因是加入了延时时间，可能存在相机还未拍摄到startFrame的情况）
-	int nowFrame = p_e2vbuffer->GetWriteIndex();
+	int nowFrame = p_e2v->P_CycleBuffer->GetWriteIndex();
 	while (
 		!(
 		(startFrame >= firstFrame && (nowFrame > startFrame || nowFrame < firstFrame)) ||//第一种情况，startFrame未换页，则有两种可能，1.nowFrame也没换页则要求nowFrame>startFrame，2.或nowFrame换页了(即nowFrame<firstFrame)则立即判定为通过。
@@ -521,7 +509,7 @@ void Controller::captureAndassembleThread()
 		)
 	{
 		Sleep(10);
-		nowFrame = p_e2vbuffer->GetWriteIndex();
+		nowFrame = p_e2v->P_CycleBuffer->GetWriteIndex();
 	}
 #ifdef Controller_DEBUG
 	if (1 == 1)
@@ -537,9 +525,9 @@ void Controller::captureAndassembleThread()
 
 	//第二部分，确定结束行并等待相机写到该行
 
-	int addFrameCountOut = Worker_WaitTimeMSOut * 1000 / ImgScanner::FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
+	int addFrameCountOut = Worker_WaitTimeMSOut * 1000 / p_e2v->FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
 	if (length == 0)//采集固定长度
-		length = Worker_FrameTimeOut * 1000 / ImgScanner::FrameTimeUS;
+		length = Worker_FrameTimeOut * 1000 / p_e2v->FrameTimeUS;
 
 	int endFrameAbso = startFrame;
 	frameIndexAdd(endFrameAbso, length);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
@@ -561,7 +549,7 @@ void Controller::captureAndassembleThread()
 	//while (pci1761.GetRisingEdgeIDI(7))
 	while (true)
 	{
-		int now = p_e2vbuffer->GetWriteIndex();
+		int now = p_e2v->P_CycleBuffer->GetWriteIndex();
 		//因超时而退出
 		if (
 			(endFrameAbso >= startFrame && now >= endFrameAbso) ||
@@ -585,7 +573,7 @@ void Controller::captureAndassembleThread()
 	{
 		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
 		//此处重新计算endFrame
-		endFrame = p_e2vbuffer->GetWriteIndex();
+		endFrame = p_e2v->P_CycleBuffer->GetWriteIndex();
 		frameIndexAdd(endFrame, addFrameCountOut);
 #ifdef Controller_DEBUG
 		if (1 == 1)
@@ -602,7 +590,7 @@ void Controller::captureAndassembleThread()
 		while (true)
 		{
 			//判断是否读够那么多行
-			int now = p_e2vbuffer->GetWriteIndex();
+			int now = p_e2v->P_CycleBuffer->GetWriteIndex();
 			//计数完成而退出
 			if (
 				endFrame > startFrame && now >= endFrame ||
@@ -616,7 +604,7 @@ void Controller::captureAndassembleThread()
 	}
 
 	//第三部分，取图
-	cv::Mat image = p_e2vbuffer->GetImage(startFrame, endFrame);
+	cv::Mat image = p_e2v->P_CycleBuffer->GetImage(startFrame, endFrame);
 
 
 	//第四部分 分配工作
