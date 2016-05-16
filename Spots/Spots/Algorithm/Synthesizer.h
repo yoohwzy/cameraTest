@@ -4,6 +4,7 @@
 //ÒýÈëËã·¨
 #include <Algorithm/Base/Block.h>
 #include <Algorithm/Base/Faults.h>
+#include <Algorithm/Pretreatment.h>
 
 
 //#include <Algorithm/Pretreatment.h>

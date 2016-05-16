@@ -153,7 +153,7 @@ END_MESSAGE_MAP()
 void SpotsEdgeParameterSetDlg::OnBnClickedOk()
 {
 	//±£¥Ê…Ë÷√
-	saveParameter(IDC_TB_BlockLocalizer_THRESHOD, "EDGE_PARAMETER", "IDC_TB_BlockLocalizer_THRESHOD");
+	saveParameter(IDC_TB_BlockLocalizer_THRESHOD, "EDGE_PARAMETER", "BlockLocalizer_THRESHOD");
 	saveParameter(IDC_TB_BlockLocalizer_ContinuePointCount, "EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount");
 
 

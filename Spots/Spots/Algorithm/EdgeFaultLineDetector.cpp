@@ -1,7 +1,7 @@
-#include "BlockEdgeLineDetector.h"
+#include "EdgeFaultLineDetector.h"
 #include <Class\Debug\MFCConsole.h>
 
-BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Faults* _faults)
+EdgeFaultLineDetector::EdgeFaultLineDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	image = _img;
 	if (image.channels() == 3)
@@ -9,21 +9,21 @@ BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Fault
 	p_block = _block;
 	p_faults = _faults;
 }
-void BlockEdgeLineDetector::Run()
+void EdgeFaultLineDetector::Run()
 {
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef EFLD_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
-	doUp();
-	doDown(); 
+	//doUp();
+	//doDown(); 
 	doLeft();
-	doRight();
+	//doRight();
 #else
-	thread t1 = thread(std::mem_fn(&BlockEdgeLineDetector::doUp), this);
-	thread t2 = thread(std::mem_fn(&BlockEdgeLineDetector::doDown), this);
-	thread t3 = thread(std::mem_fn(&BlockEdgeLineDetector::doLeft), this);
-	thread t4 = thread(std::mem_fn(&BlockEdgeLineDetector::doRight), this);
+	thread t1 = thread(std::mem_fn(&EdgeFaultLineDetector::doUp), this);
+	thread t2 = thread(std::mem_fn(&EdgeFaultLineDetector::doDown), this);
+	thread t3 = thread(std::mem_fn(&EdgeFaultLineDetector::doLeft), this);
+	thread t4 = thread(std::mem_fn(&EdgeFaultLineDetector::doRight), this);
 	t1.join();
 	t2.join();
 	t3.join();
@@ -33,17 +33,17 @@ void BlockEdgeLineDetector::Run()
 	minLengthPix = minLengthPix == 9999 ? 0 : minLengthPix;
 	minDeepPix = minDeepPix == 9999 ? 0 : minDeepPix;
 	stringstream ss;
-	ss << "BLED定标消息：最大崩边长度=" << maxLengthPix << "pix，最大深度 = " << maxDeepPix << "pix" << endl;
-	ss << "BLED定标消息：最小崩边长度=" << minLengthPix << "pix，最小深度 = " << minDeepPix << "pix" << endl;
+	ss << "EFLD定标消息：最大崩边长度=" << maxLengthPix << "pix，最大深度 = " << maxDeepPix << "pix" << endl;
+	ss << "EFLD定标消息：最小崩边长度=" << minLengthPix << "pix，最小深度 = " << minDeepPix << "pix" << endl;
 	MFCConsole::Output(ss.str());
 }
 
-BlockEdgeLineDetector::~BlockEdgeLineDetector()
+EdgeFaultLineDetector::~EdgeFaultLineDetector()
 {
 	p_faults = NULL;
 	p_block = NULL;
 }
-void BlockEdgeLineDetector::doUp()
+void EdgeFaultLineDetector::doUp()
 {
 	Block::Line line = p_block->UpLine;
 	int startX = p_block->A.x + 5;
@@ -56,46 +56,18 @@ void BlockEdgeLineDetector::doUp()
 	vector<Faults::BrokenEdge> vbs;
 	//细找崩边，统计崩边长度
 	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
-
+	vector<int> deeps;
 	for (int point_x = startX; point_x <= endX; point_x++)
 	{
 		int point_y = p_block->GetPonintByX(point_x, &line).y;
 		if (point_y < 0 || point_y >= image.rows)
 			continue;
 		int deep = getDeepUp(cv::Point(point_x, point_y));
-		if (deep > maxDeepPix) maxDeepPix = deep;
-		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
-		if (deep > DEEP_THRESHOD)
-		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
-			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
-#endif
-			if (brokenEdgeIndex == -1)
-			{
-				Faults::BrokenEdge b;
-				b.deep = deep;
-				b.length = 1;
-				b.position = cv::Point(point_x, point_y);
-				vbs.push_back(b);
-				brokenEdgeIndex = vbs.size() - 1;
-			}
-			else
-			{
-				if (vbs[brokenEdgeIndex].deep < deep)
-					vbs[brokenEdgeIndex].deep = deep;
-				vbs[brokenEdgeIndex].length++;
-				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
-			}
-		}
-		else
-		{
-			//一个崩边缺陷的结束
-			brokenEdgeIndex = -1;
-		}
+		deeps.push_back(deep);
 	}
-	processVBS(vbs, 1);
+	//processVBS(vbs, 1);
 }
-void BlockEdgeLineDetector::doDown()
+void EdgeFaultLineDetector::doDown()
 {
 	Block::Line line = p_block->DownLine;
 	int startX = p_block->D.x + 5;
@@ -119,7 +91,7 @@ void BlockEdgeLineDetector::doDown()
 		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef EFLD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -147,7 +119,7 @@ void BlockEdgeLineDetector::doDown()
 	}
 	processVBS(vbs, 1);
 }
-void BlockEdgeLineDetector::doLeft()
+void EdgeFaultLineDetector::doLeft()
 {
 	Block::Line line = p_block->LeftLine;
 	int startY = p_block->A.y + 5;
@@ -158,20 +130,18 @@ void BlockEdgeLineDetector::doLeft()
 		endY = image.rows - 1;
 
 	vector<Faults::BrokenEdge> vbs;
-	//细找崩边，统计崩边长度
+	vector<int> deeps;
 	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
-
 	for (int point_y = startY; point_y <= endY; point_y++)
 	{
 		int point_x = p_block->GetPonintByY(point_y, &line).x;
 		if (point_x < 0 || point_x >= image.cols)
 			continue;
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
-		if (deep > maxDeepPix) maxDeepPix = deep;
-		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
+		deeps.push_back(deep);
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef EFLD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -188,7 +158,7 @@ void BlockEdgeLineDetector::doLeft()
 				if (vbs[brokenEdgeIndex].deep < deep)
 					vbs[brokenEdgeIndex].deep = deep;
 				vbs[brokenEdgeIndex].length++;
-				//vbs[brokenEdgeIndex].position = cv::Point(point_x, point_y - vbs[brokenEdgeIndex].length / 2);
+				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
 			}
 		}
 		else
@@ -197,9 +167,9 @@ void BlockEdgeLineDetector::doLeft()
 			brokenEdgeIndex = -1;
 		}
 	}
-	processVBS(vbs, 0);
+	int i = 1;
 }
-void BlockEdgeLineDetector::doRight()
+void EdgeFaultLineDetector::doRight()
 {
 	Block::Line line = p_block->RightLine;
 	int startY = p_block->B.y + 5;
@@ -223,7 +193,7 @@ void BlockEdgeLineDetector::doRight()
 		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 		if (deep > DEEP_THRESHOD)
 		{
-#ifdef BELD_OUTPUT_DEBUG_INFO
+#ifdef EFLD_OUTPUT_DEBUG_INFO
 			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
 #endif
 			if (brokenEdgeIndex == -1)
@@ -252,7 +222,7 @@ void BlockEdgeLineDetector::doRight()
 	processVBS(vbs, 0);
 }
 
-int BlockEdgeLineDetector::getDeepUp(cv::Point p)
+int EdgeFaultLineDetector::getDeepUp(cv::Point p)
 {
 	int point_x = p.x;
 	int point_y = p.y;
@@ -277,7 +247,7 @@ int BlockEdgeLineDetector::getDeepUp(cv::Point p)
 	}
 	return deep;
 }
-int BlockEdgeLineDetector::getDeepDown(cv::Point p)
+int EdgeFaultLineDetector::getDeepDown(cv::Point p)
 {
 	int point_x = p.x;
 	int point_y = p.y;
@@ -302,7 +272,7 @@ int BlockEdgeLineDetector::getDeepDown(cv::Point p)
 	}
 	return deep;
 }
-int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
+int EdgeFaultLineDetector::getDeepLeft(cv::Point p)
 {
 	int point_x = p.x;
 	int point_y = p.y;
@@ -313,7 +283,7 @@ int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
 		return 0;
 
 	int deep = 0;
-	for (; deep < 50; deep++)
+	for (; deep < 100; deep++)
 	{
 		if (point_x + deep + 4 >= image.cols)
 			break;
@@ -321,13 +291,23 @@ int BlockEdgeLineDetector::getDeepLeft(cv::Point p)
 			image.ptr<uchar>(point_y)[point_x + deep + 1] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y)[point_x + deep + 2] >= BINARY_THRESHOD &&
 			image.ptr<uchar>(point_y)[point_x + deep + 3] >= BINARY_THRESHOD &&
-			image.ptr<uchar>(point_y)[point_x + deep + 4] >= BINARY_THRESHOD
+			image.ptr<uchar>(point_y)[point_x + deep + 4] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 5] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 6] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 7] >= BINARY_THRESHOD &&
+			image.ptr<uchar>(point_y)[point_x + deep + 8] >= BINARY_THRESHOD
 			)
+		{
+#ifdef EFLD_OUTPUT_DEBUG_INFO
+			drowDebugResult.ptr<uchar>(point_y)[(point_x + deep) * 3 + 0] = 255;
+#endif
 			break;
+		}
 	}
+	if (deep == 100)return 0;
 	return deep;
 }
-int BlockEdgeLineDetector::getDeepRight(cv::Point p)
+int EdgeFaultLineDetector::getDeepRight(cv::Point p)
 {
 	int point_x = p.x;
 	int point_y = p.y;
@@ -353,7 +333,7 @@ int BlockEdgeLineDetector::getDeepRight(cv::Point p)
 	return deep;
 }
 
-void BlockEdgeLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUpDown)
+void EdgeFaultLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUpDown)
 {
 	for (int i = 0; i < vbs.size(); i++)
 	{

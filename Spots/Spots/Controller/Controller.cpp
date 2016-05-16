@@ -35,7 +35,7 @@ void Controller::init(){
 			IsRealModel = VirtualCamEnable == 0;
 	}
 
-	ss.str(""); 
+	ss.str("");
 	ss << "IsRealModel = " << IsRealModel << endl;
 	MFCConsole::Output(ss.str());
 
@@ -62,6 +62,7 @@ void Controller::init(){
 			e2vInitFlag = false;
 		}
 
+		
 		if (!pci1761.init())
 		{
 			pci1761InitFlag = false;
@@ -108,13 +109,13 @@ void Controller::init(){
 		//若为真实相机模式，则实例化两个工人，并启动触发器监视进程
 
 		//初始化工人
-		worker1 = new Worker(p_e2vbuffer);
-		worker2 = new Worker(p_e2vbuffer);
+		worker1 = new Worker("worker1:");
+		worker2 = new Worker("worker2:");
 
 		worker1->P_Controller = this;
 		worker2->P_Controller = this;
 		StartWatch();
-			
+
 		spotsMainView->SwitchModel2Virtual(false);
 
 		p_arm = new Arm();
@@ -123,6 +124,7 @@ void Controller::init(){
 	}
 	else
 	{
+		PauseFlag = true;
 		if (IsRealModel)
 		{
 			IsRealModel = 0;
@@ -138,7 +140,7 @@ void Controller::init(){
 		//若为虚拟相机模式，则实例化虚拟相机类与1个工人
 		//开启虚拟相机
 		cv::Mat virtualImg;
-		worker1 = new Worker(NULL);
+		worker1 = new Worker("Virtual Worker");
 		worker1->image = virtualImg;
 		worker1->P_Controller = this;
 		spotsMainView->SwitchModel2Virtual(true);
@@ -167,7 +169,9 @@ void Controller::StartWatch()
 
 		exitFlag = false;
 		//开始监控触发
-		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcher), this);
+		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcherThread), this);
+		auto tn = t_tiggerThread.native_handle();
+		SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 		t_tiggerThread.detach();
 
 		watcher_lock.unlock();
@@ -230,7 +234,7 @@ void Controller::VirtualWorkerStart()
 		MessageBox(0, L"请先加载虚拟底片！", L"错误", 0);
 		return;
 	}
-	if (worker1->MyStatus == Worker::Done || worker1->MyStatus == Worker::Free)
+	if (worker1->MyStatus == Worker::Free)
 	{
 		worker1->SN = Statistics::TodayAll + 1;
 		worker1->StartWork();
@@ -326,7 +330,7 @@ void Controller::ResetParameter()
 			w = worker1;
 		else
 			w = worker2;
-		if (w!=NULL)
+		if (w != NULL)
 		{
 			w->Real_WidthMM = Real_WidthMM;
 			w->Real_LengthMM = Real_LengthMM;
@@ -434,51 +438,229 @@ void Controller::release()
 	}
 }
 
-void Controller::triggerWatcher()
+void Controller::triggerWatcherThread()
 {
-	short int tiggerindex = 0;
 	double t = cv::getTickCount();
+	double risingSpan = cv::getTickCount();
 	while (!exitFlag)
 	{
-		if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
+		if (PauseFlag)//暂停标志
 		{
-			t = cv::getTickCount();
-			
-			tiggerindex++;
-			if (tiggerindex >= 100)
-				tiggerindex = 0;
-
-			if (tiggerindex % 2 == 1)
+			Sleep(50);
+			continue;
+		}
+		//if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
+		if (pci1761.GetTrailingEdgeIDI(7))//开始采图
+		{
+			if (IsGrabbing)
 			{
-				MFCConsole::Output("\r\n\r\n-------------------------Worker1 Start Work\r\n");
-				worker1->SN = Statistics::TodayAll + 1;
-				worker1->StartWork();
-				lastestWorker = worker1;
+				MFCConsole::Output("IsGrabbing = 1 触发后不响应\r\n");
+				continue;
+			}
+
+			IsGrabbing = true;
+			t = cv::getTickCount();
+			risingSpan = (cv::getTickCount() - risingSpan) * 1000 / cv::getTickFrequency();
+			stringstream ss;
+			ss << "\r\n\r\n与上次触发间隔Timespan:" << risingSpan << "ms" << endl;
+			risingSpan = cv::getTickCount();
+
+			if (!IsGrabbing2)
+			{
+				std::thread t_run(std::mem_fn(&Controller::captureAndassembleThread), this);
+				//auto tn = t_run.native_handle();
+				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+				t_run.detach();
 			}
 			else
 			{
-				MFCConsole::Output("\r\n\r\n-------------------------Worker2 Start Work\r\n");
-
-				worker2->SN = Statistics::TodayAll + 1;
-				worker2->StartWork();
-				lastestWorker = worker2;
+				stringstream ss;
+				ss << "        触发后不响应  IsGrabbing2 = 1 ,still running capture();" << endl;
+				MFCConsole::Output(ss.str());
 			}
-			Sleep(100);
+			//PauseFlag == 1;
+			IsGrabbing = false;
 		}
-		else if (pci1761.GetTrailingEdgeIDI(7))//下降沿结束采图
-		{
-			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			stringstream ss;
-			ss << "Worker Stop : Timespan:" << t << "ms" << endl;
-			MFCConsole::Output(ss.str());
-
-			// 标记工人停止采图
-			lastestWorker->GetPhotoOn = false;
-		}
-		else
-			this_thread::sleep_for(chrono::microseconds(1));
+		Sleep(10);
 	}
 }
+void Controller::captureAndassembleThread()
+{
+	IsGrabbing2 = true;
+
+	if (MFCConsole::IsOpened)
+	{
+		stringstream ss;
+		ss << "                                         capture " << endl;
+		MFCConsole::Output(ss.str());
+	}
+	//取图
+	int length = 0;//采图长度
+
+	//第一部分，确定起始行并等待相机写到该行
+	
+	int startFrame = p_e2vbuffer->GetWriteIndex();
+	int firstFrame = startFrame;//记录触发时所写行号
+	//加入延时时间
+	//触发后等待一段时间，砖走到拍摄区域后再获取图像
+	int addFrameCountIn = Worker_WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS;
+	frameIndexAdd(startFrame, addFrameCountIn);
+	//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
+	for (size_t i = 0; i < 10; i++)
+		if (p_e2vbuffer->GetWriteIndex() > startFrame)
+			Sleep(10);
+		else
+			break;
+	//第二个循环 等待相机拍摄到起始行（这样写的原因是加入了延时时间，可能存在相机还未拍摄到startFrame的情况）
+	int nowFrame = p_e2vbuffer->GetWriteIndex();
+	while (
+		!(
+		(startFrame >= firstFrame && (nowFrame > startFrame || nowFrame < firstFrame)) ||//第一种情况，startFrame未换页，则有两种可能，1.nowFrame也没换页则要求nowFrame>startFrame，2.或nowFrame换页了(即nowFrame<firstFrame)则立即判定为通过。
+		(startFrame < firstFrame && nowFrame > startFrame && nowFrame < firstFrame)//第二种情况，startFrame换页了，则判定nowFrame > startFrame即可
+		)
+		)
+	{
+		Sleep(10);
+		nowFrame = p_e2vbuffer->GetWriteIndex();
+	}
+#ifdef Controller_DEBUG
+	if (1 == 1)
+	{
+		stringstream ss;
+		ss << "capture _ startFrame =" << firstFrame << " + " << addFrameCountIn << " = " << startFrame << endl;
+		ss << "真正起始行：" << nowFrame << endl;
+		MFCConsole::Output(ss.str());
+	}
+#endif
+	IsGrabbing2 = false;
+
+
+	//第二部分，确定结束行并等待相机写到该行
+
+	int addFrameCountOut = Worker_WaitTimeMSOut * 1000 / ImgScanner::FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
+	if (length == 0)//采集固定长度
+		length = Worker_FrameTimeOut * 1000 / ImgScanner::FrameTimeUS;
+
+	int endFrameAbso = startFrame;
+	frameIndexAdd(endFrameAbso, length);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
+	int endFrame = endFrameAbso;
+#ifdef Controller_DEBUG
+	if (1 == 1)
+	{
+		stringstream ss;
+		ss << "capture _ endFrameAbso = " << startFrame << " + " << length << "=" << endFrameAbso << endl;
+		MFCConsole::Output(ss.str());
+	}
+#endif
+
+	bool overtimeflag = false;//超时标记
+	//wait capture end
+	Sleep(100);
+	//循环等待下降沿或采图超时
+	//while (pci1761.GetTrailingEdgeIDI(7))
+	//while (pci1761.GetRisingEdgeIDI(7))
+	while (true)
+	{
+		int now = p_e2vbuffer->GetWriteIndex();
+		//因超时而退出
+		if (
+			(endFrameAbso >= startFrame && now >= endFrameAbso) ||
+			(endFrameAbso < startFrame && now >= endFrameAbso && now < startFrame)
+			)
+		{
+#ifdef Controller_DEBUG
+			if (1 == 1)
+			{
+				stringstream ss;
+				ss << "capture _ get endFrameAbso,endFrameAbso =" << endFrameAbso << endl;
+				MFCConsole::Output(ss.str());
+			}
+#endif
+			overtimeflag = true;//一直没有获得下降沿信号，标记超时
+			break;
+		}
+		Sleep(2);
+	}
+	if (overtimeflag == false)//如果是获得下降沿结束，则进一步计算结束时的行号
+	{
+		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
+		//此处重新计算endFrame
+		endFrame = p_e2vbuffer->GetWriteIndex();
+		frameIndexAdd(endFrame, addFrameCountOut);
+#ifdef Controller_DEBUG
+		if (1 == 1)
+		{
+			stringstream ss;
+			ss << "capture _ endFrame = ???? + " << addFrameCountOut << " = " << endFrame << endl;
+			MFCConsole::Output(ss.str());
+		}
+#endif
+
+
+		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。
+
+		while (true)
+		{
+			//判断是否读够那么多行
+			int now = p_e2vbuffer->GetWriteIndex();
+			//计数完成而退出
+			if (
+				endFrame > startFrame && now >= endFrame ||
+				(endFrame < startFrame && now >= endFrame && now < startFrame)
+				)
+			{
+				break;
+			}
+			Sleep(2);
+		}
+	}
+
+	//第三部分，取图
+	cv::Mat image = p_e2vbuffer->GetImage(startFrame, endFrame);
+
+
+	//第四部分 分配工作
+	workerindex++;
+	if (workerindex > 1) workerindex = 0;
+	//分配任务给工人
+	stringstream ss;
+	if (workerindex == 0)
+	{
+		if (worker1->MyStatus == Worker::Free)
+		{
+			worker1->SN = index++;
+			
+			worker1->image = image;
+			ss << "-------------------------Worker1 Start Work\r\n" << worker1->SN << endl;
+			MFCConsole::Output(ss.str());
+			worker1->StartWork();
+		}
+		else
+		{
+			MFCConsole::Output(ss.str());
+			MFCConsole::Output("!!!!!!!!!!!!!!!!!!!!!!!!!!Worker1 Is busy\r\n");
+		}
+
+	}
+	else if (workerindex == 1)
+	{
+		if (worker2->MyStatus == Worker::Free)
+		{
+			worker2->SN = index++;
+			worker2->image = image;
+			ss << "-------------------------Worker2 Start Work\r\n" << worker2->SN << endl;
+			MFCConsole::Output(ss.str());
+			worker2->StartWork();
+		}
+		else
+		{
+			MFCConsole::Output(ss.str());
+			MFCConsole::Output("!!!!!!!!!!!!!!!!!!!!!!!!!!Worker2 Is busy\r\n");
+		}
+	}
+}
+
+
 
 void Controller::imageSave(cv::Mat img)
 {

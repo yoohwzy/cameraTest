@@ -207,6 +207,7 @@ void BlockLocalizer::FindLeft()
 	int lastX = firstPoint.x;
 	int range = RANGE_DEFAULT;
 	bool needReFind = false;//对该行是否需要扩大range重新搜索
+	int notfoundCount = 0;//未找到点次数
 	//扫描其他点，左往右
 	for (int y = firstPoint.y + ROW_SPAN; y < img.rows; y += ROW_SPAN)
 	{
@@ -225,15 +226,19 @@ void BlockLocalizer::FindLeft()
 			if (range > RANGE_MINI) range -= (RANGE_DEFAULT - RANGE_MINI) / 3;
 			if (range < RANGE_MINI) range = RANGE_MINI;
 		}
+		else if (needReFind)//是否要重新扫描改行
+		{
+			range = RANGE_DEFAULT;
+			y -= ROW_SPAN;
+			needReFind = false;
+		}
 		else
 		{
-			if (needReFind)//是否要重新扫描改行
-			{
-				range = RANGE_DEFAULT;
-				y -= ROW_SPAN;
-				needReFind = false;
-			}
+			notfoundCount++;
+			if (notfoundCount > 3)
+				break;
 		}
+
 		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))
 			y = img.rows - ROW_SPAN - 1;
 	}
@@ -275,6 +280,7 @@ void BlockLocalizer::FindRight()
 	int lastX = firstPoint.x;
 	int range = RANGE_DEFAULT;
 	bool needReFind = false;//对该行是否需要扩大range重新搜索
+	int notfoundCount = 0;//未找到点次数
 	//扫描其他点，左往右
 	for (int y = firstPoint.y + ROW_SPAN; (y) < img.rows; y += ROW_SPAN)
 	{
@@ -298,6 +304,12 @@ void BlockLocalizer::FindRight()
 			range = RANGE_DEFAULT;
 			y -= ROW_SPAN;
 			needReFind = false;
+		}
+		else
+		{
+			notfoundCount++;
+			if (notfoundCount > 3)
+				break;
 		}
 		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))
 			y = img.rows - ROW_SPAN - 1;

@@ -54,7 +54,7 @@ private:
 	CPoint mouse_point;
 	int zoom = 1;//缩小倍数
 	cv::Mat img_on_show;//全尺寸图
-	cv::Mat img_on_log;
+	//cv::Mat img_on_log;
 	//缩放显示图片
 	void ShowImgROI(CPoint point);
 

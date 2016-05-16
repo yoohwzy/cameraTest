@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 #include <Class/IOCard/PCI1761/PCI1761.h>
 #include <Class/Statistics/Statistics.h>
@@ -12,12 +11,15 @@
 #include <thread>
 #include <mutex>
 
+#include <Model\ImgScanner.h>
 #include <Model\Worker.h>
 #include <Model\LogImgGenerator.h>
 #include <Model\Arm.h>
 
 
 using namespace std;
+
+//#define Controller_DEBUG
 
 class Controller
 {
@@ -27,15 +29,12 @@ protected:
 public:
 	Controller(SpotsMainView* _spotsMainView) :	spotsMainView(_spotsMainView)
 	{
-		//ATLASSERT(spotsMainView);
 		spotsMainView->AddController(this);
-
-		//init();
 	}
 	~Controller()
 	{
 		exitFlag = true;
-		Sleep(10);
+		Sleep(100);
 
 		release();
 	}
@@ -54,30 +53,32 @@ public:
 	void ImgProcessOverCallBack(cv::Mat image, int type)
 	{
 		ui_lock.lock();
-		switch (type)
-		{
-		case 1:Statistics::AddTodayA(); 
-			logImg.AddItem(image, "A");
-			break;
-		case 2:Statistics::AddTodayB(); 
-			logImg.AddItem(image, "B");
-			break;
-		case 3:Statistics::AddTodayC();
-			logImg.AddItem(image, "C");
-			break;
-		case 4:
-			Statistics::AddTodayRejected(); 
-			logImg.AddItem(image, "D");
-			if (p_arm != NULL)
-				p_arm->AddAction(0, 500);//0号output口在500ms后产生一个阶跃信号
-			break;
-		default:break;
-		}
-
-
 		spotsMainView->ShowBigImg(image);
-		spotsMainView->ShowLogImg(logImg.DrawingBoard);
-		spotsMainView->UpdateStatistics();
+		if (type != 0)
+		{
+			switch (type)
+			{
+			case 1:Statistics::AddTodayA();
+				logImg.AddItem(image, "A");
+				break;
+			case 2:Statistics::AddTodayB();
+				logImg.AddItem(image, "B");
+				break;
+			case 3:Statistics::AddTodayC();
+				logImg.AddItem(image, "C");
+				break;
+			case 4:
+				Statistics::AddTodayRejected();
+				logImg.AddItem(image, "D");
+				if (p_arm != NULL)
+					p_arm->AddAction(0, 500);//0号output口在500ms后产生一个阶跃信号
+				break;
+			default:break;
+			}
+
+			spotsMainView->ShowLogImg(logImg.DrawingBoard);
+			spotsMainView->UpdateStatistics();
+		}
 		ui_lock.unlock();
 	}
 	void ImageGetCallBack(cv::Mat);//采图完成后回调，用于将图片保存至硬盘
@@ -171,6 +172,9 @@ public:
 	double Classify_SCRATCH_TOTAL_LENGTH_ACCEPT = -1;
 
 
+	bool exitFlag = false;//triggerWatcher 结束标志
+	bool PauseFlag = false;//triggerWatcher 暂停标志
+	void imageSave(cv::Mat img);
 private:
 	void release();
 	//HWND handle_mainWindow;
@@ -183,9 +187,6 @@ private:
 	Arm *p_arm = NULL;
 
 	//同时只允许两个工人工作，即只能两张图（两块砖）
-
-	//最后一个被召唤的工人
-	Worker *lastestWorker = NULL;
 	//工人1
 	Worker *worker1 = NULL;
 	//工人2
@@ -196,9 +197,22 @@ private:
 	std::mutex watcher_lock;
 	std::mutex image_write_lock;
 
-	bool exitFlag = false;//triggerWatcher 结束标志
-	void triggerWatcher();
-	//void jobWatcher();	
-	//void workerCallBack();	//算法结束后回调，显示运算结果
-	void imageSave(cv::Mat img);
+	void triggerWatcherThread();//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
+	void captureAndassembleThread();//采图与工作委托
+	int index = 0;
+	int workerindex = 0;
+
+
+	void frameIndexAdd(int& oldFrame, int add)
+	{
+		oldFrame += add;
+		if (oldFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
+			oldFrame -= E2VBuffer::BufferLength;
+	}
+
+
+
+
+	bool IsGrabbing = false;//正在开启采图线程
+	bool IsGrabbing2 = false;//正在采图
 };

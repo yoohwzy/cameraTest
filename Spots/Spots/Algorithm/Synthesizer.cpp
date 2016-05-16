@@ -2,6 +2,7 @@
 #include <Algorithm/BlockLocalizer.h>
 #include <Algorithm/BlockEdgeDetector.h>
 #include <Algorithm/BlockEdgeLineDetector.h>
+#include <Algorithm/EdgeFaultLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
 
 Synthesizer::Synthesizer(int _SN, int _Real_WidthMM, int _Real_LengthMM)
@@ -40,8 +41,9 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	{
 		return status == _Status::_NotFound ? Status::NotFound : Status::Rejected; 
 	}
-
-
+	//ÊÔÑéËã·¨
+	//EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
+	//efld.Run();
 	// ±ßÔµÈ±ÏÝ
 	status = detectEdge(grayImg);
 	if (status != Synthesizer::_Status::_NEXT)
@@ -145,9 +147,9 @@ Synthesizer::_Status Synthesizer::detectInner(cv::Mat grayImg)
 	double t = (double)cv::getTickCount();
 
 	//´É×©ÄÚ²¿È±ÏÝ¼ì²â
-	//ss << "´É×©ÄÚ²¿È±ÏÝ¼ì²â ¿ªÊ¼" << endl;
-	//Pretreatment p;
-	//p.pretreatment(grayImg, p_block, &faults);
+	ss << "´É×©ÄÚ²¿È±ÏÝ¼ì²â ¿ªÊ¼" << endl;
+	Pretreatment p;
+	p.pretreatment(grayImg, p_block, &faults);
 
 	if (MFCConsole::IsOpened)
 	{

@@ -29,6 +29,15 @@ public:
 		double deep_mm;//进边深度（mm）
 		double length_mm;//缺边长（mm）
 	};
+	//边缘相似度错误
+	struct EdgeFault
+	{
+		cv::Point position;//缺角位置
+		double deep;//进边深度（pix）
+		double length;//缺边长（pix）
+		double deep_mm;//进边深度（mm）
+		double length_mm;//缺边长（mm）
+	};
 	//缺角
 	struct BrokenCorner
 	{
@@ -83,6 +92,7 @@ public:
 	//清空上一轮的错误信息
 	void Clear(){
 		BrokenEdges.clear();//缺边
+		EdgeFaults.clear();
 		BrokenCorners.clear();//缺角
 		Crazings.clear();//釉裂
 		Holes.clear();//凹点
@@ -115,6 +125,7 @@ public:
 	double DiagonalDiff_mm;
 
 	vector<BrokenEdge> BrokenEdges;//缺边
+	vector<EdgeFault> EdgeFaults;
 	vector<BrokenCorner> BrokenCorners;//缺角
 	vector<Crazing> Crazings;//釉裂
 	vector<Hole> Holes;//凹点

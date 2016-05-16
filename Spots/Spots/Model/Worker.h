@@ -1,6 +1,4 @@
 #pragma once
-#include "ImgScanner.h"
-#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCamera.h>
 #include <thread>
 
 //引入算法综合器
@@ -15,21 +13,16 @@ class Worker
 {
 public:
 	//初始化时若传入指针为NULL，则表示使用虚拟相机。
-	Worker(E2VBuffer *_e2vbuffer = NULL);
+	Worker(string WorkerInfo = "");
 	~Worker();
 
 	enum WorkerStatus{
 		Free,
-		Busy,
-		Done
+		InProcessing,
 	};
 	void StartWork();
 	
 	int MyStatus = WorkerStatus::Free;
-
-	// 为true时采集图像，转为false时结束采集
-	// 仅当length = 0时有效，用于确定采集何时结束
-	bool GetPhotoOn = false;
 	cv::Mat image;
 
 	Controller *P_Controller = NULL;
@@ -109,10 +102,10 @@ public:
 
 
 private:
+	string workerInfo = "";
 	//double axis_x_mmPerPix = 1;//x轴方向上每像素代表多少毫米
 	//double axis_y_mmPerPix = 1;//y轴方向上每像素代表多少毫米
 
-	E2VBuffer *p_e2vbuffer = NULL;
 	// 直接读取N张图片
 	void work();
 	// 从循环缓存中取出图片
@@ -121,11 +114,4 @@ private:
 
 	// 绘制缺陷
 	void drawFaults(cv::Mat&, Faults& faults);
-
-	void frameIndexAdd(int& oldFrame, int add)
-	{
-		oldFrame += add;
-		if (oldFrame >= E2VBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
-			oldFrame -= E2VBuffer::BufferLength;
-	}
 };

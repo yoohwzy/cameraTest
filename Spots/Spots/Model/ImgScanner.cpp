@@ -1,5 +1,5 @@
 #include "ImgScanner.h"
-
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VBuffer.h>
 
 
 ImgScanner::ImgScanner(E2VBuffer *_e2vbuffer, int FrameCountPerSecond)
@@ -13,6 +13,8 @@ ImgScanner::ImgScanner(E2VBuffer *_e2vbuffer, int FrameCountPerSecond)
 	{
 		StartFlag = true;
 		std::thread t_scanThread(std::mem_fn(&ImgScanner::freerun), this);
+		auto tn = t_scanThread.native_handle();
+		SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
 		t_scanThread.detach();
 	}
 	else

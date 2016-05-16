@@ -1,36 +1,37 @@
 #include "Pretreatment.h"
-#include <Eigen/Dense>
-#include <opencv2/core/eigen.hpp>
 
 using namespace cv;
 using namespace std;
 
 
-#define STAMP_WIDTH		30
-#define STAMP_HEIGHT	30
-#define STAMP_SIZE		STAMP_WIDTH*STAMP_HEIGHT
-int kItemsToProduce = 10;   // Éú²úÕßÉú²úµÄ×ÜÊý
+static const int STAMP_WIDTH = 30;
+static const int  STAMP_HEIGHT = 30;
+static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
+static const int kItemsToProduce = 10;   // Éú²úÕßÉú²úµÄ×ÜÊý
 int flagdata = 0;
 Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 vector<Rect> needContour;
-CvKNearest knn;
+static CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
+union luai_Cast { double l_d; long l_l; };
+#define double2int(d,i) \
+  { volatile union luai_Cast u; u.l_d = (d) + 6755399441055744.0; (i) = u.l_l; }
 
 
 //PointÐÍË³ÐòÅÅÁÐËã×Ó
-bool SortBysize(const vector<Point>v1, const vector<Point>v2)
+inline bool SortBysize(vector<Point>const &v1, vector<Point>const &v2)
 {
 	return v1.size() > v2.size();//½µÐòÅÅÁÐ  
 }
 
 //intÐÍË³ÐòÅÅÁÐËã×Ó  
-bool SortBysize_int(const vector<int>v1, const vector<int>v2)
+inline bool SortBysize_int(vector<int>const &v1, vector<int>const &v2)
 {
 	return v1.size() > v2.size();//½µÐòÅÅÁÐ  
 }
 
 //Êý¾Ý¼°²ÎÊý³õÊ¼»¯
-inline void Dataload()
+inline void Pretreatment::Init()
 {
 	FileStorage fs("Data//data.yaml", FileStorage::READ);
 	Mat dataMat, labelMat;
@@ -40,7 +41,7 @@ inline void Dataload()
 	flagdata = 1;
 }
 
-bool Fourier(Mat &Img)
+bool Fourier(const Mat &Img)
 {
 	Mat src = Img.clone();
 
@@ -184,7 +185,7 @@ bool line_core(Mat &_Img)
 		return 0;
 }
 
-bool defect_YoN(Mat &_Img)
+bool Pretreatment::defect_YoN(const Mat &_Img)
 {
 	Mat NorImg(STAMP_WIDTH, STAMP_HEIGHT, CV_8U);
 	resize(_Img, NorImg, Size(STAMP_WIDTH, STAMP_HEIGHT), 0, 0, INTER_LINEAR);
@@ -200,11 +201,22 @@ bool defect_YoN(Mat &_Img)
 			n++;
 		}
 	}
+	/*Mat a(1,1,CV_32F,Scalar(1));
+	FileStorage fs("Data//data.yaml", FileStorage::READ);
+	Mat dataMat, labelMat;
+	fs["data"] >> dataMat;
+	fs["label"] >> labelMat;
+	FileStorage fs1("Data//data1.yaml", FileStorage::WRITE);
+	dataMat.push_back(data_sort);
+	labelMat.push_back(a);
+	fs1<<"data" << dataMat;
+	fs1<<"label" << labelMat;
+	fs1.release();*/
 	float resepone = knn.find_nearest(data_sort, 1);//¼ÇµÃ¼ÓÈë»®ºÛÎª·ñµÄÊý¾Ý
 	return int(resepone);
 }
 
-bool line_YoN(Rect _linesrect)
+bool line_YoN(const Rect &_linesrect)
 {
 	bool flagbit = line_core(LMidImg(_linesrect));
 	if (flagbit)
@@ -213,7 +225,7 @@ bool line_YoN(Rect _linesrect)
 		return 0;//²»ÊÇ»®ºÛ
 }
 
-bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
+bool WhetherLine(const Mat &oneImg, const Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄºËÐÄ²¿·Ö
 {
 	vector<Point> maxV_white_Points;
 	if (countNonZero(oneImg) >= 1)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
@@ -270,7 +282,7 @@ bool WhetherLine(Mat &oneImg, Mat &G_Img, bool cor, bool boe)//ÅÐ¶ÏÊÇ·ñÎªlineµÄº
 }
 
 //¼ÆËãÂÖÀªÖØÐÄ
-Point barycenter1(vector<Point> contoursi)
+Point barycenter1(vector<Point> const &contoursi)
 {
 	Moments m = moments(contoursi);
 	Point center = Point(0, 0);
@@ -315,17 +327,7 @@ Mat Pretreatment::Equalize(const Mat &_Img)
 	Mat work_Img;
 	GaussianBlur(re_Img_small, re_Img_temp, Size(15, 15), 0, 0);//¸ßË¹Ä£ºý
 	resize(re_Img_temp, re_Img_big, Size(_Img.cols, _Img.rows), 0, 0, INTER_LINEAR);
-	Timer timer;
-	timer.start();
-	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> a;
-	cv2eigen(_Img, a);*/
-	/*Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> b;
-	cv2eigen(re_Img_big, b);
-	a = a - b;*/
-	/*Mat work_Img(_Img.size(),CV_8UC1,sharpened.data());*/
 	absdiff(_Img, re_Img_big, work_Img);//Çó¾ø¶Ô²îÖµÔ¤´¦ÀíºÃµÄ´óÍ¼
-	timer.stop();
-	cout<<timer.getElapsedTimeInMilliSec()<<"ms"<<endl;
 	LUT(work_Img, E_lookUpTable, work_Img);
 	/*LUT(re_Img_small, E_lookUpTable, re_Img_small);*/
 	
@@ -349,6 +351,11 @@ void Pretreatment::ProcessArea(Block *blockin)
 	pointlist.push_back(_C_remo);
 	pointlist.push_back(_D_remo);
 
+	//ÓÉÓÚÉÏÏÂ²¿·ÖÓÐÒõÓ°£¬µ±´ý¼ì²â±ê¼Ç±ßÔµrectÂäÔÚÒõÓ°ÖÐÊ±²»ÈÏÎªÊÇ±ê¼Ç
+	_A = _A + Point(0, 100);
+	_C = _C + Point(0, -100);
+	_D = _D + Point(0, -100);
+	_B = _B + Point(0, 100);
 	pointlist_r.push_back(_A);
 	pointlist_r.push_back(_B);
 	pointlist_r.push_back(_C);
@@ -420,7 +427,8 @@ void Pretreatment::Handwriting(const Mat &_img)
 	Mat Canny_Img;
 	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
 	Mask_result_small = Mat(MidImg.rows / 4, MidImg.cols / 4, CV_8UC1, Scalar(255));
-	GaussianBlur(_img, Canny_Img, Size(5, 5), 0, 0);
+	GaussianBlur(_img, Canny_Img, Size(3, 3), 0, 0);
+	copyMakeBorder(Canny_Img, Canny_Img, 1, 1, 1, 1, BORDER_CONSTANT, 0);
 	Canny(Canny_Img, Canny_Img, 40, 120);//´æÔÚÆ½ÐÐË«±ßÇ¿±ßÔµ
 	vector<vector<Point>> Maskcontours;
 	findContours(Canny_Img, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -430,7 +438,15 @@ void Pretreatment::Handwriting(const Mat &_img)
 		if (Maskcontours[i].size() > 5)
 		{
 			Rect mask_rect = boundingRect(Maskcontours[i]);
-			Mat watch_img = _img(mask_rect);
+			mask_rect.x -= 1;
+			mask_rect.y -= 1;
+			Mat watch_img = _img(mask_rect).clone();
+			threshold(watch_img, watch_img,100,255,CV_THRESH_OTSU);
+			double nonnum = countNonZero(watch_img);
+			long numlong;
+			double2int(nonnum, numlong);
+			if (numlong< watch_img.cols || numlong < watch_img.rows)
+				continue;
 			int compare_v = Maxdistance(Maskcontours[i]);
 			if (compare_v < 9)//¸ø³öµã¼¯ÖÐÏà¾à×îÔ¶µÄÁ½µãÖ®¼äµÄ¾àÀë
 				continue;
@@ -441,10 +457,10 @@ void Pretreatment::Handwriting(const Mat &_img)
 			mask_rect.height = (16 * mask_rect.height + 128 < Mask_result_small.rows) ? 16 * mask_rect.height + 128 : Mask_result_small.rows;
 			rectangle(Mask_result_big, mask_rect, Scalar(255), -1);//ÖÆ×÷ÑÚÄ¤
 
-			Faults::MarkPen markpen;
+			
 			mask_rect.x += recImg.x;
 			mask_rect.y += recImg.y;
-			markpen.markposition = mask_rect;
+			
 			Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);//×óÉÏ£¬ÓÒÏÂ
 			Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);//ÓÒÉÏ£¬×óÏÂ
 			
@@ -460,7 +476,11 @@ void Pretreatment::Handwriting(const Mat &_img)
 
 			if (pointPolygonTest(pointlist_r, outpoint_a, 0) == 1 && pointPolygonTest(pointlist_r, outpoint_b, 0) == 1)//¼ì²â¸Ã±ê¼ÇÊÇ·ñÔÚ´É×©ÉÏ£¬·ÀÖ¹´É×©ÇãÐ±ÎóÅÐ
 				if (pointPolygonTest(pointlist_r, outpoint_c, 0) == 1 && pointPolygonTest(pointlist_r, outpoint_d, 0) == 1)
+				{
+					Faults::MarkPen markpen;
+					markpen.markposition = mask_rect;
 					_faults->MarkPens.push_back(markpen);
+				}		
 		}
 	}
 }
@@ -556,7 +576,7 @@ int Pretreatment::otsuThreshold(const Mat &frame, const MatND &hist)
 }
 
 //ÇøÓòÉú³¤Í¼ÏñÖÖ×ÓµãÃÅÏÞ
-Mat Pretreatment::Grow(Mat &image, const Point &seedpoint, const int th_v)
+Mat Pretreatment::Grow(const Mat &image, const Point &seedpoint, const int th_v)
 {
 	Mat HyImg = image.clone();
 	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
@@ -696,18 +716,23 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 	{
 		/*cout << i << endl;*/
 		Rect box = CneedContours[i];
-		Point pt1 = Point(box.x, box.y);
-		Point pt2 = Point(box.x + box.width, box.y + box.height);
+		Point pt1 = Point(box.x, box.y) + locationpoint;
+		Point pt2 = Point(box.x + box.width, box.y + box.height) + locationpoint;
+		Point pt3,pt4;
+		pt3.x = pt1.x - 5 > 0 ? pt1.x - 5 : 0;
+		pt3.y = pt1.y - 5 > 0 ? pt1.y - 5 : 0;
+		pt4.x = pt2.x + 5 < original_Img_D.cols ? pt2.x + 5 : original_Img_D.cols;
+		pt4.y = pt2.y + 5 < original_Img_D.rows ? pt2.y + 5 : original_Img_D.rows;
+		Mat work_boxImg = original_Img_D(Rect(pt3 , pt4));
 
-		Mat work_boxImg = original_Img_D(Rect(pt1 + locationpoint, pt2 + locationpoint));
-
-		
+		if (10 * mean(work_boxImg)[0] - 360 > box.width - 8 || box.width < 5)
+			continue;
 		if (!defect_YoN(work_boxImg))
 			continue;
 		
 		Faults::Hole hole;
-		hole.position.x = 0.5*(pt1.x + pt2.x) + recImg.x + locationpoint.x;//×ø±ê±ä»»»ØÔ­Í¼
-		hole.position.y = 0.5*(pt1.y + pt2.y) + recImg.y + locationpoint.y;
+		hole.position.x = 0.5*(pt1.x + pt2.x) + recImg.x ;//×ø±ê±ä»»»ØÔ­Í¼
+		hole.position.y = 0.5*(pt1.y + pt2.y) + recImg.y ;
 		if (box.height > box.width)
 			hole.diameter = box.height;
 		else
@@ -730,7 +755,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 
 void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
 {
-	ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//¶þÖµ»¯Ô­Í¼
+	//ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//¶þÖµ»¯Ô­Í¼
 	if (_faults->MarkPens.size() != 0)
 	{
 		(cv::max)(MidImg, Mask_result_big, MidImg);
@@ -753,7 +778,7 @@ void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
 			MidImgROI = MidImg(Rect(ThRect));
 			/*medianBlur(MidImgROI, MidImgROI,7);*/
 
-			ThImgROI = ThImg(Rect(ThRect));
+			/*ThImgROI = ThImg(Rect(ThRect));*/
 
 			MatND histolist;
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);//»ñµÃ»Ò¶È·Ö²¼
@@ -797,7 +822,6 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 
 void Pretreatment::linedetect()
 {
-	Faults::Scratch scratch;
 	resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
 	Canny(LMidImg, LMidImg, 40, 120);
 	bitwise_xor(LMidImg, Mask_result_line, CannyImg);
@@ -810,6 +834,15 @@ void Pretreatment::linedetect()
 			vector<Point> km_contours;
 			convexHull(linescontours[i], km_contours);//½«ÂÖÀª×ª»»ÎªÍ¹°ü
 			Rect linerect = boundingRect(linescontours[i]);
+			Point a_sy = Point(0, 0);
+			Point b_sy = Point(0, 0);
+			if (linerect.width < 20 || linerect.height < 20)
+			{
+				a_sy = Point(linerect.x + linerect.width*0.25, linerect.y + linerect.height*0.75);
+				b_sy = Point(linerect.x + linerect.width*0.75, linerect.y + linerect.height*0.25);
+			}
+			if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))
+				continue;
 			if ((linerect.width-1)*(linerect.height-1) < 2 * int(contourArea(km_contours)))//¼ì²âÊÇ·ñÎªÀà»®ºÛÐÎ×´
 				continue;
 			if (line_YoN(linerect))
@@ -819,6 +852,7 @@ void Pretreatment::linedetect()
 				linerect.y = 3 * linerect.y;
 				linerect.width = 3 * linerect.width;
 				linerect.height = 3 * linerect.height;
+				Faults::Scratch scratch;
 				scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
 				scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;
 				scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
@@ -832,7 +866,7 @@ void Pretreatment::linedetect()
 
 void Pretreatment::line2preprocess()
 {
-	/*resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);*/
+	resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);
 	resize(MidImg, LMidImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
 }
 
@@ -849,13 +883,13 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	if (image.channels() == 3)//ÅÐ¶ÏÊÇ·ñÎª²ÊÍ¼
 		cvtColor(image, image, CV_RGB2GRAY);
 
-	//Ö±·½Í¼¾ùºâ»¯
+	//Ö±·½Í¼±ä»»
 	Mat E_image=Equalize(image);
 	//ÇóÄÚ²¿Ð¡¾ØÐÎ
 	ProcessArea(_block);
 
 	//µ¼Èë·ÖÀàÊý¾Ý²¢³õÊ¼»¯Ò»´Î
-	static int ret = (Dataload(), 1);
+	static int ret = (Init(), 1);
 
 	vector<vector<Point>>filterContours;
 	filterContours.push_back(pointlist);

@@ -171,6 +171,12 @@
     <ClInclude Include="Model\Arm.h">
       <Filter>Model</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\EdgeFaultLineDetector.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Pretreatment.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -247,6 +253,12 @@
     </ClCompile>
     <ClCompile Include="Model\Arm.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\EdgeFaultLineDetector.cpp">
+      <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Pretreatment.cpp">
+      <Filter>Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -119,6 +119,8 @@
     <ClInclude Include="Algorithm\BlockEdgeDetector.h" />
     <ClInclude Include="Algorithm\BlockEdgeLineDetector.h" />
     <ClInclude Include="Algorithm\BlockLocalizer.h" />
+    <ClInclude Include="Algorithm\EdgeFaultLineDetector.h" />
+    <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
     <ClInclude Include="Algorithm\Synthesizer.h" />
     <ClInclude Include="Class\Access\ASqlHelper.h" />
@@ -153,6 +155,8 @@
     <ClCompile Include="Algorithm\BlockEdgeDetector.cpp" />
     <ClCompile Include="Algorithm\BlockEdgeLineDetector.cpp" />
     <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
+    <ClCompile Include="Algorithm\EdgeFaultLineDetector.cpp" />
+    <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />
     <ClCompile Include="Algorithm\Synthesizer.cpp" />
     <ClCompile Include="Class\Access\ASqlHelper.cpp" />

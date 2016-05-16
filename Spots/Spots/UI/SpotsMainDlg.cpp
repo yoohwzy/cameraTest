@@ -182,8 +182,8 @@ void CSpotsMainDlg::OnPaint()
 		dc.FillSolidRect(rect, RGB(255, 255, 255));
 		dc.FillPath();
 
-		ShowLogImg(img_on_log);
-		ShowBigImg(img_on_show);
+		//ShowLogImg(img_on_log);
+		//ShowBigImg(img_on_show);
 	}
 }
 
@@ -275,12 +275,13 @@ void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 
 void CSpotsMainDlg::ShowBigImg(cv::Mat img)
 {
+	zoom = 1;
 	img_on_show = img;
 	DrawPicToHDC(img, IDC_IMG_BIG);
 }
 void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 {
-	img_on_log = img;
+	//img_on_log = img;
 	DrawPicToHDC(img, IDC_IMG_HISTORY);
 }
 
@@ -352,12 +353,12 @@ void CSpotsMainDlg::OnBnClickedBtnRun()
 	isRunning = !isRunning;
 	if (!isRunning)
 	{
-		p_contrller->StopWatch();
+		p_contrller->PauseFlag = 1;
 		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"开始运行");
 	}
 	else
 	{
-		p_contrller->StartWatch();
+		p_contrller->PauseFlag = 0;
 		GetDlgItem(IDC_BTN_RUN)->SetWindowText(L"暂停程序");
 	}
 }
@@ -395,21 +396,31 @@ void CSpotsMainDlg::OnBnClickedBtnvirtualtigger()
 
 void CSpotsMainDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
-	ShowImgROI(point);
+	if (p_contrller->PauseFlag)
+	{
+		if (img_big_flag != false)
+		{
+			ShowImgROI(point);
+		}
+	}
 	CDialogEx::OnMouseMove(nFlags, point);
 }
 void CSpotsMainDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	img_big_flag = !img_big_flag;//标记放大/不放大图像
-	//if (img_big_flag)
-	//	zoom = 1;
-	zoom = 1;
-	ShowImgROI(point);
+	if (p_contrller->PauseFlag)
+	{
+		img_big_flag = !img_big_flag;//标记放大/不放大图像
+		//if (img_big_flag)
+		//	zoom = 1;
+		zoom = 1;
+		ShowImgROI(point);
+	}
 	CDialogEx::OnLButtonDown(nFlags, point);
 }
 //鼠标滚轮
 BOOL CSpotsMainDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
 {
+	if (p_contrller->PauseFlag)
 	//zDelta：大于0时为向上滚动，小于0时为向下滚动。
 	if (img_on_show.rows > 0)
 	{

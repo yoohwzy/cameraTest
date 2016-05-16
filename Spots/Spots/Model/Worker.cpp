@@ -2,9 +2,9 @@
 #include <Controller\Controller.h>
 #include <Class/Debug/MFCConsole.h>
 
-Worker::Worker(E2VBuffer *_e2vbuffer)
+Worker::Worker(string WorkerInfo)
 {
-	p_e2vbuffer = _e2vbuffer;
+	workerInfo = WorkerInfo;
 }
 
 
@@ -20,62 +20,8 @@ void Worker::StartWork()
 }
 void Worker::work()
 {
-	//采图
-	cv::Mat grayImg;
-	//真实相机
-	if (p_e2vbuffer != NULL)
-	{
-		MyStatus = WorkerStatus::Busy;
-
-		int startFrame = p_e2vbuffer->GetWriteIndex();
-		int firstFrame = startFrame;//记录触发时所写行号
-#ifdef WORKER_DEBUG
-		stringstream ss;
-		ss << "startFrame =" << startFrame << endl;
-#endif
-		//加入延时时间
-		//触发后等待一段时间，砖走到拍摄区域后再获取图像
-		frameIndexAdd(startFrame, WaitTimeMSIn * 1000 / ImgScanner::FrameTimeUS);
-#ifdef WORKER_DEBUG
-		ss << "startFrame(after frameIndexAdd()) =" << startFrame << endl;
-		MFCConsole::Output(ss.str());
-#endif
-
-		//第一个for循环是为了处理循环指针越界的情况，如startFrame = 19500 + 600 = 100，此时GetWriteIndex = 19800 > 100 需要等待GetWriteIndex越界
-		for (size_t i = 0; i < 10; i++)
-			if (p_e2vbuffer->GetWriteIndex() > startFrame)
-				Sleep(10);
-			else
-				break;
-		//第二个循环 等待相机拍摄到起始行（这样写的原因是加入了延时时间，可能存在相机还未拍摄到startFrame的情况）
-		int nowFrame = p_e2vbuffer->GetWriteIndex();
-		while (
-			!(
-			(startFrame >= firstFrame && (nowFrame > startFrame || nowFrame < firstFrame)) ||//第一种情况，startFrame未换页，则有两种可能，1.nowFrame也没换页则要求nowFrame>startFrame，2.或nowFrame换页了(即nowFrame<firstFrame)则立即判定为通过。
-			(startFrame < firstFrame && (nowFrame > startFrame))//第二种情况，startFrame换页了，则判定nowFrame > startFrame即可
-			)
-			)
-		{
-			Sleep(10);
-			nowFrame = p_e2vbuffer->GetWriteIndex();
-		}
-
-
-		image = getPhoto(startFrame, 0);
-		grayImg = image;
-	}
-	//虚拟相机
-	else if (image.cols > 0)
-	{
-		MFCConsole::Output("虚拟相机模式运行\r\n");
-		grayImg = image.clone();
-	}
-	else
-	{
-		MFCConsole::Output("硬件初始化失败，且虚拟相机无底片，请设置好再试。\r\n");
-		MessageBox(0, L"硬件初始化失败，请设置好再试。", L"警告", 0);
-		return;
-	}
+	MyStatus = WorkerStatus::InProcessing;
+	cv::Mat grayImg = image.clone();
 
 	//开启线程保存图片至硬盘
 	P_Controller->ImageGetCallBack(grayImg);
@@ -110,6 +56,7 @@ void Worker::work()
 
 	Synthesizer::Status status = s.Run(grayImg);
 	
+	//cv::Mat tmp = grayImg.clone();
 	if (status != Synthesizer::Status::NotFound)
 	{
 		//绘制缺陷图像
@@ -124,6 +71,10 @@ void Worker::work()
 		//直接判断为不合格的情况，若有则type=4
 
 		//产品分级
+		if (s.faults.EdgeFaults.size() > 0)
+		{
+			type = 4;
+		}
 		if (type != 4)//崩边分级
 		{
 			double _EDGE_TOTAL_LENGTH = 0;//崩边总长度
@@ -155,8 +106,8 @@ void Worker::work()
 				type = 2;
 
 			stringstream ss;
-			ss << "崩边总长=" << _EDGE_TOTAL_LENGTH << "mm" << endl;
-			ss << "崩边总深=" << _EDGE_TOTAL_DEEP << "mm" << endl;
+			ss << workerInfo << "崩边总长=" << _EDGE_TOTAL_LENGTH << "mm" << endl;
+			ss << workerInfo << "崩边总深=" << _EDGE_TOTAL_DEEP << "mm" << endl;
 			MFCConsole::Output(ss.str());
 		}
 		if (type != 4)//内部缺陷分级
@@ -169,112 +120,22 @@ void Worker::work()
 		if (1 == 1)
 		{
 			stringstream ss;
-			ss << "type=" << type << endl;
+			ss << workerInfo << "type=" << type << endl;
 			MFCConsole::Output(ss.str());
 		}
 		P_Controller->ImgProcessOverCallBack(grayImg, type);
+		//if (type > 1)
+		//	P_Controller->imageSave(tmp);
 	}
 	else
 	{
-
+		P_Controller->ImgProcessOverCallBack(grayImg, 0);
 	}
 
 
 	//显示结果
-	MyStatus = WorkerStatus::Done;
+	MyStatus = WorkerStatus::Free;
 	return;
-}
-
-
-
-
-
-//length < 12000
-//取图范围 startFrame 到 endFrame，包括startFrame与endFrame两行
-cv::Mat Worker::getPhoto(int startFrame, int length)
-{
-	int waitLength = WaitTimeMSOut * 1000 / ImgScanner::FrameTimeUS;//获得下降沿后，等待瓷砖离开拍摄区域帧长
-	if (length == 0)//采集固定长度
-		length = FrameTimeOut * 1000 / ImgScanner::FrameTimeUS;
-
-	int endFrameAbso = startFrame;
-	frameIndexAdd(endFrameAbso, length);//绝对最后一帧，到了这一帧不管触发器是否有下降沿都停止采集。while循环break。
-	int endFrame = endFrameAbso;
-
-
-	GetPhotoOn = true;
-	bool overtimeflag = false;//超时标记
-	//wait capture end
-	Sleep(100);
-	//循环等待下降沿或采图超时
-	while (GetPhotoOn)
-	{
-		int now = p_e2vbuffer->GetWriteIndex();
-		//因超时而退出
-		if (
-			(endFrameAbso >= startFrame && now >= endFrameAbso) ||
-			(endFrameAbso < startFrame && now >= endFrameAbso && now < startFrame)
-			)
-		{
-#ifdef WORKER_DEBUG
-			if (1 == 1)
-			{
-				stringstream ss;
-				ss << "worker get endFrameAbso,endFrameAbso =" << endFrameAbso << endl;
-				MFCConsole::Output(ss.str());
-			}
-#endif
-			overtimeflag = true;//一直没有获得下降沿信号，标记超时
-			break;
-		}
-		Sleep(2);
-	}
-	//判断是否获取到了下降沿
-	if (GetPhotoOn == false && overtimeflag == false)
-	{
-		//进入此处说明是外部将GetPhotoOn置0，即触发器下降沿信号结束了采集
-		//此处重新计算endFrame
-		endFrame = p_e2vbuffer->GetWriteIndex();
-#ifdef WORKER_DEBUG
-		if (1 == 1)
-		{
-			stringstream ss;
-			ss << "endFrame =" << endFrame << endl;
-			MFCConsole::Output(ss.str());
-		}
-#endif
-		frameIndexAdd(endFrame, waitLength);
-#ifdef WORKER_DEBUG
-		if (1 == 1)
-		{
-			stringstream ss;
-			ss << "endFrame(after frameIndexAdd()) =" << endFrame << endl;
-			MFCConsole::Output(ss.str());
-		}
-#endif
-
-
-		//TODO::判断每一帧是否是结束。加一个while循环，判断每一帧是否为全黑，全黑说明采集应该结束了。
-
-		while (true)
-		{
-			//判断是否读够那么多行
-			int now = p_e2vbuffer->GetWriteIndex();
-			//计数完成而退出
-			if (
-				endFrame >= startFrame && now >= endFrame ||
-				(endFrame < startFrame && now >= endFrame && now < startFrame)
-				)
-			{
-				GetPhotoOn = false;
-				break;
-			}
-			Sleep(2);
-		}
-	}
-
-	//三合一没有做 转入算法模块做预处理
-	return p_e2vbuffer->GetImage(startFrame, endFrame);
 }
 
 
@@ -283,12 +144,26 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 	if (img.channels() == 1)
 		cv::cvtColor(img, img, CV_GRAY2RGB);
 
+
+	if (faults.EdgeFaults.size() > 0)
+	{
+		if (MFCConsole::IsOpened)
+		{
+			stringstream ss;
+			ss << workerInfo << SN << " 存在 " << faults.EdgeFaults.size() << " 处边缘不相似。" << endl;
+			MFCConsole::Output(ss.str());
+		}
+		for (size_t i = 0; i < faults.EdgeFaults.size(); i++)
+		{
+			cv::circle(img, faults.EdgeFaults[i].position, faults.EdgeFaults[i].length, cv::Scalar(255, 100, 255), 4);
+		}
+	}
 	if (faults.BrokenEdges.size() > 0)
 	{
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
-			ss << SN << " 存在 " << faults.BrokenEdges.size() << " 处崩边缺陷，红色标出。" << endl;
+			ss << workerInfo << SN << " 存在 " << faults.BrokenEdges.size() << " 处崩边缺陷，红色标出。" << endl;
 			MFCConsole::Output(ss.str());
 		}
 		for (size_t i = 0; i < faults.BrokenEdges.size(); i++)
@@ -301,7 +176,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
-			ss << SN << " 存在 " << faults.BrokenCorners.size() << " 处崩角缺陷，洋红标出。" << endl;
+			ss << workerInfo << SN << " 存在 " << faults.BrokenCorners.size() << " 处崩角缺陷，洋红标出。" << endl;
 			MFCConsole::Output(ss.str());
 		}
 
@@ -333,7 +208,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
-			ss << SN << " 存在 " << faults.Scratchs.size() << " 处划痕缺陷，绿色标出。" << endl;
+			ss << workerInfo << SN << " 存在 " << faults.Scratchs.size() << " 处划痕缺陷，绿色标出。" << endl;
 			MFCConsole::Output(ss.str());
 		}
 		for (size_t i = 0; i < faults.Scratchs.size(); i++)
@@ -346,7 +221,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
-			ss << SN << " 存在 " << faults.Holes.size() << " 处凹点缺陷，黄色标出。" << endl;
+			ss << workerInfo << SN << " 存在 " << faults.Holes.size() << " 处凹点缺陷，黄色标出。" << endl;
 			MFCConsole::Output(ss.str());
 		}
 		for (size_t i = 0; i < faults.Holes.size(); i++)
@@ -360,7 +235,7 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
-			ss << SN << " 存在 " << faults.MarkPens.size() << " 处人工标记，橙色标出。" << endl;
+			ss << workerInfo << SN << " 存在 " << faults.MarkPens.size() << " 处人工标记，橙色标出。" << endl;
 			MFCConsole::Output(ss.str());
 		}
 		for (size_t i = 0; i < faults.MarkPens.size(); i++)

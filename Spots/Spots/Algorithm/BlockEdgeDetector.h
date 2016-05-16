@@ -55,7 +55,6 @@ private:
 	void doLeft();
 	void doRight();
 
-	void processLeftRight(vector<cv::Mat> reduceList, vector<cv::Point> points);
-	void processUpDown(vector<cv::Mat> reduceList, vector<cv::Point> points);
+	void process(vector<cv::Mat> reduceList, vector<cv::Point> points,string info);
 };
 

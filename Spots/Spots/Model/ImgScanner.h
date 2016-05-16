@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCamera.h"
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCamera.h>
 
 #include <thread>
 

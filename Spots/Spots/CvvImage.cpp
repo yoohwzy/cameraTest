@@ -134,6 +134,7 @@ void  CvvImage::CopyOf( IplImage* img, int desired_color )
          img->origin ))
       {
          cvConvertImage( img, m_img, 0 );
+
       }
    }
 }
