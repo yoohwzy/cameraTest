@@ -6,7 +6,7 @@
 
 #include <thread>
 
-//#define BED_OUTPUT_DEBUG_INFO 1
+#define BED_OUTPUT_DEBUG_INFO 1
 
 class BlockEdgeDetector
 {

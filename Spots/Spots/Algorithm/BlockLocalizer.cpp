@@ -58,8 +58,6 @@ void BlockLocalizer::Run()
 	Judgement();
 	p_block->Lines2ABCD();
 
-	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (double)(abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
-	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (double)(abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
 #ifdef BL_OUTPUT_DEBUG_INFO
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).UpLine.k * (0 - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Point(drowDebugResult.cols, (*p_block).UpLine.k * (drowDebugResult.cols - (*p_block).UpLine.x0) + (*p_block).UpLine.y0), cv::Scalar(0, 0, 255), 1);
 	cv::line(drowDebugResult, cv::Point(0, (*p_block).DownLine.k * (0 - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Point(drowDebugResult.cols, (*p_block).DownLine.k * (drowDebugResult.cols - (*p_block).DownLine.x0) + (*p_block).DownLine.y0), cv::Scalar(0, 255, 255), 1);
@@ -74,6 +72,9 @@ void BlockLocalizer::Run()
 		}
 	}
 #endif
+
+	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (double)(abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
+	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (double)(abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
 }
 
 BlockLocalizer::~BlockLocalizer()
@@ -139,6 +140,7 @@ void BlockLocalizer::FindUp()
 	lastY = firstPoint.y;
 	range = RANGE_DEFAULT;
 	needReFind = false;
+	int notfoundCount = 0;//未找到点次数
 	//扫描其他点，右往左
 	for (int x = 2048 - COL_SPAN; x > 0; x -= COL_SPAN)
 	{
@@ -155,14 +157,17 @@ void BlockLocalizer::FindUp()
 			if (range > RANGE_MINI) range -= (RANGE_DEFAULT - RANGE_MINI) / 3;
 			if (range < RANGE_MINI) range = RANGE_MINI;
 		}
+		else if (needReFind)//是否要重新扫描改行
+		{
+			range = RANGE_DEFAULT;
+			x += COL_SPAN;
+			needReFind = false;
+		}
 		else
 		{
-			if (needReFind)//是否要重新扫描改行
-			{
-				range = RANGE_DEFAULT;
-				x += COL_SPAN;
-				needReFind = false;
-			}
+			notfoundCount++;
+			if (notfoundCount >= 3)
+				break;
 		}
 	}
 	std::sort(uppoints.begin(), uppoints.end(), ORDER_BY_X_ASC);
@@ -235,7 +240,7 @@ void BlockLocalizer::FindLeft()
 		else
 		{
 			notfoundCount++;
-			if (notfoundCount > 3)
+			if (notfoundCount >= 3)
 				break;
 		}
 
@@ -308,10 +313,10 @@ void BlockLocalizer::FindRight()
 		else
 		{
 			notfoundCount++;
-			if (notfoundCount > 3)
+			if (notfoundCount >= 3)
 				break;
 		}
-		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))
+		if ((y + ROW_SPAN) >= img.rows && y != (img.rows - 1))//
 			y = img.rows - ROW_SPAN - 1;
 	}
 	std::sort(rightpoints.begin(), rightpoints.end(), ORDER_BY_Y_ASC);
@@ -335,6 +340,7 @@ void BlockLocalizer::FindDown()
 	{
 		int y = -1;
 		int startY = img.rows - 1;
+		startY = (firstPoint.y + ROW_SPAN * 2) < startY ? (firstPoint.y - ROW_SPAN * 2) : startY;
 		while (y == -1 && startY > firstPoint.y - RANGE_DEFAULT)
 		{
 			y = getYOnLine(cv::Point(firstPoint.x, startY), RANGE_DEFAULT, false);
@@ -350,6 +356,7 @@ void BlockLocalizer::FindDown()
 	int lastY = firstPoint.y;
 	int range = RANGE_DEFAULT;
 	bool needReFind = false;//对该行是否需要扩大range重新搜索
+	int notfoundCount = 0;//未找到点次数
 	//扫描其他点，左往右
 	for (int x = firstPoint.x; (x + COL_SPAN) < img.cols; x += COL_SPAN)
 	{
@@ -373,6 +380,12 @@ void BlockLocalizer::FindDown()
 			range = RANGE_DEFAULT;
 			x -= COL_SPAN;
 			needReFind = false;
+		}
+		else
+		{
+			notfoundCount++;
+			if (notfoundCount >= 3)
+				break;
 		}
 	}
 	std::sort(downpoints.begin(), downpoints.end(), ORDER_BY_X_ASC);

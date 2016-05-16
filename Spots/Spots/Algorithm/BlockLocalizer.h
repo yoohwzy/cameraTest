@@ -6,13 +6,12 @@
 
 #include <thread>
 
-//#define BL_OUTPUT_DEBUG_INFO 1
+#define BL_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像
 // 首先查找上边缘，取小区域高斯模糊，二值化
 //@author VShawn
-//@last modify date 2015-9-29 22:39:36 By VShawn
 class BlockLocalizer
 {
 public:
@@ -42,8 +41,8 @@ public:
 
 private:
 	//parameter
-	const int COL_SPAN = 150;//x方向上定点间隔
-	const int ROW_SPAN = 150;//y方向上定点间隔
+	const int COL_SPAN = 50;//x方向上定点间隔
+	const int ROW_SPAN = 50;//y方向上定点间隔
 	const int RANGE_DEFAULT = 400;//最大搜索高度
 	const int RANGE_MINI = 100;//最小搜索高度
 
