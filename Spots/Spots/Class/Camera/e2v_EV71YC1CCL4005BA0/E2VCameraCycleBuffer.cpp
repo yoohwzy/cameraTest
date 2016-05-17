@@ -124,6 +124,9 @@ E2VCameraCycleBuffer::~E2VCameraCycleBuffer()
 		delete P_CycleBuffer;
 		P_CycleBuffer = NULL;
 	}
+
+	StartFlag = false;
+	Sleep(100);
 }
 bool E2VCameraCycleBuffer::freeRun()
 {

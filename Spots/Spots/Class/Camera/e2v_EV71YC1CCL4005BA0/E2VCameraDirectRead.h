@@ -24,8 +24,4 @@ public:
 
 	cv::Mat GetImage() override;
 private:
-
-
-	//开始循环采图
-	bool freeRun();
 };

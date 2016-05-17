@@ -6,11 +6,6 @@
 E2VCameraDirectRead::E2VCameraDirectRead(int width, int height, int colorType, int boardID, int Camport)
 	: E2VCameraModel(width, height, colorType, boardID, Camport)
 {
-	//∆Ù∂Ø≤…Õº—≠ª∑
-	std::thread t_scanThread(std::mem_fn(&E2VCameraDirectRead::freeRun), this);
-	auto tn = t_scanThread.native_handle();
-	SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
-	t_scanThread.detach();
 }
 E2VCameraDirectRead::~E2VCameraDirectRead()
 {

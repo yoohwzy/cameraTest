@@ -15,10 +15,8 @@ public:
 	//E2VCycleBuffer(int width, int length = 20000, bool isGray = false);
 	~E2VCycleBuffer()
 	{
-
 	};
 	static const int BufferLength = 20000;
-
 
 	//获得OPENCV的色彩模式，
 	int GetColorType(){ return colorType; };
@@ -85,6 +83,7 @@ public:
 	int FrameTimeUS = 0;
 private:
 
+	bool StartFlag = true;
 
 	//开始循环采图
 	bool freeRun();
