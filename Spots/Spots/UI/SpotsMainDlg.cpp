@@ -86,7 +86,7 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	SetMenu(&menu);
 
 	//系统初始化
-	p_contrller->init();
+	p_contrller->Init();
 
 	save1control(0);
 	

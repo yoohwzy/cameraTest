@@ -8,7 +8,7 @@
 
 //#define WORKER_DEBUG
 
-extern class Controller;
+class ControllerModel;// 解决类互相包含
 class Worker
 {
 public:
@@ -25,7 +25,7 @@ public:
 	int MyStatus = WorkerStatus::Free;
 	cv::Mat image;
 
-	Controller *P_Controller = NULL;
+	ControllerModel *P_Controller = NULL;
 
 
 

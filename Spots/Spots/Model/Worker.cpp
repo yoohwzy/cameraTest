@@ -1,5 +1,5 @@
 #include "Worker.h"
-#include <Controller\Controller.h>
+#include <Controller/ControllerModel.h>
 #include <Class/Debug/MFCConsole.h>
 
 Worker::Worker(string WorkerInfo)
