@@ -180,6 +180,9 @@
     <ClInclude Include="Controller\ControllerCycleBuffer.h">
       <Filter>Controller</Filter>
     </ClInclude>
+    <ClInclude Include="Controller\ControllerDirectRead.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -264,6 +267,9 @@
       <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Controller\ControllerCycleBuffer.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\ControllerDirectRead.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
   </ItemGroup>

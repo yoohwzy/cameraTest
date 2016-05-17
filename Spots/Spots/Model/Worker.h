@@ -32,9 +32,6 @@ public:
 	//需要设置的参数
 	int Real_WidthMM = 600;//图像中瓷砖的横长
 	int Real_LengthMM = 300;//图像中瓷砖的纵长
-	int WaitTimeMSIn = 50;//等待瓷砖进入拍摄区的时间
-	int WaitTimeMSOut = 50;//等待瓷砖离开拍摄区的时间
-	int FrameTimeOut = 2000;//拍摄超时时间
 	// 瓷砖序列号
 	int SN = 0;
 
