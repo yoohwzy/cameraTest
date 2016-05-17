@@ -22,6 +22,7 @@ public:
 
 	bool StartFlag = true;
 
+	//立即命令相机开始采图，读取一张长度为初始化时height的图像。
 	cv::Mat GetImage() override;
 private:
 };
