@@ -31,31 +31,19 @@ public:
 	{
 		ExitFlag = true;
 		Sleep(100);
-
-		release();
+		Release();
 	}
-	//是否为虚拟相机模式，本属性通过外部配置，在启动exe时若附加了virtual命令，则IsRealModel=0；
-	bool IsRealModel = 1;
 
-
-	void init() override;
-	void release() override;
+	void Init() override;
+	void Release() override;
 	void TiggerStartWatch() override;
 	void TiggerStopWatch() override;
 
-	/*****************虚拟相机模式方法*****************/
-	void VirtualSelectImg(cv::Mat);
-	void VirtualWorkerStart();
-
-	/*****************虚拟相机模式方法 End*****************/
 private:
 	E2VCameraCycleBuffer *p_e2v = NULL;
-
-	void triggerWatcherThread();//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
-	void captureAndassembleThread();//采图与工作委托
+	void triggerWatcherThread() override;//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
+	void captureAndProcessThread() override;//采图与工作委托
 	int index = 0;
-	int workerindex = 0;
-
 
 	void frameIndexAdd(int& oldFrame, int add)
 	{
@@ -63,8 +51,6 @@ private:
 		if (oldFrame >= E2VCycleBuffer::BufferLength)//exp:5600+400=6000 >= 6000 -> 6000 - 6000 =0
 			oldFrame -= E2VCycleBuffer::BufferLength;
 	}
-
-
 
 
 	bool IsGrabbing = false;//正在开启采图线程

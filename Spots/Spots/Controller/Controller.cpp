@@ -8,9 +8,9 @@
 #include <Class/Debug/MFCConsole.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
-void Controller::init(){
+void Controller::Init(){
 
-	release();
+	Release();
 
 	bool e2vInitFlag = true;
 	bool pci1761InitFlag = true;
@@ -149,9 +149,26 @@ void Controller::init(){
 	logImg.InitDrawingBoard();
 	spotsMainView->ShowBigImg(white);
 	spotsMainView->ShowLogImg(logImg.DrawingBoard);
-
 }
+void Controller::Release()
+{
+	if (worker1 != NULL)
+	{
+		delete worker1;
+		worker1 = NULL;
+	}
+	if (worker2 != NULL)
+	{
+		delete worker2;
+		worker2 = NULL;
+	}
 
+	if (p_e2v != NULL)
+	{
+		delete p_e2v;
+		p_e2v = NULL;
+	}
+}
 
 void Controller::TiggerStartWatch()
 {
@@ -184,25 +201,7 @@ void Controller::TiggerStopWatch()
 
 //private:
 
-void Controller::release()
-{
-	if (worker1 != NULL)
-	{
-		delete worker1;
-		worker1 = NULL;
-	}
-	if (worker2 != NULL)
-	{
-		delete worker2;
-		worker2 = NULL;
-	}
 
-	if (p_e2v != NULL)
-	{
-		delete p_e2v;
-		p_e2v = NULL;
-	}
-}
 
 void Controller::triggerWatcherThread()
 {
@@ -233,7 +232,7 @@ void Controller::triggerWatcherThread()
 
 			if (!IsGrabbing2)
 			{
-				std::thread t_run(std::mem_fn(&Controller::captureAndassembleThread), this);
+				std::thread t_run(std::mem_fn(&Controller::captureAndProcessThread), this);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -250,7 +249,10 @@ void Controller::triggerWatcherThread()
 		Sleep(10);
 	}
 }
-void Controller::captureAndassembleThread()
+
+
+
+void Controller::captureAndProcessThread()
 {
 	IsGrabbing2 = true;
 

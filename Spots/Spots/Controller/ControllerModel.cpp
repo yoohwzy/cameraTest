@@ -8,19 +8,6 @@
 #include <Class/Debug/MFCConsole.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
-//采集完照片后，图像处理前的回调函数，主要用于保存原始图像
-void ControllerModel::ImageGetCallBack(cv::Mat img)
-{
-	if (SAVE_IMG)//是否要保存图片
-	{
-		std::thread t_tiggerThread(std::mem_fn(&ControllerModel::imageSave), this, img);
-		t_tiggerThread.detach();
-		//imageSave(img);
-	}
-	else
-		MFCConsole::Output("当前为不保存图片模式\r\n");
-}
-
 
 /*********************  虚拟相机模式方法  ***********************/
 
@@ -214,7 +201,6 @@ void ControllerModel::ResetParameter()
 
 
 //private:
-
 void ControllerModel::imageSave(cv::Mat img)
 {
 	image_write_lock.lock();
