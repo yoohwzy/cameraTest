@@ -134,7 +134,7 @@
     <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h" />
     <ClInclude Include="Class\Setting\SettingHelper.h" />
     <ClInclude Include="Class\Statistics\Statistics.h" />
-    <ClInclude Include="Controller\Controller.h" />
+    <ClInclude Include="Controller\ControllerCycleBuffer.h" />
     <ClInclude Include="Controller\ControllerModel.h" />
     <ClInclude Include="CvvImage.h" />
     <ClInclude Include="Model\Arm.h" />
@@ -168,7 +168,7 @@
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
     <ClCompile Include="Class\Setting\SettingHelper.cpp" />
     <ClCompile Include="Class\Statistics\Statistics.cpp" />
-    <ClCompile Include="Controller\Controller.cpp" />
+    <ClCompile Include="Controller\ControllerCycleBuffer.cpp" />
     <ClCompile Include="Controller\ControllerModel.cpp" />
     <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="Model\Arm.cpp" />

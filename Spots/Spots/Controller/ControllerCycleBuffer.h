@@ -21,13 +21,13 @@ using namespace std;
 
 //#define Controller_DEBUG
 
-class Controller :public ControllerModel
+class ControllerCycleBuffer :public ControllerModel
 {
 public:
-	Controller(SpotsMainView* _spotsMainView) : ControllerModel(_spotsMainView)
+	ControllerCycleBuffer(SpotsMainView* _spotsMainView) : ControllerModel(_spotsMainView)
 	{
 	}
-	~Controller()
+	~ControllerCycleBuffer()
 	{
 		ExitFlag = true;
 		Sleep(100);
@@ -43,7 +43,6 @@ private:
 	E2VCameraCycleBuffer *p_e2v = NULL;
 	void triggerWatcherThread() override;//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
 	void captureAndProcessThread() override;//采图与工作委托
-	int index = 0;
 
 	void frameIndexAdd(int& oldFrame, int add)
 	{
@@ -53,6 +52,7 @@ private:
 	}
 
 
+	int index = 0;
 	bool IsGrabbing = false;//正在开启采图线程
 	bool IsGrabbing2 = false;//正在采图
 };

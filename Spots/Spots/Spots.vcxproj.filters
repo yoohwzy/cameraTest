@@ -93,9 +93,6 @@
     <ClInclude Include="Class\IOCard\PCI1761\PCI1761.h">
       <Filter>Class\IOCard</Filter>
     </ClInclude>
-    <ClInclude Include="Controller\Controller.h">
-      <Filter>Controller</Filter>
-    </ClInclude>
     <ClInclude Include="CvvImage.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -180,6 +177,9 @@
     <ClInclude Include="Controller\ControllerModel.h">
       <Filter>Controller</Filter>
     </ClInclude>
+    <ClInclude Include="Controller\ControllerCycleBuffer.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -187,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp">
       <Filter>Class\IOCard</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller\Controller.cpp">
-      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="CvvImage.cpp">
       <Filter>源文件</Filter>
@@ -264,6 +261,9 @@
       <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
     </ClCompile>
     <ClCompile Include="Controller\ControllerModel.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\ControllerCycleBuffer.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
   </ItemGroup>

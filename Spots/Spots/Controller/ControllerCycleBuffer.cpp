@@ -1,24 +1,24 @@
 #ifndef AFX_DATA
 #	include <afxwin.h>
 #endif
-#include "Controller.h"
+#include "ControllerCycleBuffer.h"
 #include <Class/Setting/SettingHelper.h>
 #include <Class\Helper\StringHelper.h>
 #include <shlwapi.h>
 #include <Class/Debug/MFCConsole.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
-void Controller::Init(){
+void ControllerCycleBuffer::Init(){
 
 	Release();
-
 	bool e2vInitFlag = true;
 	bool pci1761InitFlag = true;
 
 	stringstream ss;
-	ss.str("");
-	ss << "IsRealModel = " << IsRealModel << endl;
-	MFCConsole::Output(ss.str());
+
+	//ss.str("");
+	//ss << "IsRealModel = " << IsRealModel << endl;
+	//MFCConsole::Output(ss.str());
 
 	if (IsRealModel)
 	{
@@ -27,9 +27,9 @@ void Controller::Init(){
 			IsRealModel = VirtualCamEnable == 0;
 	}
 
-	ss.str("");
-	ss << "IsRealModel = " << IsRealModel << endl;
-	MFCConsole::Output(ss.str());
+	//ss.str("");
+	//ss << "IsRealModel = " << IsRealModel << endl;
+	//MFCConsole::Output(ss.str());
 
 	if (IsRealModel)
 	{
@@ -150,7 +150,7 @@ void Controller::Init(){
 	spotsMainView->ShowBigImg(white);
 	spotsMainView->ShowLogImg(logImg.DrawingBoard);
 }
-void Controller::Release()
+void ControllerCycleBuffer::Release()
 {
 	if (worker1 != NULL)
 	{
@@ -170,7 +170,7 @@ void Controller::Release()
 	}
 }
 
-void Controller::TiggerStartWatch()
+void ControllerCycleBuffer::TiggerStartWatch()
 {
 	if (IsRealModel)
 	{
@@ -178,7 +178,7 @@ void Controller::TiggerStartWatch()
 
 		ExitFlag = false;
 		//开始监控触发
-		std::thread t_tiggerThread(std::mem_fn(&Controller::triggerWatcherThread), this);
+		std::thread t_tiggerThread(std::mem_fn(&ControllerCycleBuffer::triggerWatcherThread), this);
 		auto tn = t_tiggerThread.native_handle();
 		SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 		t_tiggerThread.detach();
@@ -187,7 +187,7 @@ void Controller::TiggerStartWatch()
 	}
 }
 
-void Controller::TiggerStopWatch()
+void ControllerCycleBuffer::TiggerStopWatch()
 {
 	if (IsRealModel)
 	{
@@ -203,7 +203,7 @@ void Controller::TiggerStopWatch()
 
 
 
-void Controller::triggerWatcherThread()
+void ControllerCycleBuffer::triggerWatcherThread()
 {
 	double t = cv::getTickCount();
 	double risingSpan = cv::getTickCount();
@@ -232,7 +232,7 @@ void Controller::triggerWatcherThread()
 
 			if (!IsGrabbing2)
 			{
-				std::thread t_run(std::mem_fn(&Controller::captureAndProcessThread), this);
+				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -252,7 +252,7 @@ void Controller::triggerWatcherThread()
 
 
 
-void Controller::captureAndProcessThread()
+void ControllerCycleBuffer::captureAndProcessThread()
 {
 	IsGrabbing2 = true;
 
