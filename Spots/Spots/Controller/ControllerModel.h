@@ -34,9 +34,6 @@ public:
 	{
 		spotsMainView = NULL;
 	}
-	//是否为虚拟相机模式，本属性通过外部配置，在启动exe时若附加了virtual命令，则IsRealModel=0；
-	bool IsRealModel = 1;
-
 
 	//处理结束后显示处理结果
 	//结果图像
@@ -88,17 +85,17 @@ public:
 
 	// 在设置中调整了系统参数后，调用本方法将参数更新至算法中。
 	void ResetParameter();
-
 	/*****************虚拟相机模式方法*****************/
 	void VirtualSelectImg(cv::Mat);
 	void VirtualWorkerStart();
 	/*****************虚拟相机模式方法 End*****************/
 
 
-	bool ExitFlag = false;//triggerWatcher 结束标志
-	bool PauseFlag = false;//triggerWatcher 暂停标志
-
 protected:
+	//通用的初始化代码
+	//初始化PCI1761、数据库、根据参数将系统切换到真实/虚拟相机模式
+	//真实模式下调用TiggerStartWatch，开启监视线程
+	void baseInit();
 	void imageSave(cv::Mat img);
 
 
@@ -107,6 +104,12 @@ protected:
 	/*           属性与对象           */
 	/*                                */
 	/**********************************/
+public:
+	//是否为虚拟相机模式，本属性通过外部配置，在启动exe时若附加了virtual命令，则IsRealModel=0；
+	bool IsRealModel = 1;
+	bool ExitFlag = false;//triggerWatcher 结束标志
+	bool PauseFlag = false;//triggerWatcher 暂停标志
+protected:
 	PCI1761 pci1761;
 	LogImgGenerator logImg;
 	Arm arm;
@@ -122,6 +125,9 @@ protected:
 	std::mutex watcher_lock;
 	std::mutex image_write_lock;
 
+	bool e2vInited = true;
+	bool pci1761Inited = true;
+private:
 
 
 
@@ -171,9 +177,10 @@ public:
 
 	int Real_WidthMM = 600;//图像中瓷砖的横长
 	int Real_LengthMM = 300;//图像中瓷砖的纵长
-	int Worker_WaitTimeMSIn = 100;
-	int Worker_WaitTimeMSOut = 250;
-	int Worker_FrameTimeOut = 2000;
+
+	int Capture_WaitTimeMSIn = 100;//等待瓷砖进入拍摄区的时间
+	int Capture_WaitTimeMSOut = 250;//等待瓷砖离开拍摄区的时间
+	int Capture_FrameTimeOut = 2000;//拍摄超时时间
 
 
 	/******************边缘缺陷参数***************/

@@ -9,6 +9,108 @@
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
 
+void ControllerModel::baseInit()
+{
+	stringstream ss;
+
+	//初始化PCI1761
+	if (IsRealModel)
+	{
+		if (!pci1761.init())
+		{
+			pci1761Inited = false;
+		}
+	}
+
+
+	// 数据库配置初始化
+	if (1 == 1)
+	{
+		int accEnable = 0;
+		SettingHelper::GetKeyInt("DATABASE", "ACCDB_ENABLE", accEnable);//读取是否启用数据库模块
+
+		ss.clear();
+		ss << "ACCDB_ENABLE = " << accEnable << endl;
+		MFCConsole::Output(ss.str());
+		if (accEnable != 0)
+		{
+			string db_path;
+			bool accConnFlag = false;
+			if (SettingHelper::GetKeyString("DATABASE", "ACCDB_PATH", db_path))//读取数据库所在路径
+			{
+				accConnFlag = Statistics::InitDate(db_path);
+				MFCConsole::Output("db_path:");
+				MFCConsole::Output(db_path);
+				MFCConsole::Output("\r\n");
+			}
+			else
+			{
+				accConnFlag = Statistics::InitDate("src//..//瓷砖缺陷检测数据库.mdb");
+				SettingHelper::AddKey("DATABASE", "ACCDB_PATH", "src//..//瓷砖缺陷检测数据库.mdb");
+				MFCConsole::Output("db_path:src//..//瓷砖缺陷检测数据库.mdb\r\n");
+			}
+			// 统计数据初始化
+			if (accConnFlag)
+				spotsMainView->UpdateStatistics();
+			else
+				AfxMessageBox(L"无法连接到数据库！");
+		}
+	}
+	// 初始化工作线程
+	if (IsRealModel)
+	{
+		//若为真实相机模式，则实例化两个工人，并启动触发器监视进程
+
+		//初始化工人
+		worker1 = new Worker("worker1:");
+		worker2 = new Worker("worker2:");
+
+		worker1->P_Controller = this;
+		worker2->P_Controller = this;
+		TiggerStartWatch();
+
+		spotsMainView->SwitchModel2Virtual(false);
+
+		MFCConsole::Output("已切换到真实相机模式。\r\n");
+	}
+	else
+	{
+		PauseFlag = true;
+		if (IsRealModel)
+		{
+			IsRealModel = 0;
+			if (!e2vInited && !pci1761Inited)
+				AfxMessageBox(L"线阵相机&pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!pci1761Inited)
+				AfxMessageBox(L"pci1761初始化失败！已切换到虚拟相机模式。");
+			else if (!e2vInited)
+				AfxMessageBox(L"线阵相机初始化失败！已切换到虚拟相机模式。");
+		}
+		else
+			MFCConsole::Output("已切换到虚拟相机模式。\r\n");
+		//若为虚拟相机模式，则实例化虚拟相机类与1个工人
+		//开启虚拟相机
+		cv::Mat virtualImg;
+		worker1 = new Worker("Virtual Worker");
+		worker1->image = virtualImg;
+		worker1->P_Controller = this;
+		spotsMainView->SwitchModel2Virtual(true);
+	}
+
+	//读取参数配置
+	//设置工人算法参数
+	ResetParameter();
+
+
+	//初始化UI
+	cv::Mat white(2, 2, CV_8U, cv::Scalar(255));
+	logImg.InitDrawingBoard();
+	spotsMainView->ShowBigImg(white);
+	spotsMainView->ShowLogImg(logImg.DrawingBoard);
+}
+
+
+
 /*********************  虚拟相机模式方法  ***********************/
 
 void ControllerModel::VirtualSelectImg(cv::Mat image)
@@ -49,9 +151,9 @@ void ControllerModel::ResetParameter()
 	this->SAVE_IMG = si;
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", this->Worker_WaitTimeMSIn);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", this->Worker_WaitTimeMSOut);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", this->Worker_FrameTimeOut);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", this->Capture_WaitTimeMSIn);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", this->Capture_WaitTimeMSOut);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", this->Capture_FrameTimeOut);
 
 	/*************边缘缺陷检测参数***********/
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
@@ -140,10 +242,6 @@ void ControllerModel::ResetParameter()
 			w->BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
 			w->BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
 			w->BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
-
-			w->WaitTimeMSIn = Worker_WaitTimeMSIn;
-			w->WaitTimeMSOut = Worker_WaitTimeMSOut;
-			w->FrameTimeOut = Worker_FrameTimeOut;
 
 
 			/**************分级参数*************/
