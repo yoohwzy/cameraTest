@@ -84,12 +84,6 @@
     <ClInclude Include="Class\Helper\StringHelper.h">
       <Filter>Class\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.h">
-      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
-    </ClInclude>
-    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.h">
-      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
-    </ClInclude>
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h">
       <Filter>Class\IOCard</Filter>
     </ClInclude>
@@ -128,9 +122,6 @@
     </ClInclude>
     <ClInclude Include="Class\Debug\MFCConsole.h">
       <Filter>Class\Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="Model\ImgScanner.h">
-      <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="Model\ModelVirtual.h">
       <Filter>Model</Filter>
@@ -183,16 +174,16 @@
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.h">
       <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
     </ClInclude>
+    <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.h">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\ControllerModel.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VBuffer.cpp">
-      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
-    </ClCompile>
-    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCamera.cpp">
-      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
     </ClCompile>
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp">
       <Filter>Class\IOCard</Filter>
@@ -220,9 +211,6 @@
     </ClCompile>
     <ClCompile Include="Class\Debug\MFCConsole.cpp">
       <Filter>Class\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Model\ImgScanner.cpp">
-      <Filter>Model</Filter>
     </ClCompile>
     <ClCompile Include="Model\Worker.cpp">
       <Filter>Model</Filter>
@@ -271,6 +259,12 @@
     </ClCompile>
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.cpp">
       <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.cpp">
+      <Filter>Class\Camera\e2v_EV71YC1CCL4005BA0</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\ControllerModel.cpp">
+      <Filter>Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
