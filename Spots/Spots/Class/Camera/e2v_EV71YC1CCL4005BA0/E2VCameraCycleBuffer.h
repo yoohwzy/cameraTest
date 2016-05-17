@@ -72,17 +72,14 @@ class E2VCameraCycleBuffer :public E2VCameraModel
 {
 public:
 	//初始化采集参数
-	//1.缓存指针，为NULL时自动开辟内存
-	//2.采集图像宽度
-	//3.采集图像高度
-	//4.每帧时长（微秒）要求大于30，默认为0
-	//5.色彩模式 枚举 RGB OR GRAY
-	//6.采集卡编号Logical number of the board.（默认为0）
-	//7.采集卡Port口号，PORT_A(默认) OR PORT_B
+	//1.采集图像宽度
+	//2.色彩模式 枚举 RGB OR GRAY
+	//3.每帧时长（微秒）要求大于30，默认为0
+	//4.采集卡编号Logical number of the board.（默认为0）
+	//5.采集卡Port口号，PORT_A(默认) OR PORT_B
 	E2VCameraCycleBuffer(int width, int colorType = RGB, int frameTimeUS = 0, int boardID = 0, int Camport = PORT_A);
 	~E2VCameraCycleBuffer();
 
-	bool StartFlag = true;
 	E2VCycleBuffer *P_CycleBuffer = NULL;
 	//每帧时长（微秒）要求大于30，默认为0
 	int FrameTimeUS = 0;

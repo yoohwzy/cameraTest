@@ -57,7 +57,7 @@ protected:
 	const int _frameHeight = 1;		//每帧高度
 	int _nBoard = 0;				//采集卡编号
 	int _camPort = PORT_A;			//采集卡Port
-	int _colorType = 1;				//采图颜色模式
+	int _colorType = CV_8U;				//采图颜色模式
 
 	//检测MD采集卡是否有错误
 	//报错->退出
