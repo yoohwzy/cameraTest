@@ -66,7 +66,7 @@ public:
 			spotsMainView->ShowLogImg(logImg.DrawingBoard);
 			spotsMainView->UpdateStatistics();
 		}
-		ui_lock.unlock();
+		ui_lock.unlock(); 
 	}
 	//采图完成后回调，用于将图片保存至硬盘
 	void ImageGetCallBack(cv::Mat img)

@@ -4,8 +4,8 @@
 #include "ControllerModel.h"
 #include <Class/Setting/SettingHelper.h>
 #include <Class\Helper\StringHelper.h>
-#include <shlwapi.h>
 #include <Class/Debug/MFCConsole.h>
+#include <shlwapi.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
 

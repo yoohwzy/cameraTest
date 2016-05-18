@@ -1,7 +1,11 @@
-#include "BlockEdgeDetector.h"
+#include "BlockEdgeSimilarDetector.h"
 #include <Class\Debug\MFCConsole.h>
 
-BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults)
+#include <string>
+#include <iostream>
+#include <fstream>
+
+BlockEdgeSimilarDetector::BlockEdgeSimilarDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	image = _img;
 	if (image.channels() == 3)
@@ -9,7 +13,7 @@ BlockEdgeDetector::BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faul
 	p_block = _block;
 	p_faults = _faults;
 }
-void BlockEdgeDetector::Run()
+void BlockEdgeSimilarDetector::Run()
 {
 #ifdef BED_OUTPUT_DEBUG_INFO
 	drowDebugResult = image.clone();
@@ -20,10 +24,10 @@ void BlockEdgeDetector::Run()
 	doLeft();
 	doRight();
 #else
-	thread t1 = thread(std::mem_fn(&BlockEdgeDetector::doUp), this);
-	thread t2 = thread(std::mem_fn(&BlockEdgeDetector::doDown), this);
-	thread t3 = thread(std::mem_fn(&BlockEdgeDetector::doLeft), this);
-	thread t4 = thread(std::mem_fn(&BlockEdgeDetector::doRight), this);
+	thread t1 = thread(std::mem_fn(&BlockEdgeSimilarDetector::doUp), this);
+	thread t2 = thread(std::mem_fn(&BlockEdgeSimilarDetector::doDown), this);
+	thread t3 = thread(std::mem_fn(&BlockEdgeSimilarDetector::doLeft), this);
+	thread t4 = thread(std::mem_fn(&BlockEdgeSimilarDetector::doRight), this);
 	t1.join();
 	t2.join();
 	t3.join();
@@ -38,13 +42,18 @@ void BlockEdgeDetector::Run()
 	MFCConsole::Output(ss.str());
 }
 
-BlockEdgeDetector::~BlockEdgeDetector()
+BlockEdgeSimilarDetector::~BlockEdgeSimilarDetector()
 {
 	p_faults = NULL;
 	p_block = NULL;
 }
-void BlockEdgeDetector::doUp()
+void BlockEdgeSimilarDetector::doUp()
 {
+	// 如果左边界直接在图像边缘上，则不进行检测。
+	if (p_block->A.y < 2 && p_block->B.y < 2)
+		return;
+
+
 	const int ROI_WIDTH = 51;
 	const int ROI_HEIGHT = 77;
 	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
@@ -93,11 +102,25 @@ void BlockEdgeDetector::doUp()
 		sprintf(num, "%03d", index);
 		string strnum(num);
 		stringstream ss;
-		ss << "EdgeInner\\U\\上_" << strnum << "_reduce.jpg";
+		ss << "BlockEdgeSimilarDetector\\up\\上_" << strnum << "_reduce.jpg";
 		cv::imwrite(ss.str(), reduceImg);
 		ss.str("");
-		ss << "EdgeInner\\U\\上_" << strnum << ".jpg";
+		ss << "BlockEdgeSimilarDetector\\up\\上_" << strnum << ".jpg";
 		cv::imwrite(ss.str(), tmpROI);
+		cv::Mat hist(100, reduceImg.rows, CV_8U, cv::Scalar(0));
+		for (size_t y = 0; y < reduceImg.rows; y++)
+		{
+			int count = reduceImg.ptr<float>(y)[0];
+			int x = y;
+			for (int i = 99; i >= 0 && count > 0; i--)
+			{
+				count--;
+				hist.ptr<uchar>(i)[x] = 255;
+			}
+		}
+		ss.str("");
+		ss << "BlockEdgeSimilarDetector\\up\\上_" << strnum << "hist.jpg";
+		cv::imwrite(ss.str(), hist);
 #endif
 
 		tmpROI.release();
@@ -106,8 +129,12 @@ void BlockEdgeDetector::doUp()
 	}
 	process(reduceList, points, "up");
 }
-void BlockEdgeDetector::doDown()
+void BlockEdgeSimilarDetector::doDown()
 {
+	// 如果边界直接在图像边缘上，则不进行检测。
+	if (p_block->C.y >= image.rows - 2 && p_block->D.y >= image.rows - 2)
+		return;
+
 	const int ROI_WIDTH = 51;
 	const int ROI_HEIGHT = 77;
 	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
@@ -156,11 +183,26 @@ void BlockEdgeDetector::doDown()
 		sprintf(num, "%03d", index);
 		string strnum(num);
 		stringstream ss;
-		ss << "EdgeInner\\D\\下_" << strnum << "_reduce.jpg";
+		ss << "BlockEdgeSimilarDetector\\down\\下_" << strnum << "_reduce.jpg";
 		cv::imwrite(ss.str(), reduceImg);
 		ss.str("");
-		ss << "EdgeInner\\D\\下_" << strnum << ".jpg";
+		ss << "BlockEdgeSimilarDetector\\down\\下_" << strnum << ".jpg";
 		cv::imwrite(ss.str(), tmpROI);
+
+		cv::Mat hist(100, reduceImg.rows, CV_8U, cv::Scalar(0));
+		for (size_t y = 0; y < reduceImg.rows; y++)
+		{
+			int count = reduceImg.ptr<float>(y)[0];
+			int x = y;
+			for (int i = 99; i >= 0 && count > 0; i--)
+			{
+				count--;
+				hist.ptr<uchar>(i)[x] = 255;
+			}
+		}
+		ss.str("");
+		ss << "BlockEdgeSimilarDetector\\down\\下_" << strnum << "hist.jpg";
+		cv::imwrite(ss.str(), hist);
 #endif
 
 		tmpROI.release();
@@ -170,8 +212,14 @@ void BlockEdgeDetector::doDown()
 	}
 	process(reduceList, points, "down");
 }
-void BlockEdgeDetector::doLeft()
+void BlockEdgeSimilarDetector::doLeft()
 {
+	// 如果边界直接在图像边缘上，则不进行检测。
+	if (p_block->A.x < 2 && p_block->D.x < 2)
+		return;
+
+
+
 	const int ROI_WIDTH = 76;
 	const int ROI_HEIGHT = 71;
 	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
@@ -210,6 +258,7 @@ void BlockEdgeDetector::doLeft()
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
 		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
+		reduceImg = reduceImg.t();
 
 #ifdef SAVE_IMG
 		//保存图片
@@ -217,16 +266,29 @@ void BlockEdgeDetector::doLeft()
 		sprintf(num, "%03d", index);
 		string strnum(num);
 		stringstream ss;
-		ss << "EdgeInner\\L\\左_" << strnum << "_reduce.jpg";
+		ss << "BlockEdgeSimilarDetector\\left\\左_" << strnum << "_reduce.jpg";
 		cv::imwrite(ss.str(), reduceImg);
 		ss.str("");
-		ss << "EdgeInner\\L\\左_" << strnum << ".jpg";
+		ss << "BlockEdgeSimilarDetector\\left\\左_" << strnum << ".jpg";
 		cv::imwrite(ss.str(), tmpROI);
+		cv::Mat hist(100, reduceImg.rows, CV_8U, cv::Scalar(0));
+		for (size_t y = 0; y < reduceImg.rows; y++)
+		{
+			int count = reduceImg.ptr<float>(y)[0];
+			int x = y;
+			for (int i = 99; i >= 0 && count > 0; i--)
+			{
+				count--;
+				hist.ptr<uchar>(i)[x] = 255;
+			}
+		}
+		ss.str("");
+		ss << "BlockEdgeSimilarDetector\\left\\左_" << strnum << "hist.jpg";
+		cv::imwrite(ss.str(), hist);
 #endif
 
 		//tmpROI.release();
 
-		reduceImg = reduceImg.t();
 		//reduceImg.convertTo(reduceImg, CV_32F);
 		reduceList.push_back(reduceImg);
 		points.push_back(p_block->GetPonintByY(y, &p_block->LeftLine));
@@ -235,8 +297,12 @@ void BlockEdgeDetector::doLeft()
 	process(reduceList, points, "左");
 	//processAndSaveData(reduceList, points, "L\\左");
 }
-void BlockEdgeDetector::doRight()
+void BlockEdgeSimilarDetector::doRight()
 {
+	// 如果边界直接在图像边缘上，则不进行检测。
+	if (p_block->B.y >= image.cols - 2 && p_block->C.y >= image.cols - 2)
+		return;
+
 	const int ROI_WIDTH = 76;
 	const int ROI_HEIGHT = 71;
 	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
@@ -276,20 +342,34 @@ void BlockEdgeDetector::doRight()
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
 		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
 
+		reduceImg = reduceImg.t();
 #ifdef SAVE_IMG
 		//保存图片
 		char num[10];
 		sprintf(num, "%03d", index);
 		string strnum(num);
 		stringstream ss;
-		ss << "EdgeInner\\R\\右_" << strnum << "_reduce.jpg";
+		ss << "BlockEdgeSimilarDetector\\right\\右_" << strnum << "_reduce.jpg";
 		cv::imwrite(ss.str(), reduceImg);
 		ss.str("");
-		ss << "EdgeInner\\R\\右_" << strnum << ".jpg";
+		ss << "BlockEdgeSimilarDetector\\right\\右_" << strnum << ".jpg";
 		cv::imwrite(ss.str(), tmpROI);
+		cv::Mat hist(100, reduceImg.rows, CV_8U, cv::Scalar(0));
+		for (size_t y = 0; y < reduceImg.rows; y++)
+		{
+			int count = reduceImg.ptr<float>(y)[0];
+			int x = y;
+			for (int i = 99; i >= 0 && count > 0; i--)
+			{
+				count--;
+				hist.ptr<uchar>(i)[x] = 255;
+			}
+		}
+		ss.str("");
+		ss << "BlockEdgeSimilarDetector\\right\\右_" << strnum << "hist.jpg";
+		cv::imwrite(ss.str(), hist);
 #endif
 
-		reduceImg = reduceImg.t();
 		tmpROI.release();
 		reduceList.push_back(reduceImg);
 		points.push_back(p_block->GetPonintByY(y, &p_block->RightLine));
@@ -298,16 +378,21 @@ void BlockEdgeDetector::doRight()
 }
 
 
-void BlockEdgeDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> points, string info)
+void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> points, string info)
 {
 	if (points.size() != reduceList.size())
 		return;
 
 	vector<bool> pointFlag;
+
+#ifdef BED_OUTPUT_DEBUG_INFO
+	vector<double> diffs;
+#endif
 	for (size_t i = 0; i < points.size(); i++)
 	{
 		pointFlag.push_back(0);
 	}
+
 #ifdef BED_OUTPUT_DEBUG_INFO
 	for (size_t i = 0; i < points.size(); i++)
 	{
@@ -317,14 +402,18 @@ void BlockEdgeDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> po
 		cv::circle(drowDebugResult, points[i], 2, cv::Scalar(255, 0, 255), -1);
 	}
 #endif
+
 	//vector<int> errorPointsIndex;
 	if (reduceList.size() > 2)
 	{
-		for (int i = 1; i < reduceList.size() - 3; i++)
+		const int span = 1;//相似度计算间隔
+		for (int i = 1; i < reduceList.size() - 1 - span; i++)
 		{
-			double diff = cv::compareHist(reduceList[i], reduceList[i + 2], CV_COMP_CORREL); //越大越像
+			double diff = cv::compareHist(reduceList[i], reduceList[i + span], CV_COMP_CORREL); //越大越像
 
 #ifdef BED_OUTPUT_DEBUG_INFO
+			diffs.push_back(diff);
+
 			cv::Mat hist1 = reduceList[i];
 			cv::Mat hist2 = reduceList[i + 2];
 			double diff1 = cv::compareHist(hist1, hist2, CV_COMP_CORREL); //越大越像
@@ -336,7 +425,7 @@ void BlockEdgeDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> po
 			if (diff < DIFF_THRESHOLD)
 			{
 				pointFlag[i] = 1;
-				pointFlag[i + 2] = 1;
+				pointFlag[i + span] = 1;
 				//errorPointsIndex.push_back(i);
 #ifdef BED_OUTPUT_DEBUG_INFO
 				stringstream ss;
@@ -345,6 +434,10 @@ void BlockEdgeDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> po
 				cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
 #endif
 			}
+			//else if (pointFlag[i])
+			//{
+			//	pointFlag[i] = 0;
+			//}
 		}
 	}
 	//不合并缺陷
@@ -365,4 +458,19 @@ void BlockEdgeDetector::process(vector<cv::Mat> reduceList, vector<cv::Point> po
 			}
 		}
 	}
+
+
+
+#ifdef BED_OUTPUT_DEBUG_INFO
+	if (1 == 1)
+	{
+		stringstream ss;
+		ss << "BlockEdgeSimilarDetector\\" << info << ".txt";
+		ofstream of(ss.str(), ios::out);
+		for (size_t i = 0; i < diffs.size(); i++)
+		{
+			of << diffs[i] << ",";
+		}
+	}
+#endif
 }

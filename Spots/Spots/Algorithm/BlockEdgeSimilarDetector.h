@@ -6,13 +6,15 @@
 
 #include <thread>
 
+#define SAVE_IMG
 #define BED_OUTPUT_DEBUG_INFO 1
 
-class BlockEdgeDetector
+//根据相似度计算边缘是否有缺陷
+class BlockEdgeSimilarDetector
 {
 public:
-	BlockEdgeDetector(cv::Mat& _img, Block* _block, Faults* _faults);
-	~BlockEdgeDetector();
+	BlockEdgeSimilarDetector(cv::Mat& _img, Block* _block, Faults* _faults);
+	~BlockEdgeSimilarDetector();
 	void Run();
 
 

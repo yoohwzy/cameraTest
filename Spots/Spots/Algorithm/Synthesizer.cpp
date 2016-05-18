@@ -1,6 +1,6 @@
 #include "Synthesizer.h"
 #include <Algorithm/BlockLocalizer.h>
-#include <Algorithm/BlockEdgeDetector.h>
+#include <Algorithm/BlockEdgeSimilarDetector.h>
 #include <Algorithm/BlockEdgeLineDetector.h>
 #include <Algorithm/EdgeFaultLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
@@ -125,16 +125,16 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 	{
 		if (MFCConsole::IsOpened)
 			t = cv::getTickCount();
-		BlockEdgeDetector bed = BlockEdgeDetector(grayImg, p_block, &faults);
-		bed.DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		bed.FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		bed.FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-		bed.Run();
+		BlockEdgeSimilarDetector besd = BlockEdgeSimilarDetector(grayImg, p_block, &faults);
+		besd.DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+		besd.FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+		besd.FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+		besd.Run();
 		if (MFCConsole::IsOpened)
 		{
 			stringstream ss;
 			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			ss << "算法BlockEdgeDetector用时：" << t << endl;
+			ss << "算法BlockEdgeSimilarDetector用时：" << t << endl;
 			MFCConsole::Output(ss.str());
 		}
 	}

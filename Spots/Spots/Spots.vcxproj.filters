@@ -138,9 +138,6 @@
     <ClInclude Include="Class\Statistics\Statistics.h">
       <Filter>Class\Statistics</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\BlockEdgeDetector.h">
-      <Filter>Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\BlockLocalizer.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
@@ -182,6 +179,9 @@
     </ClInclude>
     <ClInclude Include="Controller\ControllerDirectRead.h">
       <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\BlockEdgeSimilarDetector.h">
+      <Filter>Algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -227,9 +227,6 @@
     <ClCompile Include="Class\Statistics\Statistics.cpp">
       <Filter>Class\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithm\BlockEdgeDetector.cpp">
-      <Filter>Algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithm\BlockLocalizer.cpp">
       <Filter>Algorithm</Filter>
     </ClCompile>
@@ -271,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="Controller\ControllerDirectRead.cpp">
       <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\BlockEdgeSimilarDetector.cpp">
+      <Filter>Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
