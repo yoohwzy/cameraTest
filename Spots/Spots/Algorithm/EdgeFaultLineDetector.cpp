@@ -130,7 +130,7 @@ void EdgeFaultLineDetector::doLeft()
 		endY = image.rows - 1;
 
 	vector<Faults::BrokenEdge> vbs;
-	vector<int> deeps;
+	cv::Mat deeps(endY - startY, 1, CV_16U, cv::Scalar(0));
 	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
 	for (int point_y = startY; point_y <= endY; point_y++)
 	{
@@ -138,35 +138,44 @@ void EdgeFaultLineDetector::doLeft()
 		if (point_x < 0 || point_x >= image.cols)
 			continue;
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
-		deeps.push_back(deep);
-		if (deep > DEEP_THRESHOD)
-		{
-#ifdef EFLD_OUTPUT_DEBUG_INFO
-			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
-#endif
-			if (brokenEdgeIndex == -1)
-			{
-				Faults::BrokenEdge b;
-				b.deep = deep;
-				b.length = 1;
-				b.position = cv::Point(point_x, point_y);
-				vbs.push_back(b);
-				brokenEdgeIndex = vbs.size() - 1;
-			}
-			else
-			{
-				if (vbs[brokenEdgeIndex].deep < deep)
-					vbs[brokenEdgeIndex].deep = deep;
-				vbs[brokenEdgeIndex].length++;
-				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
-			}
-		}
-		else
-		{
-			//一个崩边缺陷的结束
-			brokenEdgeIndex = -1;
-		}
+		deeps.ptr<ushort>(point_y - startY)[0] = deep;
+//		if (deep > DEEP_THRESHOD)
+//		{
+//#ifdef EFLD_OUTPUT_DEBUG_INFO
+//			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
+//#endif
+//			if (brokenEdgeIndex == -1)
+//			{
+//				Faults::BrokenEdge b;
+//				b.deep = deep;
+//				b.length = 1;
+//				b.position = cv::Point(point_x, point_y);
+//				vbs.push_back(b);
+//				brokenEdgeIndex = vbs.size() - 1;
+//			}
+//			else
+//			{
+//				if (vbs[brokenEdgeIndex].deep < deep)
+//					vbs[brokenEdgeIndex].deep = deep;
+//				vbs[brokenEdgeIndex].length++;
+//				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
+//			}
+//		}
+//		else
+//		{
+//			//一个崩边缺陷的结束
+//			brokenEdgeIndex = -1;
+//		}
 	}
+	cv::Mat tmp_m, tmp_sd;
+	double m = 0, sd = 0;
+	m = cv::mean(deeps)[0];
+	cout << "Mean: " << m << endl;
+
+	meanStdDev(deeps, tmp_m, tmp_sd);
+	m = tmp_m.at<double>(0, 0);
+	sd = tmp_sd.at<double>(0, 0);
+
 	int i = 1;
 }
 void EdgeFaultLineDetector::doRight()
