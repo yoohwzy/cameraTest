@@ -57,7 +57,7 @@ void ControllerModel::baseInit()
 		}
 	}
 	// 初始化工作线程
-	if (IsRealModel)
+	if (e2vInited && pci1761Inited)
 	{
 		//若为真实相机模式，则实例化两个工人，并启动触发器监视进程
 
