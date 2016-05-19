@@ -53,7 +53,7 @@ private:
 	Mat Grow(const Mat &image, const Point &seedpoint, const int th_v);//种子点区域生长
 	Mat Equalize(const Mat &_Img);//瓷砖表面预处理高斯差分滤波与直方图均衡化
 	void ProcessArea(Block *blockin);//确定瓷砖表面内部位置，A是左上，顺时针
-	int otsuThreshold(const Mat &frame, const MatND &hist);//局部寻找可靠阈值
+	int otsuThreshold(int _width, int _height, float origin, const MatND &hist);//局部寻找可靠阈值
 	int Maxdistance(vector<Point> const &vec);//给一组点集求出任意两点间的最大距离时间复杂度为nlogn
 	void Handwriting(const Mat &_img);//判断是否存在人工笔迹
 	void line2preprocess();

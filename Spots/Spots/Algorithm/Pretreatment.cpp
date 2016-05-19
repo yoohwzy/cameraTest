@@ -1,6 +1,7 @@
 #include "Pretreatment.h"
 #include <Eigen/Dense>
 #include <opencv2/core/eigen.hpp>
+#include <numeric>
 
 using namespace cv;
 using namespace std;
@@ -10,13 +11,17 @@ static const int STAMP_WIDTH = 30;
 static const int  STAMP_HEIGHT = 30;
 static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
 static const int kItemsToProduce = 10;   // 生产者生产的总数
-static const int block_num = 12;
+static const int block_num = 10;//10个区域
+
 int flagdata = 0;//数据初始化标识
 Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 vector<Rect> needContour;
 vector<int> statistics_list(2 * block_num,50);//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
+vector<int> statistics_result(2,50);//上一幅图的结果
 static CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
+
+//快速double到int类型转换
 union luai_Cast { double l_d; long l_l; };
 #define double2int(d,i) \
   { volatile union luai_Cast u; u.l_d = (d) + 6755399441055744.0; (i) = u.l_l; }
@@ -483,9 +488,9 @@ void Pretreatment::Handwriting(const Mat &_img)
 }
 
 //局部数据统计
-void statistics_gray(const Mat &frame, const MatND &hist, int _step)
+void statistics_gray(int _width, int _height, const MatND &hist, int _step)
 {
-	int pixelSum = frame.cols * frame.rows,pixelmaxloc = 0;
+	int pixelSum = _width * _height, pixelmaxloc = 0;
 	float pixelcumu = 0, pixelmax = 0, pixelnow = 0;
 	for (int i = 0; i < 256; ++i)
 	{
@@ -499,14 +504,78 @@ void statistics_gray(const Mat &frame, const MatND &hist, int _step)
 			pixelmaxloc = i;
 		}
 	}
-	statistics_list[_step + 1] = pixelmaxloc;//第一个为中位数第二个为众数
+	statistics_list[_step + 10] = pixelmaxloc;//第一个为中位数第二个为众数
+}
+
+
+int partition(vector<int> &array, int left, int right)
+{
+	int pos = right;
+	right--;
+	while (left <= right)
+	{
+		while (left < pos && array[left] <= array[pos])
+			left++;
+
+		while (right >= 0 && array[right] > array[pos])
+			right--;
+
+		if (left >= right)
+			break;
+
+		swap(array[left], array[right]);
+	}
+	swap(array[left], array[pos]);
+
+	return left;
+}
+
+//快速寻找中位数
+int getMidIndex(vector<int> &array, int size)
+{
+	if (size <= 0)
+		return -1;
+
+	int left = 0;
+	int right = size - 1;
+	int midPos = right >> 1;//中间位置
+	int index = -1;
+
+	while (index != midPos)
+	{
+		index = partition(array, left, right);
+
+		if (index < midPos)
+		{
+			left = index + 1;
+		}
+		else if (index > midPos)
+		{
+			right = index - 1;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	assert(index == midPos);
+	return array[index];
+}
+
+//统计数据归一化
+void statis_nol(vector<int> &_statis)
+{
+	statistics_result[0] = getMidIndex(_statis, 10);//算出总的中位数
+	double sum = std::accumulate(std::begin(_statis)+10, std::end(_statis), 0.0);
+	statistics_result[1] =int(2*sum / double(_statis.size())+0.5);//算出总的众数
 }
 
 //局部二值化的阈值选取
-int Pretreatment::otsuThreshold(const Mat &frame, const MatND &hist)
+int Pretreatment::otsuThreshold(int _width, int _height, float origin, const MatND &hist)
 {
 	float pixelPro[256] = { 0 };
-	int pixelSum = frame.cols * frame.rows, threshold = 0;
+	int pixelSum = _width * _height, threshold = 0;
 	vector<vector<int>> grayVlist;
 	vector<int> grayV;
 
@@ -546,7 +615,7 @@ int Pretreatment::otsuThreshold(const Mat &frame, const MatND &hist)
 		m = 0;
 	}
 	if (grayVlist.size() == 0)
-		return frame.at<uchar>(0, 0);
+		return origin;
 	sort(grayVlist.begin(), grayVlist.end(), SortBysize_int);
 	threshold = (grayVlist[0][grayVlist[0].size()-1]-48)*0.2;//瓷砖上的标准灰度值众数为48
 	grayVlist.clear();
@@ -582,7 +651,7 @@ int Pretreatment::otsuThreshold(const Mat &frame, const MatND &hist)
 		m = 0;
 	}
 	if (grayVlist.size() == 0)
-		return frame.at<uchar>(0, 0);
+		return origin;
 	sort(grayVlist.begin(), grayVlist.end(), SortBysize_int);
 	threshold = threshold+(grayVlist[0][grayVlist[0].size() - 1])+15;//以瓷砖上的标准灰度值众数48为基准值，向连续的灰度分布右门限增长，线性变化率为0.2
 	return threshold;
@@ -792,8 +861,8 @@ void Pretreatment::ProducerTask() // 生产者任务
 			MatND histolist, histolist_r;
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);//预处理过的图获得灰度分布
 			calcHist(&original_Img_ROI, 1, &channels, Mat(), histolist_r, 1, &size, ranges);//原图获得灰度分布
-			statistics_gray(original_Img_ROI, histolist_r,step);
-			int OtsuV = otsuThreshold(MidImgROI, histolist);//找到离散灰度值导数的阈值
+			statistics_gray(ThRect.width, ThRect.height, histolist_r, step);
+			int OtsuV = otsuThreshold(ThRect.width, ThRect.height, MidImgROI.at<uchar>(0, 0), histolist);//找到离散灰度值导数的阈值
 			threshold(MidImgROI, ThImgROI, OtsuV, 255, 0);
 
 			vector<vector<cv::Point>> decontours;
@@ -909,8 +978,8 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	bitwise_and(E_image, E_img_mask, E_image);
 	recImg = boundingRect(pointlist);//截取瓷砖区域,对拍摄不全的区域也进行截取
 
+	//截取需要的部分
 	MidImg = E_image(Rect(recImg));
-
 	original_Img_D = image(Rect(recImg));//缺陷检测原图
 
 	std::thread linepreprocess(std::mem_fn(&Pretreatment::line2preprocess), this);
@@ -919,6 +988,8 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	Handwriting(re_Img_small);//检测人工标记
 
 	linepreprocess.join();
+
+	//分为凹凸检测和线检测线程
 	InitItemRepository(&gItemRepository);
 	std::thread producer(std::mem_fn(&Pretreatment::ProducerTask), this); // 待检测缺陷的预处理.
 	std::thread consumer(std::mem_fn(&Pretreatment::ConsumerTask), this); // 区分缺陷与水渍.
@@ -928,6 +999,10 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	producer.join();
 	consumer.join();
 	line.join();
+
+	//数据统计整理汇总
+	statis_nol(statistics_list);
+
 	//回收内存
 	vector<Rect>().swap(needContour);
 	vector<Rect>().swap(CneedContours);
