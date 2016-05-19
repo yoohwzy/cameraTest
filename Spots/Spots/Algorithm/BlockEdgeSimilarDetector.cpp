@@ -427,8 +427,8 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 			double diff4 = cv::compareHist(hist1, hist2, CV_COMP_BHATTACHARYYA); //Ô½Ð¡Ô½Ïñ
 #endif
 
-			//if (fdis > 5)
-			if (diff < DIFF_THRESHOLD)
+			if (fdis > 20)
+			//if (diff < DIFF_THRESHOLD)
 			{
 				pointFlag[i] = 1;
 				pointFlag[i + span] = 1;
