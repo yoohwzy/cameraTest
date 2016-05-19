@@ -58,5 +58,7 @@ private:
 	void doRight();
 
 	void process(vector<cv::Mat> reduceList, vector<cv::Point> points,string info);
+	double getFrechetDistance(vector<double> lineA, vector<double> lineB);
+	double getFrechetDistance(cv::Mat lineA, cv::Mat lineB);
 };
 

@@ -55,7 +55,7 @@ void BlockEdgeSimilarDetector::doUp()
 
 
 	const int ROI_WIDTH = 51;
-	const int ROI_HEIGHT = 77;
+	const int ROI_HEIGHT = 40;
 	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
@@ -94,7 +94,8 @@ void BlockEdgeSimilarDetector::doUp()
 
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(3, 3), 0);
+		//cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
 
 #ifdef SAVE_IMG
 		//保存图片
@@ -136,7 +137,7 @@ void BlockEdgeSimilarDetector::doDown()
 		return;
 
 	const int ROI_WIDTH = 51;
-	const int ROI_HEIGHT = 77;
+	const int ROI_HEIGHT = 30;
 	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
@@ -175,7 +176,8 @@ void BlockEdgeSimilarDetector::doDown()
 
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 1, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(3, 3), 0);
+		//cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols, reduceImg.rows / 2));//高度缩减为一半
 
 #ifdef SAVE_IMG
 		//保存图片
@@ -220,7 +222,7 @@ void BlockEdgeSimilarDetector::doLeft()
 
 
 
-	const int ROI_WIDTH = 76;
+	const int ROI_WIDTH = 40;
 	const int ROI_HEIGHT = 71;
 	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
@@ -257,7 +259,8 @@ void BlockEdgeSimilarDetector::doLeft()
 
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(3, 3), 0);
+		//cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
 		reduceImg = reduceImg.t();
 
 #ifdef SAVE_IMG
@@ -303,7 +306,7 @@ void BlockEdgeSimilarDetector::doRight()
 	if (p_block->B.y >= image.cols - 2 && p_block->C.y >= image.cols - 2)
 		return;
 
-	const int ROI_WIDTH = 76;
+	const int ROI_WIDTH = 40;
 	const int ROI_HEIGHT = 71;
 	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
@@ -340,7 +343,8 @@ void BlockEdgeSimilarDetector::doRight()
 
 		cv::Mat reduceImg;
 		cv::reduce(tmpROI, reduceImg, 0, CV_REDUCE_AVG);
-		cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
+		cv::GaussianBlur(reduceImg, reduceImg, cv::Size(3, 3), 0);
+		//cv::resize(reduceImg, reduceImg, cv::Size(reduceImg.cols / 2, reduceImg.rows));//宽缩减为一半
 
 		reduceImg = reduceImg.t();
 #ifdef SAVE_IMG
@@ -415,13 +419,15 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 			diffs.push_back(diff);
 
 			cv::Mat hist1 = reduceList[i];
-			cv::Mat hist2 = reduceList[i + 2];
+			cv::Mat hist2 = reduceList[i + span];
+			double fdis = getFrechetDistance(hist1, hist2);
 			double diff1 = cv::compareHist(hist1, hist2, CV_COMP_CORREL); //越大越像
 			double diff2 = cv::compareHist(hist1, hist2, CV_COMP_CHISQR); //越小越像
 			double diff3 = cv::compareHist(hist1, hist2, CV_COMP_INTERSECT); //越大越像
 			double diff4 = cv::compareHist(hist1, hist2, CV_COMP_BHATTACHARYYA); //越小越像
 #endif
 
+			//if (fdis > 5)
 			if (diff < DIFF_THRESHOLD)
 			{
 				pointFlag[i] = 1;
@@ -431,7 +437,10 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 				stringstream ss;
 				ss << i;
 				cv::putText(drowDebugResult, ss.str(), points[i], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));
-				cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
+				ss.str("");
+				ss << i + span;
+				cv::putText(drowDebugResult, ss.str(), points[i + span], CV_FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));
+				//cv::circle(drowDebugResult, points[i], 2, cv::Scalar(0, 255, 255), -1);
 #endif
 			}
 			//else if (pointFlag[i])
@@ -473,4 +482,122 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 		}
 	}
 #endif
+}
+
+double BlockEdgeSimilarDetector::getFrechetDistance(vector<double> lineA, vector<double> lineB)
+{
+	int lineASize = lineA.size();
+	int lineBSize = lineB.size();
+
+	double dist = 100000;
+	if (lineBSize > lineASize)
+		return dist;
+
+	vector<double> tmpDists;
+	//计算初始距离
+	double tmpDist = -1;
+	//左移、右移N次距离
+	for (int offset = -2; offset < 2; offset++)
+	{
+		tmpDist = -1;
+		int x2 = offset;
+		for (int x1 = 0; x1 < lineASize; x1++)
+		{
+			if (x2 >(lineBSize - 1))
+				break;
+			if (x2 < 0)
+			{
+				x2++;
+				continue;
+			}
+			double y1 = (double)lineA[x1];
+			double y2 = (double)lineB[x2];
+			double thisTurnDist = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+			if (tmpDist < thisTurnDist)//保存每轮的最大值
+				tmpDist = thisTurnDist;
+			x2++;
+		}
+		if (tmpDist != -1)
+			tmpDists.push_back(tmpDist);
+		else if (tmpDist == 0)
+		{
+			return 0;
+		}
+	}
+	for (int i = 0; i < tmpDists.size(); i++)//返回最大值数组中的最小值即是距离
+	{
+		if (dist > tmpDists[i])
+			dist = tmpDists[i];
+	}
+	return dist;
+}
+double BlockEdgeSimilarDetector::getFrechetDistance(cv::Mat lineA, cv::Mat lineB)
+{
+	int lineASize = lineA.rows;
+	int lineBSize = lineB.rows;
+	if (lineA.rows == 1 && lineB.rows == 1)
+	{
+		lineASize = lineA.cols;
+		lineBSize = lineB.cols;
+	}
+	else if (lineA.cols == 1 && lineB.cols == 1)
+	{
+
+	}
+	else
+	{
+		return 100000;
+	}
+
+	double dist = 100000;
+	if (lineBSize > lineASize)
+		return dist;
+
+	vector<double> tmpDists;
+	//计算初始距离
+	double tmpDist = -1;
+	//左移、右移N次距离
+	for (int offset = 0; offset < 10; offset++)
+	{
+		tmpDist = -1;
+		int x2 = offset;
+		for (int x1 = 0; x1 < lineASize; x1++)
+		{
+			if (x2 >(lineBSize - 1))
+				break;
+			if (x2 < 0)
+			{
+				x2++;
+				continue;
+			}
+			double y1 = 0;//(double)lineA.ptr<double>(x1)[0];
+			double y2 = 0;//(double)lineB.ptr<double>(x2)[0];
+			if (lineA.rows == 1 && lineB.rows == 1)
+			{
+				y1 = (float)lineA.ptr<float>(0)[x1];
+				y2 = (float)lineB.ptr<float>(0)[x2];
+			}
+			else
+			{
+				y1 = (float)lineA.ptr<float>(x1)[0];
+				y2 = (float)lineB.ptr<float>(x2)[0];
+			}
+			double thisTurnDist = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+			if (tmpDist < thisTurnDist)//保存每轮的最大值
+				tmpDist = thisTurnDist;
+			x2++;
+		}
+		if (tmpDist != -1)
+			tmpDists.push_back(tmpDist);
+		else if (tmpDist == 0)
+		{
+			return 0;
+		}
+	}
+	for (int i = 0; i < tmpDists.size(); i++)//返回最大值数组中的最小值即是距离
+	{
+		if (dist > tmpDists[i])
+			dist = tmpDists[i];
+	}
+	return dist;
 }
