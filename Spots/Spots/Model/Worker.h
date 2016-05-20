@@ -50,6 +50,8 @@ public:
 	double BlockEdgeDetector_FAULTS_SPAN = 4;		//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
 	double BlockEdgeDetector_FAULTS_COUNT = 5;		//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
+	/**************内部参数****************/
+	int Pretreatment_Enable = 1;
 
 	/**************分级参数*************/
 

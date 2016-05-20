@@ -174,6 +174,11 @@ void ControllerModel::ResetParameter()
 	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD", this->BlockEdgeLineDetector_LENGTH_THRESHOD);
 	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD", this->BlockEdgeLineDetector_DEEP_THRESHOD);
 
+	/**************内部参数****************/
+	int _Pretreatment_Enable = 1;
+	SettingHelper::GetKeyInt("SURFACE", "Pretreatment_Enable", _BlockEdgeDetector_Enable);
+	this->Pretreatment_Enable = _Pretreatment_Enable;
+
 	/**************分类参数****************/
 	//缺边 长
 	SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_A", this->Classify_EDGE_SINGLE_LENGTH_A);
@@ -242,6 +247,8 @@ void ControllerModel::ResetParameter()
 			w->BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
 			w->BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
 			w->BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
+
+			w->Pretreatment_Enable = Pretreatment_Enable;
 
 
 			/**************分级参数*************/

@@ -16,6 +16,7 @@
 #include "SpotsSystemSetDlg.h"
 #include "SpotsEdgeParameterSetDlg.h"
 #include "SpotsClassifySet.h"
+#include "SpotsSurfaceParaSetDlg.h"
 
 
 
@@ -47,6 +48,7 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnBtnMenuEdgeset)
 	ON_COMMAND(ID_32778, &CSpotsMainDlg::OnMenuClassiySetClick)
 	ON_WM_SIZE()
+	ON_COMMAND(ID_32775, &CSpotsMainDlg::OnSurfaceParaSet)
 END_MESSAGE_MAP()
 
 
@@ -546,7 +548,18 @@ void CSpotsMainDlg::OnMenuClassiySetClick()
 	CSpotsClassifySet m;
 	if (m.DoModal() == IDOK)
 	{
+		// ¿ØÖÆÆ÷
+		p_contrller->ResetParameter();
+	}
+}
 
+void CSpotsMainDlg::OnSurfaceParaSet()
+{
+	SpotsSurfaceParaSetDlg m;
+	if (m.DoModal() == IDOK)
+	{
+		// ¿ØÖÆÆ÷
+		p_contrller->ResetParameter();
 	}
 }
 
@@ -590,3 +603,4 @@ void CSpotsMainDlg::OnSize(UINT nType, int cx, int cy)
 		}
 	}
 }
+

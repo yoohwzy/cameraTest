@@ -183,6 +183,9 @@
     <ClInclude Include="Algorithm\BlockEdgeSimilarDetector.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="UI\SpotsSurfaceParaSetDlg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="Algorithm\BlockEdgeSimilarDetector.cpp">
       <Filter>Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\SpotsSurfaceParaSetDlg.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

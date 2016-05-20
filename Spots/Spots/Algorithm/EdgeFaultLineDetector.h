@@ -39,7 +39,7 @@ public:
 
 
 	//parameter
-	int BINARY_THRESHOD = 25;//边界确定阈值
+	int BINARY_THRESHOD = 50;//边界确定阈值
 	int LENGTH_THRESHOD = 10;//崩边长度要超过这个
 	int DEEP_THRESHOD = 10;//进边深度要超过这个
 private:

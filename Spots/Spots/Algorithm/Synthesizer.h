@@ -51,6 +51,9 @@ public:
 	int BlockEdgeLineDetector_BINARY_THRESHOD = 5;	//二值化阈值
 	int BlockEdgeLineDetector_LENGTH_THRESHOD = 5;	//超过这个长度才认为是缺陷（pix）
 	int BlockEdgeLineDetector_DEEP_THRESHOD = 5;	//超过这个深度才认为是缺陷（pix）
+
+
+	int Pretreatment_Enable = 1;
 private:
 
 

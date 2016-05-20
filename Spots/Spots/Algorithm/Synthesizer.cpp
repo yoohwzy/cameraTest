@@ -52,7 +52,7 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	}
 
 	//表面缺陷
-	//detectInner(grayImg);
+	detectInner(grayImg);
 	return Status::TypeA;
 }
 
@@ -143,22 +143,25 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 //内部缺陷检测
 Synthesizer::_Status Synthesizer::detectInner(cv::Mat grayImg)
 {
-	stringstream ss;
-	double t = (double)cv::getTickCount();
-
-	//瓷砖内部缺陷检测
-	ss << "瓷砖内部缺陷检测 开始" << endl;
-	Pretreatment p;
-	p.pretreatment(grayImg, p_block, &faults);
-
-	if (MFCConsole::IsOpened)
+	if (Pretreatment_Enable)
 	{
-		ss << SN << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
-		ss << SN << " " << "内部有凹点：" << faults.Holes.size() << endl;
-		ss << "瓷砖内部缺陷检测 结束" << endl;
-		t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-		ss << SN << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
-		MFCConsole::Output(ss.str());
+		stringstream ss;
+		double t = (double)cv::getTickCount();
+
+		//瓷砖内部缺陷检测
+		ss << "瓷砖内部缺陷检测 开始" << endl;
+		Pretreatment p;
+		p.pretreatment(grayImg, p_block, &faults);
+
+		if (MFCConsole::IsOpened)
+		{
+			ss << SN << " " << "内部有划痕：" << faults.Scratchs.size() << endl;
+			ss << SN << " " << "内部有凹点：" << faults.Holes.size() << endl;
+			ss << "瓷砖内部缺陷检测 结束" << endl;
+			t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+			ss << SN << " " << "内部缺陷检测：" << t << "  End at:" << (double)cv::getTickCount() / cv::getTickFrequency() << endl;
+			MFCConsole::Output(ss.str());
+		}
 	}
 	return _Status::_NEXT;
 }

@@ -197,7 +197,8 @@ public:
 	int BlockEdgeLineDetector_LENGTH_THRESHOD = 5;	//超过这个长度才认为是缺陷（pix）
 	int BlockEdgeLineDetector_DEEP_THRESHOD = 5;	//超过这个深度才认为是缺陷（pix）
 
-
+	/**************内部参数****************/
+	int Pretreatment_Enable = 1;
 
 	/**************分级参数*************/
 

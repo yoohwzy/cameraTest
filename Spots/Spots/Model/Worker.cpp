@@ -52,7 +52,8 @@ void Worker::work()
 	s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
 	s.BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
-	s.BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+
+	s.Pretreatment_Enable = Pretreatment_Enable;
 
 	Synthesizer::Status status = s.Run(grayImg);
 	

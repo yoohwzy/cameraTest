@@ -109,4 +109,5 @@ public:
 	afx_msg void OnMenu_OPEN_SYS_SET_DLG();
 	afx_msg void OnBtnMenuEdgeset();
 	afx_msg void OnMenuClassiySetClick();
+	afx_msg void OnSurfaceParaSet();
 };

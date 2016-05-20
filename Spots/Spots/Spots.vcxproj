@@ -149,6 +149,7 @@
     <ClInclude Include="UI\SpotsClassifySet.h" />
     <ClInclude Include="UI\SpotsEdgeParameterSetDlg.h" />
     <ClInclude Include="UI\SpotsMainDlg.h" />
+    <ClInclude Include="UI\SpotsSurfaceParaSetDlg.h" />
     <ClInclude Include="UI\SpotsSystemSetDlg.h" />
     <ClInclude Include="View\SpotsMainView.h" />
   </ItemGroup>
@@ -184,6 +185,7 @@
     <ClCompile Include="UI\SpotsClassifySet.cpp" />
     <ClCompile Include="UI\SpotsEdgeParameterSetDlg.cpp" />
     <ClCompile Include="UI\SpotsMainDlg.cpp" />
+    <ClCompile Include="UI\SpotsSurfaceParaSetDlg.cpp" />
     <ClCompile Include="UI\SpotsSystemSetDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
