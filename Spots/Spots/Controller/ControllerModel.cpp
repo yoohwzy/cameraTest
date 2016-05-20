@@ -176,7 +176,7 @@ void ControllerModel::ResetParameter()
 
 	/**************内部参数****************/
 	int _Pretreatment_Enable = 1;
-	SettingHelper::GetKeyInt("SURFACE", "Pretreatment_Enable", _BlockEdgeDetector_Enable);
+	SettingHelper::GetKeyInt("SURFACE", "Pretreatment_Enable", _Pretreatment_Enable);
 	this->Pretreatment_Enable = _Pretreatment_Enable;
 
 	/**************分类参数****************/
