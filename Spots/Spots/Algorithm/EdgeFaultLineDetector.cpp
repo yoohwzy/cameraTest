@@ -15,9 +15,9 @@ void EdgeFaultLineDetector::Run()
 	drowDebugResult = image.clone();
 	if (drowDebugResult.channels() == 1)
 		cv::cvtColor(drowDebugResult, drowDebugResult, CV_GRAY2BGR);
-	//doUp();
+	doUp();
 	//doDown(); 
-	doLeft();
+	//doLeft();
 	//doRight();
 #else
 	thread t1 = thread(std::mem_fn(&EdgeFaultLineDetector::doUp), this);
@@ -54,18 +54,22 @@ void EdgeFaultLineDetector::doUp()
 		endX = image.cols - 1;
 
 	vector<Faults::BrokenEdge> vbs;
+	cv::Mat deeps(1, endX - startX + 1, CV_16U, cv::Scalar(0));
 	//细找崩边，统计崩边长度
 	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
-	vector<int> deeps;
 	for (int point_x = startX; point_x <= endX; point_x++)
 	{
 		int point_y = p_block->GetPonintByX(point_x, &line).y;
 		if (point_y < 0 || point_y >= image.rows)
 			continue;
 		int deep = getDeepUp(cv::Point(point_x, point_y));
-		deeps.push_back(deep);
+		deeps.ptr<ushort>(0)[point_x - startX] = deep;
+#ifdef EFLD_OUTPUT_DEBUG_INFO
+		drowDebugResult.ptr<uchar>(point_y + deep)[(point_x)* 3 + 2] = 255;
+#endif
 	}
-	//processVBS(vbs, 1);
+	
+	int x = 1;
 }
 void EdgeFaultLineDetector::doDown()
 {
@@ -130,7 +134,7 @@ void EdgeFaultLineDetector::doLeft()
 		endY = image.rows - 1;
 
 	vector<Faults::BrokenEdge> vbs;
-	cv::Mat deeps(endY - startY, 1, CV_16U, cv::Scalar(0));
+	cv::Mat deeps(endY - startY + 1, 1, CV_16U, cv::Scalar(0));
 	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
 	for (int point_y = startY; point_y <= endY; point_y++)
 	{
@@ -139,6 +143,48 @@ void EdgeFaultLineDetector::doLeft()
 			continue;
 		int deep = getDeepLeft(cv::Point(point_x, point_y));
 		deeps.ptr<ushort>(point_y - startY)[0] = deep;
+#ifdef EFLD_OUTPUT_DEBUG_INFO
+		drowDebugResult.ptr<uchar>(point_y)[(point_x + deep) * 3 + 2] = 255;
+#endif
+	}
+	cv::Mat tmp_m, tmp_sd;
+	double m = 0, sd = 0;
+	m = cv::mean(deeps)[0];
+	cout << "Mean: " << m << endl;
+
+	meanStdDev(deeps, tmp_m, tmp_sd);
+	m = tmp_m.at<double>(0, 0);
+	sd = tmp_sd.at<double>(0, 0);
+
+	int i = 1;
+}
+void EdgeFaultLineDetector::doRight()
+{
+	Block::Line line = p_block->RightLine;
+	int startY = p_block->B.y + 5;
+	if (startY < 0)
+		startY = 0;
+	int endY = p_block->C.y - 5;
+	if (endY >= image.rows)
+		endY = image.rows - 1;
+
+	vector<Faults::BrokenEdge> vbs;
+	//细找崩边，统计崩边长度
+	cv::Mat deeps(endY - startY + 1, 1, CV_16U, cv::Scalar(0));
+	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
+
+	for (int point_y = startY; point_y <= endY; point_y++)
+	{
+		int point_x = p_block->GetPonintByY(point_y, &line).x;
+		if (point_x < 0 || point_x >= image.cols)
+			continue;
+		int deep = getDeepRight(cv::Point(point_x, point_y));
+		deeps.ptr<ushort>(point_y - startY)[0] = deep;
+#ifdef EFLD_OUTPUT_DEBUG_INFO
+		drowDebugResult.ptr<uchar>(point_y)[(point_x - deep) * 3 + 2] = 255;
+#endif
+		//		if (deep > maxDeepPix) maxDeepPix = deep;
+//		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
 //		if (deep > DEEP_THRESHOD)
 //		{
 //#ifdef EFLD_OUTPUT_DEBUG_INFO
@@ -167,6 +213,7 @@ void EdgeFaultLineDetector::doLeft()
 //			brokenEdgeIndex = -1;
 //		}
 	}
+
 	cv::Mat tmp_m, tmp_sd;
 	double m = 0, sd = 0;
 	m = cv::mean(deeps)[0];
@@ -175,60 +222,6 @@ void EdgeFaultLineDetector::doLeft()
 	meanStdDev(deeps, tmp_m, tmp_sd);
 	m = tmp_m.at<double>(0, 0);
 	sd = tmp_sd.at<double>(0, 0);
-
-	int i = 1;
-}
-void EdgeFaultLineDetector::doRight()
-{
-	Block::Line line = p_block->RightLine;
-	int startY = p_block->B.y + 5;
-	if (startY < 0)
-		startY = 0;
-	int endY = p_block->C.y - 5;
-	if (endY >= image.rows)
-		endY = image.rows - 1;
-
-	vector<Faults::BrokenEdge> vbs;
-	//细找崩边，统计崩边长度
-	int brokenEdgeIndex = -1;//用于表示是否正在一个崩边中，为-1时表示不再，否则为 p_faults->BrokenEdges的索引
-
-	for (int point_y = startY; point_y <= endY; point_y++)
-	{
-		int point_x = p_block->GetPonintByY(point_y, &line).x;
-		if (point_x < 0 || point_x >= image.cols)
-			continue;
-		int deep = getDeepRight(cv::Point(point_x, point_y));
-		if (deep > maxDeepPix) maxDeepPix = deep;
-		if (deep > 0 && deep < minDeepPix) minDeepPix = deep;
-		if (deep > DEEP_THRESHOD)
-		{
-#ifdef EFLD_OUTPUT_DEBUG_INFO
-			drowDebugResult.ptr<uchar>(point_y)[point_x * 3 + 2] = 255;
-#endif
-			if (brokenEdgeIndex == -1)
-			{
-				Faults::BrokenEdge b;
-				b.deep = deep;
-				b.length = 1;
-				b.position = cv::Point(point_x, point_y);
-				vbs.push_back(b);
-				brokenEdgeIndex = vbs.size() - 1;
-			}
-			else
-			{
-				if (vbs[brokenEdgeIndex].deep < deep)
-					vbs[brokenEdgeIndex].deep = deep;
-				vbs[brokenEdgeIndex].length++;
-				//vbs[brokenEdgeIndex].position = cv::Point(point_x - vbs[brokenEdgeIndex].length / 2, point_y);
-			}
-		}
-		else
-		{
-			//一个崩边缺陷的结束
-			brokenEdgeIndex = -1;
-		}
-	}
-	processVBS(vbs, 0);
 }
 
 int EdgeFaultLineDetector::getDeepUp(cv::Point p)
@@ -242,7 +235,7 @@ int EdgeFaultLineDetector::getDeepUp(cv::Point p)
 		return 0;
 
 	int deep = 0;
-	for (; deep < 50; deep++)
+	for (; deep < 100; deep++)
 	{
 		if (point_y + deep + 4 >= image.rows)
 			break;

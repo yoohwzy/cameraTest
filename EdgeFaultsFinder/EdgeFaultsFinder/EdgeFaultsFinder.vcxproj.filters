@@ -80,5 +80,8 @@
     <ClCompile Include="Algorithm\BlockEdgeLineDetector.cpp">
       <Filter>Algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="Class\Debug\MFCConsole.cpp">
+      <Filter>Class\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

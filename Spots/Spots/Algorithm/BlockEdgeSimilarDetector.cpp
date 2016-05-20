@@ -55,7 +55,7 @@ void BlockEdgeSimilarDetector::doUp()
 
 
 	const int ROI_WIDTH = 51;
-	const int ROI_HEIGHT = 40;
+	const int ROI_HEIGHT = 30;
 	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
@@ -413,13 +413,13 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 		const int span = 1;//相似度计算间隔
 		for (int i = 1; i < reduceList.size() - 1 - span; i++)
 		{
-			double diff = cv::compareHist(reduceList[i], reduceList[i + span], CV_COMP_CORREL); //越大越像
+			cv::Mat hist1 = reduceList[i];
+			cv::Mat hist2 = reduceList[i + span];
+			double diff = getFrechetDistance(hist1, hist2); //越大越像
 
 #ifdef BED_OUTPUT_DEBUG_INFO
 			diffs.push_back(diff);
 
-			cv::Mat hist1 = reduceList[i];
-			cv::Mat hist2 = reduceList[i + span];
 			double fdis = getFrechetDistance(hist1, hist2);
 			double diff1 = cv::compareHist(hist1, hist2, CV_COMP_CORREL); //越大越像
 			double diff2 = cv::compareHist(hist1, hist2, CV_COMP_CHISQR); //越小越像
@@ -427,7 +427,7 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 			double diff4 = cv::compareHist(hist1, hist2, CV_COMP_BHATTACHARYYA); //越小越像
 #endif
 
-			if (fdis > 20)
+			if (diff > 18)
 			//if (diff < DIFF_THRESHOLD)
 			{
 				pointFlag[i] = 1;

@@ -6,8 +6,8 @@
 
 #include <thread>
 
-#define SAVE_IMG
-#define BED_OUTPUT_DEBUG_INFO 1
+//#define SAVE_IMG
+//#define BED_OUTPUT_DEBUG_INFO 1
 
 //根据相似度计算边缘是否有缺陷
 class BlockEdgeSimilarDetector

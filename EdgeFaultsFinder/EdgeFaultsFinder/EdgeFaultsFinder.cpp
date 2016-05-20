@@ -2,15 +2,15 @@
 //
 
 #include "stdafx.h"
-#include <opencv2\opencv.hpp>
+#include <opencv2//opencv.hpp>
 
-#include "Algorithm\Base\Faults.h"
-#include "Algorithm\Base\Block.h"
+#include "Algorithm//Base//Faults.h"
+#include "Algorithm//Base//Block.h"
 
-#include "Algorithm\BlockLocalizer.h"
-#include "Algorithm\BlockEdgeDetector.h"
-//#include "Algorithm\BlockEdgeDetectorT.h"
-#include "Algorithm\BlockEdgeLineDetector.h"
+#include "Algorithm//BlockLocalizer.h"
+#include "Algorithm//BlockEdgeDetector.h"
+#include "Algorithm//BlockEdgeDetectorT.h"
+#include "Algorithm//BlockEdgeLineDetector.h"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ void main(int argc, _TCHAR* argv[])
 	
 		//cv::Mat img = cv::imread(ss.str(), 0);
 		//cv::Mat img = cv::imread("D://16_o原图7.jpg", 0);
-		cv::Mat img = cv::imread("D://出差//2015.12.29//14凹点釉下杂质//12_o原图漏检左边沿凹点.jpg", 0);
+		cv::Mat img = cv::imread("D://项目资料//线阵样张//2016_05//13 磨边后的缺陷砖//2016_05_13__09_07_15_95凹点012.jpg", 0);
 		//cv::Mat img = cv::imread("D://出差//2015.12.31//1 边上//2_o原图.jpg", 0);
 
 		if (img.rows == 0)
@@ -102,6 +102,8 @@ void main(int argc, _TCHAR* argv[])
 		t = cv::getTickCount();
 
 
+		BlockEdgeDetectorT BEDT = BlockEdgeDetectorT(img, &block, &faults);
+		BEDT.Run();
 
 
 		cv::cvtColor(img, img, CV_GRAY2BGR);

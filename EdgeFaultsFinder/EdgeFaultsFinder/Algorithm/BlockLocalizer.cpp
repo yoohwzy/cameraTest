@@ -1,5 +1,5 @@
 #include "BlockLocalizer.h"
-#include <Class\Debug\MFCConsole.h>
+#include "../Class/Debug/MFCConsole.h"
 
 
 BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)

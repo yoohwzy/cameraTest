@@ -42,8 +42,8 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 		return status == _Status::_NotFound ? Status::NotFound : Status::Rejected; 
 	}
 	// ‘—ÈÀ„∑®
-	//EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
-	//efld.Run();
+	EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
+	efld.Run();
 	// ±ﬂ‘µ»±œ›
 	status = detectEdge(grayImg);
 	if (status != Synthesizer::_Status::_NEXT)
