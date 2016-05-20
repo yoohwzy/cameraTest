@@ -504,10 +504,11 @@ void statistics_gray(int _width, int _height, const MatND &hist, int _step)
 			pixelmaxloc = i;
 		}
 	}
+	if (pixelmaxloc > 10)//众数不能在过暗部分
 	statistics_list[_step + 10] = pixelmaxloc;//第一个为中位数第二个为众数
 }
 
-
+//寻找中位数辅助函数
 int partition(vector<int> &array, int left, int right)
 {
 	int pos = right;
@@ -566,9 +567,9 @@ int getMidIndex(vector<int> &array, int size)
 //统计数据归一化
 void statis_nol(vector<int> &_statis)
 {
-	statistics_result[0] = getMidIndex(_statis, 10);//算出总的中位数
+	statistics_result[0] = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
 	double sum = std::accumulate(std::begin(_statis)+10, std::end(_statis), 0.0);
-	statistics_result[1] =int(2*sum / double(_statis.size())+0.5);//算出总的众数
+	statistics_result[1] =int(2*sum / double(_statis.size())+0.5);//算出总的众数，各部分众数的平均值
 }
 
 //局部二值化的阈值选取
@@ -946,7 +947,7 @@ void Pretreatment::linedetect()
 
 void Pretreatment::line2preprocess()
 {
-	resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);
+	resize(original_Img_D, original_Img_L, Size(original_Img_D.cols / 3, original_Img_D.rows / 3), 0, 0, INTER_AREA);//截取后的MidImg大小原图缩小
 	resize(MidImg, LMidImg, Size(MidImg.cols / 3, MidImg.rows / 3), 0, 0, INTER_AREA);
 }
 
