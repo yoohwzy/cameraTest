@@ -11,13 +11,11 @@ static const int STAMP_WIDTH = 30;
 static const int  STAMP_HEIGHT = 30;
 static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
 static const int kItemsToProduce = 10;   // 生产者生产的总数
-static const int block_num = 10;//10个区域
+const Singleton *Singleton::m_Instance = new Singleton();
 
 int flagdata = 0;//数据初始化标识
 Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 vector<Rect> needContour;
-vector<int> statistics_list(2 * block_num,50);//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
-vector<int> statistics_result(2,50);//上一幅图的结果
 static CvKNearest knn;
 Rect recImg = Rect(Point(0, 0), Point(0, 0));
 
@@ -490,6 +488,9 @@ void Pretreatment::Handwriting(const Mat &_img)
 //局部数据统计
 void statistics_gray(int _width, int _height, const MatND &hist, int _step)
 {
+	Singleton *singletonObj = Singleton::GetInstance();
+	int &Midnum = singletonObj->Getvector()[_step];//中位数
+	int &Modnum = singletonObj->Getvector()[_step+10];//众数
 	int pixelSum = _width * _height, pixelmaxloc = 0;
 	float pixelcumu = 0, pixelmax = 0, pixelnow = 0;
 	for (int i = 0; i < 256; ++i)
@@ -497,7 +498,7 @@ void statistics_gray(int _width, int _height, const MatND &hist, int _step)
 		pixelnow = hist.at<float>(i);
 		pixelcumu += pixelnow;
 		if (2 * pixelcumu > pixelSum && 2 * (pixelcumu - pixelnow) < pixelSum)
-			statistics_list[_step] = i;
+			Midnum = i;
 		if (pixelmax < pixelnow&&i > 2)
 		{
 			pixelmax = pixelnow;
@@ -505,7 +506,7 @@ void statistics_gray(int _width, int _height, const MatND &hist, int _step)
 		}
 	}
 	if (pixelmaxloc > 10)//众数不能在过暗部分
-	statistics_list[_step + 10] = pixelmaxloc;//第一个为中位数第二个为众数
+	Modnum = pixelmaxloc;//第一个为中位数第二个为众数
 }
 
 //寻找中位数辅助函数
@@ -567,9 +568,11 @@ int getMidIndex(vector<int> &array, int size)
 //统计数据归一化
 void statis_nol(vector<int> &_statis)
 {
-	statistics_result[0] = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
+	Singleton *singletonObj = Singleton::GetInstance();
+	vector<int> &result = singletonObj->Getresult();
+	result[0] = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
 	double sum = std::accumulate(std::begin(_statis)+10, std::end(_statis), 0.0);
-	statistics_result[1] =int(2*sum / double(_statis.size())+0.5);//算出总的众数，各部分众数的平均值
+	result[1] = int(2 * sum / double(_statis.size()) + 0.5);//算出总的众数，各部分众数的平均值
 }
 
 //局部二值化的阈值选取
@@ -960,6 +963,8 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 {
 
 	_faults = faults;
+	Singleton *singletonObj = Singleton::GetInstance();
+	vector<int> &result1 = singletonObj->Getresult();
 
 	if (image.channels() == 3)//判断是否为彩图
 		cvtColor(image, image, CV_RGB2GRAY);
@@ -1002,7 +1007,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	line.join();
 
 	//数据统计整理汇总
-	statis_nol(statistics_list);
+	statis_nol(singletonObj->Getvector());
 
 	//回收内存
 	vector<Rect>().swap(needContour);
