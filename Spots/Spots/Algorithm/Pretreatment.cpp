@@ -569,10 +569,21 @@ int getMidIndex(vector<int> &array, int size)
 void statis_nol(vector<int> &_statis)
 {
 	Singleton *singletonObj = Singleton::GetInstance();
+	int minv, maxv = 0;
 	vector<int> &result = singletonObj->Getresult();
-	result[0] = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
+	minv = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
 	double sum = std::accumulate(std::begin(_statis)+10, std::end(_statis), 0.0);
-	result[1] = int(2 * sum / double(_statis.size()) + 0.5);//算出总的众数，各部分众数的平均值
+	maxv = int(2 * sum / double(_statis.size()) + 0.5);//算出总的众数，各部分众数的平均值
+	if (minv < maxv)
+	{
+		result[0] = minv;
+		result[1] = maxv;
+	}
+	else
+	{
+		result[1] = minv;
+		result[0] = maxv;
+	}
 }
 
 //局部二值化的阈值选取
@@ -798,29 +809,32 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 	Warehousecontours.pop_back();
 	Point locationpoint = Point(CneedContours.back().x, CneedContours.back().y);
 	CneedContours.pop_back();
+	Singleton *singletonObj = Singleton::GetInstance();
 	for (size_t i = 0; i < CneedContours.size(); ++i)
 	{
-		/*cout << i << endl;*/
 		Rect box = CneedContours[i];
 		Point pt1 = Point(box.x, box.y);
 		Point pt2 = Point(box.x + box.width, box.y + box.height);
 
 		Mat work_boxImg = original_Img_D(Rect(pt1 + locationpoint, pt2 + locationpoint));
+		int mean_box = mean(work_boxImg)[0];
+		if (mean_box < singletonObj->OffervectorMin())
+		{
+			if (!defect_YoN(work_boxImg))
+				continue;
+		}
+		else if (mean_box > singletonObj->OffervectorMax())
+		{
+			Faults::Hole hole;
+			hole.position.x = 0.5*(pt1.x + pt2.x) + recImg.x + locationpoint.x;//坐标变换回原图
+			hole.position.y = 0.5*(pt1.y + pt2.y) + recImg.y + locationpoint.y;
+			if (box.height > box.width)
+				hole.diameter = box.height;
+			else
+				hole.diameter = box.height;
 
-		
-		if (!defect_YoN(work_boxImg))
-			continue;
-		
-		Faults::Hole hole;
-		hole.position.x = 0.5*(pt1.x + pt2.x) + recImg.x + locationpoint.x;//坐标变换回原图
-		hole.position.y = 0.5*(pt1.y + pt2.y) + recImg.y + locationpoint.y;
-		if (box.height > box.width)
-			hole.diameter = box.height;
-		else
-			hole.diameter = box.height;
-		
-		_faults->Holes.push_back(hole);
-
+			_faults->Holes.push_back(hole);
+		}
 	}
 	(ir->read_position)++; // 读取位置后移
 
@@ -873,7 +887,7 @@ void Pretreatment::ProducerTask() // 生产者任务
 			cv::findContours(ThImgROI, decontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 			for (size_t k = 0; k < decontours.size(); ++k)
 			{
-				if (decontours[k].size() > 8)
+				if (decontours[k].size() > 6)
 				{
 					Rect decontours_rect = boundingRect(decontours[k]);
 					needContour.push_back(decontours_rect);

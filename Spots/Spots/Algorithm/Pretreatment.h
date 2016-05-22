@@ -110,17 +110,17 @@ public:
 	{
 		return statistics_result;
 	}
-	int OffervectorMid()//返回总的中值
+	int OffervectorMin()//返回总的中值
 	{
 		return statistics_result[0];
 	}
-	int OffervectorMod()//返回总的众数
+	int OffervectorMax()//返回总的众数
 	{
 		return statistics_result[1];
 	}
 
 private:
-	Singleton(){ block_num = 10; statistics_list.resize(2 * block_num, 50); statistics_result.resize(2, 50); }//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
+	Singleton(){ block_num = 10; statistics_list.resize(2 * block_num, 50); statistics_result.resize(2, 52); }//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
 	static const Singleton *m_Instance;
 	int block_num;
 	vector<int> statistics_list;

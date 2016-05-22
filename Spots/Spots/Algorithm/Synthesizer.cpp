@@ -33,18 +33,18 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 
 	//定位
 	int status = positioning(grayImg);
-	if (status != Synthesizer::_Status::_NEXT)
+	/*if (status != Synthesizer::_Status::_NEXT)
 	{
 		return status == _Status::_NotFound ? Status::NotFound : Status::Rejected; 
-	}
+	}*/
 
 
 	// 边缘缺陷
 	status = detectEdge(grayImg);
-	if (status != Synthesizer::_Status::_NEXT)
+	/*if (status != Synthesizer::_Status::_NEXT)
 	{
 		return Status::Rejected;
-	}
+	}*/
 
 	//表面缺陷
 	detectInner(grayImg);
