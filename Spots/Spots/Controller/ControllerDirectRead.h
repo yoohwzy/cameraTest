@@ -39,6 +39,7 @@ public:
 	void TiggerStartWatch() override;
 	void TiggerStopWatch() override;
 
+	//拍摄的长度，多少行
 	const int LENGTH = 6000;
 private:
 	E2VCameraDirectRead *p_e2v = NULL;

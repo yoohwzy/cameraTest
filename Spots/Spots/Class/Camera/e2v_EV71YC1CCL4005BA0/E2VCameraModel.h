@@ -39,7 +39,7 @@ public:
 	//虚函数，待子类实现
 	virtual cv::Mat GetImage(){ return cv::Mat(); };
 
-	bool ReInitFg();//尝试重新初始化
+	bool ReInitFg();//尝试重新初始化，配置修改后调用本方法
 	bool HasBeenInited = false;		//是否已完成初始化
 
 protected:

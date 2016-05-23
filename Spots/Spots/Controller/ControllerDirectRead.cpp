@@ -3,9 +3,9 @@
 #endif
 #include "ControllerDirectRead.h"
 #include <Class/Setting/SettingHelper.h>
-#include <Class\Helper\StringHelper.h>
-#include <shlwapi.h>
+#include <Class/Helper/StringHelper.h>
 #include <Class/Debug/MFCConsole.h>
+#include <shlwapi.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
 void ControllerDirectRead::Init()
@@ -178,7 +178,8 @@ void ControllerDirectRead::captureAndProcessThread()
 {
 	captureIsRunning = true;
 	captureIndex++;
-
+	if (captureIndex > 60000)
+		captureIndex = 1;
 	if (MFCConsole::IsOpened)
 	{
 		stringstream ss;
