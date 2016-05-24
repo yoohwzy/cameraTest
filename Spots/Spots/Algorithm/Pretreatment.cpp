@@ -6,19 +6,8 @@
 using namespace cv;
 using namespace std;
 
-
-static const int STAMP_WIDTH = 30;
-static const int  STAMP_HEIGHT = 30;
-static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
-static const int kItemsToProduce = 10;   // 生产者生产的总数
 const Singleton *Singleton::m_Instance = new Singleton();
-
-int flagdata = 0;//数据初始化标识
-Mat MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
-vector<Rect> needContour;
 static CvKNearest knn;
-Rect recImg = Rect(Point(0, 0), Point(0, 0));
-
 //快速double到int类型转换
 union luai_Cast { double l_d; long l_l; };
 #define double2int(d,i) \
@@ -212,7 +201,7 @@ bool Pretreatment::defect_YoN(const Mat &_Img)
 	return int(resepone);
 }
 
-bool line_YoN(const Rect &_linesrect)
+bool Pretreatment::line_YoN(const Rect &_linesrect)
 {
 	bool flagbit = line_core(LMidImg(_linesrect));
 	if (flagbit)
@@ -879,7 +868,7 @@ void Pretreatment::ProducerTask() // 生产者任务
 			MatND histolist, histolist_r;
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);//预处理过的图获得灰度分布
 			calcHist(&original_Img_ROI, 1, &channels, Mat(), histolist_r, 1, &size, ranges);//原图获得灰度分布
-			statistics_gray(ThRect.width, ThRect.height, histolist_r, step);
+			statistics_gray(ThRect.width, ThRect.height, histolist_r, step);//局部数据统计写入
 			int OtsuV = otsuThreshold(ThRect.width, ThRect.height, MidImgROI.at<uchar>(0, 0), histolist);//找到离散灰度值导数的阈值
 			threshold(MidImgROI, ThImgROI, OtsuV, 255, 0);
 
@@ -917,6 +906,50 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 	ir->read_position = 0; // 初始化产品读取位置.
 }
 
+//待检测划痕邻近合并
+void Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect)
+{
+	int sizenum = 0;
+	for (size_t i = 0; i < _contours.size(); ++i)
+	{
+		Rect temptRect = boundingRect(_contours[i]);
+		if (_RoughRect.size() == 0)//初始化合并序列
+		{
+			sizenum = _contours[i].size();
+			_RoughRect.push_back(temptRect);
+		}
+		else
+		{
+			Rect combineRect = _RoughRect.back();//返回最后一个可能能够合并的元素
+			int core_x = abs(combineRect.x + 0.5*combineRect.width - temptRect.x - 0.5*temptRect.width);//重心x方向距离
+			int core_y = abs(combineRect.y + 0.5*combineRect.height - temptRect.y - 0.5*temptRect.height);//重心y方向距离
+			int distancesum_x = 0.5*combineRect.width + 0.5*temptRect.width;//x方向上边长和的一半
+			int distancesub_x = 0.5*abs(combineRect.width - temptRect.width);//x方向上边长差的一半
+			int distancesum_y = 0.5*combineRect.height + 0.5*temptRect.height;//y方向上边长和的一半
+			int distancesub_y = 0.5*abs(combineRect.height - temptRect.height);//y方向上边长差的一半
+			if (core_x < distancesum_x + 3 && core_y < distancesum_y + 3 && core_x>distancesub_x - 2 && core_y>distancesub_y - 2)//保证两外接矩不相离保证两外接矩不包含
+			{
+				Rect result;
+				Point Rectpoint;
+				result.x = temptRect.x < combineRect.x ? temptRect.x : combineRect.x;
+				result.y = temptRect.y < combineRect.y ? temptRect.y : combineRect.y;
+				Rectpoint.x = temptRect.x + temptRect.width > combineRect.x + combineRect.width ? temptRect.x + temptRect.width : combineRect.x + combineRect.width;
+				Rectpoint.y = temptRect.y + temptRect.height > combineRect.y + combineRect.height ? temptRect.y + temptRect.height : combineRect.y + combineRect.height;
+				result.width = Rectpoint.x - result.x;
+				result.height = Rectpoint.y - result.y;
+				_RoughRect.pop_back();
+				_RoughRect.push_back(result);
+				sizenum += _contours[i].size();
+			}
+			else
+			{
+				if (sizenum < 60)//累积小于60则不认为这个是需要的
+					_RoughRect.pop_back();
+				_RoughRect.push_back(temptRect);
+			}
+		}
+	}
+}
 
 void Pretreatment::linedetect()
 {
@@ -925,13 +958,15 @@ void Pretreatment::linedetect()
 	bitwise_xor(LMidImg, Mask_result_line, CannyImg);
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	for (size_t i = 0; i < linescontours.size(); ++i)
+	vector<Rect>linesRect;
+	Contoursmegre(linescontours, linesRect);
+	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
 		if (linescontours[i].size() > 60)
 		{
 			vector<Point> km_contours;
 			convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
-			Rect linerect = boundingRect(linescontours[i]);
+			Rect linerect = linesRect[i];
 			Point a_sy = Point(0, 0);
 			Point b_sy = Point(0, 0);
 			if (linerect.width < 20 || linerect.height < 20)
