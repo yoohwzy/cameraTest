@@ -54,7 +54,7 @@ protected:
 
 	int _width = 0;					//图像宽度
 	int _height = 0;				//图像高度
-	const int _frameHeight = 1;		//每帧高度
+	int _frameHeight = 1;		//每帧高度
 	int _nBoard = 0;				//采集卡编号
 	int _camPort = PORT_A;			//采集卡Port
 	int _colorType = CV_8U;				//采图颜色模式

@@ -6,7 +6,8 @@ E2VCameraModel::E2VCameraModel(int width, int height, int colorType, int boardID
 	_colorType = colorType;
 	_nBoard = boardID;
 	_camPort = Camport;
-
+	if (height > 1)
+		_frameHeight = height;
 	ReInitFg();
 }
 E2VCameraModel::~E2VCameraModel()
