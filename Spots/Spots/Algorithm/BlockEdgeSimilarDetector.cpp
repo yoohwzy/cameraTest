@@ -54,9 +54,9 @@ void BlockEdgeSimilarDetector::doUp()
 		return;
 
 
-	const int ROI_WIDTH = 51;
+	const int ROI_WIDTH = 50;
 	const int ROI_HEIGHT = 30;
-	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
+	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -130,15 +130,44 @@ void BlockEdgeSimilarDetector::doUp()
 	}
 	process(reduceList, points, "up");
 }
+int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
+{
+	//cv::Mat roi
+
+	//int point_x = p.x;
+	//int point_y = p.y;
+
+	//if (point_x < 0 || point_x >= image.cols)
+	//	return 0;
+	//if (point_y < 0 || point_y >= image.rows)
+	//	return 0;
+
+	//int deep = 0;
+	//for (; deep < 50; deep++)
+	//{
+	//	if (point_y + deep + 4 >= image.rows)
+	//		break;
+	//	if (image.ptr<uchar>(point_y + deep)[point_x] >= BINARY_THRESHOD &&
+	//		image.ptr<uchar>(point_y + deep + 1)[point_x] >= BINARY_THRESHOD &&
+	//		image.ptr<uchar>(point_y + deep + 2)[point_x] >= BINARY_THRESHOD &&
+	//		image.ptr<uchar>(point_y + deep + 3)[point_x] >= BINARY_THRESHOD &&
+	//		image.ptr<uchar>(point_y + deep + 4)[point_x] >= BINARY_THRESHOD
+	//		)
+	//		break;
+	//}
+	//return deep;
+
+	return 0;
+}
 void BlockEdgeSimilarDetector::doDown()
 {
 	// 如果边界直接在图像边缘上，则不进行检测。
 	if (p_block->C.y >= image.rows - 2 && p_block->D.y >= image.rows - 2)
 		return;
 
-	const int ROI_WIDTH = 51;
+	const int ROI_WIDTH = 50;
 	const int ROI_HEIGHT = 30;
-	int inc = 69;//(float)(endX - startX) / 30 + 0.5;//范围增量
+	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -224,7 +253,7 @@ void BlockEdgeSimilarDetector::doLeft()
 
 	const int ROI_WIDTH = 40;
 	const int ROI_HEIGHT = 71;
-	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	int inc = 20;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -308,7 +337,7 @@ void BlockEdgeSimilarDetector::doRight()
 
 	const int ROI_WIDTH = 40;
 	const int ROI_HEIGHT = 71;
-	int inc = 69;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	int inc = 20;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -410,7 +439,7 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 	//vector<int> errorPointsIndex;
 	if (reduceList.size() > 2)
 	{
-		const int span = 1;//相似度计算间隔
+		const int span = 2;//相似度计算间隔
 		for (int i = 1; i < reduceList.size() - 1 - span; i++)
 		{
 			cv::Mat hist1 = reduceList[i];

@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#define BL_OUTPUT_DEBUG_INFO 1
+//#define BL_OUTPUT_DEBUG_INFO 1
 
 using namespace std;
 //@description 瓷砖位置快速定位，传入预处理后的图像
@@ -41,8 +41,8 @@ public:
 
 private:
 	//parameter
-	const int COL_SPAN = 50;//x方向上定点间隔
-	const int ROW_SPAN = 50;//y方向上定点间隔
+	const int COL_SPAN = 100;//x方向上定点间隔
+	const int ROW_SPAN = 100;//y方向上定点间隔
 	const int RANGE_DEFAULT = 400;//最大搜索高度
 	const int RANGE_MINI = 100;//最小搜索高度
 

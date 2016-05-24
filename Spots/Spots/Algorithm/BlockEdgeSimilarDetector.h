@@ -53,6 +53,8 @@ private:
 	//返回最大偏差值
 
 	void doUp();
+	//获取上边进边深度
+	int getDeepUp(cv::Point);
 	void doDown();
 	void doLeft();
 	void doRight();

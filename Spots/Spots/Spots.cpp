@@ -6,6 +6,7 @@
 #include "Spots.h"
 
 #include "Controller\ControllerCycleBuffer.h"
+#include "Controller\ControllerDirectRead.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,7 +78,7 @@ BOOL CSpotsApp::InitInstance()
 	{
 		CSpotsMainDlg *dlgMain = new CSpotsMainDlg();
 		//dlgMain->Create(IDD_SPOTS_DIALOG);
-		ControllerCycleBuffer controller = ControllerCycleBuffer(dlgMain);
+		ControllerDirectRead controller = ControllerDirectRead(dlgMain);
 		m_pMainWnd = dlgMain;
 		dlgMain->DoModal();
 
