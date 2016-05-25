@@ -907,17 +907,18 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 }
 
 //待检测划痕邻近合并
-void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect)
+void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect,vector<vector<Point>> &_combinecontours)
 {
-	int sizenum = 0;
-	vector<Point2f>_RoughRotatedPoints;
+	int sizenum = 0;//初始化合并轮廓中点的数目
+	vector<Point2f>_RoughRotatedPoints;//暂存4点集
+	vector<Point> temptcontours;
 	for (size_t i = 0; i < _contours.size(); ++i)
 	{
 		RotatedRect testbox = minAreaRect(_contours[i]);
 		Point2f vecbox[4];
 		testbox.points(vecbox);
-		Rect temptRect = boundingRect(_contours[i]);
-		Mat temptImg = LMidImg(Rect(temptRect));
+		/*Rect temptRect = boundingRect(_contours[i]);
+		Mat temptImg = LMidImg(Rect(temptRect));//测试用*/
 
 		if (i == 0)//初始化
 		{
@@ -925,6 +926,7 @@ void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Re
 			_RoughRotatedPoints.push_back(vecbox[1]);
 			_RoughRotatedPoints.push_back(vecbox[2]);
 			_RoughRotatedPoints.push_back(vecbox[3]);
+			temptcontours.insert(temptcontours.end(), _contours[i].begin(), _contours[i].end());
 			continue;
 		}
 		else
@@ -942,6 +944,7 @@ void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Re
 				_RoughRotatedPoints.push_back(vecbox[1]);
 				_RoughRotatedPoints.push_back(vecbox[2]);
 				_RoughRotatedPoints.push_back(vecbox[3]);
+				temptcontours.insert(temptcontours.end(), _contours[i].begin(), _contours[i].end());
 
 			}
 			else if (max_distance < 0 && max_distance >= -5)//近距离相离
@@ -950,20 +953,24 @@ void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Re
 				_RoughRotatedPoints.push_back(vecbox[1]);
 				_RoughRotatedPoints.push_back(vecbox[2]);
 				_RoughRotatedPoints.push_back(vecbox[3]);
+				temptcontours.insert(temptcontours.end(), _contours[i].begin(), _contours[i].end());
 			}
 			else
 			{
-				if (sizenum >= 60)
+				if (sizenum >= 60)//筛选
 				{
 					Rect resultRect = boundingRect(_RoughRotatedPoints);
 					_RoughRect.push_back(resultRect);
+					_combinecontours.push_back(temptcontours);
 				}
 				_RoughRotatedPoints.clear();//暂存点集清空
+				temptcontours.clear();//暂存轮廓集清空
 				sizenum = 0;//累积轮廓大小清零
 				_RoughRotatedPoints.push_back(vecbox[0]);//存储当前四点
 				_RoughRotatedPoints.push_back(vecbox[1]);
 				_RoughRotatedPoints.push_back(vecbox[2]);
 				_RoughRotatedPoints.push_back(vecbox[3]);
+				temptcontours.insert(temptcontours.end(), _contours[i].begin(), _contours[i].end());
 
 			}
 		}
@@ -972,6 +979,7 @@ void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Re
 	{
 		Rect resultRect = boundingRect(_RoughRotatedPoints);
 		_RoughRect.push_back(resultRect);
+		_combinecontours.push_back(temptcontours);
 	}
 }
 
@@ -979,17 +987,20 @@ void Pretreatment::linedetect()
 {
 	resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
 	Canny(LMidImg, LMidImg, 40, 120);
+	copyMakeBorder(LMidImg, LMidImg, 1, 1, 1, 1, BORDER_CONSTANT, 0);//防止RotatedRect得出的点集越界
+	copyMakeBorder(Mask_result_line, Mask_result_line, 1, 1, 1, 1, BORDER_CONSTANT, 0);
 	bitwise_xor(LMidImg, Mask_result_line, CannyImg);
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	vector<Rect>linesRect;
-	Contoursmegre(linescontours, linesRect);
+	vector<vector<Point>>combinecontours;
+	Contoursmegre(linescontours, linesRect, combinecontours);
 	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
 		vector<Point> km_contours;
-		convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
+		convexHull(combinecontours[i], km_contours);//将轮廓转换为凸包
 		Rect linerect = linesRect[i];
-		Point a_sy = Point(0, 0);
+		Point a_sy = Point(0, 0);//对称
 		Point b_sy = Point(0, 0);
 		if (linerect.width < 20 || linerect.height < 20)
 		{
@@ -998,7 +1009,13 @@ void Pretreatment::linedetect()
 		}
 		if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))//单边缘防误检
 			continue;
-		if ((linerect.width - 1)*(linerect.height - 1) < 2 * int(contourArea(km_contours)))//检测是否为类划痕形状
+		/*double anum = contourArea(km_contours);
+		Mat temptImg(LMidImg.size(),CV_8UC1,Scalar(0));
+		vector<vector<Point>>tempt;
+		tempt.push_back(km_contours);
+		drawContours(temptImg, tempt,-1,Scalar(255),-1);
+		double numw = countNonZero(temptImg);*/
+		if ((linerect.width - 1)*(linerect.height - 1) < 3 * int(contourArea(km_contours)))//检测是否为类划痕形状
 			continue;
 		if (line_YoN(linerect))
 		{
@@ -1008,8 +1025,8 @@ void Pretreatment::linedetect()
 			linerect.width = 3 * linerect.width;
 			linerect.height = 3 * linerect.height;
 			Faults::Scratch scratch;
-			scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
-			scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;
+			scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x - 1;
+			scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y - 1;
 			scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
 			_faults->Scratchs.push_back(scratch);
 		}
