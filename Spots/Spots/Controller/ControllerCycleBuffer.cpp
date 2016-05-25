@@ -290,8 +290,10 @@ void ControllerCycleBuffer::captureAndProcessThread()
 	}
 
 	//第三部分，取图
-	cv::Mat image = p_e2v->P_CycleBuffer->GetImage(startFrame, endFrame);
+	cv::Mat image = p_e2v->P_CycleBuffer->GetImage(startFrame, endFrame).clone();
 	
+	//开启线程保存图片至硬盘
+	this->ImageGetCallBack(image);
 
 	//第四部分 分配工作
 	workerindex++;

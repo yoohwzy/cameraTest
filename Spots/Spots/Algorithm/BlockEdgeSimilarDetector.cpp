@@ -132,16 +132,21 @@ void BlockEdgeSimilarDetector::doUp()
 }
 int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 {
-	//cv::Mat roi
+	int point_x = p.x;
+	int point_y = p.y;
 
-	//int point_x = p.x;
-	//int point_y = p.y;
+	if (point_x < 0 || point_x >= image.cols)
+		return 0;
+	if (point_y < 0 || point_y >= image.rows)
+		return 0;
 
-	//if (point_x < 0 || point_x >= image.cols)
-	//	return 0;
-	//if (point_y < 0 || point_y >= image.rows)
-	//	return 0;
+	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 200));
+	cv::Mat reduce;
+	cv::reduce(roi, reduce, 1, CV_REDUCE_SUM);
+	for (int i = 0; i < reduce.rows; i++)
+	{
 
+	}
 	//int deep = 0;
 	//for (; deep < 50; deep++)
 	//{

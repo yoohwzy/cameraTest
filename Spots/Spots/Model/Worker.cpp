@@ -21,12 +21,7 @@ void Worker::StartWork()
 void Worker::work()
 {
 	MyStatus = WorkerStatus::InProcessing;
-	cv::Mat grayImg = image.clone();
-
-	//开启线程保存图片至硬盘
-	P_Controller->ImageGetCallBack(grayImg);
-
-
+	cv::Mat grayImg = image;
 	/********************************************/
 	//开始图像处理
 	if (image.channels() == 3)

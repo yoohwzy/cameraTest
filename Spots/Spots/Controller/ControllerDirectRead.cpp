@@ -120,8 +120,8 @@ void ControllerDirectRead::triggerWatcherThread()
 			Sleep(50);
 			continue;
 		}
-		//if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
-		if (pci1761.GetTrailingEdgeIDI(7))//开始采图
+		if (pci1761.GetRisingEdgeIDI(7))//上升沿开始采图
+		//if (pci1761.GetTrailingEdgeIDI(7))//下降沿开始采图
 		{
 			if (1 == 1)
 			{
@@ -189,8 +189,12 @@ void ControllerDirectRead::captureAndProcessThread()
 
 	//取图
 	cv::Mat image = p_e2v->GetImage();
+	if (image.rows > 8000)
+		cv::resize(image, image, cv::Size(image.cols, image.rows / 2));
 	captureIsRunning = false;
-	
+
+	//开启线程保存图片至硬盘
+	this->ImageGetCallBack(image);
 
 	//第四部分 分配工作
 	workerindex++;
