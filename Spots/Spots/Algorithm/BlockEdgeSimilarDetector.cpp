@@ -54,8 +54,17 @@ void BlockEdgeSimilarDetector::doUp()
 		return;
 
 
+	//计算出上边缘的倒角深度，以该深度取ROI比较相似度
+
+	int deep1 = getDeepUp(p_block->GetPonintByX((p_block->A.x + p_block->B.x) / 2, &p_block->UpLine));//中点深度
+	int deep2 = getDeepUp(p_block->GetPonintByX((2 * p_block->A.x + p_block->B.x) / 3, &p_block->UpLine));//1/3点深度
+	int deep3 = getDeepUp(p_block->GetPonintByX((p_block->A.x + 2 * p_block->B.x) / 3, &p_block->UpLine));//2/3点深度
+
+	int deep = deep1 > deep2 ? deep1 : deep2;
+	deep = deep > deep3 ? deep : deep3;
+
 	const int ROI_WIDTH = 50;
-	const int ROI_HEIGHT = 30;
+	const int ROI_HEIGHT = deep;
 	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
@@ -63,13 +72,12 @@ void BlockEdgeSimilarDetector::doUp()
 	vector<cv::Point> points;
 
 	//上边界
-	int startX = p_block->A.x + 111;
+	int startX = p_block->A.x + 55;
 	if (startX < 0)
 		startX = 0;
-	int endX = p_block->B.x - 111;
+	int endX = p_block->B.x - 55;
 	if (endX >= image.cols)
 		endX = image.cols - 1;
-
 
 	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
 	{
@@ -132,6 +140,8 @@ void BlockEdgeSimilarDetector::doUp()
 }
 int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 {
+	int deep = 20;
+
 	int point_x = p.x;
 	int point_y = p.y;
 
@@ -141,28 +151,19 @@ int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 		return 0;
 
 	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 200));
-	cv::Mat reduce;
-	cv::reduce(roi, reduce, 1, CV_REDUCE_SUM);
-	for (int i = 0; i < reduce.rows; i++)
+	cv::Mat reduceImg(1, image.cols, CV_32S);
+	cv::reduce(roi, reduceImg, 1, CV_REDUCE_SUM, CV_32S);
+	int maxDiff = 0;
+	for (int i = deep; i < reduceImg.rows; i++)
 	{
-
+		int diff = reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0];
+		if (maxDiff < diff)
+		{
+			maxDiff = diff;
+			deep = i;
+		}
 	}
-	//int deep = 0;
-	//for (; deep < 50; deep++)
-	//{
-	//	if (point_y + deep + 4 >= image.rows)
-	//		break;
-	//	if (image.ptr<uchar>(point_y + deep)[point_x] >= BINARY_THRESHOD &&
-	//		image.ptr<uchar>(point_y + deep + 1)[point_x] >= BINARY_THRESHOD &&
-	//		image.ptr<uchar>(point_y + deep + 2)[point_x] >= BINARY_THRESHOD &&
-	//		image.ptr<uchar>(point_y + deep + 3)[point_x] >= BINARY_THRESHOD &&
-	//		image.ptr<uchar>(point_y + deep + 4)[point_x] >= BINARY_THRESHOD
-	//		)
-	//		break;
-	//}
-	//return deep;
-
-	return 0;
+	return deep + 5;
 }
 void BlockEdgeSimilarDetector::doDown()
 {

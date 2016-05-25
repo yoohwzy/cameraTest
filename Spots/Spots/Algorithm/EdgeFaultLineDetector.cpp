@@ -69,7 +69,7 @@ void EdgeFaultLineDetector::doUp()
 #endif
 	}
 	
-	int x = 1;
+	//int x = 1;
 }
 void EdgeFaultLineDetector::doDown()
 {
