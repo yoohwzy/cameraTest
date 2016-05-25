@@ -40,7 +40,7 @@ public:
 	void TiggerStopWatch() override;
 
 	//拍摄的长度，多少行
-	const int LENGTH = 6000;
+	int PhotoHeight = 6000;
 	const int FrameRate = 5000;//当前线阵相机行频
 private:
 	E2VCameraDirectRead *p_e2v = NULL;

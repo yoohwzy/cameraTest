@@ -36,9 +36,9 @@ void ControllerDirectRead::Init()
 		int COLOR_TYPE_IS_GRAY = 1;
 		SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
 		if (COLOR_TYPE_IS_GRAY != 0)
-			p_e2v = new	E2VCameraDirectRead(4096, LENGTH, CV_8U, 0, PORT_A);
+			p_e2v = new	E2VCameraDirectRead(4096, PhotoHeight, CV_8U, 0, PORT_A);
 		else
-			p_e2v = new	E2VCameraDirectRead(4096, LENGTH, CV_8UC3, 0, PORT_A);
+			p_e2v = new	E2VCameraDirectRead(4096, PhotoHeight, CV_8UC3, 0, PORT_A);
 
 
 		if (!p_e2v->HasBeenInited)
