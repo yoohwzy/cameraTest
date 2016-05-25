@@ -43,7 +43,7 @@ cv::Mat E2VCameraDirectRead::GetImage()
 		//if (nId != -1)
 		//	::DrawBuffer(nId, Fg_getImagePtrEx(fg, lastPicNr, 0, memHandle), (int)lastPicNr, "");
 
-		OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr);
+		OriginalImage = cv::Mat(_frameHeight, _width, CV_8UC3, bytePtr).clone();
 		if (_colorType == GRAY)
 		{
 			cv::cvtColor(OriginalImage, OriginalImage, CV_BGR2GRAY);
