@@ -123,6 +123,7 @@ private:
 	inline void Dataload();
 	bool defect_YoN(const Mat &_Img);
 	bool line_YoN(const Rect &_linesrect);
+	void Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect);
 
 public:
 	Pretreatment()

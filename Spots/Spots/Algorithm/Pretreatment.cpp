@@ -907,47 +907,71 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 }
 
 //待检测划痕邻近合并
-void Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect)
+void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect)
 {
 	int sizenum = 0;
+	vector<Point2f>_RoughRotatedPoints;
 	for (size_t i = 0; i < _contours.size(); ++i)
 	{
+		RotatedRect testbox = minAreaRect(_contours[i]);
+		Point2f vecbox[4];
+		testbox.points(vecbox);
 		Rect temptRect = boundingRect(_contours[i]);
-		if (_RoughRect.size() == 0)//初始化合并序列
+		Mat temptImg = LMidImg(Rect(temptRect));
+
+		if (i == 0)//初始化
 		{
-			sizenum = _contours[i].size();
-			_RoughRect.push_back(temptRect);
+			_RoughRotatedPoints.push_back(vecbox[0]);
+			_RoughRotatedPoints.push_back(vecbox[1]);
+			_RoughRotatedPoints.push_back(vecbox[2]);
+			_RoughRotatedPoints.push_back(vecbox[3]);
+			continue;
 		}
 		else
 		{
-			Rect combineRect = _RoughRect.back();//返回最后一个可能能够合并的元素
-			int core_x = abs(combineRect.x + 0.5*combineRect.width - temptRect.x - 0.5*temptRect.width);//重心x方向距离
-			int core_y = abs(combineRect.y + 0.5*combineRect.height - temptRect.y - 0.5*temptRect.height);//重心y方向距离
-			int distancesum_x = 0.5*combineRect.width + 0.5*temptRect.width;//x方向上边长和的一半
-			int distancesub_x = 0.5*abs(combineRect.width - temptRect.width);//x方向上边长差的一半
-			int distancesum_y = 0.5*combineRect.height + 0.5*temptRect.height;//y方向上边长和的一半
-			int distancesub_y = 0.5*abs(combineRect.height - temptRect.height);//y方向上边长差的一半
-			if (core_x < distancesum_x + 3 && core_y < distancesum_y + 3 && core_x>distancesub_x - 2 && core_y>distancesub_y - 2)//保证两外接矩不相离保证两外接矩不包含
+			sizenum += _contours[i-1].size();
+			double distance_a = pointPolygonTest(_RoughRotatedPoints, vecbox[0], 1);//正数时该点在四点轮廓内部
+			double distance_b = pointPolygonTest(_RoughRotatedPoints, vecbox[1], 1);//正数时该点在四点轮廓内部
+			double distance_c = pointPolygonTest(_RoughRotatedPoints, vecbox[2], 1);//正数时该点在四点轮廓内部
+			double distance_d = pointPolygonTest(_RoughRotatedPoints, vecbox[3], 1);//正数时该点在四点轮廓内部
+			double min_distance = min(distance_a, distance_b, distance_c, distance_d);
+			double max_distance = max(distance_a, distance_b, distance_c, distance_d);
+			if (min_distance < 0 && max_distance > 0)//相交
 			{
-				Rect result;
-				Point Rectpoint;
-				result.x = temptRect.x < combineRect.x ? temptRect.x : combineRect.x;
-				result.y = temptRect.y < combineRect.y ? temptRect.y : combineRect.y;
-				Rectpoint.x = temptRect.x + temptRect.width > combineRect.x + combineRect.width ? temptRect.x + temptRect.width : combineRect.x + combineRect.width;
-				Rectpoint.y = temptRect.y + temptRect.height > combineRect.y + combineRect.height ? temptRect.y + temptRect.height : combineRect.y + combineRect.height;
-				result.width = Rectpoint.x - result.x;
-				result.height = Rectpoint.y - result.y;
-				_RoughRect.pop_back();
-				_RoughRect.push_back(result);
-				sizenum += _contours[i].size();
+				_RoughRotatedPoints.push_back(vecbox[0]);
+				_RoughRotatedPoints.push_back(vecbox[1]);
+				_RoughRotatedPoints.push_back(vecbox[2]);
+				_RoughRotatedPoints.push_back(vecbox[3]);
+
+			}
+			else if (max_distance < 0 && max_distance >= -5)//近距离相离
+			{
+				_RoughRotatedPoints.push_back(vecbox[0]);
+				_RoughRotatedPoints.push_back(vecbox[1]);
+				_RoughRotatedPoints.push_back(vecbox[2]);
+				_RoughRotatedPoints.push_back(vecbox[3]);
 			}
 			else
 			{
-				if (sizenum < 60)//累积小于60则不认为这个是需要的
-					_RoughRect.pop_back();
-				_RoughRect.push_back(temptRect);
+				if (sizenum >= 60)
+				{
+					Rect resultRect = boundingRect(_RoughRotatedPoints);
+					_RoughRect.push_back(resultRect);
+				}
+				_RoughRotatedPoints.clear();//暂存点集清空
+				sizenum = 0;//累积轮廓大小清零
+				_RoughRotatedPoints.push_back(vecbox[0]);//存储当前四点
+				_RoughRotatedPoints.push_back(vecbox[1]);
+				_RoughRotatedPoints.push_back(vecbox[2]);
+				_RoughRotatedPoints.push_back(vecbox[3]);
+
 			}
 		}
+	}
+	if (sizenum != 0 && sizenum + _contours[_contours.size() - 1].size() > 60)//当最后若干个轮廓可以合并时在for循环中会漏过
+	{
+		Rect resultRect = boundingRect(_RoughRotatedPoints);
+		_RoughRect.push_back(resultRect);
 	}
 }
 
@@ -962,35 +986,32 @@ void Pretreatment::linedetect()
 	Contoursmegre(linescontours, linesRect);
 	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
-		if (linescontours[i].size() > 60)
+		vector<Point> km_contours;
+		convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
+		Rect linerect = linesRect[i];
+		Point a_sy = Point(0, 0);
+		Point b_sy = Point(0, 0);
+		if (linerect.width < 20 || linerect.height < 20)
 		{
-			vector<Point> km_contours;
-			convexHull(linescontours[i], km_contours);//将轮廓转换为凸包
-			Rect linerect = linesRect[i];
-			Point a_sy = Point(0, 0);
-			Point b_sy = Point(0, 0);
-			if (linerect.width < 20 || linerect.height < 20)
-			{
-				a_sy = Point(linerect.x + linerect.width*0.25, linerect.y + linerect.height*0.75);
-				b_sy = Point(linerect.x + linerect.width*0.75, linerect.y + linerect.height*0.25);
-			}
-			if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))
-				continue;
-			if ((linerect.width-1)*(linerect.height-1) < 2 * int(contourArea(km_contours)))//检测是否为类划痕形状
-				continue;
-			if (line_YoN(linerect))
-			{
-				//坐标变换回原图
-				linerect.x = 3 * linerect.x;
-				linerect.y = 3 * linerect.y;
-				linerect.width = 3 * linerect.width;
-				linerect.height = 3 * linerect.height;
-				Faults::Scratch scratch;
-				scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
-				scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;
-				scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
-				_faults->Scratchs.push_back(scratch);
-			}
+			a_sy = Point(linerect.x + linerect.width*0.25, linerect.y + linerect.height*0.75);
+			b_sy = Point(linerect.x + linerect.width*0.75, linerect.y + linerect.height*0.25);
+		}
+		if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))//单边缘防误检
+			continue;
+		if ((linerect.width - 1)*(linerect.height - 1) < 2 * int(contourArea(km_contours)))//检测是否为类划痕形状
+			continue;
+		if (line_YoN(linerect))
+		{
+			//坐标变换回原图
+			linerect.x = 3 * linerect.x;
+			linerect.y = 3 * linerect.y;
+			linerect.width = 3 * linerect.width;
+			linerect.height = 3 * linerect.height;
+			Faults::Scratch scratch;
+			scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x;
+			scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y;
+			scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
+			_faults->Scratchs.push_back(scratch);
 		}
 	}
 }
