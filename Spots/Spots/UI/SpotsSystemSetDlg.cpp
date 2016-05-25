@@ -64,23 +64,23 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 	else
 		((CButton*)GetDlgItem(IDC_CB_SAVE_IMG))->SetCheck(0);
 
-	int Worker_WaitTimeMSIn = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", Worker_WaitTimeMSIn))
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(StringHelper::int2CString(Worker_WaitTimeMSIn));
+	int WaitTimeMSIn = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSIn", WaitTimeMSIn))
+		GetDlgItem(IDC_TB_WaitTimeMSIn)->SetWindowText(StringHelper::int2CString(WaitTimeMSIn));
 	else
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSIn)->SetWindowText(L"100");
+		GetDlgItem(IDC_TB_WaitTimeMSIn)->SetWindowText(L"100");
 
-	int Worker_WaitTimeMSOut = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", Worker_WaitTimeMSOut))
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(StringHelper::int2CString(Worker_WaitTimeMSOut));
+	int WaitTimeMSOut = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSOut", WaitTimeMSOut))
+		GetDlgItem(IDC_TB_WaitTimeMSOut)->SetWindowText(StringHelper::int2CString(WaitTimeMSOut));
 	else
-		GetDlgItem(IDC_TB_Worker_WaitTimeMSOut)->SetWindowText(L"250");
+		GetDlgItem(IDC_TB_WaitTimeMSOut)->SetWindowText(L"250");
 
-	int Worker_FrameTimeOut = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", Worker_FrameTimeOut))
-		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(StringHelper::int2CString(Worker_FrameTimeOut));
+	int FrameTimeOut = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "FrameTimeOut", FrameTimeOut))
+		GetDlgItem(IDC_TB_FrameTimeOut)->SetWindowText(StringHelper::int2CString(FrameTimeOut));
 	else
-		GetDlgItem(IDC_TB_Worker_FrameTimeOut)->SetWindowText(L"2000");
+		GetDlgItem(IDC_TB_FrameTimeOut)->SetWindowText(L"2000");
 
 
 
@@ -172,9 +172,9 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	//²ÉÍ¼ÉèÖÃ
 	pBtn = (CButton*)GetDlgItem(IDC_CB_SAVE_IMG);
 	SettingHelper::AddKey("SYS_IMG_CAPTURE", "SAVE_IMG", pBtn->GetCheck());
-	saveParameter(IDC_TB_Worker_WaitTimeMSIn, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn");
-	saveParameter(IDC_TB_Worker_WaitTimeMSOut, "SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut");
-	saveParameter(IDC_TB_Worker_FrameTimeOut, "SYS_IMG_CAPTURE", "Worker_FrameTimeOut");
+	saveParameter(IDC_TB_WaitTimeMSIn, "SYS_IMG_CAPTURE", "WaitTimeMSIn");
+	saveParameter(IDC_TB_WaitTimeMSOut, "SYS_IMG_CAPTURE", "WaitTimeMSOut");
+	saveParameter(IDC_TB_FrameTimeOut, "SYS_IMG_CAPTURE", "FrameTimeOut");
 	saveParameter(IDC_TB_Real_WidthMM, "SYS_IMG_CAPTURE", "Real_WidthMM");
 	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Real_LengthMM");
 

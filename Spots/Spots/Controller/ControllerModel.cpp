@@ -151,9 +151,9 @@ void ControllerModel::ResetParameter()
 	this->SAVE_IMG = si;
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSIn", this->Capture_WaitTimeMSIn);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_WaitTimeMSOut", this->Capture_WaitTimeMSOut);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Worker_FrameTimeOut", this->Capture_FrameTimeOut);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSIn", this->Capture_WaitTimeMSIn);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSOut", this->Capture_WaitTimeMSOut);
+	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "FrameTimeOut", this->Capture_FrameTimeOut);
 
 	/*************±ßÔµÈ±ÏÝ¼ì²â²ÎÊý***********/
 	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
