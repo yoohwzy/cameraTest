@@ -150,17 +150,18 @@ int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 	if (point_y < 0 || point_y >= image.rows)
 		return 0;
 
-	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 200));
+	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 100));
 	cv::Mat reduceImg(1, image.cols, CV_32S);
 	cv::reduce(roi, reduceImg, 1, CV_REDUCE_SUM, CV_32S);
 	int maxDiff = 0;
-	for (int i = deep; i < reduceImg.rows; i++)
+	for (int i = 0; i < reduceImg.rows; i++)
 	{
 		int diff = reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0];
 		if (maxDiff < diff)
 		{
 			maxDiff = diff;
-			deep = i;
+			if (deep < i)
+				deep = i;
 		}
 	}
 	return deep + 5;
@@ -248,6 +249,34 @@ void BlockEdgeSimilarDetector::doDown()
 		points.push_back(p_block->GetPonintByX(x, &p_block->DownLine));
 	}
 	process(reduceList, points, "down");
+}
+int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
+{
+	int deep = 20;
+
+	int point_x = p.x;
+	int point_y = p.y;
+
+	if (point_x < 0 || point_x >= image.cols)
+		return 0;
+	if (point_y < 0 || point_y >= image.rows)
+		return 0;
+
+	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 100));
+	cv::Mat reduceImg(1, image.cols, CV_32S);
+	cv::reduce(roi, reduceImg, 1, CV_REDUCE_SUM, CV_32S);
+	int maxDiff = 0;
+	for (int i = 0; i < reduceImg.rows; i++)
+	{
+		int diff = reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0];
+		if (maxDiff < diff)
+		{
+			maxDiff = diff;
+			if (deep < i)
+				deep = i;
+		}
+	}
+	return deep + 5;
 }
 void BlockEdgeSimilarDetector::doLeft()
 {

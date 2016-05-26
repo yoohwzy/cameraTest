@@ -56,6 +56,8 @@ private:
 	//获取上边进边深度
 	int getDeepUp(cv::Point);
 	void doDown();
+	//获取下边进边深度
+	int getDeepDowm(cv::Point);
 	void doLeft();
 	void doRight();
 
