@@ -849,7 +849,6 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 
 void Pretreatment::ProducerTask() // 生产者任务
 {
-	//ThImg = Mat(MidImg.size(), CV_8UC1, Scalar(0));//二值化原图
 	if (_faults->MarkPens.size() != 0)
 	{
 		(cv::max)(MidImg, Mask_result_big, MidImg);
@@ -1111,6 +1110,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	vector<Rect>().swap(needContour);
 	vector<Rect>().swap(CneedContours);
 	vector<vector<Rect>>().swap(Warehousecontours);
+	Singleton::DestoryInstance();
 	/*needContour.clear();
 	CneedContours.clear();
 	Warehousecontours.clear();*/

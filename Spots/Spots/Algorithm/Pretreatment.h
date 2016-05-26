@@ -88,8 +88,8 @@ private:
 	const float *ranges[1];
 	int channels;
 
-	static const int STAMP_WIDTH = 30;
-	static const int  STAMP_HEIGHT = 30;
+	static const int STAMP_WIDTH = 30;//凹凸检测resize宽
+	static const int  STAMP_HEIGHT = 30;//凹凸检测resize高
 	static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
 	static const int kItemsToProduce = 10;   // 生产者生产的总数
 	int flagdata = 0;//数据初始化标识
@@ -99,13 +99,30 @@ private:
 	vector<Point> pointlist;//瓷砖内部定位坐标集
 	vector<Point> pointlist_r;//原始定位坐标集
 	vector<Point> in_or_out;//最小外接矩形四顶点坐标集
-	Rect location_rect;
+	Rect location_rect;//相对MidImg的位置
 	vector<Point> locationpoints;
 	vector<Rect> CneedContours;
 	vector<vector<Rect>> Warehousecontours;
 	vector<Rect> needContour;
-	Mat Mask_result_big, Mask_result_small, MidImg, original_Img_D, original_Img_L, ThImg, LMidImg, CannyImg, PMidImg, re_Img_small, Mask_result_line;
 
+	//掩膜大图
+	Mat Mask_result_big;
+	//掩膜小图
+	Mat Mask_result_small;
+	//预处理后截取图凹凸用
+	Mat MidImg;
+	//凹凸检测截取原图
+	Mat original_Img_D;
+	//划痕检测截取原图
+	Mat original_Img_L;
+	//预处理后截取图划痕用
+	Mat LMidImg;
+	//边缘检测图
+	Mat CannyImg;
+	//掩膜制作用图
+	Mat re_Img_small;
+	//划痕用掩膜
+	Mat Mask_result_line;
 
 	Mat Grow(const Mat &image, const Point &seedpoint, const int th_v);//种子点区域生长
 	Mat Equalize(const Mat &_Img);//瓷砖表面预处理高斯差分滤波与直方图均衡化
@@ -113,16 +130,16 @@ private:
 	int otsuThreshold(int _width, int _height, float origin, const MatND &hist);//局部寻找可靠阈值
 	int Maxdistance(vector<Point> const &vec);//给一组点集求出任意两点间的最大距离时间复杂度为nlogn
 	void Handwriting(const Mat &_img);//判断是否存在人工笔迹
-	void line2preprocess();
-	void linedetect();
-	void ProduceItem(ItemRepository *ir, int item);
-	void ProducerTask();
-	int ConsumeItem(ItemRepository *ir);
-	void ConsumerTask();
-	void InitItemRepository(ItemRepository *ir);
-	inline void Dataload();
-	bool defect_YoN(const Mat &_Img);
-	bool line_YoN(const Rect &_linesrect);
+	void line2preprocess();//划痕检测预处理线程
+	void linedetect();//划痕检测主线程
+	void ProduceItem(ItemRepository *ir, int item);//生产者标记移动
+	void ProducerTask();//生产者任务内容
+	int ConsumeItem(ItemRepository *ir);//消费者任务内容
+	void ConsumerTask();//消费者标记移动
+	void InitItemRepository(ItemRepository *ir);//多线程初始化
+	inline void Dataload();//算法数据导入初始化
+	bool defect_YoN(const Mat &_Img);//凹凸检测核心
+	bool line_YoN(const Rect &_linesrect);//划痕检测核心
 	void Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<Point>> &_combinecontours);//合并轮廓函数
 
 public:
