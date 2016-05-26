@@ -198,16 +198,16 @@ bool Pretreatment::defect_YoN(const Mat &_Img)
 		}
 	}
 	float resepone = knn.find_nearest(data_sort, 1);//记得加入划痕为否的数据
-	return int(resepone);
+	return bool(resepone);
 }
 
 bool Pretreatment::line_YoN(const Rect &_linesrect)
 {
 	bool flagbit = line_core(LMidImg(_linesrect));
 	if (flagbit)
-		return 1;//是划痕
+		return true;//是划痕
 	else
-		return 0;//不是划痕
+		return false;//不是划痕
 }
 
 bool WhetherLine(const Mat &oneImg, const Mat &G_Img, bool cor, bool boe)//判断是否为line的核心部分
@@ -563,10 +563,11 @@ void statis_nol(vector<int> &_statis)
 	minv = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
 	double sum = std::accumulate(std::begin(_statis)+10, std::end(_statis), 0.0);
 	maxv = int(2 * sum / double(_statis.size()) + 0.5);//算出总的众数，各部分众数的平均值
+
 	if (minv < maxv)
 	{
-		result[0] = minv;
-		result[1] = maxv;
+		result[0] = minv;//小
+		result[1] = maxv;//大
 	}
 	else
 	{
@@ -811,6 +812,15 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 		{
 			if (!defect_YoN(work_boxImg))
 				continue;
+			Faults::Hole hole;
+			hole.position.x = 0.5*(pt1.x + pt2.x) + recImg.x + locationpoint.x;//坐标变换回原图
+			hole.position.y = 0.5*(pt1.y + pt2.y) + recImg.y + locationpoint.y;
+			if (box.height > box.width)
+				hole.diameter = box.height;
+			else
+				hole.diameter = box.height;
+
+			_faults->Holes.push_back(hole);
 		}
 		else if (mean_box > singletonObj->OffervectorMax())
 		{
@@ -932,12 +942,13 @@ void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Re
 		else
 		{
 			sizenum += _contours[i-1].size();
-			double distance_a = pointPolygonTest(_RoughRotatedPoints, vecbox[0], 1);//正数时该点在四点轮廓内部
-			double distance_b = pointPolygonTest(_RoughRotatedPoints, vecbox[1], 1);//正数时该点在四点轮廓内部
-			double distance_c = pointPolygonTest(_RoughRotatedPoints, vecbox[2], 1);//正数时该点在四点轮廓内部
-			double distance_d = pointPolygonTest(_RoughRotatedPoints, vecbox[3], 1);//正数时该点在四点轮廓内部
-			double min_distance = min(distance_a, distance_b, distance_c, distance_d);
-			double max_distance = max(distance_a, distance_b, distance_c, distance_d);
+			vector<double>distance(4,0.0);
+			distance[0] = pointPolygonTest(_RoughRotatedPoints, vecbox[0], 1);//正数时该点在四点轮廓内部
+			distance[1] = pointPolygonTest(_RoughRotatedPoints, vecbox[1], 1);//正数时该点在四点轮廓内部
+			distance[2] = pointPolygonTest(_RoughRotatedPoints, vecbox[2], 1);//正数时该点在四点轮廓内部
+			distance[3] = pointPolygonTest(_RoughRotatedPoints, vecbox[3], 1);//正数时该点在四点轮廓内部
+			double min_distance = *min_element(distance.begin(), distance.end());
+			double max_distance = *max_element(distance.begin(), distance.end());
 			if (min_distance < 0 && max_distance > 0)//相交
 			{
 				_RoughRotatedPoints.push_back(vecbox[0]);
