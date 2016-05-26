@@ -1110,7 +1110,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	vector<Rect>().swap(needContour);
 	vector<Rect>().swap(CneedContours);
 	vector<vector<Rect>>().swap(Warehousecontours);
-	Singleton::DestoryInstance();
+	/*Singleton::DestoryInstance();*/
 	/*needContour.clear();
 	CneedContours.clear();
 	Warehousecontours.clear();*/
