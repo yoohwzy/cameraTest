@@ -634,7 +634,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			else
 			{
 				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (dy.size() > 5 && i > 5 && i < dy.size() - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				if (dy.size() > 5 && i > 5 && i < (dy.size() - 6))//若点位于砖的中间才做这样的处理，否则就是大的崩角
 				{
 					if (abs(dy[i - 2] - dy[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
 					{
@@ -684,7 +684,7 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			else
 			{
 				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (dx.size() > 5 && i > 5 && i < dx.size() - 6)//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				if (dx.size() > 5 && i > 5 && i < (dx.size() - 6))//若点位于砖的中间才做这样的处理，否则就是大的崩角
 				{
 					if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
 					{
@@ -712,66 +712,66 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 		return;
 	}
 
-	//添加缺陷信息
-	//计算各种情况下的length 与  deep值
-	//errorPoint在边缘附近的情况
-	if (errorPointIndex[0] < (points.size() / 3) || errorPointIndex[errorPointIndex.size() - 1] > (points.size() / 3 * 2))
-	{
-		Faults::BrokenEdge be;
-		int l1 = updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
-		int d1 = !updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
-		int l2 = updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
-		int d2 = !updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
-
-		int indexOffset = l1 < l2 ? abs(errorPointIndex[errorPointIndex.size() - 1]) : abs((int)points.size() - 1 - errorPointIndex[0]);
-		indexOffset /= 2;
-
-		//根据水平还是竖直方向分配length 与  deep
-		be.length = l1 < l2 ? l1 : l2;
-		be.deep = l1 < l2 ? d1 : d2;
-		if (updown)
-		{
-			be.length_mm = be.length*p_block->Axis_X_mmPerPix;
-			be.deep_mm = be.deep*p_block->Axis_Y_mmPerPix;
-		}
-		else
-		{
-			be.length_mm = be.length*p_block->Axis_Y_mmPerPix;
-			be.deep_mm = be.deep*p_block->Axis_X_mmPerPix;
-		}
-
-
-		be.position.x = l1 < l2 ? abs(points[0].x + points[errorPointIndex[errorPointIndex.size() - 1]].x) / 2 : abs(points[points.size() - 1].x + points[errorPointIndex[0]].x) / 2;
-		be.position.y = l1 < l2 ? abs(points[0].y + points[errorPointIndex[errorPointIndex.size() - 1]].y) / 2 : abs(points[points.size() - 1].y + points[errorPointIndex[0]].y) / 2;
-		//be.position.x += updown ? be.length / 2 : be.deep;
-		//be.position.y += updown ? be.deep / 2 : be.length;
-		p_faults->BrokenEdges.push_back(be);
-
-#ifdef BL_OUTPUT_DEBUG_INFO
-		//debug绘图
-		for (int i = 0; i < errorPointIndex.size(); i++)
-		{
-			cv::circle(drowDebugResult, points[errorPointIndex[i]], 10, cv::Scalar(255, 255, 0), -1);
-		}
-		cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
-#endif
-	}
-	else
-	{
-		for (size_t i = 0; i < errorPointIndex.size(); i++)
-		{
-			Faults::BrokenEdge be;
-			be.position = points[errorPointIndex[i]];
-			be.deep = PIX_OFFSET;
-			be.length = ROW_SPAN;
-			p_faults->BrokenEdges.push_back(be);
-#ifdef BL_OUTPUT_DEBUG_INFO
-			//debug绘图
-			cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
-#endif
-		}
-	}
-	BrokenEdgeFlag = true;
+//	//添加缺陷信息
+//	//计算各种情况下的length 与  deep值
+//	//errorPoint在边缘附近的情况
+//	if (errorPointIndex[0] < (points.size() / 3) || errorPointIndex[errorPointIndex.size() - 1] > (points.size() / 3 * 2))
+//	{
+//		Faults::BrokenEdge be;
+//		int l1 = updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
+//		int d1 = !updown ? abs(points[0].x - points[errorPointIndex[errorPointIndex.size() - 1]].x) : abs(points[0].y - points[errorPointIndex[errorPointIndex.size() - 1]].y);
+//		int l2 = updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
+//		int d2 = !updown ? abs(points[points.size() - 1].x - points[errorPointIndex[0]].x) : abs(points[points.size() - 1].y - points[errorPointIndex[0]].y);
+//
+//		int indexOffset = l1 < l2 ? abs(errorPointIndex[errorPointIndex.size() - 1]) : abs((int)points.size() - 1 - errorPointIndex[0]);
+//		indexOffset /= 2;
+//
+//		//根据水平还是竖直方向分配length 与  deep
+//		be.length = l1 < l2 ? l1 : l2;
+//		be.deep = l1 < l2 ? d1 : d2;
+//		if (updown)
+//		{
+//			be.length_mm = be.length*p_block->Axis_X_mmPerPix;
+//			be.deep_mm = be.deep*p_block->Axis_Y_mmPerPix;
+//		}
+//		else
+//		{
+//			be.length_mm = be.length*p_block->Axis_Y_mmPerPix;
+//			be.deep_mm = be.deep*p_block->Axis_X_mmPerPix;
+//		}
+//
+//
+//		be.position.x = l1 < l2 ? abs(points[0].x + points[errorPointIndex[errorPointIndex.size() - 1]].x) / 2 : abs(points[points.size() - 1].x + points[errorPointIndex[0]].x) / 2;
+//		be.position.y = l1 < l2 ? abs(points[0].y + points[errorPointIndex[errorPointIndex.size() - 1]].y) / 2 : abs(points[points.size() - 1].y + points[errorPointIndex[0]].y) / 2;
+//		//be.position.x += updown ? be.length / 2 : be.deep;
+//		//be.position.y += updown ? be.deep / 2 : be.length;
+//		p_faults->BrokenEdges.push_back(be);
+//
+//#ifdef BL_OUTPUT_DEBUG_INFO
+//		//debug绘图
+//		for (int i = 0; i < errorPointIndex.size(); i++)
+//		{
+//			cv::circle(drowDebugResult, points[errorPointIndex[i]], 10, cv::Scalar(255, 255, 0), -1);
+//		}
+//		cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
+//#endif
+//	}
+//	else
+//	{
+//		for (size_t i = 0; i < errorPointIndex.size(); i++)
+//		{
+//			Faults::BrokenEdge be;
+//			be.position = points[errorPointIndex[i]];
+//			be.deep = PIX_OFFSET;
+//			be.length = ROW_SPAN;
+//			p_faults->BrokenEdges.push_back(be);
+//#ifdef BL_OUTPUT_DEBUG_INFO
+//			//debug绘图
+//			cv::circle(drowDebugResult, be.position, 10, cv::Scalar(123, 255, 255), -1);
+//#endif
+//		}
+//	}
+//	BrokenEdgeFlag = true;
 }
 bool BlockLocalizer::fixLineOnBorder(vector<cv::Point>& points, Block::Line& line)
 {
