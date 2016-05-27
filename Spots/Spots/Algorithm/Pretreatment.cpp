@@ -849,7 +849,7 @@ int Pretreatment::ConsumeItem(ItemRepository *ir)
 
 void Pretreatment::ProducerTask() // 生产者任务
 {
-	if (_faults->MarkPens.size() != 0)
+	if (_faults->MarkPens.size() != 0)//判断是否存在不需要检测区域
 	{
 		(cv::max)(MidImg, Mask_result_big, MidImg);
 	}
@@ -916,14 +916,14 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 }
 
 //待检测划痕邻近合并
-void Pretreatment::Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect,vector<vector<Point>> &_combinecontours)
+void Pretreatment::ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect,vector<vector<Point>> &_combinecontours)
 {
 	int sizenum = 0;//初始化合并轮廓中点的数目
 	vector<Point2f>_RoughRotatedPoints;//暂存4点集
 	vector<Point> temptcontours;
 	for (size_t i = 0; i < _contours.size(); ++i)
 	{
-		RotatedRect testbox = minAreaRect(_contours[i]);
+		RotatedRect testbox = minAreaRect(_contours[i]);//求出最小外接矩形这里可能存在求出来的点越界
 		Point2f vecbox[4];
 		testbox.points(vecbox);
 		/*Rect temptRect = boundingRect(_contours[i]);
@@ -999,12 +999,17 @@ void Pretreatment::linedetect()
 	Canny(LMidImg, LMidImg, 40, 120);
 	copyMakeBorder(LMidImg, LMidImg, 1, 1, 1, 1, BORDER_CONSTANT, 0);//防止RotatedRect得出的点集越界
 	copyMakeBorder(Mask_result_line, Mask_result_line, 1, 1, 1, 1, BORDER_CONSTANT, 0);
-	bitwise_xor(LMidImg, Mask_result_line, CannyImg);
+
+	if (_faults->MarkPens.size() != 0)//判断是否存在不需要检测区域
+	{
+		bitwise_xor(LMidImg, Mask_result_line, CannyImg);//排除不需要检测区域
+	}
+		
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	vector<Rect>linesRect;
 	vector<vector<Point>>combinecontours;
-	Contoursmegre(linescontours, linesRect, combinecontours);
+	ContoursMegre(linescontours, linesRect, combinecontours);//合并待检测边缘线条
 	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
 		vector<Point> km_contours;
