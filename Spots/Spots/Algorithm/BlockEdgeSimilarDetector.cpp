@@ -60,12 +60,7 @@ void BlockEdgeSimilarDetector::doUp()
 	int deep2 = getDeepUp(p_block->GetPonintByX((2 * p_block->A.x + p_block->B.x) / 3, &p_block->UpLine));//1/3点深度
 	int deep3 = getDeepUp(p_block->GetPonintByX((p_block->A.x + 2 * p_block->B.x) / 3, &p_block->UpLine));//2/3点深度
 
-	int deep = deep1 > deep2 ? deep1 : deep2;
-	deep = deep > deep3 ? deep : deep3;
-
-	const int ROI_WIDTH = 50;
-	const int ROI_HEIGHT = deep;
-	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
+	ROI_HEIGHT_UP = (deep1 + deep2 + deep3) / 3;
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -79,21 +74,21 @@ void BlockEdgeSimilarDetector::doUp()
 	if (endX >= image.cols)
 		endX = image.cols - 1;
 
-	for (int x = startX; x < endX && x < image.cols; x += inc, index++)
+	for (int x = startX; x < endX && x < image.cols; x += ROI_WIDTH_INC, index++)
 	{
 		int x1 = x;
 		if (x < 0 || x >= image.cols)
 			continue;
-		if ((x + ROI_WIDTH) >= endX)
-			x1 = endX - ROI_WIDTH - 1;
-		if ((x + ROI_WIDTH) >= image.cols)
-			x1 = image.cols - ROI_WIDTH - 1;
+		if ((x + ROI_WIDTH_UPDOWN) >= endX)
+			x1 = endX - ROI_WIDTH_UPDOWN - 1;
+		if ((x + ROI_WIDTH_UPDOWN) >= image.cols)
+			x1 = image.cols - ROI_WIDTH_UPDOWN - 1;
 
 		int y = p_block->GetPonintByX(x1, &p_block->UpLine).y;
 		if (y < 0 || y >= image.rows)
 			continue;
 
-		cv::Mat tmpROI = image(cv::Rect(x1, y, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x1, y, ROI_WIDTH_UPDOWN, ROI_HEIGHT_UP)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_ups.push_back(tmpROI);
@@ -154,9 +149,9 @@ int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 	cv::Mat reduceImg(1, image.cols, CV_32S);
 	cv::reduce(roi, reduceImg, 1, CV_REDUCE_SUM, CV_32S);
 	int maxDiff = 0;
-	for (int i = 0; i < reduceImg.rows; i++)
+	for (int i = 1; i < reduceImg.rows; i++)
 	{
-		int diff = reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0];
+		int diff = abs(reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0]);
 		if (maxDiff < diff)
 		{
 			maxDiff = diff;
@@ -172,18 +167,26 @@ void BlockEdgeSimilarDetector::doDown()
 	if (p_block->C.y >= image.rows - 2 && p_block->D.y >= image.rows - 2)
 		return;
 
-	const int ROI_WIDTH = 50;
-	const int ROI_HEIGHT = 30;
+	//计算出下边缘的倒角深度，以该深度取ROI比较相似度
+
+	int deep1 = getDeepUp(p_block->GetPonintByX((p_block->A.x + p_block->B.x) / 2, &p_block->UpLine));//中点深度
+	int deep2 = getDeepUp(p_block->GetPonintByX((2 * p_block->A.x + p_block->B.x) / 3, &p_block->UpLine));//1/3点深度
+	int deep3 = getDeepUp(p_block->GetPonintByX((p_block->A.x + 2 * p_block->B.x) / 3, &p_block->UpLine));//2/3点深度
+
+	ROI_HEIGHT_DOWN = (deep1 + deep2 + deep3) / 3;
+
+
+
 	int inc = 25;//(float)(endX - startX) / 30 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
 	vector<cv::Point> points;
 	//下边界
-	int startX = p_block->D.x + 111;
+	int startX = p_block->D.x + 55;
 	if (startX < 0)
 		startX = 0;
-	int endX = p_block->C.x - 111;
+	int endX = p_block->C.x - 55;
 	if (endX >= image.cols)
 		endX = image.cols - 1;
 
@@ -192,17 +195,17 @@ void BlockEdgeSimilarDetector::doDown()
 		int x1 = x;
 		if (x < 0 || x >= image.cols)
 			continue;
-		if ((x + ROI_WIDTH) >= endX)
-			x1 = endX - ROI_WIDTH - 1;
-		if ((x + ROI_WIDTH) >= image.cols)
-			x1 = image.cols - ROI_WIDTH - 1;
+		if ((x + ROI_WIDTH_UPDOWN) >= endX)
+			x1 = endX - ROI_WIDTH_UPDOWN - 1;
+		if ((x + ROI_WIDTH_UPDOWN) >= image.cols)
+			x1 = image.cols - ROI_WIDTH_UPDOWN - 1;
 
 
 		int y = p_block->GetPonintByX(x1, &p_block->DownLine).y;
 		if (y < 0 || y >= image.rows)
 			continue;
 
-		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x1, y - ROI_HEIGHT_DOWN, ROI_WIDTH_UPDOWN, ROI_HEIGHT_DOWN)).clone();
 
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
@@ -250,7 +253,7 @@ void BlockEdgeSimilarDetector::doDown()
 	}
 	process(reduceList, points, "down");
 }
-int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
+int BlockEdgeSimilarDetector::getDeepDown(cv::Point p)
 {
 	int deep = 20;
 
@@ -262,18 +265,18 @@ int BlockEdgeSimilarDetector::getDeepUp(cv::Point p)
 	if (point_y < 0 || point_y >= image.rows)
 		return 0;
 
-	cv::Mat roi = image(cv::Rect(point_x - 30, point_y, 60, 100));
+	cv::Mat roi = image(cv::Rect(point_x - 30, point_y - 100, 60, 100));
 	cv::Mat reduceImg(1, image.cols, CV_32S);
 	cv::reduce(roi, reduceImg, 1, CV_REDUCE_SUM, CV_32S);
 	int maxDiff = 0;
-	for (int i = 0; i < reduceImg.rows; i++)
+	for (int i = reduceImg.rows - 1; i >= 1; i++)
 	{
-		int diff = reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0];
+		int diff = abs(reduceImg.ptr<int>(i)[0] - reduceImg.ptr<int>(i - 1)[0]);
 		if (maxDiff < diff)
 		{
 			maxDiff = diff;
-			if (deep < i)
-				deep = i;
+			if (deep < (reduceImg.rows - i))
+				deep = reduceImg.rows - i;
 		}
 	}
 	return deep + 5;
@@ -283,12 +286,6 @@ void BlockEdgeSimilarDetector::doLeft()
 	// 如果边界直接在图像边缘上，则不进行检测。
 	if (p_block->A.x < 2 && p_block->D.x < 2)
 		return;
-
-
-
-	const int ROI_WIDTH = 40;
-	const int ROI_HEIGHT = 71;
-	int inc = 20;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -300,21 +297,21 @@ void BlockEdgeSimilarDetector::doLeft()
 	int endY = p_block->D.y - 69;
 	if (endY >= image.rows)
 		endY = image.rows - 1;
-	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
+	for (int y = startY; y < endY && y < image.rows; y += ROI_HEIGHT_INC, index++)
 	{
 		int y1 = y;
 		if (y1 < 0 || y1 >= image.rows)
 			continue;
-		if ((y1 + ROI_HEIGHT) >= endY)
-			y1 = endY - ROI_HEIGHT - 1;
-		if ((y1 + ROI_HEIGHT) >= image.rows)
-			y1 = image.rows - ROI_HEIGHT - 1;
+		if ((y1 + ROI_HEIGHT_LEFTRIGHT) >= endY)
+			y1 = endY - ROI_HEIGHT_LEFTRIGHT - 1;
+		if ((y1 + ROI_HEIGHT_LEFTRIGHT) >= image.rows)
+			y1 = image.rows - ROI_HEIGHT_LEFTRIGHT - 1;
 
 		int x = p_block->GetPonintByY(y1, &p_block->LeftLine).x;
 		if (x < 0 || x >= image.cols)
 			continue;
 
-		cv::Mat tmpROI = image(cv::Rect(x, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x, y1, ROI_WIDTH_LEFTRIGHT, ROI_HEIGHT_LEFTRIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(9, 9), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_lefts.push_back(tmpROI);
@@ -361,7 +358,7 @@ void BlockEdgeSimilarDetector::doLeft()
 		points.push_back(p_block->GetPonintByY(y, &p_block->LeftLine));
 
 	}
-	process(reduceList, points, "左");
+	process(reduceList, points, "left");
 	//processAndSaveData(reduceList, points, "L\\左");
 }
 void BlockEdgeSimilarDetector::doRight()
@@ -369,10 +366,6 @@ void BlockEdgeSimilarDetector::doRight()
 	// 如果边界直接在图像边缘上，则不进行检测。
 	if (p_block->B.y >= image.cols - 2 && p_block->C.y >= image.cols - 2)
 		return;
-
-	const int ROI_WIDTH = 40;
-	const int ROI_HEIGHT = 71;
-	int inc = 20;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 	int index = 0;
 	vector<cv::Mat> reduceList;
@@ -384,21 +377,21 @@ void BlockEdgeSimilarDetector::doRight()
 	int endY = p_block->D.y - 69;
 	if (endY >= image.rows)
 		endY = image.rows - 1;
-	for (int y = startY; y < endY && y < image.rows; y += inc, index++)
+	for (int y = startY; y < endY && y < image.rows; y += ROI_HEIGHT_INC, index++)
 	{	
 		int y1 = y;
 		if (y1 < 0 || y1 >= image.rows)
 			continue;
-		if ((y1 + ROI_HEIGHT) >= endY)
-			y1 = endY - ROI_HEIGHT - 1;
-		if ((y1 + ROI_HEIGHT) >= image.rows)
-			y1 = image.rows - ROI_HEIGHT - 1;
+		if ((y1 + ROI_HEIGHT_LEFTRIGHT) >= endY)
+			y1 = endY - ROI_HEIGHT_LEFTRIGHT - 1;
+		if ((y1 + ROI_HEIGHT_LEFTRIGHT) >= image.rows)
+			y1 = image.rows - ROI_HEIGHT_LEFTRIGHT - 1;
 
 		int x = p_block->GetPonintByY(y1, &p_block->RightLine).x;
 		if (x < 0 || x >= image.cols)
 			continue;
 
-		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH, y1, ROI_WIDTH, ROI_HEIGHT)).clone();
+		cv::Mat tmpROI = image(cv::Rect(x - ROI_WIDTH_LEFTRIGHT, y1, ROI_WIDTH_LEFTRIGHT, ROI_HEIGHT_LEFTRIGHT)).clone();
 		cv::GaussianBlur(tmpROI, tmpROI, cv::Size(5, 5), 0);
 #ifdef BED_OUTPUT_DEBUG_INFO
 		debug_rights.push_back(tmpROI);
@@ -516,17 +509,32 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 	//不合并缺陷
 	if (points.size() > 2)
 	{
-		int pointSpanX = abs(points[1].x - points[0].x);
-		int pointSpanY = abs(points[1].y - points[0].y);
-		int length = pointSpanY > pointSpanX ? pointSpanY : pointSpanX;
-		length = length + length;
+		//int pointSpanX = abs(points[1].x - points[0].x);
+		//int pointSpanY = abs(points[1].y - points[0].y);
+		//int length = pointSpanY > pointSpanX ? pointSpanY : pointSpanX;
+		//length = length + length;
 		for (int i = 0; i < pointFlag.size(); i++)
 		{
 			if (pointFlag[i])
 			{
 				Faults::EdgeFault ef;
+
+				if (info == "up")
+				{
+					ef.width = ROI_WIDTH_UPDOWN;
+					ef.height = ROI_HEIGHT_UP;
+				}
+				else if (info == "down")
+				{
+					ef.width = ROI_WIDTH_UPDOWN;
+					ef.height = ROI_HEIGHT_DOWN;
+				}
+				else
+				{
+					ef.width = ROI_WIDTH_LEFTRIGHT;
+					ef.height = ROI_HEIGHT_LEFTRIGHT;
+				}
 				ef.position = points[i];
-				ef.length = length;
 				p_faults->EdgeFaults.push_back(ef);
 			}
 		}

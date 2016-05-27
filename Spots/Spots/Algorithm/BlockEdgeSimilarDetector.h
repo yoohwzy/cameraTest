@@ -50,14 +50,22 @@ private:
 	Block *p_block = NULL;
 
 
-	//返回最大偏差值
+	const int ROI_WIDTH_UPDOWN = 50;
+	int ROI_HEIGHT_UP = 30;
+	int ROI_HEIGHT_DOWN = 30;
+	const int ROI_WIDTH_INC = 25;
+
+	int ROI_WIDTH_LEFTRIGHT = 40;
+	const int ROI_HEIGHT_LEFTRIGHT = 70;
+	const int ROI_HEIGHT_INC = 35;//(float)(endY - startY) / 60 + 0.5;//范围增量
+
 
 	void doUp();
 	//获取上边进边深度
 	int getDeepUp(cv::Point);
 	void doDown();
 	//获取下边进边深度
-	int getDeepDowm(cv::Point);
+	int getDeepDown(cv::Point);
 	void doLeft();
 	void doRight();
 

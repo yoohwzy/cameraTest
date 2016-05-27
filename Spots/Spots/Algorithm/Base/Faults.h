@@ -33,10 +33,10 @@ public:
 	struct EdgeFault
 	{
 		cv::Point position;//缺角位置
-		double deep;//进边深度（pix）
-		double length;//缺边长（pix）
-		double deep_mm;//进边深度（mm）
-		double length_mm;//缺边长（mm）
+		double width;//进边深度（pix）
+		double height;//缺边长（pix）
+		double width_mm;//进边深度（mm）
+		double height_mm;//缺边长（mm）
 	};
 	//缺角
 	struct BrokenCorner

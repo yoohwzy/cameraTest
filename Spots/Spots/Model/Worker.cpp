@@ -151,7 +151,10 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 		}
 		for (size_t i = 0; i < faults.EdgeFaults.size(); i++)
 		{
-			cv::circle(img, faults.EdgeFaults[i].position, faults.EdgeFaults[i].length, cv::Scalar(255, 100, 255), 4);
+			cv::rectangle(img, cv::Rect(faults.EdgeFaults[i].position.x - faults.EdgeFaults[i].width,
+				faults.EdgeFaults[i].position.y - faults.EdgeFaults[i].height,
+				faults.EdgeFaults[i].width * 2,
+				faults.EdgeFaults[i].height * 2), Scalar(0, 30 * i, 250));
 		}
 	}
 	if (faults.BrokenEdges.size() > 0)
@@ -167,20 +170,20 @@ void Worker::drawFaults(cv::Mat& img, Faults& faults)
 			cv::circle(img, faults.BrokenEdges[i].position, faults.BrokenEdges[i].length, cv::Scalar(0, 0, 255), 4);
 		}
 	}
-	if (faults.BrokenCorners.size() > 0)
-	{
-		if (MFCConsole::IsOpened)
-		{
-			stringstream ss;
-			ss << workerInfo << SN << " ´æÔÚ " << faults.BrokenCorners.size() << " ´¦±À½ÇÈ±ÏÝ£¬Ñóºì±ê³ö¡£" << endl;
-			MFCConsole::Output(ss.str());
-		}
+	//if (faults.BrokenCorners.size() > 0)
+	//{
+	//	if (MFCConsole::IsOpened)
+	//	{
+	//		stringstream ss;
+	//		ss << workerInfo << SN << " ´æÔÚ " << faults.BrokenCorners.size() << " ´¦±À½ÇÈ±ÏÝ£¬Ñóºì±ê³ö¡£" << endl;
+	//		MFCConsole::Output(ss.str());
+	//	}
 
-		for (size_t i = 0; i < faults.BrokenCorners.size(); i++)
-		{
-			cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length, cv::Scalar(127, 0, 228), 5);
-		}
-	}
+	//	for (size_t i = 0; i < faults.BrokenCorners.size(); i++)
+	//	{
+	//		cv::circle(img, faults.BrokenCorners[i].position, faults.BrokenCorners[i].length, cv::Scalar(127, 0, 228), 5);
+	//	}
+	//}
 	//if (faults.SomethingBigs.size() > 0)
 	//{
 	//	if (MFCConsole::IsOpened)
