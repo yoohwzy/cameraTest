@@ -12,10 +12,10 @@ static CvKNearest knn;
 union luai_Cast { double l_d; long l_l; };
 #define double2int(d,i) \
   { volatile union luai_Cast u; u.l_d = (d) + 6755399441055744.0; (i) = u.l_l; }
-
+#define OUTPUT_ASSIST true;
 
 //PointĞÍË³ĞòÅÅÁĞËã×Ó
-inline bool SortBysize(vector<Point>const &v1, vector<Point>const &v2)
+inline bool SortBysize(vector<cv::Point>const &v1, vector<cv::Point>const &v2)
 {
 	return v1.size() > v2.size();//½µĞòÅÅÁĞ  
 }
@@ -212,7 +212,7 @@ bool Pretreatment::line_YoN(const Rect &_linesrect)
 
 bool WhetherLine(const Mat &oneImg, const Mat &G_Img, bool cor, bool boe)//ÅĞ¶ÏÊÇ·ñÎªlineµÄºËĞÄ²¿·Ö
 {
-	vector<Point> maxV_white_Points;
+	vector<cv::Point> maxV_white_Points;
 	if (countNonZero(oneImg) >= 1)//»ñÈ¡ËÄ±ßµÄ°×É«µã×ø±ê
 	{
 		if (cor == 1)
@@ -267,7 +267,7 @@ bool WhetherLine(const Mat &oneImg, const Mat &G_Img, bool cor, bool boe)//ÅĞ¶ÏÊ
 }
 
 //¼ÆËãÂÖÀªÖØĞÄ
-Point barycenter1(vector<Point> const &contoursi)
+Point barycenter1(vector<cv::Point> const &contoursi)
 {
 	Moments m = moments(contoursi);
 	Point center = Point(0, 0);
@@ -366,9 +366,9 @@ inline int Distance(const Point &point1, const Point &point2)
 }
 
 //¸øÒ»×éµã¼¯Çó³öÈÎÒâÁ½µã¼äµÄ×î´ó¾àÀëÊ±¼ä¸´ÔÓ¶ÈÎªnlogn
-int Pretreatment::Maxdistance(vector<Point> const &vec)
+int Pretreatment::Maxdistance(vector<cv::Point> const &vec)
 {
-	vector<Point> hulldistance;
+	vector<cv::Point> hulldistance;
 	convexHull(vec, hulldistance);
 	int n = hulldistance.size() - 1;
 	int j = 1;
@@ -384,9 +384,9 @@ int Pretreatment::Maxdistance(vector<Point> const &vec)
 }
 
 //ÅĞ¶Ïµ±Ç°rectÊÇ·ñ±»ÒÑ´æÔÚµÄrect°üº¬
-bool Contain(vector<vector<Point>> const &rectveclist, vector<Point> const &rectcandidate)
+bool Contain(vector<vector<cv::Point>> const &rectveclist, vector<cv::Point> const &rectcandidate)
 {
-	int Contain_mark = 0;
+	int Contain_Mark = 0;
 	for (size_t i = 0; i < rectveclist.size(); ++i)
 	{
 		int j = 0;
@@ -400,18 +400,18 @@ bool Contain(vector<vector<Point>> const &rectveclist, vector<Point> const &rect
 			j++;
 		if (j == 4)//ËÄ¸öµãÍ¬Ê±ÔÚµ±Ç°rectµÄÄÚ²¿
 		{
-			Contain_mark = 1;
+			Contain_Mark = 1;
 			break;
 		}
 	}
-	if (Contain_mark)//ÔÚËÄ¸öµã¶¼ÔÚÄÚ²¿Ê±ÎªÕæ
-		return 1;
+	if (Contain_Mark)//ÔÚËÄ¸öµã¶¼ÔÚÄÚ²¿Ê±ÎªÕæ
+		return true;
 	else
-		return 0;
+		return false;
 }
 
 //ÅĞ¶ÏÈË¹¤±Ê¼£
-void Pretreatment::Handwriting(const Mat &_img)
+void Pretreatment::HandWriting(const Mat &_img)
 {
 	Mat Canny_Img;
 	Mask_result_big = Mat(MidImg.size(), CV_8UC1, Scalar(0));
@@ -419,9 +419,9 @@ void Pretreatment::Handwriting(const Mat &_img)
 	GaussianBlur(_img, Canny_Img, Size(3, 3), 0, 0);
 	copyMakeBorder(Canny_Img, Canny_Img, 1, 1, 1, 1, BORDER_CONSTANT, 0);
 	Canny(Canny_Img, Canny_Img, 40, 120);//´æÔÚÆ½ĞĞË«±ßÇ¿±ßÔµ
-	vector<vector<Point>> Maskcontours;
+	vector<vector<cv::Point>> Maskcontours;
 	findContours(Canny_Img, Maskcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	vector<vector<Point>> containlist;
+	vector<vector<cv::Point>> containlist;
 	for (size_t i = 0; i < Maskcontours.size(); ++i)
 	{
 		if (Maskcontours[i].size() > 5)
@@ -577,7 +577,7 @@ void statis_nol(vector<int> &_statis)
 }
 
 //¾Ö²¿¶şÖµ»¯µÄãĞÖµÑ¡È¡
-int Pretreatment::otsuThreshold(int _width, int _height, float origin, const MatND &hist)
+int Pretreatment::OtsuThreshold(int _width, int _height, float origin, const MatND &hist)
 {
 	float pixelPro[256] = { 0 };
 	int pixelSum = _width * _height, threshold = 0;
@@ -667,7 +667,7 @@ Mat Pretreatment::Grow(const Mat &image, const Point &seedpoint, const int th_v)
 {
 	Mat HyImg = image.clone();
 	Mat SameImg(HyImg.size(), CV_8UC1, Scalar(0));
-	vector<Point> seedq;
+	vector<cv::Point> seedq;
 	seedq.push_back(seedpoint);
 	while (!seedq.empty())
 	{
@@ -878,7 +878,7 @@ void Pretreatment::ProducerTask() // Éú²úÕßÈÎÎñ
 			calcHist(&MidImgROI, 1, &channels, Mat(), histolist, 1, &size, ranges);//Ô¤´¦Àí¹ıµÄÍ¼»ñµÃ»Ò¶È·Ö²¼
 			calcHist(&original_Img_ROI, 1, &channels, Mat(), histolist_r, 1, &size, ranges);//Ô­Í¼»ñµÃ»Ò¶È·Ö²¼
 			statistics_gray(ThRect.width, ThRect.height, histolist_r, step);//¾Ö²¿Êı¾İÍ³¼ÆĞ´Èë
-			int OtsuV = otsuThreshold(ThRect.width, ThRect.height, MidImgROI.at<uchar>(0, 0), histolist);//ÕÒµ½ÀëÉ¢»Ò¶ÈÖµµ¼ÊıµÄãĞÖµ
+			int OtsuV = OtsuThreshold(ThRect.width, ThRect.height, MidImgROI.at<uchar>(0, 0), histolist);//ÕÒµ½ÀëÉ¢»Ò¶ÈÖµµ¼ÊıµÄãĞÖµ
 			threshold(MidImgROI, ThImgROI, OtsuV, 255, 0);
 
 			vector<vector<cv::Point>> decontours;
@@ -916,11 +916,11 @@ void Pretreatment::InitItemRepository(ItemRepository *ir)
 }
 
 //´ı¼ì²â»®ºÛÁÚ½üºÏ²¢
-void Pretreatment::ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect,vector<vector<Point>> &_combinecontours)
+void Pretreatment::ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<cv::Point>> &_combinecontours)
 {
 	int sizenum = 0;//³õÊ¼»¯ºÏ²¢ÂÖÀªÖĞµãµÄÊıÄ¿
-	vector<Point2f>_RoughRotatedPoints;//Ôİ´æ4µã¼¯
-	vector<Point> temptcontours;
+	vector<cv::Point2f>_RoughRotatedPoints;//Ôİ´æ4µã¼¯
+	vector<cv::Point> temptcontours;//´æ´¢Ä¿Ç°µÄÂÖÀªÄÚÈİ
 	for (size_t i = 0; i < _contours.size(); ++i)
 	{
 		RotatedRect testbox = minAreaRect(_contours[i]);//Çó³ö×îĞ¡Íâ½Ó¾ØĞÎÕâÀï¿ÉÄÜ´æÔÚÇó³öÀ´µÄµãÔ½½ç
@@ -1000,27 +1000,28 @@ void Pretreatment::ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Re
 
 void Pretreatment::linedetect()
 {
-	resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
 	Canny(LMidImg, LMidImg, 40, 120);
 	copyMakeBorder(LMidImg, LMidImg, 1, 1, 1, 1, BORDER_CONSTANT, 0);//·ÀÖ¹RotatedRectµÃ³öµÄµã¼¯Ô½½ç
-	copyMakeBorder(Mask_result_line, Mask_result_line, 1, 1, 1, 1, BORDER_CONSTANT, 0);
-
+	
 	if (_faults->MarkPens.size() != 0)//ÅĞ¶ÏÊÇ·ñ´æÔÚ²»ĞèÒª¼ì²âÇøÓò
 	{
+		resize(Mask_result_big, Mask_result_line, Size(Mask_result_big.cols / 3, Mask_result_big.rows / 3), 0, 0, INTER_AREA);
+		copyMakeBorder(Mask_result_line, Mask_result_line, 1, 1, 1, 1, BORDER_CONSTANT, 0);//ºÍLMidImgµÄsize±£³ÖÒ»ÖÂ
 		bitwise_xor(LMidImg, Mask_result_line, CannyImg);//ÅÅ³ı²»ĞèÒª¼ì²âÇøÓò
 	}
 	else
 	{
 		CannyImg = LMidImg.clone();
 	}
+
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	vector<Rect>linesRect;
-	vector<vector<Point>>combinecontours;
+	vector<vector<cv::Point>>combinecontours;
 	ContoursMegre(linescontours, linesRect, combinecontours);//ºÏ²¢´ı¼ì²â±ßÔµÏßÌõ
 	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
-		vector<Point> km_contours;
+		vector<cv::Point> km_contours;
 		convexHull(combinecontours[i], km_contours);//½«ÂÖÀª×ª»»ÎªÍ¹°ü
 		Rect linerect = linesRect[i];
 		Point a_sy = Point(0, 0);//¶Ô³Æ
@@ -1038,7 +1039,7 @@ void Pretreatment::linedetect()
 		tempt.push_back(km_contours);
 		drawContours(temptImg, tempt,-1,Scalar(255),-1);
 		double numw = countNonZero(temptImg);*/
-		if ((linerect.width - 1)*(linerect.height - 1) < 3 * int(contourArea(km_contours)))//¼ì²âÊÇ·ñÎªÀà»®ºÛĞÎ×´
+		if ((linerect.width - 1)*(linerect.height - 1) < 3 * int(contourArea(km_contours)))//¼ì²âÊÇ·ñÎªÀà»®ºÛĞÎ×´Ëã³öÀ´µÄÃæ»ı²¢²»µÈÓÚ°×µãnum
 			continue;
 		if (line_YoN(linerect))
 		{
@@ -1079,7 +1080,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	if (image.channels() == 3)//ÅĞ¶ÏÊÇ·ñÎª²ÊÍ¼
 		cvtColor(image, image, CV_RGB2GRAY);
 
-	//Ö±·½Í¼±ä»»
+	//¹âÕÕ½ÃÕıÓëÖ±·½Í¼±ä»»
 	Mat E_image=Equalize(image);
 	//ÇóÄÚ²¿Ğ¡¾ØĞÎ
 	ProcessArea(_block);
@@ -1087,7 +1088,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	//µ¼Èë·ÖÀàÊı¾İ²¢³õÊ¼»¯Ò»´Î
 	static int ret = (Dataload(), 1);
 
-	vector<vector<Point>>filterContours;
+	vector<vector<cv::Point>>filterContours;
 	filterContours.push_back(pointlist);
 	Mat E_img_mask(E_image.size(),CV_8UC1,Scalar(0));
 	drawContours(E_img_mask, filterContours, 0, Scalar(255), CV_FILLED);
@@ -1101,7 +1102,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	std::thread linepreprocess(std::mem_fn(&Pretreatment::line2preprocess), this);
 	resize(MidImg, re_Img_small, Size(MidImg.cols / 16, MidImg.rows / 16), 0, 0, INTER_LINEAR);
 
-	Handwriting(re_Img_small);//¼ì²âÈË¹¤±ê¼Ç
+	HandWriting(re_Img_small);//¼ì²âÈË¹¤±ê¼Ç
 
 	linepreprocess.join();
 
@@ -1120,8 +1121,11 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	statis_nol(singletonObj->Getvector());
 
 	//»ØÊÕÄÚ´æ
-	vector<Rect>().swap(needContour);
+	needContour.clear();//Çå¿Õ´óĞ¡
+	vector<Rect>().swap(needContour);//»ØÊÕÄÚ´æ
+	CneedContours.clear();
 	vector<Rect>().swap(CneedContours);
+	Warehousecontours.clear();
 	vector<vector<Rect>>().swap(Warehousecontours);
 	/*Singleton::DestoryInstance();*/
 	/*needContour.clear();
