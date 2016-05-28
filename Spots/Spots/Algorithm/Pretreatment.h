@@ -140,7 +140,7 @@ private:
 	inline void Dataload();//算法数据导入初始化
 	bool defect_YoN(const Mat &_Img);//凹凸检测核心
 	bool line_YoN(const Rect &_linesrect);//划痕检测核心
-	void Contoursmegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<Point>> &_combinecontours);//合并轮廓函数
+	void ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<Point>> &_combinecontours);//合并轮廓函数
 
 public:
 	Pretreatment()

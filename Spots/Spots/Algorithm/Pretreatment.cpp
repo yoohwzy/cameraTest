@@ -972,6 +972,11 @@ void Pretreatment::ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Re
 					Rect resultRect = boundingRect(_RoughRotatedPoints);
 					_RoughRect.push_back(resultRect);
 					_combinecontours.push_back(temptcontours);
+					Mat temptimg(resultRect.height, resultRect.width,CV_8U,Scalar(0));
+					temptimg = LMidImg(Rect(resultRect));
+					/*vector<vector<Point>>temptcontors;
+					temptcontors.push_back(temptcontours);
+					drawContours(temptimg, temptcontors, -1, Scalar(255), 1, 8, noArray(), 2145483647, Point(-resultRect.x, -resultRect.y));*/
 				}
 				_RoughRotatedPoints.clear();//暂存点集清空
 				temptcontours.clear();//暂存轮廓集清空
@@ -1004,7 +1009,10 @@ void Pretreatment::linedetect()
 	{
 		bitwise_xor(LMidImg, Mask_result_line, CannyImg);//排除不需要检测区域
 	}
-		
+	else
+	{
+		CannyImg = LMidImg.clone();
+	}
 	vector<vector<cv::Point>> linescontours;
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	vector<Rect>linesRect;
