@@ -100,10 +100,9 @@ private:
 	vector<Point> pointlist_r;//原始定位坐标集
 	vector<Point> in_or_out;//最小外接矩形四顶点坐标集
 	Rect location_rect;//相对MidImg的位置
-	vector<Point> locationpoints;
-	vector<Rect> CneedContours;
-	vector<vector<Rect>> Warehousecontours;
-	vector<Rect> needContour;
+	vector<Rect> CneedContours;//在消费者阶段存储ROI信息的容器
+	vector<vector<Rect>> Warehousecontours;//生产者消费者传递阶段的容器
+	vector<Rect> needContour;//生产者阶段存储ROI的容器
 
 	//掩膜大图
 	Mat Mask_result_big;
@@ -150,6 +149,10 @@ public:
 		hranges[1] = 255.0;
 		ranges[0] = hranges;
 		channels = 0;
+		in_or_out.resize(4,Point(0,0));//初始化空间大小
+		CneedContours.reserve(200);
+		Warehousecontours.reserve(2);
+		needContour.reserve(200);
 	}
 	~Pretreatment();
 	void pretreatment(Mat &image, Block *_block, Faults *faults);

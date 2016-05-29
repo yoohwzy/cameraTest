@@ -312,11 +312,11 @@ Mat Pretreatment::Equalize(const Mat &_Img)
 	Mat work_Img;
 	GaussianBlur(re_Img_small, re_Img_temp, Size(15, 15), 0, 0);//高斯模糊
 	resize(re_Img_temp, re_Img_big, Size(_Img.cols, _Img.rows), 0, 0, INTER_LINEAR);
-	Timer timer;
-	timer.start();
+	//Timer timer;
+	//timer.start();
 	absdiff(_Img, re_Img_big, work_Img);//求绝对差值预处理好的大图
-	timer.stop();
-	cout<<timer.getElapsedTimeInMilliSec()<<"ms"<<endl;
+	//timer.stop();
+	//cout<<timer.getElapsedTimeInMilliSec()<<"ms"<<endl;
 	LUT(work_Img, E_lookUpTable, work_Img);
 	/*LUT(re_Img_small, E_lookUpTable, re_Img_small);*/
 	
@@ -453,11 +453,10 @@ void Pretreatment::HandWriting(const Mat &_img)
 			Point outpoint_a(mask_rect.x, mask_rect.y), outpoint_b(mask_rect.x + mask_rect.width, mask_rect.y + mask_rect.height);//左上，右下
 			Point outpoint_c(mask_rect.x + mask_rect.width, mask_rect.y), outpoint_d(mask_rect.x, mask_rect.y + mask_rect.height);//右上，左下
 			
-			in_or_out.clear();
-			in_or_out.push_back(outpoint_a);
-			in_or_out.push_back(outpoint_b);
-			in_or_out.push_back(outpoint_c);
-			in_or_out.push_back(outpoint_d);
+			in_or_out[0] = outpoint_a;
+			in_or_out[1] = outpoint_b;
+			in_or_out[2] = outpoint_c;
+			in_or_out[3] = outpoint_d;
 
 			if (Contain(containlist, in_or_out))//判断当前rect是否被已存在rect的包含，根据findcontours轮廓顺序，一定是外部的轮廓被读取到，故无需检测之前的轮廓是否需要被排除
 				continue;
@@ -894,7 +893,6 @@ void Pretreatment::ProducerTask() // 生产者任务
 			location_rect = Rect(Point(ThRect.x, ThRect.y), Point(ThRect.x, ThRect.y));//当前ROI左上角顶点在Mid中的坐标
 			ProduceItem(&gItemRepository, step);
 			step++;
-			locationpoints.clear();
 		}
 		Thpt.y = i*int(MidImg.rows*0.2);
 	}
@@ -1121,14 +1119,14 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	statis_nol(singletonObj->Getvector());
 
 	//回收内存
-	needContour.clear();//清空大小
-	vector<Rect>().swap(needContour);//回收内存
-	CneedContours.clear();
-	vector<Rect>().swap(CneedContours);
-	Warehousecontours.clear();
-	vector<vector<Rect>>().swap(Warehousecontours);
+	//needContour.clear();//清空大小
+	//vector<Rect>().swap(needContour);//回收内存
+	//CneedContours.clear();
+	//vector<Rect>().swap(CneedContours);
+	//Warehousecontours.clear();
+	//vector<vector<Rect>>().swap(Warehousecontours);
 	/*Singleton::DestoryInstance();*/
-	/*needContour.clear();
+	needContour.clear();
 	CneedContours.clear();
-	Warehousecontours.clear();*/
+	Warehousecontours.clear();
 }
