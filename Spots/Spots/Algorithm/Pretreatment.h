@@ -56,11 +56,29 @@ public:
 	{
 		return statistics_result[1];
 	}
+	int &Getflagdata()
+	{
+		return flagdata;
+	}
+	int &Gethandlenum()
+	{
+		return handlenum;
+	}
 
 private:
-	Singleton(){ block_num = 10; statistics_list.resize(2 * block_num, 50); statistics_result.resize(2, 52); }//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
+	Singleton()
+	{ 
+		block_num = 10; 
+		statistics_list.resize(2 * block_num, 50); 
+		statistics_result.resize(2 * (block_num + 1), 52);
+		handlenum = 0; 
+		flagdata = 0;
+	}//统计分块瓷砖区域中的灰度中值和众数初始化数值设为50，此后每次更新为前一幅图的数据
+
 	static const Singleton *m_Instance;
-	int block_num;
+	int block_num;//分区数量
+	int handlenum;//处理数量
+	int flagdata;//数据初始化标识
 	vector<int> statistics_list;
 	vector<int> statistics_result;
 };
@@ -92,7 +110,6 @@ private:
 	static const int  STAMP_HEIGHT = 30;//凹凸检测resize高
 	static const int STAMP_SIZE = STAMP_WIDTH*STAMP_HEIGHT;
 	static const int kItemsToProduce = 10;   // 生产者生产的总数
-	int flagdata = 0;//数据初始化标识
 	Rect recImg = Rect(Point(0, 0), Point(0, 0));
 
 	Faults *_faults;//各类缺陷集
@@ -140,6 +157,7 @@ private:
 	bool defect_YoN(const Mat &_Img);//凹凸检测核心
 	bool line_YoN(const Rect &_linesrect);//划痕检测核心
 	void ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<Point>> &_combinecontours);//合并轮廓函数
+	void statis_nol(vector<int> &_statis);
 
 public:
 	Pretreatment()

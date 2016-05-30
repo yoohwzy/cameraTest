@@ -29,12 +29,13 @@ inline bool SortBysize_int(vector<int>const &v1, vector<int>const &v2)
 //数据及参数初始化
 inline void Pretreatment::Dataload()
 {
+	Singleton *singletonObj = Singleton::GetInstance();
 	FileStorage fs("Data//data.yaml", FileStorage::READ);
 	Mat dataMat, labelMat;
 	fs["data"] >> dataMat;
 	fs["label"] >> labelMat;
 	knn.train(dataMat, labelMat, Mat(), false, 2);
-	flagdata = 1;
+	singletonObj->Getflagdata() = 1;
 }
 
 bool Fourier(const Mat &Img)
@@ -554,9 +555,11 @@ int getMidIndex(vector<int> &array, int size)
 }
 
 //统计数据归一化
-void statis_nol(vector<int> &_statis)
+void Pretreatment::statis_nol(vector<int> &_statis)
 {
 	Singleton *singletonObj = Singleton::GetInstance();
+	int &_handlenum = singletonObj->Gethandlenum();
+	int remainder = _handlenum % 10;
 	int minv, maxv = 0;
 	vector<int> &result = singletonObj->Getresult();
 	minv = getMidIndex(_statis, 10);//算出总的中位数，各部分中位数的中位数
@@ -565,14 +568,27 @@ void statis_nol(vector<int> &_statis)
 
 	if (minv < maxv)
 	{
-		result[0] = minv;//小
-		result[1] = maxv;//大
+		result[remainder+2] = minv;//小
+		result[remainder+12] = maxv;//大
 	}
 	else
 	{
-		result[1] = minv;
-		result[0] = maxv;
+		result[remainder+12] = minv;
+		result[remainder+2] = maxv;
 	}
+	if (_handlenum < 9)
+	{
+		result[0] = result[remainder + 2];
+		result[1] = result[remainder + 12];
+	}
+	else
+	{
+		double resultsum_a = std::accumulate(std::begin(result) + 2, std::begin(result) + 11, 0.0);
+		double resultsum_b = std::accumulate(std::begin(result) + 12, std::end(result), 0.0);
+		result[0] = resultsum_a / 10;
+		result[1] = resultsum_b / 10;
+	}
+	_handlenum++;
 }
 
 //局部二值化的阈值选取
@@ -1009,25 +1025,25 @@ void Pretreatment::linedetect()
 	}
 	else
 	{
-		CannyImg = LMidImg.clone();
+		LMidImg.copyTo(CannyImg);
 	}
 
 	vector<vector<cv::Point>> linescontours;
+	linescontours.reserve(100);
 	findContours(CannyImg, linescontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	vector<Rect>linesRect;
 	vector<vector<cv::Point>>combinecontours;
 	ContoursMegre(linescontours, linesRect, combinecontours);//合并待检测边缘线条
 	for (size_t i = 0; i < linesRect.size(); ++i)
 	{
-		vector<cv::Point> km_contours;
+		vector<cv::Point> km_contours(1);
 		convexHull(combinecontours[i], km_contours);//将轮廓转换为凸包
-		Rect linerect = linesRect[i];
 		Point a_sy = Point(0, 0);//对称
 		Point b_sy = Point(0, 0);
-		if (linerect.width < 20 || linerect.height < 20)
+		if (linesRect[i].width < 20 || linesRect[i].height < 20)
 		{
-			a_sy = Point(linerect.x + linerect.width*0.25, linerect.y + linerect.height*0.75);
-			b_sy = Point(linerect.x + linerect.width*0.75, linerect.y + linerect.height*0.25);
+			a_sy = Point(linesRect[i].x + linesRect[i].width*0.25, linesRect[i].y + linesRect[i].height*0.75);
+			b_sy = Point(linesRect[i].x + linesRect[i].width*0.75, linesRect[i].y + linesRect[i].height*0.25);
 		}
 		if (abs(original_Img_L.at<uchar>(a_sy)-original_Img_L.at<uchar>(b_sy) > 4))//单边缘防误检
 			continue;
@@ -1037,19 +1053,19 @@ void Pretreatment::linedetect()
 		tempt.push_back(km_contours);
 		drawContours(temptImg, tempt,-1,Scalar(255),-1);
 		double numw = countNonZero(temptImg);*/
-		if ((linerect.width - 1)*(linerect.height - 1) < 3 * int(contourArea(km_contours)))//检测是否为类划痕形状算出来的面积并不等于白点num
+		if ((linesRect[i].width - 1)*(linesRect[i].height - 1) < 3 * int(contourArea(km_contours)))//检测是否为类划痕形状算出来的面积并不等于白点num
 			continue;
-		if (line_YoN(linerect))
+		if (line_YoN(linesRect[i]))
 		{
 			//坐标变换回原图
-			linerect.x = 3 * linerect.x;
-			linerect.y = 3 * linerect.y;
-			linerect.width = 3 * linerect.width;
-			linerect.height = 3 * linerect.height;
+			linesRect[i].x = 3 * linesRect[i].x;
+			linesRect[i].y = 3 * linesRect[i].y;
+			linesRect[i].width = 3 * linesRect[i].width;
+			linesRect[i].height = 3 * linesRect[i].height;
 			Faults::Scratch scratch;
-			scratch.position.x = linerect.x + 0.5 * linerect.width + recImg.x - 1;
-			scratch.position.y = linerect.y + 0.5 * linerect.height + recImg.y - 1;
-			scratch.length = (linerect.width >linerect.height) ? linerect.width : linerect.height;
+			scratch.position.x = linesRect[i].x + 0.5 * linesRect[i].width + recImg.x - 1;//1为扩展的边界
+			scratch.position.y = linesRect[i].y + 0.5 * linesRect[i].height + recImg.y - 1;
+			scratch.length = (linesRect[i].width >linesRect[i].height) ? linesRect[i].width : linesRect[i].height;
 			_faults->Scratchs.push_back(scratch);
 		}
 	}
@@ -1085,6 +1101,7 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 
 	//导入分类数据并初始化一次
 	static int ret = (Dataload(), 1);
+	int &_a = singletonObj->Getflagdata();
 
 	vector<vector<cv::Point>>filterContours(1);
 	filterContours[0] = pointlist;
