@@ -335,20 +335,20 @@ void Pretreatment::ProcessArea(Block *blockin)
 	Point _D_remo = _D + Point(100, -100);
 	Point _B_remo = _B + Point(-100, 100);
 	
-	pointlist.push_back(_A_remo);
-	pointlist.push_back(_B_remo);
-	pointlist.push_back(_C_remo);
-	pointlist.push_back(_D_remo);
+	pointlist[0] = _A_remo;
+	pointlist[1] = _B_remo;
+	pointlist[2] = _C_remo;
+	pointlist[3] = _D_remo;
 
 	//由于上下部分有阴影，当待检测标记边缘rect落在阴影中时不认为是标记
 	_A = _A + Point(0, 100);
 	_C = _C + Point(0, -100);
 	_D = _D + Point(0, -100);
 	_B = _B + Point(0, 100);
-	pointlist_r.push_back(_A);
-	pointlist_r.push_back(_B);
-	pointlist_r.push_back(_C);
-	pointlist_r.push_back(_D);
+	pointlist_r[0] = _A;
+	pointlist_r[1] = _B;
+	pointlist_r[2] = _C;
+	pointlist_r[3] = _D;
 }
 
 inline int CrossProduct(const Point &pre, const Point &cur, const Point &next)//pre是上一个点，cur是当前点，next是将要选择的点    
@@ -1086,15 +1086,19 @@ void Pretreatment::pretreatment(Mat &image, Block *_block, Faults *faults)
 	//导入分类数据并初始化一次
 	static int ret = (Dataload(), 1);
 
-	vector<vector<cv::Point>>filterContours;
-	filterContours.push_back(pointlist);
-	Mat E_img_mask(E_image.size(),CV_8UC1,Scalar(0));
+	vector<vector<cv::Point>>filterContours(1);
+	filterContours[0] = pointlist;
+	/*Mat E_img_mask(E_image.size(),CV_8UC1,Scalar(0));
 	drawContours(E_img_mask, filterContours, 0, Scalar(255), CV_FILLED);
-	bitwise_and(E_image, E_img_mask, E_image);
+	bitwise_and(E_image, E_img_mask, E_image);*/
 	recImg = boundingRect(pointlist);//截取瓷砖区域,对拍摄不全的区域也进行截取
 
 	//截取需要的部分
 	MidImg = E_image(Rect(recImg));
+	Mat MidImg_mask(MidImg.size(), CV_8UC1, Scalar(0));
+	drawContours(MidImg_mask, filterContours, 0, Scalar(255), CV_FILLED, 8, noArray(), 2147483647, Point(-recImg.x, -recImg.y));
+	bitwise_and(MidImg, MidImg_mask, MidImg);
+
 	original_Img_D = image(Rect(recImg));//缺陷检测原图
 
 	std::thread linepreprocess(std::mem_fn(&Pretreatment::line2preprocess), this);

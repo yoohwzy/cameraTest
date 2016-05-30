@@ -149,7 +149,11 @@ public:
 		hranges[1] = 255.0;
 		ranges[0] = hranges;
 		channels = 0;
-		in_or_out.resize(4,Point(0,0));//初始化空间大小
+
+		//初始化容器空间大小
+		in_or_out.resize(4, Point(0, 0));
+		pointlist.resize(4, Point(0, 0));
+		pointlist_r.resize(4, Point(0, 0));
 		CneedContours.reserve(200);
 		Warehousecontours.reserve(2);
 		needContour.reserve(200);
