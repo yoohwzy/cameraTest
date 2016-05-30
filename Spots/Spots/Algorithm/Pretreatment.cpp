@@ -583,7 +583,7 @@ void Pretreatment::statis_nol(vector<int> &_statis)
 	}
 	else
 	{
-		double resultsum_a = std::accumulate(std::begin(result) + 2, std::begin(result) + 11, 0.0);
+		double resultsum_a = std::accumulate(std::begin(result) + 2, std::begin(result) + 12, 0.0);
 		double resultsum_b = std::accumulate(std::begin(result) + 12, std::end(result), 0.0);
 		result[0] = resultsum_a / 10;
 		result[1] = resultsum_b / 10;
