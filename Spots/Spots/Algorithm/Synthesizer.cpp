@@ -4,7 +4,7 @@
 #include <Algorithm/BlockEdgeLineDetector.h>
 #include <Algorithm/EdgeFaultLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
-
+#include "Measurer.h"
 Synthesizer::Synthesizer(int _SN, int _Real_WidthMM, int _Real_LengthMM)
 {
 	SN = _SN;
@@ -41,9 +41,13 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 	{
 		return status == _Status::_NotFound ? Status::NotFound : Status::Rejected; 
 	}
-	// ‘—ÈÀ„∑®
-	EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
-	efld.Run();
+
+	Measurer m;
+	m.CalculateDuiJiaoXian(*p_block);
+
+
+	//EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
+	//efld.Run();
 	// ±ﬂ‘µ»±œ›
 	status = detectEdge(grayImg);
 	if (status != Synthesizer::_Status::_NEXT)

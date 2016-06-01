@@ -43,15 +43,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;$(ProjectDir);$(IncludePath)</IncludePath>
-    <ReferencePath>C:\SDK\lib;C:\SDK\bin;$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;C:\SDK\tbb44_20160128oss\include;$(IncludePath)</IncludePath>
+    <ReferencePath>C:\SDK\lib;C:\SDK\bin;C:\SDK\tbb44_20160128oss\bin\ia32\vc12;$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;C:\SDK\tbb44_20160128oss\lib\ia32\vc12;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;$(ProjectDir);$(IncludePath)</IncludePath>
-    <ReferencePath>C:\SDK\lib;C:\SDK\bin;$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;C:\SDK\tbb44_20160128oss\include;$(IncludePath)</IncludePath>
+    <ReferencePath>C:\SDK\lib;C:\SDK\bin;C:\SDK\tbb44_20160128oss\bin\ia32\vc12;$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;C:\SDK\tbb44_20160128oss\lib\ia32\vc12;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,8 +86,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>HAVE_TBB;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,6 +120,7 @@
     <ClInclude Include="Algorithm\BlockEdgeSimilarDetector.h" />
     <ClInclude Include="Algorithm\BlockLocalizer.h" />
     <ClInclude Include="Algorithm\EdgeFaultLineDetector.h" />
+    <ClInclude Include="Algorithm\Measurer.h" />
     <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
     <ClInclude Include="Algorithm\Synthesizer.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="Algorithm\BlockEdgeSimilarDetector.cpp" />
     <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
     <ClCompile Include="Algorithm\EdgeFaultLineDetector.cpp" />
+    <ClCompile Include="Algorithm\Measurer.cpp" />
     <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />
     <ClCompile Include="Algorithm\Synthesizer.cpp" />

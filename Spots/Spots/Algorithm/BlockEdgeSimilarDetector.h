@@ -6,6 +6,10 @@
 
 #include <thread>
 
+#include "tbb/tbb.h"  
+#include "tbb/task.h" 
+#include "tbb/tbb_stddef.h" 
+#pragma comment(lib, "tbb.lib")  
 //#define SAVE_IMG
 //#define BED_OUTPUT_DEBUG_INFO 1
 
@@ -57,7 +61,7 @@ private:
 
 	int ROI_WIDTH_LEFTRIGHT = 40;
 	const int ROI_HEIGHT_LEFTRIGHT = 70;
-	const int ROI_HEIGHT_INC = 35;//(float)(endY - startY) / 60 + 0.5;//范围增量
+	const int ROI_HEIGHT_INC = 70;//(float)(endY - startY) / 60 + 0.5;//范围增量
 
 
 	void doUp();
