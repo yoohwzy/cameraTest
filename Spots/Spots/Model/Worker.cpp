@@ -33,7 +33,7 @@ void Worker::work()
 
 
 	//开始图像处理
-	Synthesizer s = Synthesizer(SN, Real_WidthMM, Real_LengthMM);
+	Synthesizer s = Synthesizer(SN);
 	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 
@@ -119,13 +119,13 @@ void Worker::work()
 			ss << workerInfo << "type=" << type << endl;
 			MFCConsole::Output(ss.str());
 		}
-		P_Controller->ImgProcessOverCallBack(grayImg, type);
+		P_Controller->ImgProcessOverCallBack(grayImg, *(s.p_block), type);
 		//if (type > 1)
 		//	P_Controller->imageSave(tmp);
 	}
 	else
 	{
-		P_Controller->ImgProcessOverCallBack(grayImg, 0);
+		P_Controller->ImgProcessOverCallBack(grayImg, *(s.p_block), 0);
 	}
 
 

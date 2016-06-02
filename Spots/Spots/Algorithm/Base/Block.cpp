@@ -110,42 +110,7 @@ cv::Point Block::GetPonintByY(int y, Line *l)
 	return p;
 }
 
-void Block::ABCDAdjust()
-{
-	if (A.x < 0)
-		A.x = 0;
-	if (A.x >(imageWidth - 1))
-		A.x = (imageWidth - 1);
-	if (A.y < 0)
-		A.y = 0;
-	if (A.y >(imageHeight - 1))
-		A.y = (imageHeight - 1);
-
-
-	if (B.x < 0)
-		B.x = 0;
-	if (B.x >(imageWidth - 1))
-		B.x = (imageWidth - 1);
-	if (B.y < 0)
-		B.y = 0;
-	if (B.y >(imageHeight - 1))
-		B.y = (imageHeight - 1);
-
-	if (C.x < 0)
-		C.x = 0;
-	if (C.x >(imageWidth - 1))
-		C.x = (imageWidth - 1);
-	if (C.y < 0)
-		C.y = 0;
-	if (C.y >(imageHeight - 1))
-		C.y = (imageHeight - 1);
-
-	if (D.x < 0)
-		D.x = 0;
-	if (D.x >(imageWidth - 1))
-		D.x = (imageWidth - 1);
-	if (D.y < 0)
-		D.y = 0;
-	if (D.y >(imageHeight - 1))
-		D.y = (imageHeight - 1);
-}
+int Block::Standard_Width_mm = 600;//标准砖横长mm
+int Block::Standard_Length_mm = 300;//标准砖纵长mm
+double Block::X_mmPerPix = -1;
+double Block::Y_mmPerPix = -1;

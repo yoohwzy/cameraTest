@@ -72,9 +72,6 @@ void BlockLocalizer::Run()
 		}
 	}
 #endif
-
-	p_block->Axis_X_mmPerPix = p_block->Real_WidthMM * 2 / (double)(abs(p_block->B.x - p_block->A.x) + abs(p_block->C.x - p_block->D.x));
-	p_block->Axis_Y_mmPerPix = p_block->Real_LengthMM * 2 / (double)(abs(p_block->D.y - p_block->A.y) + abs(p_block->C.y - p_block->B.y));
 }
 
 BlockLocalizer::~BlockLocalizer()
@@ -731,13 +728,13 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 //		be.deep = l1 < l2 ? d1 : d2;
 //		if (updown)
 //		{
-//			be.length_mm = be.length*p_block->Axis_X_mmPerPix;
-//			be.deep_mm = be.deep*p_block->Axis_Y_mmPerPix;
+//			be.length_mm = be.length*Block::X_mmPerPix;
+//			be.deep_mm = be.deep*Block::Y_mmPerPix;
 //		}
 //		else
 //		{
-//			be.length_mm = be.length*p_block->Axis_Y_mmPerPix;
-//			be.deep_mm = be.deep*p_block->Axis_X_mmPerPix;
+//			be.length_mm = be.length*Block::Y_mmPerPix;
+//			be.deep_mm = be.deep*Block::X_mmPerPix;
 //		}
 //
 //

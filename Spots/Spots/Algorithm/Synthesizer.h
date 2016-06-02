@@ -25,7 +25,7 @@ public:
 		TypeC = 4,//C级
 		Rejected = 5,//不合格
 	};
-	Synthesizer(int _SN, int Real_WidthMM, int Real_LengthMM);
+	Synthesizer(int _SN);
 	~Synthesizer();
 	//传入线阵相机所拍照片（乘以3倍后）
 	Status Run(cv::Mat TileImg);
@@ -37,8 +37,6 @@ public:
 	Block *p_block = NULL;
 
 	//parameter
-	int Real_WidthMM = 600;//图像中瓷砖的横长
-	int Real_LengthMM = 300;//图像中瓷砖的纵长
 	double BlockLocalizer_THRESHOD = 10;			//边缘查找二值化阈值
 	double BlockLocalizer_ContinuePointCount = 30;	//连续多少个点则判断为边缘
 

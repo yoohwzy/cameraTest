@@ -89,15 +89,15 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	menu.LoadMenuW(IDR_MenuMain);
 	SetMenu(&menu);
 
-	int Real_WidthMM = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM))
-		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(StringHelper::int2CString(Real_WidthMM));
+	int Standard_Width_mm = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Standard_Width_mm", Standard_Width_mm))
+		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(StringHelper::int2CString(Standard_Width_mm));
 	else
 		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(L"600");
 
-	int Real_LengthMM = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM))
-		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(StringHelper::int2CString(Real_LengthMM));
+	int Standard_Length_mm = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Standard_Length_mm", Standard_Length_mm))
+		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(StringHelper::int2CString(Standard_Length_mm));
 	else
 		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(L"300");
 
@@ -629,13 +629,17 @@ void CSpotsMainDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-
+#include <Algorithm\Measurer.h>
 void CSpotsMainDlg::OnBnClickedBtnSizedingbiao()
 {
-	saveParameter(IDC_TB_Real_WidthMM, "SYS_IMG_CAPTURE", "Real_WidthMM");
-	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Real_LengthMM");
+	saveParameter(IDC_TB_Real_WidthMM, "SYS_STANDARD", "Standard_Width_mm");
+	saveParameter(IDC_TB_Real_LengthMM, "SYS_STANDARD", "Standard_Length_mm");
+	p_contrller->ResetParameter();
+	Measurer m;
+	m.BiaoDing(p_contrller->block);
 
-
+	SettingHelper::AddKey("SYS_STANDARD", "X_mmPerPix", StringHelper::double2string(Block::X_mmPerPix));
+	SettingHelper::AddKey("SYS_STANDARD", "Y_mmPerPix", StringHelper::double2string(Block::Y_mmPerPix));
 }
 void CSpotsMainDlg::saveParameter(int IDC, string SectionName, string key)
 {

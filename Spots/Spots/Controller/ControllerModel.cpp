@@ -149,8 +149,14 @@ void ControllerModel::ResetParameter()
 	int si = 0;
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "SAVE_IMG", si);
 	this->SAVE_IMG = si;
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM);
-	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM);
+
+	//尺寸相关
+	SettingHelper::GetKeyInt("SYS_STANDARD", "Standard_Width_mm", Block::Standard_Width_mm);
+	SettingHelper::GetKeyInt("SYS_STANDARD", "Standard_Length_mm", Block::Standard_Length_mm);
+	SettingHelper::GetKeyDouble("SYS_STANDARD", "X_mmPerPix", Block::X_mmPerPix);
+	SettingHelper::GetKeyDouble("SYS_STANDARD", "Y_mmPerPix", Block::Y_mmPerPix);
+
+	//触发、采图相关
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSIn", this->Capture_WaitTimeMSIn);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "WaitTimeMSOut", this->Capture_WaitTimeMSOut);
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "FrameTimeOut", this->Capture_FrameTimeOut);
@@ -233,8 +239,6 @@ void ControllerModel::ResetParameter()
 			w = worker2;
 		if (w != NULL)
 		{
-			w->Real_WidthMM = Real_WidthMM;
-			w->Real_LengthMM = Real_LengthMM;
 			w->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
 			w->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 

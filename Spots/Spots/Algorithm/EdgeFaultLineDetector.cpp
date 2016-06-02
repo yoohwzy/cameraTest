@@ -353,13 +353,13 @@ void EdgeFaultLineDetector::processVBS(vector<Faults::BrokenEdge> vbs, bool isUp
 		{
 			if (isUpDown)
 			{
-				vbs[i].length_mm = vbs[i].length * p_block->Axis_X_mmPerPix;
-				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_Y_mmPerPix;
+				vbs[i].length_mm = vbs[i].length * Block::X_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * Block::Y_mmPerPix;
 			}
 			else
 			{
-				vbs[i].length_mm = vbs[i].length * p_block->Axis_Y_mmPerPix;
-				vbs[i].deep_mm = vbs[i].deep * p_block->Axis_X_mmPerPix;
+				vbs[i].length_mm = vbs[i].length * Block::Y_mmPerPix;
+				vbs[i].deep_mm = vbs[i].deep * Block::X_mmPerPix;
 			}
 			p_faults->BrokenEdges.push_back(vbs[i]);
 		}

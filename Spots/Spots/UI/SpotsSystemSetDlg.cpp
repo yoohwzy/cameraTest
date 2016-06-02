@@ -160,7 +160,7 @@ void SpotsSystemSetDlg::OnBnClickedOk()
 	saveParameter(IDC_TB_WaitTimeMSOut, "SYS_IMG_CAPTURE", "WaitTimeMSOut");
 	saveParameter(IDC_TB_FrameTimeOut, "SYS_IMG_CAPTURE", "FrameTimeOut");
 	saveParameter(IDC_TB_Real_WidthMM, "SYS_IMG_CAPTURE", "Real_WidthMM");
-	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Real_LengthMM");
+	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Standard_Length_mm");
 
 
 	CDialogEx::OnOK();

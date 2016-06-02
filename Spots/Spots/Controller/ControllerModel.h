@@ -24,9 +24,9 @@ class ControllerModel
 {
 protected:
 	SpotsMainView*  spotsMainView = NULL;
-
 public:
-	ControllerModel(SpotsMainView* _spotsMainView) :	spotsMainView(_spotsMainView)
+	Block block = Block(0, 0);
+	ControllerModel(SpotsMainView* _spotsMainView) : spotsMainView(_spotsMainView)
 	{
 		spotsMainView->AddController(this);
 	}
@@ -38,9 +38,10 @@ public:
 	//处理结束后显示处理结果
 	//结果图像
 	//产品类型，1A 2B 3C 4Rejcet
-	void ImgProcessOverCallBack(cv::Mat image, int type)
+	void ImgProcessOverCallBack(cv::Mat image, Block b, int type)
 	{
 		ui_lock.lock();
+		block = b;
 		spotsMainView->ShowBigImg(image);
 		if (type != 0)
 		{
@@ -174,9 +175,6 @@ public:
 	/*                                */
 	/**********************************/
 	bool SAVE_IMG = false;//是否保存图片到硬盘
-
-	int Real_WidthMM = 600;//图像中瓷砖的横长
-	int Real_LengthMM = 300;//图像中瓷砖的纵长
 
 	int Capture_WaitTimeMSIn = 100;//等待瓷砖进入拍摄区的时间
 	int Capture_WaitTimeMSOut = 250;//等待瓷砖离开拍摄区的时间

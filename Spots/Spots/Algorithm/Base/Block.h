@@ -30,23 +30,26 @@ public:
 	Line UpLine;
 	Line DownLine;
 
-	int Real_WidthMM = 600;//图像中瓷砖的横长
-	int Real_LengthMM = 300;//图像中瓷砖的纵长
-	double Axis_X_mmPerPix = 1;//x轴方向上每像素代表多少毫米
-	double Axis_Y_mmPerPix = 1;//y轴方向上每像素代表多少毫米
+	//int Real_WidthMM = 600;//图像中瓷砖的横长
+	//int Real_LengthMM = 300;//图像中瓷砖的纵长
+	//double Axis_X_mmPerPix = 1;//x轴方向上每像素代表多少毫米
+	//double Axis_Y_mmPerPix = 1;//y轴方向上每像素代表多少毫米
 
 	//根据四个边算出ABCD四个点 若四个点位置不对，返回false
 	bool Lines2ABCD();
 	//根据ABCD四个点算出四个边
 	bool ABCD2Lines();
 
-	void ABCDAdjust();
-
 	cv::Point GetPonintByX(int x, Line *l);
 	cv::Point GetPonintByY(int y, Line *l);
-
+private:
 	//图像大小
 	int imageWidth = 0;
 	int imageHeight = 0;
+public:
+	static int Standard_Width_mm;//标准砖横长mm
+	static int Standard_Length_mm;//标准砖纵长mm
+	static double X_mmPerPix;//x轴方向上每像素代表多少毫米
+	static double Y_mmPerPix;//y轴方向上每像素代表多少毫米
 };
 

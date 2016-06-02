@@ -28,10 +28,6 @@ public:
 	ControllerModel *P_Controller = NULL;
 
 
-
-	//需要设置的参数
-	int Real_WidthMM = 600;//图像中瓷砖的横长
-	int Real_LengthMM = 300;//图像中瓷砖的纵长
 	// 瓷砖序列号
 	int SN = 0;
 

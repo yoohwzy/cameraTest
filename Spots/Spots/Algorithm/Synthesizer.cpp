@@ -5,11 +5,9 @@
 #include <Algorithm/EdgeFaultLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
 #include "Measurer.h"
-Synthesizer::Synthesizer(int _SN, int _Real_WidthMM, int _Real_LengthMM)
+Synthesizer::Synthesizer(int _SN)
 {
 	SN = _SN;
-	Real_WidthMM = _Real_WidthMM;
-	Real_LengthMM = _Real_LengthMM;
 }
 
 
@@ -22,8 +20,6 @@ Synthesizer::~Synthesizer()
 Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 {
 	p_block = new Block(TileImg.size().width, TileImg.size().height);
-	p_block->Real_WidthMM = Real_WidthMM;
-	p_block->Real_LengthMM = Real_LengthMM;
 
 	if (TileImg.cols == 0)
 	{
@@ -42,9 +38,15 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 		return status == _Status::_NotFound ? Status::NotFound : Status::Rejected; 
 	}
 
+	//若没有标定数据，则粗略计算以获得缺陷尺寸
+	if (Block::X_mmPerPix < 0)
+	{
+		Block::X_mmPerPix = Block::Standard_Width_mm / (double)abs(p_block->B.x - p_block->A.x);
+		Block::Y_mmPerPix = Block::Standard_Length_mm / (double)abs(p_block->C.y - p_block->B.y);
+	}
+
 	Measurer m;
 	m.CalculateDuiJiaoXian(*p_block);
-
 
 	//EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
 	//efld.Run();
