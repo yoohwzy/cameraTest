@@ -120,7 +120,6 @@
     <ClInclude Include="Algorithm\BlockEdgeSimilarDetector.h" />
     <ClInclude Include="Algorithm\BlockLocalizer.h" />
     <ClInclude Include="Algorithm\EdgeFaultLineDetector.h" />
-    <ClInclude Include="Algorithm\Measurer.h" />
     <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
     <ClInclude Include="Algorithm\Synthesizer.h" />
@@ -160,7 +159,6 @@
     <ClCompile Include="Algorithm\BlockEdgeSimilarDetector.cpp" />
     <ClCompile Include="Algorithm\BlockLocalizer.cpp" />
     <ClCompile Include="Algorithm\EdgeFaultLineDetector.cpp" />
-    <ClCompile Include="Algorithm\Measurer.cpp" />
     <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />
     <ClCompile Include="Algorithm\Synthesizer.cpp" />

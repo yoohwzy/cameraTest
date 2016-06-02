@@ -110,7 +110,123 @@ cv::Point Block::GetPonintByY(int y, Line *l)
 	return p;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int Block::Standard_Width_mm = 600;//标准砖横长mm
 int Block::Standard_Length_mm = 300;//标准砖纵长mm
 double Block::X_mmPerPix = -1;
 double Block::Y_mmPerPix = -1;
+
+
+
+void Block::CalculateDuiJiaoXian(Block *p_b)
+{
+	p_b->ab_pix = sqrt((p_b->A.y - p_b->B.y)*(p_b->A.y - p_b->B.y) + (p_b->A.x - p_b->B.x)*(p_b->A.x - p_b->B.x));
+	p_b->bc_pix = sqrt((p_b->C.y - p_b->B.y)*(p_b->C.y - p_b->B.y) + (p_b->C.x - p_b->B.x)*(p_b->C.x - p_b->B.x));
+	p_b->cd_pix = sqrt((p_b->C.y - p_b->D.y)*(p_b->C.y - p_b->D.y) + (p_b->C.x - p_b->D.x)*(p_b->C.x - p_b->D.x));
+	p_b->da_pix = sqrt((p_b->A.y - p_b->D.y)*(p_b->A.y - p_b->D.y) + (p_b->A.x - p_b->D.x)*(p_b->A.x - p_b->D.x));
+
+	p_b->ac_pix = (sqrt(p_b->ab_pix*p_b->ab_pix + p_b->bc_pix*p_b->bc_pix) + sqrt(p_b->da_pix*p_b->da_pix + p_b->cd_pix*p_b->cd_pix)) / 2;
+	p_b->bd_pix = (sqrt(p_b->cd_pix*p_b->cd_pix + p_b->bc_pix*p_b->bc_pix) + sqrt(p_b->ab_pix*p_b->ab_pix + p_b->da_pix*p_b->bc_pix)) / 2;
+}
+
+
+void Block::Calculate(Block *p_b)
+{
+	p_b->ab_pix = sqrt((p_b->A.y - p_b->B.y)*(p_b->A.y - p_b->B.y) + (p_b->A.x - p_b->B.x)*(p_b->A.x - p_b->B.x));
+	p_b->bc_pix = sqrt((p_b->C.y - p_b->B.y)*(p_b->C.y - p_b->B.y) + (p_b->C.x - p_b->B.x)*(p_b->C.x - p_b->B.x));
+	p_b->cd_pix = sqrt((p_b->C.y - p_b->D.y)*(p_b->C.y - p_b->D.y) + (p_b->C.x - p_b->D.x)*(p_b->C.x - p_b->D.x));
+	p_b->da_pix = sqrt((p_b->A.y - p_b->D.y)*(p_b->A.y - p_b->D.y) + (p_b->A.x - p_b->D.x)*(p_b->A.x - p_b->D.x));
+
+	p_b->ac_pix = (sqrt(p_b->ab_pix*p_b->ab_pix + p_b->bc_pix*p_b->bc_pix) + sqrt(p_b->da_pix*p_b->da_pix + p_b->cd_pix*p_b->cd_pix)) / 2;
+	p_b->bd_pix = (sqrt(p_b->cd_pix*p_b->cd_pix + p_b->bc_pix*p_b->bc_pix) + sqrt(p_b->ab_pix*p_b->ab_pix + p_b->da_pix*p_b->bc_pix)) / 2;
+
+
+	//AB边
+	if (1 == 1)
+	{
+		double y_offsetMM = abs(p_b->B.y - p_b->A.y) * Block::Y_mmPerPix;//A B两点间高度落差mm
+		if (y_offsetMM > 7)//为什么是7？假设上边长300mm，投影到水平方向后为299.9mm，则AB点高度差应为300平方-299.9平方≈7.7平方
+		{
+			double d1 = abs(p_b->B.x - p_b->A.x)*Block::X_mmPerPix;
+			p_b->ab_mm = sqrt(d1*d1 + y_offsetMM*y_offsetMM);
+		}
+		else
+			p_b->ab_mm = abs(p_b->B.x - p_b->A.x)*Block::X_mmPerPix;
+	}
+	//CD边
+	if (1 == 1)
+	{
+		double y_offsetMM = abs(p_b->C.y - p_b->D.y) * Block::Y_mmPerPix;
+		if (y_offsetMM > 7)//为什么是7？假设上边长300mm，投影到水平方向后为299.9mm，则AB点高度差应为300平方-299.9平方≈7.7平方
+		{
+			double d1 = abs(p_b->C.x - p_b->D.x)*Block::X_mmPerPix;
+			p_b->cd_mm = sqrt(d1*d1 + y_offsetMM*y_offsetMM);
+		}
+		else
+			p_b->cd_mm = abs(p_b->C.x - p_b->D.x)*Block::X_mmPerPix;
+	}
+	//BC
+	if (1 == 1)
+	{
+		double x_offsetMM = abs(p_b->B.x - p_b->C.x) * Block::X_mmPerPix;
+		if (x_offsetMM > 7)
+		{
+			double d1 = abs(p_b->C.y - p_b->B.y)*Block::Y_mmPerPix;
+			p_b->bc_mm = sqrt(d1*d1 + x_offsetMM*x_offsetMM);
+		}
+		else
+			p_b->bc_mm = abs(p_b->C.y - p_b->B.y)*Block::Y_mmPerPix;
+	}
+	//AD
+	if (1 == 1)
+	{
+		double x_offsetMM = abs(p_b->A.x - p_b->D.x) * Block::X_mmPerPix;
+		if (x_offsetMM > 7)
+		{
+			double d1 = abs(p_b->A.y - p_b->D.y)*Block::Y_mmPerPix;
+			p_b->da_mm = sqrt(d1*d1 + x_offsetMM*x_offsetMM);
+		}
+		else
+			p_b->da_mm = abs(p_b->A.y - p_b->D.y)*Block::Y_mmPerPix;
+	}
+
+	p_b->ac_mm = (sqrt(p_b->ab_mm*p_b->ab_mm + p_b->bc_mm*p_b->bc_mm) + sqrt(p_b->da_mm*p_b->da_mm + p_b->cd_mm*p_b->cd_mm)) / 2;
+	p_b->bd_mm = (sqrt(p_b->cd_mm*p_b->cd_mm + p_b->bc_mm*p_b->bc_mm) + sqrt(p_b->ab_mm*p_b->ab_mm + p_b->da_mm*p_b->bc_mm)) / 2;
+}
+
+//保证竖直边一定是垂直时调用
+void Block::BiaoDing(Block *p_b)
+{
+	//计算竖直方向一个像素代表多少毫米
+	double bc_pix = (p_b->C.y - p_b->B.y + p_b->D.y - p_b->A.y) / 2;
+	Block::Y_mmPerPix = Block::Standard_Length_mm / bc_pix;
+
+	//计算水平方向一个像素代表多少毫米
+	double y_offsetMM = abs(p_b->B.y - p_b->A.y) * Block::Y_mmPerPix;//A B两点间高度落差mm
+	if (y_offsetMM > 7)//为什么是7？假设上边长300mm，投影到水平方向后为299.9mm，则AB点高度差应为300平方-299.9平方≈7.7平方
+	{
+		double x_lengthMM = sqrt(Block::Standard_Width_mm*Block::Standard_Width_mm - y_offsetMM*y_offsetMM);
+		Block::X_mmPerPix = x_lengthMM / (double)(p_b->B.x - p_b->A.x);
+	}
+	else
+	{
+		Block::X_mmPerPix = Block::Standard_Width_mm / (double)(p_b->B.x - p_b->A.x);
+	}
+}

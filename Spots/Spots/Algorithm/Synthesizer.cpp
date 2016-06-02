@@ -4,7 +4,7 @@
 #include <Algorithm/BlockEdgeLineDetector.h>
 #include <Algorithm/EdgeFaultLineDetector.h>
 #include <Class\Debug\MFCConsole.h>
-#include "Measurer.h"
+
 Synthesizer::Synthesizer(int _SN)
 {
 	SN = _SN;
@@ -13,7 +13,7 @@ Synthesizer::Synthesizer(int _SN)
 
 Synthesizer::~Synthesizer()
 {
-	//delete p_block;
+	delete p_block;
 }
 
 //运行算法，返回状态
@@ -45,8 +45,7 @@ Synthesizer::Status Synthesizer::Run(cv::Mat TileImg)
 		Block::Y_mmPerPix = Block::Standard_Length_mm / (double)abs(p_block->C.y - p_block->B.y);
 	}
 
-	Measurer m;
-	m.CalculateDuiJiaoXian(*p_block);
+	Block::Calculate(p_block);
 
 	//EdgeFaultLineDetector efld = EdgeFaultLineDetector(grayImg, p_block, &faults);
 	//efld.Run();

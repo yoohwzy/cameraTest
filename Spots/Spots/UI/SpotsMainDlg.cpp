@@ -629,14 +629,12 @@ void CSpotsMainDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-#include <Algorithm\Measurer.h>
 void CSpotsMainDlg::OnBnClickedBtnSizedingbiao()
 {
 	saveParameter(IDC_TB_Real_WidthMM, "SYS_STANDARD", "Standard_Width_mm");
 	saveParameter(IDC_TB_Real_LengthMM, "SYS_STANDARD", "Standard_Length_mm");
 	p_contrller->ResetParameter();
-	Measurer m;
-	m.BiaoDing(p_contrller->block);
+	Block::BiaoDing(&p_contrller->block);
 
 	SettingHelper::AddKey("SYS_STANDARD", "X_mmPerPix", StringHelper::double2string(Block::X_mmPerPix));
 	SettingHelper::AddKey("SYS_STANDARD", "Y_mmPerPix", StringHelper::double2string(Block::Y_mmPerPix));

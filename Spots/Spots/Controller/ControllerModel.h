@@ -66,6 +66,8 @@ public:
 
 			spotsMainView->ShowLogImg(logImg.DrawingBoard);
 			spotsMainView->UpdateStatistics();
+
+
 		}
 		ui_lock.unlock(); 
 	}
