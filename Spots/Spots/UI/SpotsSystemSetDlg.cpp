@@ -81,22 +81,6 @@ BOOL SpotsSystemSetDlg::OnInitDialog()
 		GetDlgItem(IDC_TB_FrameTimeOut)->SetWindowText(StringHelper::int2CString(FrameTimeOut));
 	else
 		GetDlgItem(IDC_TB_FrameTimeOut)->SetWindowText(L"2000");
-
-
-
-	int Real_WidthMM = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM))
-		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(StringHelper::int2CString(Real_WidthMM));
-	else
-		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(L"600");
-
-	int Real_LengthMM = 0;
-	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM))
-		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(StringHelper::int2CString(Real_LengthMM));
-	else
-		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(L"300");
-
-
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 

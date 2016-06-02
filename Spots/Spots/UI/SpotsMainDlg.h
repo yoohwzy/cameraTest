@@ -67,7 +67,10 @@ private:
 	afx_msg void OnBnClickedBtnSelectvirtualimg();
 	afx_msg void OnBnClickedBtnvirtualtigger();
 
+	
+	void saveParameter(int IDC, string SectionName, string key);
 
+	//UI缩放相关
 	struct control//用于记录控件原始位置
 	{
 		control(){};
@@ -106,8 +109,14 @@ public:
 	void SwitchModel2Virtual(bool switchToV);
 
 	// 供Controller调用 END
+
+
+
+
+
 	afx_msg void OnMenu_OPEN_SYS_SET_DLG();
 	afx_msg void OnBtnMenuEdgeset();
 	afx_msg void OnMenuClassiySetClick();
 	afx_msg void OnSurfaceParaSet();
+	afx_msg void OnBnClickedBtnSizedingbiao();
 };

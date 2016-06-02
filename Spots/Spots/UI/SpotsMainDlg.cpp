@@ -17,6 +17,7 @@
 #include "SpotsEdgeParameterSetDlg.h"
 #include "SpotsClassifySet.h"
 #include "SpotsSurfaceParaSetDlg.h"
+#include <Class/Setting/SettingHelper.h>
 
 
 
@@ -49,6 +50,7 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_COMMAND(ID_32778, &CSpotsMainDlg::OnMenuClassiySetClick)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_32775, &CSpotsMainDlg::OnSurfaceParaSet)
+	ON_BN_CLICKED(IDC_BTN_SizeDingBiao, &CSpotsMainDlg::OnBnClickedBtnSizedingbiao)
 END_MESSAGE_MAP()
 
 
@@ -87,10 +89,22 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	menu.LoadMenuW(IDR_MenuMain);
 	SetMenu(&menu);
 
+	int Real_WidthMM = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_WidthMM", Real_WidthMM))
+		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(StringHelper::int2CString(Real_WidthMM));
+	else
+		GetDlgItem(IDC_TB_Real_WidthMM)->SetWindowText(L"600");
+
+	int Real_LengthMM = 0;
+	if (SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "Real_LengthMM", Real_LengthMM))
+		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(StringHelper::int2CString(Real_LengthMM));
+	else
+		GetDlgItem(IDC_TB_Real_LengthMM)->SetWindowText(L"300");
+
 	//系统初始化
 	p_contrller->Init();
 
-	save1control(0);
+	save1control(0);//保存主窗口
 	
 	save1control(IDC_BTN_SelectVirtualImg);
 	save1control(IDC_BTN_virtualTigger);
@@ -135,6 +149,16 @@ BOOL CSpotsMainDlg::OnInitDialog()
 	save1control(IDC_LB_yearC);
 	save1control(IDC_LB_yearGood);
 	save1control(IDC_LB_yearFineRate);
+
+	save1control(IDC_LB_SIZESHOW);
+	save1control(IDC_GB_SIZE);
+	save1control(IDC_LB_SZIE_X);
+	save1control(IDC_TB_Real_WidthMM);
+	save1control(IDC_LB_SIZE_Y);
+	save1control(IDC_TB_Real_LengthMM);
+	save1control(IDC_BTN_SizeDingBiao);
+	
+
 
 	initEndFlag = true;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE 
@@ -604,3 +628,19 @@ void CSpotsMainDlg::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
+
+
+void CSpotsMainDlg::OnBnClickedBtnSizedingbiao()
+{
+	saveParameter(IDC_TB_Real_WidthMM, "SYS_IMG_CAPTURE", "Real_WidthMM");
+	saveParameter(IDC_TB_Real_LengthMM, "SYS_IMG_CAPTURE", "Real_LengthMM");
+
+
+}
+void CSpotsMainDlg::saveParameter(int IDC, string SectionName, string key)
+{
+	//保存设置
+	CString cstr;
+	GetDlgItem(IDC)->GetWindowText(cstr);
+	SettingHelper::AddKey(SectionName, key, StringHelper::CString2string(cstr));
+}
