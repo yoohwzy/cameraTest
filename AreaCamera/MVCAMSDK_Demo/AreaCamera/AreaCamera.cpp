@@ -7,11 +7,11 @@
 #include <process.h>
 
 #pragma comment(lib,"MVCAMSDK.lib")
-
+#include <string.h>
 #include "./include/CameraApi.h"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 UINT            m_threadID;		//图像抓取线程的ID
 HANDLE          m_hDispThread;	//图像抓取线程的句柄
@@ -100,7 +100,7 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 	{
 		if (CameraGetImageBuffer(hCamera, &sFrameInfo, &pbyBuffer, 1000) == CAMERA_STATUS_SUCCESS)
 		{
-			double t = (double)getTickCount();
+			double t = (double)cv::getTickCount();
 			//将获得的原始数据转换成RGB格式的数据，同时经过ISP模块，对图像进行降噪，边沿提升，颜色校正等处理。
 			//我公司大部分型号的相机，原始数据都是Bayer格式的
 			status = CameraImageProcess(hCamera, pbyBuffer, m_pFrameBuffer, &sFrameInfo);//连续模式
@@ -127,7 +127,7 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 				//cvFlip(iplImage, iplImage);
 				cv::Mat img(iplImage);
 				cv::imshow("123", img);
-				t = ((double)getTickCount() - t) / getTickFrequency();
+				t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 				CameraGetFrameSpeed(m_hCamera, &poFrameSpeed);
 				std::cout << "the time is :" << t << " s, " << 1 / (t + 0.001) << "Hz, Camera Out:" << poFrameSpeed << endl;
 				imgindex++;
@@ -138,12 +138,12 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 			}
 
 			//在成功调用CameraGetImageBuffer后，必须调用CameraReleaseImageBuffer来释放获得的buffer。
-			//否则再次调用CameraGetImageBuffer时，程序将被挂起，知道其他线程中调用CameraReleaseImageBuffer来释放了buffer
+			//否则再次调用CameraGetImageBuffer时，程序将被挂起，直到其他线程中调用CameraReleaseImageBuffer来释放了buffer
 			CameraReleaseImageBuffer(hCamera, pbyBuffer);
 
 			memcpy(&m_sFrInfo, &sFrameInfo, sizeof(tSdkFrameHead));
 		}
-		int c = waitKey(5);
+		int c = cv::waitKey(5);
 
 		if (c == 'q' || c == 'Q' || (c & 255) == 27)
 		{
@@ -164,14 +164,10 @@ UINT WINAPI uiDisplayThread(LPVOID lpParam)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
+	//相机的设备信息
 	tSdkCameraDevInfo sCameraList[10];
-	INT iCameraNums;
+	INT iCameraNums = 10;//调用CameraEnumerateDevice前，先设置iCameraNums = 10，表示最多只读取10个设备，如果需要枚举更多的设备，请更改sCameraList数组的大小和iCameraNums的值
 	CameraSdkStatus status;
-	tSdkCameraCapbility sCameraInfo;
-
-	//枚举设备，获得设备列表
-	iCameraNums = 10;//调用CameraEnumerateDevice前，先设置iCameraNums = 10，表示最多只读取10个设备，如果需要枚举更多的设备，请更改sCameraList数组的大小和iCameraNums的值
 
 	if (CameraEnumerateDevice(sCameraList, &iCameraNums) != CAMERA_STATUS_SUCCESS || iCameraNums == 0)
 	{
@@ -190,27 +186,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 
-
-
-	//设置手动曝光
-	CameraSetAeState(m_hCamera, FALSE);
-	CameraSetExposureTime(m_hCamera, 80000);//曝光时间10ms = 10000微秒
-	CameraSetAnalogGain(m_hCamera, 1);//设置模拟增益16=1.6
-	//CameraSetMonochrome(m_hCamera, TRUE);//设置黑白图像
-
-	//tSdkCameraCapbility tcability;
-	//CameraGetCapability(m_hCamera, &tcability);
-	CameraSetFrameSpeed(m_hCamera, 2);//高速模式
-
-
-
 	//Get properties description for this camera.
-	CameraGetCapability(m_hCamera, &sCameraInfo);//"获得该相机的特性描述"
+	tSdkCameraCapbility sCameraInfo;
+	CameraGetCapability(m_hCamera, &sCameraInfo);// 获得相机的属性
+	
 
+	CameraSetAeState(m_hCamera, FALSE);//设置相机曝光的模式。自动或者手动。bState：TRUE，使能自动曝光；FALSE，停止自动曝光。
+	CameraSetExposureTime(m_hCamera, 80000);//曝光时间10ms = 10000微秒
+	CameraSetAnalogGain(m_hCamera, 10);//设置模拟增益16=1.6
+	//CameraSetMonochrome(m_hCamera, TRUE);//设置黑白图像
+	CameraSetFrameSpeed(m_hCamera, sCameraInfo.iFrameSpeedDesc - 1);//设定相机输出图像的帧率。iFrameSpeedSel：选择的帧率模式索引号，范围从 0 到CameraGetCapability 获得的信息结构体中	iFrameSpeedDesc - 1
+
+
+	//申请空间
 	m_pFrameBuffer = (BYTE *)CameraAlignMalloc(sCameraInfo.sResolutionRange.iWidthMax*sCameraInfo.sResolutionRange.iWidthMax * 3, 16);
 
 
-	if (sCameraInfo.sIspCapacity.bMonoSensor)
+	if (sCameraInfo.sIspCapacity.bMonoSensor)//ISP 能力描述，BOOL bMonoSensor; //表示该型号相机是否为黑白相机,如果是黑白相机，则颜色相关的功能都无法调节
 	{
 		CameraSetIspOutFormat(m_hCamera, CAMERA_MEDIA_TYPE_MONO8);
 	}
@@ -219,19 +211,23 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 	strcpy_s(g_CameraName, sCameraList[0].acFriendlyName);
-
+	//创建该相机的属性配置窗口。
 	CameraCreateSettingPage(m_hCamera, NULL,g_CameraName, NULL, NULL, 0);//"通知SDK内部建该相机的属性页面";
+
+
 
 #ifdef USE_CALLBACK_GRAB_IMAGE //如果要使用回调函数方式，定义USE_CALLBACK_GRAB_IMAGE这个宏
 	//Set the callback for image capture
 	CameraSetCallbackFunction(m_hCamera, GrabImageCallback, 0, NULL);//"设置图像抓取的回调函数";
 #else
 	m_hDispThread = (HANDLE)_beginthreadex(NULL, 0, &uiDisplayThread, (PVOID)m_hCamera, 0, &m_threadID);
+	SetThreadPriority(m_hDispThread, THREAD_PRIORITY_HIGHEST);
 #endif
 
-	CameraPlay(m_hCamera);
+	CameraPlay(m_hCamera);//调用 CameraPlay 函数，让相机进入工作模式，并且 SDK 开始接收来自相机的图像。
 
 
+	//相机初始化完成
 
 	CameraShowSettingPage(m_hCamera, TRUE);//TRUE显示相机配置界面。FALSE则隐藏。
 
@@ -252,17 +248,21 @@ int _tmain(int argc, _TCHAR* argv[])
 	sRoiResolution.uBinSumMode = 0;
 	sRoiResolution.uResampleMask = 0;
 	sRoiResolution.uSkipMode = 2;
-	CameraSetImageResolution(m_hCamera, &sRoiResolution);
+	CameraSetImageResolution(m_hCamera, &sRoiResolution);//设置预览的分辨率。
 
 	endThread = 0;
 	while (!endThread)
 	{
-		int c = waitKey(10);
+		int c = cv::waitKey(10);
 	}
 
+
+
+	//在退出程序前关闭相机(反初始化，非常重要，如果直接关闭程序而不
+	//反初始化相机，程序有可能会报内存错误)
 	CameraUnInit(m_hCamera);
 	CameraAlignFree(m_pFrameBuffer);
-	destroyWindow(g_CameraName);
+	cv::destroyWindow(g_CameraName);
 
 #ifdef USE_CALLBACK_GRAB_IMAGE
 	if (g_iplImage)
