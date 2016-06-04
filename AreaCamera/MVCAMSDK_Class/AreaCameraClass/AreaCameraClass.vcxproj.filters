@@ -27,9 +27,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MVCAM.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Include\CameraApi.h">
       <Filter>Include</Filter>
     </ClInclude>
@@ -41,6 +38,9 @@
     </ClInclude>
     <ClInclude Include="Include\CameraStatus.h">
       <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="MVCAM.h">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

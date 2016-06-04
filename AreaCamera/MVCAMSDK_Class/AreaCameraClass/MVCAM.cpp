@@ -9,6 +9,7 @@ MVCAM::MVCAM()
 
 MVCAM::~MVCAM()
 {
+	Release();
 }
 
 bool MVCAM::Init()
@@ -41,9 +42,12 @@ bool MVCAM::Init()
 
 
 	CameraSetAeState(m_hCamera, FALSE);//设置相机曝光的模式。自动或者手动。bState：TRUE，使能自动曝光；FALSE，停止自动曝光。
-	CameraSetExposureTime(m_hCamera, 80000);//曝光时间10ms = 10000微秒
-	CameraSetAnalogGain(m_hCamera, 10);//设置模拟增益16=1.6
-	//CameraSetMonochrome(m_hCamera, TRUE);//设置黑白图像
+	CameraSetExposureTime(m_hCamera, 10000 * ExposureTimeMS);//曝光时间10ms = 10000微秒
+	CameraSetAnalogGain(m_hCamera, 10 * AnalogGain);//设置模拟增益16=1.6
+	if (ColorType == CV_8U)
+	{
+		CameraSetMonochrome(m_hCamera, TRUE);//设置黑白图像
+	}
 	CameraSetFrameSpeed(m_hCamera, sCameraInfo.iFrameSpeedDesc - 1);//设定相机输出图像的帧率。iFrameSpeedSel：选择的帧率模式索引号，范围从 0 到CameraGetCapability 获得的信息结构体中	iFrameSpeedDesc - 1
 
 
@@ -64,22 +68,12 @@ bool MVCAM::Init()
 	//创建该相机的属性配置窗口。
 	CameraCreateSettingPage(m_hCamera, NULL, "cam", NULL, NULL, 0);//"通知SDK内部建该相机的属性页面";
 
-
-
-//#ifdef USE_CALLBACK_GRAB_IMAGE //如果要使用回调函数方式，定义USE_CALLBACK_GRAB_IMAGE这个宏
-//	//Set the callback for image capture
-//	CameraSetCallbackFunction(m_hCamera, GrabImageCallback, 0, NULL);//"设置图像抓取的回调函数";
-//#else
-//	m_hDispThread = (HANDLE)_beginthreadex(NULL, 0, &uiDisplayThread, (PVOID)m_hCamera, 0, &m_threadID);
-//	SetThreadPriority(m_hDispThread, THREAD_PRIORITY_HIGHEST);
-//#endif
-
-	CameraPlay(m_hCamera);//调用 CameraPlay 函数，让相机进入工作模式，并且 SDK 开始接收来自相机的图像。
+	//CameraPlay(m_hCamera);//调用 CameraPlay 函数，让相机进入工作模式，并且 SDK 开始接收来自相机的图像。
 
 
 	//相机初始化完成
 
-	CameraShowSettingPage(m_hCamera, TRUE);//TRUE显示相机配置界面。FALSE则隐藏。
+	CameraShowSettingPage(m_hCamera, FALSE);//TRUE显示相机配置界面。FALSE则隐藏。
 
 	tSdkImageResolution sRoiResolution;
 	memset(&sRoiResolution, 0, sizeof(sRoiResolution));
@@ -101,7 +95,66 @@ bool MVCAM::Init()
 	CameraSetImageResolution(m_hCamera, &sRoiResolution);//设置预览的分辨率。
 
 
-	MVCAM::HasInited = true;
+	HasInited = true;
 }
 
-bool MVCAM::HasInited = 0;
+void MVCAM::GetFrame(cv::Mat& img)
+{
+	tSdkFrameHead 	sFrameInfo;
+	CameraHandle    hCamera = (CameraHandle)m_hCamera;
+	BYTE*			pbyBuffer;
+	CameraSdkStatus status;
+
+
+
+	if (CameraGetImageBuffer(hCamera, &sFrameInfo, &pbyBuffer, 1000) == CAMERA_STATUS_SUCCESS)
+	{
+		double t = (double)cv::getTickCount();
+		//将获得的原始数据转换成RGB格式的数据，同时经过ISP模块，对图像进行降噪，边沿提升，颜色校正等处理。
+		//我公司大部分型号的相机，原始数据都是Bayer格式的
+		status = CameraImageProcess(hCamera, pbyBuffer, m_pFrameBuffer, &sFrameInfo);//连续模式
+
+		////分辨率改变了，则刷新背景
+		//if (m_sFrInfo.iWidth != sFrameInfo.iWidth || m_sFrInfo.iHeight != sFrameInfo.iHeight)
+		//{
+		//	m_sFrInfo.iWidth = sFrameInfo.iWidth;
+		//	m_sFrInfo.iHeight = sFrameInfo.iHeight;
+		//	//图像大小改变，通知重绘
+		//}
+
+		if (status == CAMERA_STATUS_SUCCESS)
+		{
+			////IplImage
+			////调用SDK封装好的显示接口来显示图像,您也可以将m_pFrameBuffer中的RGB数据通过其他方式显示，比如directX,OpengGL,等方式。
+			//CameraImageOverlay(hCamera, m_pFrameBuffer, &sFrameInfo);
+			//IplImage *iplImage = NULL;
+			//if (iplImage)
+			//{
+			//	cvReleaseImageHeader(&iplImage);
+			//}
+			//iplImage = cvCreateImageHeader(cvSize(sFrameInfo.iWidth, sFrameInfo.iHeight), IPL_DEPTH_8U, sFrameInfo.uiMediaType == CAMERA_MEDIA_TYPE_MONO8 ? 1 : 3);
+			//cvSetData(iplImage, m_pFrameBuffer, sFrameInfo.iWidth*(sFrameInfo.uiMediaType == CAMERA_MEDIA_TYPE_MONO8 ? 1 : 3));
+
+			//cv::Mat img(iplImage);
+			//cv::imshow("123", img);
+
+			//if (iplImage)
+			//{
+			//	cvReleaseImageHeader(&iplImage);
+			//}
+
+
+			//直接用MAT
+			cv::Mat OriginalImage;
+			if (ColorType == CV_8U)
+				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8U, m_pFrameBuffer).clone();
+			else
+				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8UC3, m_pFrameBuffer).clone();
+			img = OriginalImage;
+		}
+
+		//在成功调用CameraGetImageBuffer后，必须调用CameraReleaseImageBuffer来释放获得的buffer。
+		//否则再次调用CameraGetImageBuffer时，程序将被挂起，直到其他线程中调用CameraReleaseImageBuffer来释放了buffer
+		CameraReleaseImageBuffer(hCamera, pbyBuffer);
+	}
+}
