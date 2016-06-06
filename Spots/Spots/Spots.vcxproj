@@ -146,6 +146,7 @@
     <ClInclude Include="Spots.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UI\SpotAreaCamSetDlg.h" />
     <ClInclude Include="UI\SpotsClassifySet.h" />
     <ClInclude Include="UI\SpotsEdgeParameterSetDlg.h" />
     <ClInclude Include="UI\SpotsMainDlg.h" />
@@ -182,6 +183,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="UI\SpotAreaCamSetDlg.cpp" />
     <ClCompile Include="UI\SpotsClassifySet.cpp" />
     <ClCompile Include="UI\SpotsEdgeParameterSetDlg.cpp" />
     <ClCompile Include="UI\SpotsMainDlg.cpp" />

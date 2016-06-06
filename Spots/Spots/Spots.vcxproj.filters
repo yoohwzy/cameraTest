@@ -186,6 +186,9 @@
     <ClInclude Include="UI\SpotsSurfaceParaSetDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="UI\SpotAreaCamSetDlg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -276,6 +279,9 @@
       <Filter>Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="UI\SpotsSurfaceParaSetDlg.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\SpotAreaCamSetDlg.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>

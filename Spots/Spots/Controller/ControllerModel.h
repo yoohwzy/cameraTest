@@ -13,7 +13,7 @@
 #include <Model\Worker.h>
 #include <Model\LogImgGenerator.h>
 #include <Model\Arm.h>
-
+//#include <Model\MainHueScanner.h>
 
 using namespace std;
 
@@ -119,7 +119,7 @@ protected:
 	PCI1761 pci1761;
 	LogImgGenerator logImg;
 	Arm arm;
-
+	//MainHueScanner mainHueScanner = MainHueScanner(this);
 	//同时只允许两个工人工作，即只能两张图（两块砖）
 	//工人1
 	Worker *worker1 = NULL;
