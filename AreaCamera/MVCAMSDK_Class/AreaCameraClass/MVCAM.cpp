@@ -42,8 +42,8 @@ bool MVCAM::Init()
 
 
 	CameraSetAeState(m_hCamera, FALSE);//设置相机曝光的模式。自动或者手动。bState：TRUE，使能自动曝光；FALSE，停止自动曝光。
-	CameraSetExposureTime(m_hCamera, 10000 * ExposureTimeMS);//曝光时间10ms = 10000微秒
-	CameraSetAnalogGain(m_hCamera, 10 * AnalogGain);//设置模拟增益16=1.6
+	CameraSetExposureTime(m_hCamera, 1000 * ExposureTimeMS);//曝光时间10ms = 1000微秒*10
+	CameraSetAnalogGain(m_hCamera, 10 * AnalogGain);//设置模拟增益16=1.6  该值乘以 CameraGetCapability  获得的相机属性结构体中sExposeDesc.fAnalogGainStep ，就得到实际的图像信号放大倍数。
 	if (ColorType == CV_8U)
 	{
 		CameraSetMonochrome(m_hCamera, TRUE);//设置黑白图像
@@ -73,7 +73,7 @@ bool MVCAM::Init()
 
 	//相机初始化完成
 
-	CameraShowSettingPage(m_hCamera, FALSE);//TRUE显示相机配置界面。FALSE则隐藏。
+	CameraShowSettingPage(m_hCamera, TRUE);//TRUE显示相机配置界面。FALSE则隐藏。
 
 	tSdkImageResolution sRoiResolution;
 	memset(&sRoiResolution, 0, sizeof(sRoiResolution));
@@ -105,11 +105,8 @@ void MVCAM::GetFrame(cv::Mat& img)
 	BYTE*			pbyBuffer;
 	CameraSdkStatus status;
 
-
-
 	if (CameraGetImageBuffer(hCamera, &sFrameInfo, &pbyBuffer, 1000) == CAMERA_STATUS_SUCCESS)
 	{
-		double t = (double)cv::getTickCount();
 		//将获得的原始数据转换成RGB格式的数据，同时经过ISP模块，对图像进行降噪，边沿提升，颜色校正等处理。
 		//我公司大部分型号的相机，原始数据都是Bayer格式的
 		status = CameraImageProcess(hCamera, pbyBuffer, m_pFrameBuffer, &sFrameInfo);//连续模式
