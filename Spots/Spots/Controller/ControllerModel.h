@@ -85,7 +85,10 @@ public:
 		else
 			MFCConsole::Output("当前为不保存图片模式\r\n");
 	};
-
+	//主色调错误后的回调函数
+	void MainHueErrorCallBack(int SN,cv::Mat img)
+	{
+	}
 	// 在设置中调整了系统参数后，调用本方法将参数更新至算法中。
 	void ResetParameter();
 	/*****************虚拟相机模式方法*****************/

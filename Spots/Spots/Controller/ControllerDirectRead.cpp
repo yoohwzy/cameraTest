@@ -86,7 +86,7 @@ void ControllerDirectRead::TiggerStartWatch()
 		//¿ªÊ¼¼à¿Ø´¥·¢
 		std::thread t_tiggerThread(std::mem_fn(&ControllerDirectRead::triggerWatcherThread), this);
 		auto tn = t_tiggerThread.native_handle();
-		SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+		SetThreadPriority(tn, THREAD_PRIORITY_HIGHEST);
 		t_tiggerThread.detach();
 
 		watcher_lock.unlock();

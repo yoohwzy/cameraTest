@@ -9,6 +9,11 @@
 //#define WORKER_DEBUG
 
 class ControllerModel;// 解决类互相包含
+
+
+//工人类
+//负责当线阵相机采集图像后，进行算法处理的调度
+//以及当处理完成后的绘图
 class Worker
 {
 public:
