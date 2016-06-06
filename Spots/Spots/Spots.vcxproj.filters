@@ -64,6 +64,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Class\Camera\MVCAM">
+      <UniqueIdentifier>{360b7ae4-e11c-4dfc-a2e5-ad71e4f2708d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Class\Camera\MVCAM\Include">
+      <UniqueIdentifier>{5c01fa7a-f893-4f97-bfa5-fe4e0aaa6287}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -189,6 +195,24 @@
     <ClInclude Include="UI\SpotAreaCamSetDlg.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Model\MainHueScanner.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\MVCAM\MVCAM.h">
+      <Filter>Class\Camera\MVCAM</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraApi.h">
+      <Filter>Class\Camera\MVCAM\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraApiLoad.h">
+      <Filter>Class\Camera\MVCAM\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraDefine.H">
+      <Filter>Class\Camera\MVCAM\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraStatus.h">
+      <Filter>Class\Camera\MVCAM\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -284,6 +308,12 @@
     <ClCompile Include="UI\SpotAreaCamSetDlg.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="Model\MainHueScanner.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Class\Camera\MVCAM\MVCAM.cpp">
+      <Filter>Class\Camera\MVCAM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Spots.rc">
@@ -315,6 +345,9 @@
     </Library>
     <Library Include="Class\IOCard\PCI1761\odbccp32.lib">
       <Filter>Class\IOCard</Filter>
+    </Library>
+    <Library Include="Class\Camera\MVCAM\Include\MVCAMSDK.lib">
+      <Filter>源文件\资源文件</Filter>
     </Library>
   </ItemGroup>
 </Project>

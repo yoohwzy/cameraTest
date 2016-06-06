@@ -16,7 +16,6 @@
 #include <Model\LogImgGenerator.h>
 #include <Model\Arm.h>
 
-
 using namespace std;
 
 //#define Controller_DEBUG
@@ -44,6 +43,7 @@ public:
 	const int FrameRate = 5000;//当前线阵相机行频
 private:
 	E2VCameraDirectRead *p_e2v = NULL;
+	MainHueScanner *p_mainHueScanner = NULL;
 	void triggerWatcherThread() override;//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
 	void captureAndProcessThread() override;//采图与工作委托
 

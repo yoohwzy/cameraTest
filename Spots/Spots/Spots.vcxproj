@@ -127,6 +127,11 @@
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.h" />
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraApi.h" />
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraApiLoad.h" />
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraDefine.H" />
+    <ClInclude Include="Class\Camera\MVCAM\Include\CameraStatus.h" />
+    <ClInclude Include="Class\Camera\MVCAM\MVCAM.h" />
     <ClInclude Include="Class\Debug\MFCConsole.h" />
     <ClInclude Include="Class\Helper\StringHelper.h" />
     <ClInclude Include="Class\IOCard\PCI1761\bdaqctrl.h" />
@@ -140,6 +145,7 @@
     <ClInclude Include="CvvImage.h" />
     <ClInclude Include="Model\Arm.h" />
     <ClInclude Include="Model\LogImgGenerator.h" />
+    <ClInclude Include="Model\MainHueScanner.h" />
     <ClInclude Include="Model\ModelVirtual.h" />
     <ClInclude Include="Model\Worker.h" />
     <ClInclude Include="Resource.h" />
@@ -167,6 +173,7 @@
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraModel.cpp" />
+    <ClCompile Include="Class\Camera\MVCAM\MVCAM.cpp" />
     <ClCompile Include="Class\Debug\MFCConsole.cpp" />
     <ClCompile Include="Class\IOCard\PCI1761\PCI1761.cpp" />
     <ClCompile Include="Class\Setting\SettingHelper.cpp" />
@@ -177,6 +184,7 @@
     <ClCompile Include="CvvImage.cpp" />
     <ClCompile Include="Model\Arm.cpp" />
     <ClCompile Include="Model\LogImgGenerator.cpp" />
+    <ClCompile Include="Model\MainHueScanner.cpp" />
     <ClCompile Include="Model\Worker.cpp" />
     <ClCompile Include="Spots.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -202,6 +210,7 @@
     <Image Include="res\Spots.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Class\Camera\MVCAM\Include\MVCAMSDK.lib" />
     <Library Include="Class\IOCard\PCI1761\Adsapi32.lib" />
     <Library Include="Class\IOCard\PCI1761\odbc32.lib" />
     <Library Include="Class\IOCard\PCI1761\odbccp32.lib" />

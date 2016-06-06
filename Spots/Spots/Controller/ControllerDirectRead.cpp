@@ -54,6 +54,12 @@ void ControllerDirectRead::Init()
 		}
 
 	}
+
+	//初始化面阵相机
+	if (1 == 1)
+	{
+		p_mainHueScanner = new MainHueScanner(this);
+	}
 	baseInit();
 }
 void ControllerDirectRead::Release()
@@ -73,6 +79,11 @@ void ControllerDirectRead::Release()
 	{
 		delete p_e2v;
 		p_e2v = NULL;
+	}
+	if (p_mainHueScanner != NULL)
+	{
+		delete p_mainHueScanner;
+		p_mainHueScanner = NULL;
 	}
 }
 

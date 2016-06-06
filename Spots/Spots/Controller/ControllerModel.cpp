@@ -8,7 +8,9 @@
 #include <shlwapi.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
-
+//通用的初始化代码
+//初始化PCI1761、数据库、根据参数将系统切换到真实/虚拟相机模式
+//真实模式下调用TiggerStartWatch，开启监视线程
 void ControllerModel::baseInit()
 {
 	stringstream ss;
