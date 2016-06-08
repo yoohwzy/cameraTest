@@ -42,7 +42,7 @@ public:
 private:
 	E2VCameraCycleBuffer *p_e2v = NULL;
 	void triggerWatcherThread() override;//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图
-	void captureAndProcessThread() override;//采图与工作委托
+	void captureAndProcessThread(int sn = 0) override;//采图与工作委托
 
 	void frameIndexAdd(int& oldFrame, int add)
 	{

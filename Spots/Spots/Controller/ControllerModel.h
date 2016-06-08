@@ -165,7 +165,7 @@ public:
 
 protected:
 	virtual void triggerWatcherThread() = 0;//触发器监视线程
-	virtual void captureAndProcessThread() = 0;//采图与工作委托
+	virtual void captureAndProcessThread(int sn=0) = 0;//采图与工作委托
 
 
 

@@ -138,7 +138,7 @@ void ControllerCycleBuffer::triggerWatcherThread()
 
 			if (!IsGrabbing2)
 			{
-				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this);
+				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this, 0);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -158,7 +158,7 @@ void ControllerCycleBuffer::triggerWatcherThread()
 
 
 
-void ControllerCycleBuffer::captureAndProcessThread()
+void ControllerCycleBuffer::captureAndProcessThread(int sn)
 {
 	IsGrabbing2 = true;
 

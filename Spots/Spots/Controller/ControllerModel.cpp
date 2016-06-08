@@ -22,6 +22,8 @@ void ControllerModel::baseInit()
 		{
 			pci1761Inited = false;
 		}
+		else
+			pci1761Inited = true;
 	}
 
 

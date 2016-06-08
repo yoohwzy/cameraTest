@@ -52,15 +52,25 @@ void ControllerDirectRead::Init()
 			}
 			e2vInited = false;
 		}
-
+		else
+			e2vInited = true;
 	}
 
-	//初始化面阵相机
-	if (1 == 1)
-	{
-		p_mainHueScanner = new MainHueScanner(this);
-	}
 	baseInit();
+	if (pci1761Inited)
+	{
+		//初始化面阵相机
+		if (1 == 1)
+		{
+			p_mainHueScanner = new MainHueScanner(this);
+			if (!p_mainHueScanner->HasInited)
+			{
+				delete p_mainHueScanner;
+				p_mainHueScanner = NULL;
+				AfxMessageBox(L"未能初始化面阵相机，该模块被禁用！");
+			}
+		}
+	}
 }
 void ControllerDirectRead::Release()
 {
@@ -143,8 +153,16 @@ void ControllerDirectRead::triggerWatcherThread()
 				tiggerTimeSpan = cv::getTickCount();
 				MFCConsole::Output(ss.str());
 			}
+			//触发编号
+			int SN = 0;
 
-			//触发后等待时间
+			//启动面阵模块
+			if (p_mainHueScanner != NULL)
+			{
+				p_mainHueScanner->Run(SN);
+			}
+
+			//触发后线阵等待时间
 			if (Capture_WaitTimeMSIn > 0)
 			{
 #ifdef Controller_DEBUG
@@ -166,7 +184,7 @@ void ControllerDirectRead::triggerWatcherThread()
 			//开始采图
 			if (!captureIsRunning)
 			{
-				std::thread t_run(std::mem_fn(&ControllerDirectRead::captureAndProcessThread), this);
+				std::thread t_run(std::mem_fn(&ControllerDirectRead::captureAndProcessThread), this, 0);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -185,7 +203,7 @@ void ControllerDirectRead::triggerWatcherThread()
 
 
 
-void ControllerDirectRead::captureAndProcessThread()
+void ControllerDirectRead::captureAndProcessThread(int sn)
 {
 	captureIsRunning = true;
 	captureIndex++;
