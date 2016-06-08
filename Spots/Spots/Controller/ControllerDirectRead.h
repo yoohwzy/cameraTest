@@ -49,5 +49,4 @@ private:
 
 	//相机正在采图标志
 	bool captureIsRunning = false;
-	long captureIndex = 0;
 };

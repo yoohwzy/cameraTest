@@ -130,15 +130,23 @@ void ControllerCycleBuffer::triggerWatcherThread()
 			}
 
 			IsGrabbing = true;
-			t = cv::getTickCount();
-			tiggerTimeSpan = (cv::getTickCount() - tiggerTimeSpan) * 1000 / cv::getTickFrequency();
-			stringstream ss;
-			ss << "\r\n\r\n与上次触发间隔Timespan:" << tiggerTimeSpan << "ms" << endl;
-			tiggerTimeSpan = cv::getTickCount();
 
+			if (1 == 1)
+			{
+				t = cv::getTickCount();
+				tiggerTimeSpan = (cv::getTickCount() - tiggerTimeSpan) * 1000 / cv::getTickFrequency();
+				stringstream ss;
+				ss << "\r\n\r\n与上次触发间隔Timespan:" << tiggerTimeSpan << "ms" << endl;
+				tiggerTimeSpan = cv::getTickCount();
+				MFCConsole::Output(ss.str());
+			}
+
+			//触发编号
+			Statistics::TodayTiggerIndex++;
+			int SN = Statistics::TodayTiggerIndex;
 			if (!IsGrabbing2)
 			{
-				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this, 0);
+				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this, SN);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -151,6 +159,9 @@ void ControllerCycleBuffer::triggerWatcherThread()
 			}
 			//PauseFlag == 1;
 			IsGrabbing = false;
+		}
+		if (pci1761.GetTrailingEdgeIDI(7))
+		{
 		}
 		Sleep(10);
 	}
@@ -304,7 +315,7 @@ void ControllerCycleBuffer::captureAndProcessThread(int sn)
 	{
 		if (worker1->MyStatus == Worker::Free)
 		{
-			worker1->SN = index++;
+			worker1->SN = sn;
 			
 			worker1->image = image;
 			ss << "-------------------------Worker1 Start Work\r\n" << worker1->SN << endl;
@@ -322,7 +333,7 @@ void ControllerCycleBuffer::captureAndProcessThread(int sn)
 	{
 		if (worker2->MyStatus == Worker::Free)
 		{
-			worker2->SN = index++;
+			worker2->SN = sn;
 			worker2->image = image;
 			ss << "-------------------------Worker2 Start Work\r\n" << worker2->SN << endl;
 			MFCConsole::Output(ss.str());

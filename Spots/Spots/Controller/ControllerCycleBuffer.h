@@ -51,8 +51,6 @@ private:
 			oldFrame -= E2VCycleBuffer::BufferLength;
 	}
 
-
-	int index = 0;
 	bool IsGrabbing = false;//正在开启采图线程
 	bool IsGrabbing2 = false;//正在采图
 };

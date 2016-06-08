@@ -153,8 +153,10 @@ void ControllerDirectRead::triggerWatcherThread()
 				tiggerTimeSpan = cv::getTickCount();
 				MFCConsole::Output(ss.str());
 			}
+
 			//触发编号
-			int SN = 0;
+			Statistics::TodayTiggerIndex++;
+			int SN = Statistics::TodayTiggerIndex;
 
 			//启动面阵模块
 			if (p_mainHueScanner != NULL)
@@ -184,7 +186,7 @@ void ControllerDirectRead::triggerWatcherThread()
 			//开始采图
 			if (!captureIsRunning)
 			{
-				std::thread t_run(std::mem_fn(&ControllerDirectRead::captureAndProcessThread), this, 0);
+				std::thread t_run(std::mem_fn(&ControllerDirectRead::captureAndProcessThread), this, SN);
 				//auto tn = t_run.native_handle();
 				//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
 				t_run.detach();
@@ -197,6 +199,14 @@ void ControllerDirectRead::triggerWatcherThread()
 			}
 			//PauseFlag == 1;
 		}
+		if (pci1761.GetTrailingEdgeIDI(7))
+		{
+			//暂停面阵模块运行
+			if (p_mainHueScanner != NULL)
+			{
+				p_mainHueScanner->Pause();
+			}
+		}
 		Sleep(10);
 	}
 }
@@ -206,13 +216,10 @@ void ControllerDirectRead::triggerWatcherThread()
 void ControllerDirectRead::captureAndProcessThread(int sn)
 {
 	captureIsRunning = true;
-	captureIndex++;
-	if (captureIndex > 60000)
-		captureIndex = 1;
 	if (MFCConsole::IsOpened)
 	{
 		stringstream ss;
-		ss << "                                         captureIndex :" << captureIndex << endl;
+		ss << "                                         captureIndex :" << sn << endl;
 		MFCConsole::Output(ss.str());
 	}
 
@@ -234,7 +241,7 @@ void ControllerDirectRead::captureAndProcessThread(int sn)
 	{
 		if (worker1->MyStatus == Worker::Free)
 		{
-			worker1->SN = captureIndex;
+			worker1->SN = sn;
 			
 			worker1->image = image;
 			ss << "-------------------------Worker1 Start Work\r\n" << worker1->SN << endl;
@@ -252,7 +259,7 @@ void ControllerDirectRead::captureAndProcessThread(int sn)
 	{
 		if (worker2->MyStatus == Worker::Free)
 		{
-			worker2->SN = captureIndex;
+			worker2->SN = sn;
 			worker2->image = image;
 			ss << "-------------------------Worker2 Start Work\r\n" << worker2->SN << endl;
 			MFCConsole::Output(ss.str());
