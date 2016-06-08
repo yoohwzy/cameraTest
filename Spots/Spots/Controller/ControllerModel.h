@@ -174,7 +174,12 @@ public:
 	//停止监控触发器线程
 	virtual void TiggerStopWatch() = 0;
 	//主色调错误后的回调函数
-	virtual void MainHueErrorCallBack(int SN, cv::Mat img) = 0;
+	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
+		MainHueErrorSNs.push_back(SN);
+		ui_lock.lock();
+		spotsMainView->ShowBigImg(img);
+		ui_lock.unlock();
+	};
 	//用以存储色调错误的SN
 	vector<int> MainHueErrorSNs;
 protected:

@@ -6,8 +6,8 @@
 #include "SpotAreaCamSetDlg.h"
 #include "afxdialogex.h"
 #include <Class/Setting/SettingHelper.h>
-
-
+#include <thread>
+#include <Model\MainHueScanner.h>
 // SpotAreaCamSetDlg 对话框
 
 IMPLEMENT_DYNAMIC(SpotAreaCamSetDlg, CDialogEx)
@@ -19,6 +19,11 @@ SpotAreaCamSetDlg::SpotAreaCamSetDlg(CWnd* pParent /*=NULL*/)
 
 SpotAreaCamSetDlg::~SpotAreaCamSetDlg()
 {
+	if (p_mvcam != NULL)
+	{
+		delete p_mvcam;
+		p_mvcam = NULL;
+	}
 }
 
 
@@ -109,6 +114,7 @@ HBRUSH SpotAreaCamSetDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BEGIN_MESSAGE_MAP(SpotAreaCamSetDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SpotAreaCamSetDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_AreaCamSetDlg_BTN_DingBiao, &SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao)
 END_MESSAGE_MAP()
 
 
@@ -134,4 +140,55 @@ void SpotAreaCamSetDlg::OnBnClickedOk()
 	saveParameter(IDC_TB_AreaStandardHSVs, "AreaCam", "MainHSVs");
 	// TODO:  在此添加控件通知处理程序代码
 	CDialogEx::OnOK();
+}
+
+
+void SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao()
+{
+	if (biaoDingExitFlag)
+	{
+		p_mvcam = new MVCAM();
+		if (p_mvcam->Init())
+		{
+			SetDlgItemText(IDC_AreaCamSetDlg_BTN_DingBiao, L"结束定标");
+			p_mvcam->StartCapture();
+			biaoDingExitFlag = false;
+			std::thread t_run(std::mem_fn(&SpotAreaCamSetDlg::biaodingDispThread), this);
+			t_run.detach();
+		}
+		else
+		{
+			delete p_mvcam;
+			p_mvcam = NULL;
+			AfxMessageBox(L"初始化面阵相机失败！");
+		}
+	}
+	else
+	{
+		biaoDingExitFlag = true;
+		SetDlgItemText(IDC_AreaCamSetDlg_BTN_DingBiao, L"开始定标");
+		while (!biaodingDispThreadEndFlag)
+			Sleep(10);
+		if (p_mvcam != NULL)
+		{
+			delete p_mvcam;
+			p_mvcam = NULL;
+		}
+	}
+}
+void SpotAreaCamSetDlg::biaodingDispThread()
+{
+	biaodingDispThreadEndFlag = false;
+	cv::Mat disp;
+	while (!biaoDingExitFlag)
+	{
+		disp = p_mvcam->Grub();
+		cv::imshow("DingBiao", disp);
+		cv::waitKey(5);
+	}
+	biaodingDispThreadEndFlag = true;
+	MainHueScanner::DingBiao(disp);
+	stringstream ss;
+	ss << MainHueScanner::Standard_H << "," << MainHueScanner::Standard_S << "," << MainHueScanner::Standard_V;
+	GetDlgItem(IDC_TB_AreaStandardHSVs)->SetWindowText(StringHelper::string2CString(ss.str()));
 }
