@@ -60,19 +60,12 @@ bool MVCAM::Init()
 		CameraSetIspOutFormat(m_hCamera, CAMERA_MEDIA_TYPE_MONO8);
 	}
 
-
-
-
-	//char g_CameraName[64];
-	//strcpy_s(g_CameraName, sCameraList[0].acFriendlyName);
 	//创建该相机的属性配置窗口。
 	CameraCreateSettingPage(m_hCamera, NULL, "cam", NULL, NULL, 0);//"通知SDK内部建该相机的属性页面";
 
 	//CameraPlay(m_hCamera);//调用 CameraPlay 函数，让相机进入工作模式，并且 SDK 开始接收来自相机的图像。
 
-
 	//相机初始化完成
-
 	CameraShowSettingPage(m_hCamera, TRUE);//TRUE显示相机配置界面。FALSE则隐藏。
 
 	tSdkImageResolution sRoiResolution;
@@ -94,8 +87,8 @@ bool MVCAM::Init()
 	sRoiResolution.uSkipMode = 2;
 	CameraSetImageResolution(m_hCamera, &sRoiResolution);//设置预览的分辨率。
 
-
 	HasInited = true;
+	return true;
 }
 
 void MVCAM::GetFrame(cv::Mat& img)
@@ -111,17 +104,9 @@ void MVCAM::GetFrame(cv::Mat& img)
 		//我公司大部分型号的相机，原始数据都是Bayer格式的
 		status = CameraImageProcess(hCamera, pbyBuffer, m_pFrameBuffer, &sFrameInfo);//连续模式
 
-		////分辨率改变了，则刷新背景
-		//if (m_sFrInfo.iWidth != sFrameInfo.iWidth || m_sFrInfo.iHeight != sFrameInfo.iHeight)
-		//{
-		//	m_sFrInfo.iWidth = sFrameInfo.iWidth;
-		//	m_sFrInfo.iHeight = sFrameInfo.iHeight;
-		//	//图像大小改变，通知重绘
-		//}
-
 		if (status == CAMERA_STATUS_SUCCESS)
 		{
-			////IplImage
+			////使用IplImage
 			////调用SDK封装好的显示接口来显示图像,您也可以将m_pFrameBuffer中的RGB数据通过其他方式显示，比如directX,OpengGL,等方式。
 			//CameraImageOverlay(hCamera, m_pFrameBuffer, &sFrameInfo);
 			//IplImage *iplImage = NULL;
@@ -139,7 +124,6 @@ void MVCAM::GetFrame(cv::Mat& img)
 			//{
 			//	cvReleaseImageHeader(&iplImage);
 			//}
-
 
 			//直接用MAT
 			cv::Mat OriginalImage;

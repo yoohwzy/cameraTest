@@ -10,7 +10,9 @@
 #define MVSDK_API extern "C" __declspec(dllimport)
 #endif
 
-#include <afxwin.h>
+#ifndef _WINDOWS_
+#	include <afxwin.h>
+#endif
 #include "CameraDefine.h"
 #include "CameraStatus.h"
 
