@@ -11,6 +11,7 @@ Statistics::Statistics()
 Statistics::~Statistics()
 {
 }
+unsigned int Statistics::TodayTiggerIndex = 0;
 
 int Statistics::TodayAll = 0;
 int Statistics::TodayA = 0;
@@ -160,6 +161,7 @@ void Statistics::initToday()
 {
 	string sql = "INSERT INTO 历史记录 (日期,今日产量,A类,B类,C类,不合格数量,合格率) VALUES (format(now(), 'yyyy-mm-dd '),0,0,0,0,0,0)";
 	ASqlHelper::ExecuteNonQuery(sql);
+	Statistics::TodayTiggerIndex = 0;
 	Statistics::TodayAll = 0;
 	Statistics::TodayA = 0;
 	Statistics::TodayB = 0;

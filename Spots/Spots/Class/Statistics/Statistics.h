@@ -10,7 +10,7 @@ class Statistics
 public:
 	Statistics();
 	~Statistics();
-
+	static unsigned int TodayTiggerIndex;//今日的触发索引号
 	static int TodayAll;
 	static int TodayA;
 	static int TodayB;
