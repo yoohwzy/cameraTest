@@ -6,18 +6,27 @@
 //实例化后直接开启面阵相机采图线程
 MainHueScanner::MainHueScanner(ControllerModel *pController)
 {
-	p_Controller = pController;
 	mvcam.ColorType = CV_8U;
 	mvcam.ExposureTimeMS = 50;
 	mvcam.AnalogGain = 2;
 	mvcam.Init();
-	mvcam.StartCapture();
+	if (mvcam.HasInited)
+	{
+		HasInited = 1;
 
-	sn = 0;
-	std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
-	auto tn = t_run.native_handle();
-	SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
-	t_run.detach();
+		p_Controller = pController;
+
+		mvcam.StartCapture();
+		sn = 0;
+		std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
+		auto tn = t_run.native_handle();
+		SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+		t_run.detach();
+	}
+	else
+	{
+		HasInited = 0;
+	}
 }
 
 

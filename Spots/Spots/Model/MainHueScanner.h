@@ -18,6 +18,7 @@ public:
 	void Run(int SN){ sn = SN; };
 	void Pause(){ sn = 0; };
 	void Stop(){ stopFlag = true; };
+	bool HasInited = false;
 private:
 	ControllerModel *p_Controller = NULL;
 	int sn = 0;//Í¼ÏñÐòÁÐºÅ£¬Îª0Ê±ÔÝÍ£
