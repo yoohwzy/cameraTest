@@ -38,6 +38,7 @@ public:
 	void Release() override;
 	void TiggerStartWatch() override;
 	void TiggerStopWatch() override;
+	void MainHueErrorCallBack(int SN, cv::Mat img) override;
 
 private:
 	E2VCameraCycleBuffer *p_e2v = NULL;

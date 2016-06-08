@@ -272,3 +272,11 @@ void ControllerDirectRead::captureAndProcessThread(int sn)
 		}
 	}
 }
+
+void ControllerDirectRead::MainHueErrorCallBack(int SN, cv::Mat img)
+{
+	MainHueErrorSNs.push_back(SN);
+	ui_lock.lock();
+	spotsMainView->ShowBigImg(img);
+	ui_lock.unlock();
+}

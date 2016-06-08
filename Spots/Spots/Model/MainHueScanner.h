@@ -19,13 +19,18 @@ public:
 	void Pause(){ sn = 0; };
 	void Stop(){ stopFlag = true; };
 	bool HasInited = false;
+	//定标，计算出标准HSV并存储
+	static void DingBiao(cv::Mat);
+	static int Standard_H;
+	static int Standard_S;
+	static int Standard_V;
 private:
 	ControllerModel *p_Controller = NULL;
 	int sn = 0;//图像序列号，为0时暂停
 	bool stopFlag = false;
 	MVCAM mvcam;
 	void scanImg();
-	//分析是否有
+	//分析是否有缺陷
 	int analysis(cv::Mat);
 };
 

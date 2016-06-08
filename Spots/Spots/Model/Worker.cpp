@@ -119,13 +119,13 @@ void Worker::work()
 			ss << workerInfo << "type=" << type << endl;
 			MFCConsole::Output(ss.str());
 		}
-		P_Controller->ImgProcessOverCallBack(grayImg, *(s.p_block), type);
+		P_Controller->ImgProcessOverCallBack(SN, grayImg, *(s.p_block), type);
 		//if (type > 1)
 		//	P_Controller->imageSave(tmp);
 	}
 	else
 	{
-		P_Controller->ImgProcessOverCallBack(grayImg, *(s.p_block), 0);
+		P_Controller->ImgProcessOverCallBack(SN, grayImg, *(s.p_block), 0);
 	}
 
 

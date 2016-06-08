@@ -37,14 +37,31 @@ public:
 
 	//处理结束后显示处理结果
 	//结果图像
-	//产品类型，1A 2B 3C 4Rejcet
-	void ImgProcessOverCallBack(cv::Mat image, Block b, int type)
+	//产品类型，0 BL未找到砖 1A 2B 3C 4Rejcet
+	void ImgProcessOverCallBack(int SN, cv::Mat image, Block b, int type)
 	{
 		ui_lock.lock();
 		block = b;
 		spotsMainView->ShowBigImg(image);
 		if (type != 0)
 		{
+			if (type != 4)
+			{
+				//判断色调是否正确
+				vector<int>::iterator it;
+				for (it = MainHueErrorSNs.begin(); it != MainHueErrorSNs.end(); it++)
+				{
+					if (*it == SN)//如果该SN在MainHueErrorSNs有记录，说明色调有错
+					{
+						type = 4;
+						MainHueErrorSNs.erase(it);
+					}
+					else if (*it + 10 < SN)//若该SN远大于记录中的数值，则擦除这一记录
+						MainHueErrorSNs.erase(it);
+				}
+			}
+
+			//再根据
 			switch (type)
 			{
 			case 1:Statistics::AddTodayA();
@@ -66,8 +83,6 @@ public:
 
 			spotsMainView->ShowLogImg(logImg.DrawingBoard);
 			spotsMainView->UpdateStatistics();
-
-
 		}
 		ui_lock.unlock(); 
 	}
@@ -85,10 +100,6 @@ public:
 		else
 			MFCConsole::Output("当前为不保存图片模式\r\n");
 	};
-	//主色调错误后的回调函数
-	void MainHueErrorCallBack(int SN,cv::Mat img)
-	{
-	}
 	// 在设置中调整了系统参数后，调用本方法将参数更新至算法中。
 	void ResetParameter();
 	/*****************虚拟相机模式方法*****************/
@@ -162,7 +173,10 @@ public:
 	virtual void TiggerStartWatch() = 0;
 	//停止监控触发器线程
 	virtual void TiggerStopWatch() = 0;
-
+	//主色调错误后的回调函数
+	virtual void MainHueErrorCallBack(int SN, cv::Mat img) = 0;
+	//用以存储色调错误的SN
+	vector<int> MainHueErrorSNs;
 protected:
 	virtual void triggerWatcherThread() = 0;//触发器监视线程
 	virtual void captureAndProcessThread(int sn=0) = 0;//采图与工作委托

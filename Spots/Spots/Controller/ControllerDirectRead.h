@@ -37,6 +37,7 @@ public:
 	void Release() override;
 	void TiggerStartWatch() override;
 	void TiggerStopWatch() override;
+	void MainHueErrorCallBack(int SN, cv::Mat img) override;
 
 	//拍摄的长度，多少行
 	int PhotoHeight = 5000;
