@@ -17,6 +17,8 @@
 #include "SpotsEdgeParameterSetDlg.h"
 #include "SpotsClassifySet.h"
 #include "SpotsSurfaceParaSetDlg.h"
+#include "SpotAreaCamSetDlg.h"
+
 #include <Class/Setting/SettingHelper.h>
 
 
@@ -41,16 +43,17 @@ BEGIN_MESSAGE_MAP(CSpotsMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_RUN, &CSpotsMainDlg::OnBnClickedBtnRun)
 	ON_BN_CLICKED(IDC_BTN_SelectVirtualImg, &CSpotsMainDlg::OnBnClickedBtnSelectvirtualimg)
 	ON_BN_CLICKED(IDC_BTN_virtualTigger, &CSpotsMainDlg::OnBnClickedBtnvirtualtigger)
+	ON_BN_CLICKED(IDC_BTN_SizeDingBiao, &CSpotsMainDlg::OnBnClickedBtnSizedingbiao)
 	ON_WM_CTLCOLOR()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
-	ON_COMMAND(ID_32773, &CSpotsMainDlg::OnMenu_OPEN_SYS_SET_DLG)
-	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnBtnMenuEdgeset)
-	ON_COMMAND(ID_32778, &CSpotsMainDlg::OnMenuClassiySetClick)
 	ON_WM_SIZE()
-	ON_COMMAND(ID_32775, &CSpotsMainDlg::OnSurfaceParaSet)
-	ON_BN_CLICKED(IDC_BTN_SizeDingBiao, &CSpotsMainDlg::OnBnClickedBtnSizedingbiao)
+	ON_COMMAND(ID_32773, &CSpotsMainDlg::OnMenu_OPEN_SYS_SET_DLG)
+	ON_COMMAND(ID_BTN_Menu_EdgeSet, &CSpotsMainDlg::OnMenuBtnEdgeSet)
+	ON_COMMAND(ID_32775, &CSpotsMainDlg::OnMenuBtnSurfaceParaSet)
+	ON_COMMAND(MenuBtnAreaCamMainSet, &CSpotsMainDlg::OnMenuBtnAreaCamMainSet)
+	ON_COMMAND(MenuBtnClassiySet, &CSpotsMainDlg::OnMenuBtnClassiySet)
 END_MESSAGE_MAP()
 
 
@@ -558,7 +561,7 @@ void CSpotsMainDlg::OnMenu_OPEN_SYS_SET_DLG()
 	}
 }
 
-void CSpotsMainDlg::OnBtnMenuEdgeset()
+void CSpotsMainDlg::OnMenuBtnEdgeSet()
 {
 	SpotsEdgeParameterSetDlg m;
 	if (m.DoModal() == IDOK)
@@ -567,17 +570,25 @@ void CSpotsMainDlg::OnBtnMenuEdgeset()
 		p_contrller->ResetParameter();
 	}
 }
-void CSpotsMainDlg::OnMenuClassiySetClick()
+void CSpotsMainDlg::OnMenuBtnClassiySet()
 {
 	CSpotsClassifySet m;
 	if (m.DoModal() == IDOK)
 	{
-		// ¿ØÖÆÆ÷
+		p_contrller->ResetParameter();
+	}
+}
+void CSpotsMainDlg::OnMenuBtnAreaCamMainSet()
+{
+	SpotAreaCamSetDlg m;
+	if (m.DoModal() == IDOK)
+	{
 		p_contrller->ResetParameter();
 	}
 }
 
-void CSpotsMainDlg::OnSurfaceParaSet()
+
+void CSpotsMainDlg::OnMenuBtnSurfaceParaSet()
 {
 	SpotsSurfaceParaSetDlg m;
 	if (m.DoModal() == IDOK)
@@ -646,3 +657,4 @@ void CSpotsMainDlg::saveParameter(int IDC, string SectionName, string key)
 	GetDlgItem(IDC)->GetWindowText(cstr);
 	SettingHelper::AddKey(SectionName, key, StringHelper::CString2string(cstr));
 }
+

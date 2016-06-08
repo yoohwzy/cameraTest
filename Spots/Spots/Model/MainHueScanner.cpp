@@ -74,12 +74,6 @@ int MainHueScanner::analysis(cv::Mat img)
 	int channels_S = 1;
 	int channels_V = 2;
 
-	/// 直方图
-	MatND hist_H, hist_S, hist_V;
-	// 分别计算HSV图像的直方图
-	calcHist(&img_hsv, 1, &channels_H, Mat(), hist_H, 1, histSize_H, Hranges, true, false);
-	calcHist(&img_hsv, 1, &channels_S, Mat(), hist_S, 1, histSize_S, Sranges, true, false);
-	calcHist(&img_hsv, 1, &channels_V, Mat(), hist_V, 1, histSize_V, Vranges, true, false);
 
 
 	//定标
@@ -89,7 +83,14 @@ int MainHueScanner::analysis(cv::Mat img)
 	standard_value[2] = 126;
 	if (false)
 	{
-		Point maxlocation;
+		/// 直方图
+		MatND hist_H, hist_S, hist_V;
+		// 分别计算HSV图像的直方图
+		calcHist(&img_hsv, 1, &channels_H, cv::Mat(), hist_H, 1, histSize_H, Hranges, true, false);
+		calcHist(&img_hsv, 1, &channels_S, cv::Mat(), hist_S, 1, histSize_S, Sranges, true, false);
+		calcHist(&img_hsv, 1, &channels_V, cv::Mat(), hist_V, 1, histSize_V, Vranges, true, false);
+
+		cv::Point maxlocation;
 		minMaxLoc(hist_H, NULL, NULL, 0, &maxlocation);
 		standard_value[0] = maxlocation.y;
 		minMaxLoc(hist_S, NULL, NULL, 0, &maxlocation);
@@ -100,9 +101,9 @@ int MainHueScanner::analysis(cv::Mat img)
 	//检测
 	else
 	{
-		Mat imgThresholded;
-		inRange(img_hsv, Scalar(0, 0, 50), Scalar(40, 65, 140), imgThresholded); //Threshold the image  
-		Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+		cv::Mat imgThresholded;
+		inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(40, 65, 140), imgThresholded); //Threshold the image  
+		cv::Mat element = getStructuringElement(MORPH_RECT, cv::Size(5, 5));
 		//去除噪点
 		morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
 		//连接连通域 

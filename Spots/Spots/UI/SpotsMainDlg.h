@@ -111,12 +111,13 @@ public:
 	// 供Controller调用 END
 
 
-
+	//定标
+	afx_msg void OnBnClickedBtnSizedingbiao();
 
 
 	afx_msg void OnMenu_OPEN_SYS_SET_DLG();
-	afx_msg void OnBtnMenuEdgeset();
-	afx_msg void OnMenuClassiySetClick();
-	afx_msg void OnSurfaceParaSet();
-	afx_msg void OnBnClickedBtnSizedingbiao();
+	afx_msg void OnMenuBtnEdgeSet();
+	afx_msg void OnMenuBtnClassiySet();
+	afx_msg void OnMenuBtnAreaCamMainSet();
+	afx_msg void OnMenuBtnSurfaceParaSet();
 };
