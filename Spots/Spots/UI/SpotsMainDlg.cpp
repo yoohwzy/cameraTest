@@ -276,7 +276,10 @@ void CSpotsMainDlg::OnOK()
 //#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
 void CSpotsMainDlg::OnBnClickedOk()
 {
-
+	if (p_contrller->P_mainHueScanner->GetSN() == 0)
+		p_contrller->P_mainHueScanner->Run(2);
+	else
+		p_contrller->P_mainHueScanner->Pause();
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {

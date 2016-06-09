@@ -148,6 +148,9 @@ void SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao()
 	if (biaoDingExitFlag)
 	{
 		p_mvcam = new MVCAM();
+		p_mvcam->ColorType = CV_8UC3;
+		p_mvcam->ExposureTimeMS = 50;
+		p_mvcam->AnalogGain = 2;
 		if (p_mvcam->Init())
 		{
 			SetDlgItemText(IDC_AreaCamSetDlg_BTN_DingBiao, L"½áÊø¶¨±ê");
@@ -180,12 +183,14 @@ void SpotAreaCamSetDlg::biaodingDispThread()
 {
 	biaodingDispThreadEndFlag = false;
 	cv::Mat disp;
+	cv::namedWindow("DingBiao");
 	while (!biaoDingExitFlag)
 	{
 		disp = p_mvcam->Grub();
 		cv::imshow("DingBiao", disp);
 		cv::waitKey(5);
 	}
+	cv::destroyWindow("DingBiao");
 	biaodingDispThreadEndFlag = true;
 	MainHueScanner::DingBiao(disp);
 	stringstream ss;

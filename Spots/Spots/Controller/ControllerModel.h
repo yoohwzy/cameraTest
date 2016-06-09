@@ -23,8 +23,9 @@ using namespace std;
 class ControllerModel
 {
 protected:
-	SpotsMainView*  spotsMainView = NULL;
+	SpotsMainView *spotsMainView = NULL;
 public:
+	MainHueScanner *P_mainHueScanner = NULL;
 	Block block = Block(0, 0);
 	ControllerModel(SpotsMainView* _spotsMainView) : spotsMainView(_spotsMainView)
 	{
@@ -168,6 +169,11 @@ public:
 			delete worker2;
 			worker2 = NULL;
 		}
+		if (P_mainHueScanner != NULL)
+		{
+			delete P_mainHueScanner;
+			P_mainHueScanner = NULL;
+		}
 	};
 	//开始监控触发器线程
 	virtual void TiggerStartWatch() = 0;
@@ -227,8 +233,6 @@ public:
 	/*            面阵参数            */
 	/*                                */
 	/**********************************/
-	bool AreaCam_Enable = false;
-	bool AreaCam_SaveImg = false;
 
 
 

@@ -1,7 +1,7 @@
 #ifndef AFX_DATA
 #	include <afxwin.h>
 #endif
-
+#include <Controller/ControllerModel.h>
 #include "MainHueScanner.h"
 #include <Class/Helper/StringHelper.h>
 #include <Class/Debug/MFCConsole.h>
@@ -10,6 +10,8 @@ int MainHueScanner::Standard_H = 0;
 int MainHueScanner::Standard_S = 0;
 int MainHueScanner::Standard_V = 0;
 
+bool MainHueScanner::Enabled = false;
+bool MainHueScanner::SAVE_IMG = false;
 int MainHueScanner::WaitTimeMSIn = 100;//等待瓷砖进入拍摄区的时间
 int MainHueScanner::WaitTimeMSOut = 100;
 
@@ -18,26 +20,29 @@ int MainHueScanner::WaitTimeMSOut = 100;
 //实例化后直接开启面阵相机采图线程
 MainHueScanner::MainHueScanner(ControllerModel *pController)
 {
-	mvcam.ColorType = CV_8U;
-	mvcam.ExposureTimeMS = 50;
-	mvcam.AnalogGain = 2;
-	mvcam.Init();
-	if (mvcam.HasInited)
+	if (Enabled)
 	{
-		HasInited = 1;
+		mvcam.ColorType = CV_8UC3;
+		mvcam.ExposureTimeMS = 50;
+		mvcam.AnalogGain = 2;
+		mvcam.Init();
+		if (mvcam.HasInited)
+		{
+			HasInited = 1;
 
-		p_Controller = pController;
+			p_Controller = pController;
 
-		mvcam.StartCapture();
-		sn = 0;
-		std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
-		auto tn = t_run.native_handle();
-		SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
-		t_run.detach();
-	}
-	else
-	{
-		HasInited = 0;
+			mvcam.StartCapture();
+			sn = 0;
+			std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
+			auto tn = t_run.native_handle();
+			SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+			t_run.detach();
+		}
+		else
+		{
+			HasInited = 0;
+		}
 	}
 }
 
@@ -52,10 +57,15 @@ MainHueScanner::~MainHueScanner()
 void MainHueScanner::scanImg()
 {
 	int lastsn = 0;
-	while (!stopFlag)
+	while (!stopFlag && Enabled)
 	{
 		if (sn == 0)//暂停
 		{
+			if (lastsn != 0)
+			{
+				cv::destroyWindow("MainHue");
+				lastsn = 0;
+			}
 			Sleep(10);
 		}
 		else
@@ -66,15 +76,19 @@ void MainHueScanner::scanImg()
 				lastsn = sn;
 			}
 			cv::Mat img = mvcam.Grub();
+			cv::namedWindow("MainHue");
 			cv::imshow("MainHue", img);
 			cv::waitKey(5);
 			if (analysis(img) != 0)
 			{
-				sn = 0;
+				//sn = 0;
 			}
 			Sleep(20);
 		}
 	}
+	cv::destroyWindow("MainHue");
+	if (!Enabled)
+		mvcam.Release();
 }
 //分析是否有缺陷，无缺陷返回0
 int MainHueScanner::analysis(cv::Mat img)

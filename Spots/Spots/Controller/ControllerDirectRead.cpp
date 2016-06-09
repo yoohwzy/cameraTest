@@ -60,13 +60,13 @@ void ControllerDirectRead::Init()
 	//if (pci1761Inited)
 	{
 		//初始化面阵相机
-		if (AreaCam_Enable)
+		if (MainHueScanner::Enabled)
 		{
-			p_mainHueScanner = new MainHueScanner(this);
-			if (!p_mainHueScanner->HasInited)
+			P_mainHueScanner = new MainHueScanner(this);
+			if (!P_mainHueScanner->HasInited)
 			{
-				delete p_mainHueScanner;
-				p_mainHueScanner = NULL;
+				delete P_mainHueScanner;
+				P_mainHueScanner = NULL;
 				AfxMessageBox(L"未能初始化面阵相机，该模块被禁用！");
 			}
 		}
@@ -74,26 +74,10 @@ void ControllerDirectRead::Init()
 }
 void ControllerDirectRead::Release()
 {
-	if (worker1 != NULL)
-	{
-		delete worker1;
-		worker1 = NULL;
-	}
-	if (worker2 != NULL)
-	{
-		delete worker2;
-		worker2 = NULL;
-	}
-
 	if (p_e2v != NULL)
 	{
 		delete p_e2v;
 		p_e2v = NULL;
-	}
-	if (p_mainHueScanner != NULL)
-	{
-		delete p_mainHueScanner;
-		p_mainHueScanner = NULL;
 	}
 }
 
@@ -159,9 +143,9 @@ void ControllerDirectRead::triggerWatcherThread()
 			int SN = Statistics::TodayTiggerIndex;
 
 			//启动面阵模块
-			if (p_mainHueScanner != NULL)
+			if (P_mainHueScanner != NULL)
 			{
-				p_mainHueScanner->Run(SN);
+				P_mainHueScanner->Run(SN);
 			}
 
 			//触发后线阵等待时间
@@ -202,9 +186,9 @@ void ControllerDirectRead::triggerWatcherThread()
 		if (pci1761.GetTrailingEdgeIDI(7))
 		{
 			//暂停面阵模块运行
-			if (p_mainHueScanner != NULL)
+			if (P_mainHueScanner != NULL)
 			{
-				p_mainHueScanner->Pause();
+				P_mainHueScanner->Pause();
 			}
 		}
 		Sleep(10);

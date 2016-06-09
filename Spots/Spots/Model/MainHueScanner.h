@@ -1,5 +1,4 @@
 #pragma once
-#include <Controller/ControllerModel.h>
 #include <thread>
 
 //引入算法综合器
@@ -15,10 +14,11 @@ class MainHueScanner
 public:
 	MainHueScanner(ControllerModel *pController);
 	~MainHueScanner();
+	int GetSN(){ return sn; };
 	void Run(int SN){ sn = SN; };
 	void Pause()
 	{
-		thread t = thread(std::mem_fn(&MainHueScanner::scanImg), this);
+		thread t = thread(std::mem_fn(&MainHueScanner::waitPause), this);
 		t.detach();
 	};
 	void Stop(){ stopFlag = true; };
@@ -32,6 +32,8 @@ public:
 	static int Standard_V;
 
 
+	static bool Enabled;
+	static bool SAVE_IMG;
 	static int WaitTimeMSIn;//等待瓷砖进入拍摄区的时间
 	static int WaitTimeMSOut;//等待瓷砖离开拍摄区的时间
 private:

@@ -197,10 +197,10 @@ void ControllerModel::ResetParameter()
 	/**********************************/
 	int areatmpInt = 0;
 	if (SettingHelper::GetKeyInt("AreaCam", "Enable", areatmpInt))
-		AreaCam_Enable = areatmpInt;
+		MainHueScanner::Enabled = areatmpInt;
 	areatmpInt = 0;
 	if (SettingHelper::GetKeyInt("AreaCam", "SAVE_IMG", areatmpInt))
-		AreaCam_SaveImg = areatmpInt;
+		MainHueScanner::SAVE_IMG = areatmpInt;
 	string para = "para";
 	if (SettingHelper::GetKeyString("AreaCam", "MainHSVs", para))
 		MainHueScanner::SetStandardHSV(para);
