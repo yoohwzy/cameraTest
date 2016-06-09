@@ -74,6 +74,21 @@ void ControllerDirectRead::Init()
 }
 void ControllerDirectRead::Release()
 {
+	if (worker1 != NULL)
+	{
+		delete worker1;
+		worker1 = NULL;
+	}
+	if (worker2 != NULL)
+	{
+		delete worker2;
+		worker2 = NULL;
+	}
+	if (P_mainHueScanner != NULL)
+	{
+		delete P_mainHueScanner;
+		P_mainHueScanner = NULL;
+	}
 	if (p_e2v != NULL)
 	{
 		delete p_e2v;

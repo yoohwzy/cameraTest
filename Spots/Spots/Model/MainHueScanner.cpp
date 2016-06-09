@@ -26,18 +26,18 @@ MainHueScanner::MainHueScanner(ControllerModel *pController)
 		mvcam.ExposureTimeMS = 50;
 		mvcam.AnalogGain = 2;
 		mvcam.Init();
+		endFlag = true;
 		if (mvcam.HasInited)
 		{
 			HasInited = 1;
 
 			p_Controller = pController;
-
-			mvcam.StartCapture();
-			sn = 0;
-			std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
-			auto tn = t_run.native_handle();
-			SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
-			t_run.detach();
+			//mvcam.StartCapture();
+			//sn = 0;
+			//std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
+			//auto tn = t_run.native_handle();
+			//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+			//t_run.detach();
 		}
 		else
 		{
@@ -50,13 +50,17 @@ MainHueScanner::MainHueScanner(ControllerModel *pController)
 MainHueScanner::~MainHueScanner()
 {
 	stopFlag = true;
-	Sleep(50);
+	while (!endFlag)
+	{
+		Sleep(10);
+	}
 	p_Controller = NULL;
 }
 
 void MainHueScanner::scanImg()
 {
 	int lastsn = 0;
+	endFlag = 0;
 	while (!stopFlag && Enabled)
 	{
 		if (sn == 0)//ÔÝÍ£
@@ -86,6 +90,7 @@ void MainHueScanner::scanImg()
 			Sleep(20);
 		}
 	}
+	endFlag = 1;
 	cv::destroyWindow("MainHue");
 	if (!Enabled)
 		mvcam.Release();

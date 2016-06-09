@@ -66,7 +66,7 @@ bool MVCAM::Init()
 	//CameraPlay(m_hCamera);//调用 CameraPlay 函数，让相机进入工作模式，并且 SDK 开始接收来自相机的图像。
 
 	//相机初始化完成
-	CameraShowSettingPage(m_hCamera, TRUE);//TRUE显示相机配置界面。FALSE则隐藏。
+	CameraShowSettingPage(m_hCamera, FALSE);//TRUE显示相机配置界面。FALSE则隐藏。
 
 	tSdkImageResolution sRoiResolution;
 	memset(&sRoiResolution, 0, sizeof(sRoiResolution));

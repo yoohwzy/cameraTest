@@ -27,8 +27,10 @@ public:
 			CameraStop(m_hCamera);
 			//在退出程序前关闭相机(反初始化，非常重要，如果直接关闭程序而不
 			//反初始化相机，程序有可能会报内存错误)
+
 			CameraUnInit(m_hCamera);
 			CameraAlignFree(m_pFrameBuffer);
+			HasInited = false;
 		}
 	};
 

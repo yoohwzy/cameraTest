@@ -46,6 +46,7 @@ private:
 	ControllerModel *p_Controller = NULL;
 	int sn = 0;//图像序列号，为0时暂停
 	bool stopFlag = false;
+	bool endFlag = true;//进程结束标志
 	MVCAM mvcam;
 	void scanImg();
 	//分析是否有缺陷，无缺陷返回0
