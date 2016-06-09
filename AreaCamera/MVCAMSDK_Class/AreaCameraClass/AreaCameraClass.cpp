@@ -17,24 +17,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << "mvcam.Init() ms:" << t << endl;
 	t = (double)cv::getTickCount();
 
-	if (true)
-	{
-		while (true)
-		{
-			cv::Mat img = mvcam.Grub();
-			t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
-			std::cout << "mvcam.Grub() ms:" << t << endl;
-			cv::imshow("123", img);
-			cv::waitKey(5);
-		}
-	}
-	else
+	while (true)
 	{
 		cv::Mat img = mvcam.Grub();
 		t = ((double)cv::getTickCount() - t) * 1000 / cv::getTickFrequency();
 		std::cout << "mvcam.Grub() ms:" << t << endl;
 		cv::imshow("123", img);
-		cv::waitKey(0);
+		cv::waitKey(5);
 	}
 	return 0;
 }
