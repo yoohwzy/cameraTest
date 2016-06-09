@@ -190,12 +190,30 @@ void ControllerModel::ResetParameter()
 	this->Pretreatment_Enable = _Pretreatment_Enable;
 
 
-	/**************面阵参数****************/
-	string para;
+	/**********************************/
+	/*                                */
+	/*            面阵参数            */
+	/*                                */
+	/**********************************/
+	int areatmpInt = 0;
+	if (SettingHelper::GetKeyInt("AreaCam", "Enable", areatmpInt))
+		AreaCam_Enable = areatmpInt;
+	areatmpInt = 0;
+	if (SettingHelper::GetKeyInt("AreaCam", "SAVE_IMG", areatmpInt))
+		AreaCam_SaveImg = areatmpInt;
+	string para = "para";
 	if (SettingHelper::GetKeyString("AreaCam", "MainHSVs", para))
 		MainHueScanner::SetStandardHSV(para);
+	SettingHelper::GetKeyInt("AreaCam", "WaitTimeMSIn", MainHueScanner::WaitTimeMSIn);
+	SettingHelper::GetKeyInt("AreaCam", "WaitTimeMSOut", MainHueScanner::WaitTimeMSOut);
 
-	/**************分类参数****************/
+
+
+	/**********************************/
+	/*                                */
+	/*            分级参数            */
+	/*                                */
+	/**********************************/
 	//缺边 长
 	SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_A", this->Classify_EDGE_SINGLE_LENGTH_A);
 	SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_B", this->Classify_EDGE_SINGLE_LENGTH_B);

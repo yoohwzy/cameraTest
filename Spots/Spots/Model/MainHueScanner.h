@@ -16,7 +16,11 @@ public:
 	MainHueScanner(ControllerModel *pController);
 	~MainHueScanner();
 	void Run(int SN){ sn = SN; };
-	void Pause(){ sn = 0; };
+	void Pause()
+	{
+		thread t = thread(std::mem_fn(&MainHueScanner::scanImg), this);
+		t.detach();
+	};
 	void Stop(){ stopFlag = true; };
 	bool HasInited = false;
 	//定标，计算出标准HSV并存储
@@ -26,13 +30,23 @@ public:
 	static int Standard_H;
 	static int Standard_S;
 	static int Standard_V;
+
+
+	static int WaitTimeMSIn;//等待瓷砖进入拍摄区的时间
+	static int WaitTimeMSOut;//等待瓷砖离开拍摄区的时间
 private:
+	void waitPause()
+	{
+		if (MainHueScanner::WaitTimeMSOut > 0)
+			Sleep(MainHueScanner::WaitTimeMSOut);
+		this->sn = 0;
+	}
 	ControllerModel *p_Controller = NULL;
 	int sn = 0;//图像序列号，为0时暂停
 	bool stopFlag = false;
 	MVCAM mvcam;
 	void scanImg();
-	//分析是否有缺陷
+	//分析是否有缺陷，无缺陷返回0
 	int analysis(cv::Mat);
 };
 

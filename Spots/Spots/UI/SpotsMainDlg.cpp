@@ -276,14 +276,7 @@ void CSpotsMainDlg::OnOK()
 //#pragma comment(lib,"Shlwapi.lib") //如果没有这行，会出现link错误
 void CSpotsMainDlg::OnBnClickedOk()
 {
-	//if (!PathIsDirectory(L"Images"))
-	//{
-	//	CreateDirectory(L"Images", NULL);
-	//}
-	//if (!PathIsDirectory(L"Images\\2016_03_12"))
-	//{
-	//	CreateDirectory(L"Images\\2016_03_12", NULL);
-	//}
+
 }
 void CSpotsMainDlg::DrawPicToHDC(cv::Mat& img, UINT ID)
 {

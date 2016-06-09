@@ -1,5 +1,5 @@
 #pragma once
-#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCameraCycleBuffer.h>//必须放在这，否则会报错  XX定义不明确
+#include <Class/Camera/e2v_EV71YC1CCL4005BA0/E2VCameraModel.h>//必须放在这，否则会报错  XX定义不明确
 #include <Class/IOCard/PCI1761/PCI1761.h>
 #include <Class/Statistics/Statistics.h>
 
@@ -221,8 +221,23 @@ public:
 	/**************内部参数****************/
 	int Pretreatment_Enable = 1;
 
-	/**************分级参数*************/
 
+	/**********************************/
+	/*                                */
+	/*            面阵参数            */
+	/*                                */
+	/**********************************/
+	bool AreaCam_Enable = false;
+	bool AreaCam_SaveImg = false;
+
+
+
+
+	/**********************************/
+	/*                                */
+	/*            分级参数            */
+	/*                                */
+	/**********************************/
 	//边参数
 	double Classify_EDGE_SINGLE_LENGTH_A = -1;
 	double Classify_EDGE_SINGLE_LENGTH_B = -1;

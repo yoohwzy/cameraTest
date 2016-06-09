@@ -57,10 +57,10 @@ void ControllerDirectRead::Init()
 	}
 
 	baseInit();
-	if (pci1761Inited)
+	//if (pci1761Inited)
 	{
 		//初始化面阵相机
-		if (1 == 1)
+		if (AreaCam_Enable)
 		{
 			p_mainHueScanner = new MainHueScanner(this);
 			if (!p_mainHueScanner->HasInited)

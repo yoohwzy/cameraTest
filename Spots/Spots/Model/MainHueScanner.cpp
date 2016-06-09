@@ -10,7 +10,8 @@ int MainHueScanner::Standard_H = 0;
 int MainHueScanner::Standard_S = 0;
 int MainHueScanner::Standard_V = 0;
 
-
+int MainHueScanner::WaitTimeMSIn = 100;//等待瓷砖进入拍摄区的时间
+int MainHueScanner::WaitTimeMSOut = 100;
 
 //主色调分析类
 //用于判断釉下文字缺陷，面阵相机拍照后，连续计算主色调。
@@ -50,18 +51,32 @@ MainHueScanner::~MainHueScanner()
 
 void MainHueScanner::scanImg()
 {
+	int lastsn = 0;
 	while (!stopFlag)
 	{
 		if (sn == 0)//暂停
-			Sleep(10); 
+		{
+			Sleep(10);
+		}
 		else
 		{
+			if (lastsn == 0)
+			{
+				if (MainHueScanner::WaitTimeMSIn > 0)Sleep(MainHueScanner::WaitTimeMSIn);
+				lastsn = sn;
+			}
 			cv::Mat img = mvcam.Grub();
-			analysis(img);
+			cv::imshow("MainHue", img);
+			cv::waitKey(5);
+			if (analysis(img) != 0)
+			{
+				sn = 0;
+			}
 			Sleep(20);
 		}
 	}
 }
+//分析是否有缺陷，无缺陷返回0
 int MainHueScanner::analysis(cv::Mat img)
 {
 	Mat img_hsv;
@@ -93,7 +108,7 @@ int MainHueScanner::analysis(cv::Mat img)
 	//upperb 不包括进的上边界
 	//dst 输出数组必须是 8u 或 8s 类型. 
 	//inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(40, 65, 140), imgThresholded); //Threshold the image  
-	inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(Standard_H, Standard_S, Standard_V), imgThresholded); //Threshold the image  
+	inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(Standard_H + 20, Standard_S + 20, Standard_V + 20), imgThresholded); //Threshold the image  
 	cv::Mat element = getStructuringElement(MORPH_RECT, cv::Size(5, 5));
 	//去除噪点
 	morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
@@ -102,10 +117,10 @@ int MainHueScanner::analysis(cv::Mat img)
 	if (countNonZero(imgThresholded) < 0.9*imgThresholded.cols*imgThresholded.rows)
 	{
 		p_Controller->MainHueErrorCallBack(sn, img);
-		return true;//有标记
+		return 1;//有标记
 	}
 	else
-		return false;//无标记
+		return 0;//无标记
 }
 //定标，计算出标准HSV并存储
 void MainHueScanner::DingBiao(cv::Mat img)
@@ -178,19 +193,4 @@ void MainHueScanner::SetStandardHSV(string str)
 			MainHueScanner::Standard_V = StringHelper::string2int(hsv[2]);
 		}
 	}
-
-	//for (int i = 0; i < strs.size(); i++)
-	//{
-
-	//}
-
-	//const char *p = str.c_str();
-	//int n = count(p, p + str.size(), ';');
-	//if (n == 0)
-	//	n = 1;
-
-	//for (int i = 0; i < n; i++)
-	//{
-
-	//}
 };
