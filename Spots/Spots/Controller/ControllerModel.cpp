@@ -189,6 +189,12 @@ void ControllerModel::ResetParameter()
 	SettingHelper::GetKeyInt("SURFACE", "Pretreatment_Enable", _Pretreatment_Enable);
 	this->Pretreatment_Enable = _Pretreatment_Enable;
 
+
+	/**************面阵参数****************/
+	string para;
+	if (SettingHelper::GetKeyString("AreaCam", "MainHSVs", para))
+		MainHueScanner::SetStandardHSV(para);
+
 	/**************分类参数****************/
 	//缺边 长
 	SettingHelper::GetKeyDouble("Classify", "EDGE_SINGLE_LENGTH_A", this->Classify_EDGE_SINGLE_LENGTH_A);

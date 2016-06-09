@@ -3,10 +3,10 @@
 #include <thread>
 
 //引入算法综合器
-#include <Class\Debug\MFCConsole.h>
 class ControllerModel;// 解决类互相包含
-#include <Class\Camera\MVCAM\MVCAM.h>
 
+
+#include <Class\Camera\MVCAM\MVCAM.h>
 //主色调分析类
 //用于判断釉下文字缺陷，面阵相机拍照后，连续计算主色调。
 //实例化后直接开启面阵相机采图线程
@@ -21,6 +21,8 @@ public:
 	bool HasInited = false;
 	//定标，计算出标准HSV并存储
 	static void DingBiao(cv::Mat);
+	//设置标准值参数，格式如string = "H1,S1,V1;H2,S2,V2;"表示有两组
+	static void SetStandardHSV(string str);
 	static int Standard_H;
 	static int Standard_S;
 	static int Standard_V;

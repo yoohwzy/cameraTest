@@ -1,4 +1,9 @@
+#ifndef AFX_DATA
+#	include <afxwin.h>
+#endif
+
 #include "MainHueScanner.h"
+#include <Class/Helper/StringHelper.h>
 #include <Class/Debug/MFCConsole.h>
 
 int MainHueScanner::Standard_H = 0;
@@ -154,3 +159,38 @@ void MainHueScanner::DingBiao(cv::Mat img)
 	standard_value[2] = maxlocation.y;
 	Standard_V = maxlocation.y;
 }
+void MainHueScanner::SetStandardHSV(string str)
+{
+	vector<string> strs;
+	string delim = ";";
+	StringHelper::split(str, delim, &strs);
+	if (strs.size() > 0)
+	{
+		vector<string> hsv;
+		delim = ",";
+		StringHelper::split(strs[0], delim, &hsv);
+		if (hsv.size() != 3)
+			return;
+		else
+		{
+			MainHueScanner::Standard_H = StringHelper::string2int(hsv[0]);
+			MainHueScanner::Standard_S = StringHelper::string2int(hsv[1]);
+			MainHueScanner::Standard_V = StringHelper::string2int(hsv[2]);
+		}
+	}
+
+	//for (int i = 0; i < strs.size(); i++)
+	//{
+
+	//}
+
+	//const char *p = str.c_str();
+	//int n = count(p, p + str.size(), ';');
+	//if (n == 0)
+	//	n = 1;
+
+	//for (int i = 0; i < n; i++)
+	//{
+
+	//}
+};
