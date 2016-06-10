@@ -5,6 +5,9 @@
 #include "MainHueScanner.h"
 #include <Class/Helper/StringHelper.h>
 #include <Class/Debug/MFCConsole.h>
+#include <opencv2\opencv.hpp>
+
+using namespace cv;
 
 int MainHueScanner::Standard_H = 0;
 int MainHueScanner::Standard_S = 0;

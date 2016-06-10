@@ -122,7 +122,6 @@
     <ClInclude Include="Algorithm\EdgeFaultLineDetector.h" />
     <ClInclude Include="Algorithm\Pretreatment.h" />
     <ClInclude Include="Algorithm\Processor.h" />
-    <ClInclude Include="Algorithm\Synthesizer.h" />
     <ClInclude Include="Class\Access\ASqlHelper.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.h" />
     <ClInclude Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.h" />
@@ -168,7 +167,6 @@
     <ClCompile Include="Algorithm\EdgeFaultLineDetector.cpp" />
     <ClCompile Include="Algorithm\Pretreatment.cpp" />
     <ClCompile Include="Algorithm\Processor.cpp" />
-    <ClCompile Include="Algorithm\Synthesizer.cpp" />
     <ClCompile Include="Class\Access\ASqlHelper.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraCycleBuffer.cpp" />
     <ClCompile Include="Class\Camera\e2v_EV71YC1CCL4005BA0\E2VCameraDirectRead.cpp" />

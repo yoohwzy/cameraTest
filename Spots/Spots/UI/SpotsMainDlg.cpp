@@ -309,7 +309,10 @@ void CSpotsMainDlg::ShowLogImg(cv::Mat img)
 	//img_on_log = img;
 	DrawPicToHDC(img, IDC_IMG_HISTORY);
 }
-
+void CSpotsMainDlg::UpdateSizeInfo(string info)
+{
+	GetDlgItem(IDC_LB_SIZESHOW)->SetWindowText(StringHelper::string2CString(info));
+}
 void CSpotsMainDlg::UpdateStatistics()
 {
 	GetDlgItem(IDC_LB_todayTotal)->SetWindowText(StringHelper::int2CString(Statistics::TodayAll));

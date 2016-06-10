@@ -61,7 +61,6 @@ public:
 						MainHueErrorSNs.erase(it);
 				}
 			}
-
 			//再根据
 			switch (type)
 			{
@@ -84,6 +83,9 @@ public:
 
 			spotsMainView->ShowLogImg(logImg.DrawingBoard);
 			spotsMainView->UpdateStatistics();
+			stringstream ss;
+			ss << "尺寸为：\n对角线1=" << b.ac_mm << "\n对角线2=" << b.bd_mm << "\n差=" << abs(b.ac_mm - b.bd_mm);
+			spotsMainView->UpdateSizeInfo(ss.str());
 		}
 		ui_lock.unlock(); 
 	}

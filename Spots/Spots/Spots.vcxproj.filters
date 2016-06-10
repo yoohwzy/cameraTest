@@ -120,9 +120,6 @@
     <ClInclude Include="Algorithm\Base\Faults.h">
       <Filter>Algorithm\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\Synthesizer.h">
-      <Filter>Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Class\Debug\MFCConsole.h">
       <Filter>Class\Debug</Filter>
     </ClInclude>
@@ -235,9 +232,6 @@
     </ClCompile>
     <ClCompile Include="Algorithm\Base\Block.cpp">
       <Filter>Algorithm\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\Synthesizer.cpp">
-      <Filter>Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Class\Debug\MFCConsole.cpp">
       <Filter>Class\Debug</Filter>

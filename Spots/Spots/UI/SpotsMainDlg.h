@@ -90,21 +90,26 @@ private:
 	};
 	bool initEndFlag = false;//只有初始化完成后才在onsize中执行UI缩放
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	map<int, control> controls;
-	void save1control(int ID);
+	map<int, control> controls;//用于保存所有控件对象的信息
+	void save1control(int ID);//保存一个控件的位置大小，窗体初始化时需对所有控件保存一次，输入为控件ID
 public:
-	afx_msg void OnBnClickedOk();
 	void DrawPicToHDC(cv::Mat& img, UINT ID);
 	HDC hDC = NULL;
 	CDC *p_DC;
 
+
+
 	// 供Controller调用 //Override
 
-	void ShowBigImg(cv::Mat);
-	void ShowLogImg(cv::Mat);
+	void ShowBigImg(cv::Mat) override;
+	void ShowLogImg(cv::Mat) override;
+	void UpdateSizeInfo(string info) override;
+	void UpdateStatistics() override;
 
-	// 更新UI上显示的记录数据
-	void UpdateStatistics();
+
+
+
+
 	//传入true切换UI到虚拟相机模式，false切换UI到真实相机模式
 	void SwitchModel2Virtual(bool switchToV);
 
@@ -113,8 +118,7 @@ public:
 
 	//定标
 	afx_msg void OnBnClickedBtnSizedingbiao();
-
-
+	afx_msg void OnBnClickedOk();
 	afx_msg void OnMenu_OPEN_SYS_SET_DLG();
 	afx_msg void OnMenuBtnEdgeSet();
 	afx_msg void OnMenuBtnClassiySet();

@@ -167,6 +167,8 @@ void SpotsEdgeParameterSetDlg::OnBnClickedOk()
 
 
 
+
+
 	/*****±ßÔµÉ¨ÃèËã·¨*****/
 	pBtn = (CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeLineDetector);
 	SettingHelper::AddKey("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", pBtn->GetCheck());
