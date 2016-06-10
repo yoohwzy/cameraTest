@@ -1,6 +1,11 @@
 #include "BlockEdgeLineDetector.h"
 #include <Class\Debug\MFCConsole.h>
 
+bool BlockEdgeLineDetector::Enabled = true;
+int BlockEdgeLineDetector::BINARY_THRESHOD = 5;//边界确定阈值
+int BlockEdgeLineDetector::LENGTH_THRESHOD = 10;//崩边长度要超过这个
+int BlockEdgeLineDetector::DEEP_THRESHOD = 5;//崩边深度要超过这个
+
 BlockEdgeLineDetector::BlockEdgeLineDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	image = _img;

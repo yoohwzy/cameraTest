@@ -77,6 +77,7 @@ HBRUSH SpotsSurfaceParaSetDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BEGIN_MESSAGE_MAP(SpotsSurfaceParaSetDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SpotsSurfaceParaSetDlg::OnBnClickedOk)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 

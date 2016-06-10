@@ -1,6 +1,8 @@
 #include "BlockLocalizer.h"
 #include <Class\Debug\MFCConsole.h>
 
+int BlockLocalizer::THRESHOD = 10;//二值化阈值
+int BlockLocalizer::ContinuePointCount = 30;//连续多少个点则判断为边缘
 
 BlockLocalizer::BlockLocalizer(cv::Mat& _img, Block* _block, Faults* _faults)
 {
@@ -680,16 +682,17 @@ void BlockLocalizer::judgemanBrokenLine(vector<cv::Point>& points, bool updown)
 			}
 			else
 			{
-				//判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
-				if (dx.size() > 5 && i > 5 && i < (dx.size() - 6))//若点位于砖的中间才做这样的处理，否则就是大的崩角
-				{
-					if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET)//如果该点前后两点是连续的，则跳过该点。
-					{
-						vector<cv::Point>::iterator it = points.begin() + i;
-						points.erase(it);
-						continue;
-					}
-				}
+				////判断是否是孤立的缺陷点，如果是孤立的则continue，否则才记录为错误点
+				////if (dx.size() > 5 && i > 5 && i < (dx.size() - 6))//若点位于砖的中间才做这样的处理，否则就是大的崩角
+				//if ((i - 2) >= 0 && (i + 2) < (dx.size()))
+				//{
+				//	if (abs(dx[i - 2] - dx[i + 2]) < PIX_OFFSET * 2)//如果该点前后两点是连续的，则跳过该点。
+				//	{
+				//		vector<cv::Point>::iterator it = points.begin() + i;
+				//		points.erase(it);
+				//		continue;
+				//	}
+				//}
 
 				diffs.push_back(dx[i]);
 				diffsCount.push_back(1);

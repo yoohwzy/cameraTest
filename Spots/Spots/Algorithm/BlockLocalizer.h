@@ -34,8 +34,8 @@ public:
 
 
 	//parameter
-	int THRESHOD = 10;//二值化阈值
-	int ContinuePointCount = 30;//连续多少个点则判断为边缘
+	static int THRESHOD;//二值化阈值
+	static int ContinuePointCount;//连续多少个点则判断为边缘
 
 
 

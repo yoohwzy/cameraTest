@@ -49,25 +49,25 @@ BOOL SpotsEdgeParameterSetDlg::OnInitDialog()
 
 	/*****±ßÔµÏàËÆ¶ÈËã·¨*****/
 	int bedEnable = 1;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_Enable", bedEnable))
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeSimilarDetector_Enable", bedEnable))
 		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector))->SetCheck(bedEnable != 0);
 	else
 		((CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector))->SetCheck(1);
 
 	double BlockEdgeDetector_DIFF_THRESHOLD;
-	if (SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", BlockEdgeDetector_DIFF_THRESHOLD))
+	if (SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeSimilarDetector_DIFF_THRESHOLD", BlockEdgeDetector_DIFF_THRESHOLD))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD)->SetWindowText(StringHelper::double2CString(BlockEdgeDetector_DIFF_THRESHOLD));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD)->SetWindowText(L"7");
 
 	int BlockEdgeDetector_FAULTS_SPAN;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", BlockEdgeDetector_FAULTS_SPAN))
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_SPAN", BlockEdgeDetector_FAULTS_SPAN))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_SPAN)->SetWindowText(StringHelper::int2CString(BlockEdgeDetector_FAULTS_SPAN));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_SPAN)->SetWindowText(L"4");
 
 	int BlockEdgeDetector_FAULTS_COUNT;
-	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", BlockEdgeDetector_FAULTS_COUNT))
+	if (SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_COUNT", BlockEdgeDetector_FAULTS_COUNT))
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_COUNT)->SetWindowText(StringHelper::int2CString(BlockEdgeDetector_FAULTS_COUNT));
 	else
 		GetDlgItem(IDC_TB_BlockEdgeDetector_FAULTS_COUNT)->SetWindowText(L"5");
@@ -158,10 +158,10 @@ void SpotsEdgeParameterSetDlg::OnBnClickedOk()
 
 
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CB_EnableBlockEdgeDetector);
-	SettingHelper::AddKey("EDGE_PARAMETER", "BlockEdgeDetector_Enable", pBtn->GetCheck());
-	saveParameter(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD, "EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD");
-	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_SPAN, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN");
-	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_COUNT, "EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT");
+	SettingHelper::AddKey("EDGE_PARAMETER", "BlockEdgeSimilarDetector_Enable", pBtn->GetCheck());
+	saveParameter(IDC_TB_BlockEdgeDetector_DIFF_THRESHOLD, "EDGE_PARAMETER", "BlockEdgeSimilarDetector_DIFF_THRESHOLD");
+	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_SPAN, "EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_SPAN");
+	saveParameter(IDC_TB_BlockEdgeDetector_FAULTS_COUNT, "EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_COUNT");
 
 
 

@@ -43,9 +43,10 @@ public:
 
 
 	//parameter
-	double DIFF_THRESHOLD = 0.4;	//两点差值百分比超过这个阈值则认为可能有缺陷
-	int FAULTS_SPAN = 4;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
-	int FAULTS_COUNT = 5;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+	static bool Enabled;
+	static double DIFF_THRESHOLD;	//两点差值百分比超过这个阈值则认为可能有缺陷
+	static double FAULTS_SPAN;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
+	static double FAULTS_COUNT;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
 
 private:
 

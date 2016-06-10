@@ -115,6 +115,7 @@ HBRUSH SpotAreaCamSetDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 BEGIN_MESSAGE_MAP(SpotAreaCamSetDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SpotAreaCamSetDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_AreaCamSetDlg_BTN_DingBiao, &SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 

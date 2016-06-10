@@ -39,9 +39,10 @@ public:
 
 
 	//parameter
-	int BINARY_THRESHOD = 5;//边界确定阈值
-	int LENGTH_THRESHOD = 10;//崩边长度要超过这个
-	int DEEP_THRESHOD = 5;//崩边深度要超过这个
+	static bool Enabled;
+	static int BINARY_THRESHOD;//边界确定阈值
+	static int LENGTH_THRESHOD;//崩边长度要超过这个
+	static int DEEP_THRESHOD;//崩边深度要超过这个
 private:
 
 	cv::Mat image;

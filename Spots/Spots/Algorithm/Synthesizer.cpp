@@ -71,8 +71,6 @@ Synthesizer::_Status Synthesizer::positioning(cv::Mat grayImg)
 
 	//进行定位
 	BlockLocalizer bl = BlockLocalizer(grayImg, p_block, &faults);
-	bl.THRESHOD = BlockLocalizer_THRESHOD;
-	bl.ContinuePointCount = BlockLocalizer_ContinuePointCount;
 	bl.Run();
 
 
@@ -109,14 +107,11 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 	double t = 0;
 	p_block->Lines2ABCD();
 
-	if (BlockEdgeLineDetector_Enable != 0)
+	if (BlockEdgeLineDetector::Enabled)
 	{
 		if (MFCConsole::IsOpened)
 			t = cv::getTickCount();
 		BlockEdgeLineDetector  beld = BlockEdgeLineDetector(grayImg, p_block, &faults);
-		beld.BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
-		beld.DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
-		beld.LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
 		beld.Run();
 		if (MFCConsole::IsOpened)
 		{
@@ -126,14 +121,11 @@ Synthesizer::_Status Synthesizer::detectEdge(cv::Mat grayImg)
 			MFCConsole::Output(ss.str());
 		}
 	}
-	if (BlockEdgeDetector_Enable != 0)
+	if (BlockEdgeSimilarDetector::Enabled)
 	{
 		if (MFCConsole::IsOpened)
 			t = cv::getTickCount();
 		BlockEdgeSimilarDetector besd = BlockEdgeSimilarDetector(grayImg, p_block, &faults);
-		besd.DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-		besd.FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-		besd.FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 		besd.Run();
 		if (MFCConsole::IsOpened)
 		{

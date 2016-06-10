@@ -5,6 +5,11 @@
 #include <iostream>
 #include <fstream>
 
+bool BlockEdgeSimilarDetector::Enabled = 1;
+double BlockEdgeSimilarDetector::DIFF_THRESHOLD = 0.4;	//两点差值百分比超过这个阈值则认为可能有缺陷
+double BlockEdgeSimilarDetector::FAULTS_SPAN = 4;	//大于DIFF_THRESHOLD的点附近近相邻FAULTS_SPAN像素内
+double BlockEdgeSimilarDetector::FAULTS_COUNT = 5;	//连续几个点大于DIFF_THRESHOLD则判定为缺陷
+
 BlockEdgeSimilarDetector::BlockEdgeSimilarDetector(cv::Mat& _img, Block* _block, Faults* _faults)
 {
 	image = _img;
