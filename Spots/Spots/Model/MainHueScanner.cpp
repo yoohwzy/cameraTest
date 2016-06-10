@@ -32,12 +32,12 @@ MainHueScanner::MainHueScanner(ControllerModel *pController)
 			HasInited = 1;
 
 			p_Controller = pController;
-			//mvcam.StartCapture();
-			//sn = 0;
-			//std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
-			//auto tn = t_run.native_handle();
-			//SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
-			//t_run.detach();
+			mvcam.StartCapture();
+			sn = 0;
+			std::thread t_run(std::mem_fn(&MainHueScanner::scanImg), this);
+			auto tn = t_run.native_handle();
+			SetThreadPriority(tn, THREAD_PRIORITY_ABOVE_NORMAL);
+			t_run.detach();
 		}
 		else
 		{
@@ -49,10 +49,11 @@ MainHueScanner::MainHueScanner(ControllerModel *pController)
 
 MainHueScanner::~MainHueScanner()
 {
-	stopFlag = true;
+	this->Stop();
 	while (!endFlag)
 	{
-		Sleep(10);
+		//Sleep(50);
+		std::this_thread::sleep_for(chrono::milliseconds(50));
 	}
 	p_Controller = NULL;
 }
@@ -87,7 +88,7 @@ void MainHueScanner::scanImg()
 			{
 				//sn = 0;
 			}
-			Sleep(20);
+			Sleep(30);
 		}
 	}
 	endFlag = 1;

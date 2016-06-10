@@ -128,10 +128,11 @@ void MVCAM::GetFrame(cv::Mat& img)
 			//直接用MAT
 			cv::Mat OriginalImage;
 			if (ColorType == CV_8U)
-				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8U, m_pFrameBuffer).clone();
+				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8U, m_pFrameBuffer);
 			else
-				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8UC3, m_pFrameBuffer).clone();
-			img = OriginalImage;
+				OriginalImage = cv::Mat(sFrameInfo.iHeight, sFrameInfo.iWidth, CV_8UC3, m_pFrameBuffer);
+			//去白边
+			img = OriginalImage(cv::Rect(2, 2, sFrameInfo.iWidth - 4, sFrameInfo.iHeight - 4)).clone();
 		}
 
 		//在成功调用CameraGetImageBuffer后，必须调用CameraReleaseImageBuffer来释放获得的buffer。

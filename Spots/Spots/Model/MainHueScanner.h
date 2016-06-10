@@ -21,7 +21,7 @@ public:
 		thread t = thread(std::mem_fn(&MainHueScanner::waitPause), this);
 		t.detach();
 	};
-	void Stop(){ stopFlag = true; };
+	void Stop(){ this->sn = 0; stopFlag = true; };
 	bool HasInited = false;
 	//定标，计算出标准HSV并存储
 	static void DingBiao(cv::Mat);

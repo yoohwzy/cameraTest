@@ -34,18 +34,18 @@ void Worker::work()
 
 	//开始图像处理
 	Synthesizer s = Synthesizer(SN);
-	s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-	s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
+	//s.BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
+	//s.BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
 
-	s.BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
-	s.BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
-	s.BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
-	s.BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
+	//s.BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
+	//s.BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
+	//s.BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
+	//s.BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
 
-	s.BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
-	s.BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-	s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-	s.BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
+	//s.BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
+	//s.BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
+	//s.BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
+	//s.BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
 
 
 	s.Pretreatment_Enable = Pretreatment_Enable;

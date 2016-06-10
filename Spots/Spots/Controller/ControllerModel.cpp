@@ -8,6 +8,12 @@
 #include <shlwapi.h>
 #pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
 
+
+#include <Algorithm/BlockLocalizer.h>
+#include <Algorithm/BlockEdgeSimilarDetector.h>
+#include <Algorithm/BlockEdgeLineDetector.h>
+#include <Algorithm/EdgeFaultLineDetector.h>
+
 //通用的初始化代码
 //初始化PCI1761、数据库、根据参数将系统切换到真实/虚拟相机模式
 //真实模式下调用TiggerStartWatch，开启监视线程
@@ -166,23 +172,22 @@ void ControllerModel::ResetParameter()
 	SettingHelper::GetKeyInt("SYS_IMG_CAPTURE", "FrameTimeOut", this->Capture_FrameTimeOut);
 
 	/*************边缘缺陷检测参数***********/
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", this->BlockLocalizer_THRESHOD);
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", this->BlockLocalizer_ContinuePointCount);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_THRESHOD", BlockLocalizer::THRESHOD);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockLocalizer_ContinuePointCount", BlockLocalizer::ContinuePointCount);
 
-	int _BlockEdgeDetector_Enable = 1;
-	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeDetector_Enable", _BlockEdgeDetector_Enable);
-	this->BlockEdgeDetector_Enable = _BlockEdgeDetector_Enable;
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", this->BlockEdgeDetector_DIFF_THRESHOLD);
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_DIFF_THRESHOLD", this->BlockEdgeDetector_DIFF_THRESHOLD);
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_SPAN", this->BlockEdgeDetector_FAULTS_SPAN);
-	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeDetector_FAULTS_COUNT", this->BlockEdgeDetector_FAULTS_COUNT);
+	int _BlockEdgeSimilarDetector_Enable = 1;
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeSimilarDetector_Enable", _BlockEdgeSimilarDetector_Enable);
+	BlockEdgeSimilarDetector::Enabled = _BlockEdgeSimilarDetector_Enable;
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeSimilarDetector_DIFF_THRESHOLD", BlockEdgeSimilarDetector::DIFF_THRESHOLD);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_SPAN", BlockEdgeSimilarDetector::FAULTS_SPAN);
+	SettingHelper::GetKeyDouble("EDGE_PARAMETER", "BlockEdgeSimilarDetector_FAULTS_COUNT", BlockEdgeSimilarDetector::FAULTS_COUNT);
 
-	int _BlockEdgeLineDetector_Enable = 1;
-	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", _BlockEdgeLineDetector_Enable);
-	this->BlockEdgeLineDetector_Enable = _BlockEdgeLineDetector_Enable;
-	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_BINARY_THRESHOD", this->BlockEdgeLineDetector_BINARY_THRESHOD);
-	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD", this->BlockEdgeLineDetector_LENGTH_THRESHOD);
-	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD", this->BlockEdgeLineDetector_DEEP_THRESHOD);
+	int _BlockEdgeLineDetector_Enabled = 1;
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_Enable", _BlockEdgeLineDetector_Enabled);
+	BlockEdgeLineDetector::Enabled = _BlockEdgeLineDetector_Enabled;
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_BINARY_THRESHOD", BlockEdgeLineDetector::BINARY_THRESHOD);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_LENGTH_THRESHOD", BlockEdgeLineDetector::LENGTH_THRESHOD);
+	SettingHelper::GetKeyInt("EDGE_PARAMETER", "BlockEdgeLineDetector_DEEP_THRESHOD", BlockEdgeLineDetector::DEEP_THRESHOD);
 
 	/**************内部参数****************/
 	int _Pretreatment_Enable = 1;
@@ -267,19 +272,6 @@ void ControllerModel::ResetParameter()
 			w = worker2;
 		if (w != NULL)
 		{
-			w->BlockLocalizer_THRESHOD = BlockLocalizer_THRESHOD;
-			w->BlockLocalizer_ContinuePointCount = BlockLocalizer_ContinuePointCount;
-
-			w->BlockEdgeDetector_Enable = BlockEdgeDetector_Enable;
-			w->BlockEdgeDetector_DIFF_THRESHOLD = BlockEdgeDetector_DIFF_THRESHOLD;
-			w->BlockEdgeDetector_FAULTS_SPAN = BlockEdgeDetector_FAULTS_SPAN;
-			w->BlockEdgeDetector_FAULTS_COUNT = BlockEdgeDetector_FAULTS_COUNT;
-
-			w->BlockEdgeLineDetector_Enable = BlockEdgeLineDetector_Enable;
-			w->BlockEdgeLineDetector_BINARY_THRESHOD = BlockEdgeLineDetector_BINARY_THRESHOD;
-			w->BlockEdgeLineDetector_LENGTH_THRESHOD = BlockEdgeLineDetector_LENGTH_THRESHOD;
-			w->BlockEdgeLineDetector_DEEP_THRESHOD = BlockEdgeLineDetector_DEEP_THRESHOD;
-
 			w->Pretreatment_Enable = Pretreatment_Enable;
 
 
