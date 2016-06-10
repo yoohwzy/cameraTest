@@ -183,8 +183,8 @@ public:
 	virtual void TiggerStopWatch() = 0;
 	//主色调错误后的回调函数
 	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
-		MainHueErrorSNs.push_back(SN);
 		ui_lock.lock();
+		MainHueErrorSNs.push_back(SN);
 		spotsMainView->ShowBigImg(img);
 		ui_lock.unlock();
 	};

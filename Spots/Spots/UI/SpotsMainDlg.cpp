@@ -582,7 +582,8 @@ void CSpotsMainDlg::OnMenuBtnAreaCamMainSet()
 	SpotAreaCamSetDlg m;
 	if (m.DoModal() == IDOK)
 	{
-		p_contrller->ResetParameter();
+		//p_contrller->ResetParameter();
+		AfxMessageBox(L"参数保存完成，重启程序后起效。");
 	}
 }
 

@@ -19,6 +19,9 @@ SpotAreaCamSetDlg::SpotAreaCamSetDlg(CWnd* pParent /*=NULL*/)
 
 SpotAreaCamSetDlg::~SpotAreaCamSetDlg()
 {
+	biaoDingExitFlag = true;
+	while (!biaodingDispThreadEndFlag)//等待线程结束
+		Sleep(10);
 	if (p_mvcam != NULL)
 	{
 		delete p_mvcam;
@@ -148,11 +151,12 @@ void SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao()
 {
 	if (biaoDingExitFlag)
 	{
-		p_mvcam = new MVCAM();
+		p_mvcam = new MVCAM;
 		p_mvcam->ColorType = CV_8UC3;
 		p_mvcam->ExposureTimeMS = 50;
 		p_mvcam->AnalogGain = 2;
-		if (p_mvcam->Init())
+		p_mvcam->Init();
+		if (p_mvcam->HasInited)
 		{
 			SetDlgItemText(IDC_AreaCamSetDlg_BTN_DingBiao, L"结束定标");
 			p_mvcam->StartCapture();
@@ -162,8 +166,6 @@ void SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao()
 		}
 		else
 		{
-			delete p_mvcam;
-			p_mvcam = NULL;
 			AfxMessageBox(L"初始化面阵相机失败！");
 		}
 	}
@@ -171,17 +173,16 @@ void SpotAreaCamSetDlg::OnBnClickedAreacamsetdlgBtnDingbiao()
 	{
 		biaoDingExitFlag = true;
 		SetDlgItemText(IDC_AreaCamSetDlg_BTN_DingBiao, L"开始定标");
-		while (!biaodingDispThreadEndFlag)
+		while (!biaodingDispThreadEndFlag)//等待线程结束
 			Sleep(10);
-		if (p_mvcam != NULL)
-		{
-			delete p_mvcam;
-			p_mvcam = NULL;
-		}
+
+		delete p_mvcam;
+		p_mvcam = NULL;
 	}
 }
 void SpotAreaCamSetDlg::biaodingDispThread()
 {
+	biaoDingExitFlag = false;
 	biaodingDispThreadEndFlag = false;
 	cv::Mat disp;
 	cv::namedWindow("DingBiao");

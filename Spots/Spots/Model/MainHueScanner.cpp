@@ -89,6 +89,7 @@ void MainHueScanner::scanImg()
 			cv::waitKey(5);
 			if (analysis(img) != 0)
 			{
+				p_Controller->MainHueErrorCallBack(sn, img);
 				//sn = 0;
 			}
 			Sleep(30);
@@ -139,7 +140,6 @@ int MainHueScanner::analysis(cv::Mat img)
 	morphologyEx(imgThresholded, imgThresholded, MORPH_OPEN, element);
 	if (countNonZero(imgThresholded) < 0.9*imgThresholded.cols*imgThresholded.rows)
 	{
-		p_Controller->MainHueErrorCallBack(sn, img);
 		return 1;//ÓÐ±ê¼Ç
 	}
 	else
