@@ -52,7 +52,7 @@ private:
 	//分析是否有缺陷，无缺陷返回0
 	int analysis(cv::Mat);
 
-	inline bool SortBysize(vector<cv::Point>const &v1, vector<cv::Point>const &v2)	
+	static inline bool SortBysize(vector<cv::Point>const &v1, vector<cv::Point>const &v2)	
 	{
 		return v1.size()>v2.size();
 		//降序排列 
