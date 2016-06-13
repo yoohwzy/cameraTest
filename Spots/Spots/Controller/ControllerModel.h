@@ -22,10 +22,7 @@ using namespace std;
 //控制器的模型
 class ControllerModel
 {
-protected:
-	SpotsMainView *spotsMainView = NULL;
 public:
-	MainHueScanner *P_mainHueScanner = NULL;
 	Block block = Block(0, 0);
 	ControllerModel(SpotsMainView* _spotsMainView) : spotsMainView(_spotsMainView)
 	{
@@ -33,6 +30,7 @@ public:
 	}
 	~ControllerModel()
 	{
+		Release();
 		spotsMainView = NULL;
 	}
 
@@ -55,6 +53,7 @@ public:
 					if (*it == SN)//如果该SN在MainHueErrorSNs有记录，说明色调有错
 					{
 						type = 4;
+						MFCConsole::Output("因色调错误而不合格\r\n");
 						MainHueErrorSNs.erase(it);
 					}
 					else if (*it + 10 < SN)//若该SN远大于记录中的数值，则擦除这一记录
@@ -103,6 +102,15 @@ public:
 		else
 			MFCConsole::Output("当前为不保存图片模式\r\n");
 	};
+	//主色调错误后的回调函数
+	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
+		ui_lock.lock();
+		MainHueErrorSNs.push_back(SN);
+		spotsMainView->ShowBigImg(img);
+		ui_lock.unlock();
+	};
+
+
 	// 在设置中调整了系统参数后，调用本方法将参数更新至算法中。
 	void ResetParameter();
 	/*****************虚拟相机模式方法*****************/
@@ -125,11 +133,13 @@ protected:
 	/*                                */
 	/**********************************/
 public:
+	MainHueScanner *P_mainHueScanner = NULL;
 	//是否为虚拟相机模式，本属性通过外部配置，在启动exe时若附加了virtual命令，则IsRealModel=0；
 	bool IsRealModel = 1;
 	bool ExitFlag = false;//triggerWatcher 结束标志
 	bool PauseFlag = false;//triggerWatcher 暂停标志
 protected:
+	SpotsMainView *spotsMainView = NULL;
 	PCI1761 pci1761;
 	LogImgGenerator logImg;
 	Arm arm;
@@ -181,13 +191,6 @@ public:
 	virtual void TiggerStartWatch() = 0;
 	//停止监控触发器线程
 	virtual void TiggerStopWatch() = 0;
-	//主色调错误后的回调函数
-	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
-		ui_lock.lock();
-		MainHueErrorSNs.push_back(SN);
-		spotsMainView->ShowBigImg(img);
-		ui_lock.unlock();
-	};
 	//用以存储色调错误的SN
 	vector<int> MainHueErrorSNs;
 protected:

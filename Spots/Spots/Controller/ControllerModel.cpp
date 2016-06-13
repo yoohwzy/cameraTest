@@ -107,6 +107,23 @@ void ControllerModel::baseInit()
 		spotsMainView->SwitchModel2Virtual(true);
 	}
 
+
+	if (pci1761Inited)
+	{
+		//初始化面阵相机
+		if (MainHueScanner::Enabled)
+		{
+			P_mainHueScanner = new MainHueScanner(this);
+			if (!P_mainHueScanner->HasInited)
+			{
+				delete P_mainHueScanner;
+				P_mainHueScanner = NULL;
+				AfxMessageBox(L"未能初始化面阵相机，该模块被禁用！");
+			}
+		}
+	}
+
+
 	//读取参数配置
 	//设置工人算法参数
 	ResetParameter();

@@ -21,13 +21,13 @@ class Worker
 public:
 	enum Status
 	{
-		SizeError = -1,//对角线超标
-		NoImage = 0,//无图
-		NotFound = 1,//未找到瓷砖
-		TypeA = 2,//A级
-		TypeB = 3,//B级
-		TypeC = 4,//C级
-		Rejected = 5,//不合格
+		SizeError = -2,//对角线超标
+		NoImage = -1,//无图
+		NotFound = 0,//未找到瓷砖
+		TypeA = 1,//A级
+		TypeB = 2,//B级
+		TypeC = 3,//C级
+		Rejected = 4,//不合格
 	};
 
 	//初始化时若传入指针为NULL，则表示使用虚拟相机。

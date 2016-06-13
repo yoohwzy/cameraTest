@@ -57,20 +57,6 @@ void ControllerDirectRead::Init()
 	}
 
 	baseInit();
-	//if (pci1761Inited)
-	{
-		//初始化面阵相机
-		if (MainHueScanner::Enabled)
-		{
-			P_mainHueScanner = new MainHueScanner(this);
-			if (!P_mainHueScanner->HasInited)
-			{
-				delete P_mainHueScanner;
-				P_mainHueScanner = NULL;
-				AfxMessageBox(L"未能初始化面阵相机，该模块被禁用！");
-			}
-		}
-	}
 }
 void ControllerDirectRead::Release()
 {
@@ -230,6 +216,22 @@ void ControllerDirectRead::captureAndProcessThread(int sn)
 
 	//开启线程保存图片至硬盘
 	this->ImageGetCallBack(image);
+
+
+	////判断色调是否正确
+	//vector<int>::iterator it;
+	//for (it = MainHueErrorSNs.begin(); it != MainHueErrorSNs.end(); it++)
+	//{
+	//	if (*it == sn)//如果该SN在MainHueErrorSNs有记录，说明色调有错，不再进行后续处理
+	//	{
+	//		MainHueErrorSNs.erase(it);
+	//		Statistics::AddTodayRejected();
+	//		spotsMainView->ShowBigImg(image);
+	//		logImg.AddItem(image, "D");
+	//		arm.AddAction(0, 500 + 1000);//0号output口在500ms后产生一个阶跃信号+拍摄用时。
+	//		return;
+	//	}
+	//}
 
 	//第四部分 分配工作
 	workerindex++;

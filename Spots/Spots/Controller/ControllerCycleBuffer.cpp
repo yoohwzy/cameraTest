@@ -68,11 +68,15 @@ void ControllerCycleBuffer::Release()
 		delete worker2;
 		worker2 = NULL;
 	}
-
 	if (p_e2v != NULL)
 	{
 		delete p_e2v;
 		p_e2v = NULL;
+	}
+	if (P_mainHueScanner != NULL)
+	{
+		delete P_mainHueScanner;
+		P_mainHueScanner = NULL;
 	}
 }
 
@@ -144,6 +148,13 @@ void ControllerCycleBuffer::triggerWatcherThread()
 			//触发编号
 			Statistics::TodayTiggerIndex++;
 			int SN = Statistics::TodayTiggerIndex;
+
+			//启动面阵模块
+			if (P_mainHueScanner != NULL)
+			{
+				P_mainHueScanner->Run(SN);
+			}
+
 			if (!IsGrabbing2)
 			{
 				std::thread t_run(std::mem_fn(&ControllerCycleBuffer::captureAndProcessThread), this, SN);
@@ -162,6 +173,11 @@ void ControllerCycleBuffer::triggerWatcherThread()
 		}
 		if (pci1761.GetTrailingEdgeIDI(7))
 		{
+			//暂停面阵模块运行
+			if (P_mainHueScanner != NULL)
+			{
+				P_mainHueScanner->Pause();
+			}
 		}
 		Sleep(10);
 	}

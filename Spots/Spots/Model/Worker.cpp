@@ -63,8 +63,12 @@ void Worker::work()
 
 	//开始图像处理
 	Status status = algorithmSynthesize(grayImg);
-	
-	//cv::Mat tmp = grayImg.clone();
+	if (status == Worker::Status::NoImage)
+		return;
+
+	P_Controller->ImgProcessOverCallBack(SN, grayImg, *(P_Block), 1);
+	return;
+
 	if (status != Worker::Status::NotFound)
 	{
 		int type = 1;//产品级别  1 A级 2 B级 3 C级 4 不合格
