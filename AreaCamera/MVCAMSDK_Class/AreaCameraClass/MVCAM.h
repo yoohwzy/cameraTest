@@ -23,6 +23,7 @@ public:
 	{
 		if (HasInited)
 		{
+			HasInited = false;
 			StopCapture();
 			CameraStop(m_hCamera);
 			//在退出程序前关闭相机(反初始化，非常重要，如果直接关闭程序而不
@@ -30,7 +31,6 @@ public:
 
 			CameraUnInit(m_hCamera);
 			CameraAlignFree(m_pFrameBuffer);
-			HasInited = false;
 		}
 	};
 
