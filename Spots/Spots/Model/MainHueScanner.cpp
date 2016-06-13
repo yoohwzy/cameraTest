@@ -125,15 +125,25 @@ int MainHueScanner::analysis(cv::Mat img)
 	int channels_V = 2;
 
 	//检测
-	cv::Mat imgThresholded;
-	//检查数组元素是否在两个数量之间 
-	//原数组
-	//lowerb 包括进的下边界
-	//upperb 不包括进的上边界
-	//dst 输出数组必须是 8u 或 8s 类型. 
-	//inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(40, 65, 140), imgThresholded); //Threshold the image  
-	inRange(img_hsv, cv::Scalar(0, 0, 50), cv::Scalar(Standard_H + 20, Standard_S + 20, Standard_V + 20), imgThresholded); //Threshold the image  
-	cv::Mat element = getStructuringElement(MORPH_RECT, cv::Size(5, 5));
+	Mat imgThresholded, imgThresholdback;
+	inRange(img_hsv, Scalar(0, 0, 50), Scalar(40, 65, 140), imgThresholded); //Threshold the image
+
+	inRange(img_hsv, Scalar(0, 0, 0), Scalar(180, 180, 40), imgThresholdback); //背景处理
+	dilate(imgThresholdback, imgThresholdback, Mat());
+	vector<vector<cv::Point>>backcontours;
+	findContours(imgThresholdback, backcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	bool backflag = false;//背景标记
+	if (backcontours.size() >= 1)
+	{
+		sort(backcontours.begin(), backcontours.end(), SortBysize);
+		Rect backrect = boundingRect(backcontours[0]);
+		if (backrect.width > imgThresholdback.cols - 5)
+		{
+			backflag = true;
+		}
+	}
+
+	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
 	//去除噪点
 	morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
 	//连接连通域 
