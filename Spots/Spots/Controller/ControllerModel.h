@@ -48,16 +48,18 @@ public:
 			{
 				//判断色调是否正确
 				vector<int>::iterator it;
-				for (it = MainHueErrorSNs.begin(); it != MainHueErrorSNs.end(); it++)
+				for (it = MainHueErrorSNs.begin(); it != MainHueErrorSNs.end();)
 				{
 					if (*it == SN)//如果该SN在MainHueErrorSNs有记录，说明色调有错
 					{
 						type = 4;
 						MFCConsole::Output("因色调错误而不合格\r\n");
-						MainHueErrorSNs.erase(it);
+						it = MainHueErrorSNs.erase(it);
 					}
 					else if (*it + 10 < SN)//若该SN远大于记录中的数值，则擦除这一记录
-						MainHueErrorSNs.erase(it);
+						it = MainHueErrorSNs.erase(it);
+					else
+						it++;
 				}
 			}
 			//再根据
@@ -104,6 +106,9 @@ public:
 	};
 	//主色调错误后的回调函数
 	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
+		if (SN <= 0)
+			return;
+
 		ui_lock.lock();
 		bool flag = true;
 		for (int i = 0; i < MainHueErrorSNs.size(); i++)
@@ -112,8 +117,11 @@ public:
 				flag = false;
 				break;
 			}
-		MainHueErrorSNs.push_back(SN);
-		spotsMainView->ShowBigImg(img);
+		if (flag)
+		{
+			MainHueErrorSNs.push_back(SN);
+			spotsMainView->ShowBigImg(img);
+		}
 		ui_lock.unlock();
 	};
 
