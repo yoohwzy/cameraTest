@@ -107,6 +107,10 @@ void ControllerModel::baseInit()
 		spotsMainView->SwitchModel2Virtual(true);
 	}
 
+	//读取参数配置
+	//设置工人算法参数
+	ResetParameter();
+
 
 	if (pci1761Inited)
 	{
@@ -123,10 +127,6 @@ void ControllerModel::baseInit()
 		}
 	}
 
-
-	//读取参数配置
-	//设置工人算法参数
-	ResetParameter();
 
 
 	//初始化UI

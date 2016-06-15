@@ -105,6 +105,13 @@ public:
 	//主色调错误后的回调函数
 	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
 		ui_lock.lock();
+		bool flag = true;
+		for (int i = 0; i < MainHueErrorSNs.size(); i++)
+			if (MainHueErrorSNs[i] == SN)
+			{
+				flag = false;
+				break;
+			}
 		MainHueErrorSNs.push_back(SN);
 		spotsMainView->ShowBigImg(img);
 		ui_lock.unlock();

@@ -64,10 +64,16 @@ void Worker::work()
 	//开始图像处理
 	Status status = algorithmSynthesize(grayImg);
 	if (status == Worker::Status::NoImage)
+	{
+		MyStatus = WorkerStatus::Free;
 		return;
+	}
 
 	P_Controller->ImgProcessOverCallBack(SN, grayImg, *(P_Block), 1);
-	return;
+	{
+		MyStatus = WorkerStatus::Free;
+		return;
+	}
 
 	if (status != Worker::Status::NotFound)
 	{

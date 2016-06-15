@@ -128,7 +128,7 @@ int MainHueScanner::analysis(cv::Mat img)
 	Mat imgThresholded, imgThresholdback;
 	inRange(img_hsv, Scalar(0, 0, 50), Scalar(40, 65, 140), imgThresholded); //Threshold the image
 
-	inRange(img_hsv, Scalar(0, 0, 0), Scalar(180, 180, 40), imgThresholdback); //背景处理
+	inRange(img_hsv, Scalar(0, 0, 0), Scalar(180, 255, 40), imgThresholdback); //背景处理
 	dilate(imgThresholdback, imgThresholdback, Mat());
 	vector<vector<cv::Point>>backcontours;
 	findContours(imgThresholdback, backcontours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -148,7 +148,7 @@ int MainHueScanner::analysis(cv::Mat img)
 	morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
 	//连接连通域 
 	morphologyEx(imgThresholded, imgThresholded, MORPH_OPEN, element);
-	if (countNonZero(imgThresholded) < 0.9*imgThresholded.cols*imgThresholded.rows)
+	if (countNonZero(imgThresholded) < 0.9*imgThresholded.cols*imgThresholded.rows&& !backflag)
 	{
 		return 1;//有标记
 	}
