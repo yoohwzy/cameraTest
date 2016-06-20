@@ -105,7 +105,7 @@ public:
 			MFCConsole::Output("当前为不保存图片模式\r\n");
 	};
 	//主色调错误后的回调函数
-	virtual void MainHueErrorCallBack(int SN, cv::Mat img){
+	void MainHueErrorCallBack(int SN, cv::Mat img){
 		if (SN <= 0)
 			return;
 
@@ -169,8 +169,10 @@ protected:
 	std::mutex watcher_lock;
 	std::mutex image_write_lock;
 
-	bool e2vInited = true;
-	bool pci1761Inited = true;
+	bool e2vInited = true;//e2v相机初始化成功标志
+	bool pci1761Inited = true;//pci1761初始化成功标志
+	//用以存储色调错误的SN
+	vector<int> MainHueErrorSNs;
 private:
 
 
@@ -183,7 +185,7 @@ private:
 public:
 	//初始化
 	virtual void Init() = 0;
-	//析构
+	//释放资源，派生类中如果有指针则一定要override本方法
 	virtual void Release() 
 	{
 		if (worker1 != NULL)
@@ -204,10 +206,8 @@ public:
 	};
 	//开始监控触发器线程
 	virtual void TiggerStartWatch() = 0;
-	//停止监控触发器线程
+	//停止监控触发器线程，供其他类调用
 	virtual void TiggerStopWatch() = 0;
-	//用以存储色调错误的SN
-	vector<int> MainHueErrorSNs;
 protected:
 	virtual void triggerWatcherThread() = 0;//触发器监视线程
 	virtual void captureAndProcessThread(int sn=0) = 0;//采图与工作委托

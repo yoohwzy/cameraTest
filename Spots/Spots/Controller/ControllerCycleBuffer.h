@@ -38,7 +38,6 @@ public:
 	void Release() override;
 	void TiggerStartWatch() override;
 	void TiggerStopWatch() override;
-	void MainHueErrorCallBack(int SN, cv::Mat img) override;
 
 private:
 	E2VCameraCycleBuffer *p_e2v = NULL;
@@ -52,6 +51,6 @@ private:
 			oldFrame -= E2VCycleBuffer::BufferLength;
 	}
 
-	bool IsGrabbing = false;//正在开启采图线程
-	bool IsGrabbing2 = false;//正在采图
+	bool IsGrabbing = false;//为ture表示上一轮触发仍在处理
+	bool IsGrabbing2 = false;//为true则正在采图，相机正被占用
 };
