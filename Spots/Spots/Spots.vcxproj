@@ -43,9 +43,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>C:\Work\All Library file\tbb44_20160128oss\include;C:\Program Files\SiliconSoftware\Runtime5.2.3\include;C:\SDK\include;C:\SDK\include\opencv;C:\SDK\include\opencv2;C:\SDK\bin;$(ProjectDir);$(IncludePath)</IncludePath>
     <ReferencePath>C:\SDK\lib;C:\SDK\bin;$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Work\All Library file\tbb44_20160128oss\lib\ia32\vc12;C:\Program Files\SiliconSoftware\Runtime5.2.3\lib\visualc;C:\Program Files\SiliconSoftware\Runtime5.2.3\dll;C:\SDK\lib;C:\SDK\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -58,10 +58,10 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_TBB;HAVE_IPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>C:\Work\All Library file\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

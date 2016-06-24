@@ -11,12 +11,19 @@
 #include <cstdlib>
 #include <condition_variable>
 #include "Base\Block.h"
+#include "tbb/tbb_stddef.h"  
+#if TBB_VERSION_MAJOR*100 + TBB_VERSION_MINOR >= 202  
+#include "tbb/tbb.h"  
+#include "tbb/task.h" 
+#endif  
 
-
+#pragma comment(lib, "tbb.lib")  
+using namespace tbb;
 using namespace cv;
 using namespace std;
 
 #include "Base\Faults.h"
+
 
 
 class Singleton//数据统计读写类
@@ -156,7 +163,7 @@ private:
 	inline void Dataload();//算法数据导入初始化
 	bool defect_YoN(const Mat &_Img);//凹凸检测核心
 	bool line_YoN(const Rect &_linesrect);//划痕检测核心
-	void ContoursMegre(vector<vector<cv::Point>> &_contours, vector<Rect>&_RoughRect, vector<vector<Point>> &_combinecontours);//合并轮廓函数
+	void ContoursMegre(vector<vector<cv::Point>> &_contours, vector<vector<Point>> &_combinecontours);//合并轮廓函数
 	void statis_nol(vector<int> &_statis);
 
 public:
