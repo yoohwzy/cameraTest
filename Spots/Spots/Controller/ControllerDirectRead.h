@@ -27,7 +27,6 @@ public:
 
 	//拍摄的长度，多少行
 	int PhotoHeight = 5000;
-	const int FrameRate = 5000;//当前线阵相机行频
 private:
 	E2VCameraDirectRead *p_e2v = NULL;
 	void triggerWatcherThread() override;//触发器监视线程，发出IsGrabbing2=1时，相机监视线程开始采图

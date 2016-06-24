@@ -61,13 +61,10 @@ public:
 	static double X_mmPerPix;//x轴方向上每像素代表多少毫米
 	static double Y_mmPerPix;//y轴方向上每像素代表多少毫米
 
-
-
 	//直接计算对角线的像素长度
 	static void CalculateDuiJiaoXian(Block *p_b);
 	//根据定标数据，求出瓷砖四边长度
 	static void Calculate(Block *p_b);
-
 	//保证竖直边一定是垂直时调用
 	static void BiaoDing(Block *p_b);
 };

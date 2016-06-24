@@ -31,8 +31,6 @@ void ControllerDirectRead::Init()
 	//初始化E2V相机
 	if (IsRealModel)
 	{
-		int Cam_FrameCount_PerSecond = 5000;
-		SettingHelper::GetKeyInt("E2V", "Cam_FrameCount_PerSecond", Cam_FrameCount_PerSecond);
 		int COLOR_TYPE_IS_GRAY = 1;
 		SettingHelper::GetKeyInt("E2V", "COLOR_TYPE_IS_GRAY", COLOR_TYPE_IS_GRAY);
 		if (COLOR_TYPE_IS_GRAY != 0)
@@ -243,7 +241,6 @@ void ControllerDirectRead::captureAndProcessThread(int sn)
 		if (worker1->MyStatus == Worker::Free)
 		{
 			worker1->SN = sn;
-			
 			worker1->image = image;
 			ss << "-------------------------Worker1 Start Work\r\n" << worker1->SN << endl;
 			MFCConsole::Output(ss.str());

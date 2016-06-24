@@ -77,8 +77,8 @@ BOOL CSpotsApp::InitInstance()
 	//if (dlgInit.DoModal() == IDOK)
 	{
 		CSpotsMainDlg *dlgMain = new CSpotsMainDlg();
-		//dlgMain->Create(IDD_SPOTS_DIALOG);
 		ControllerDirectRead controller = ControllerDirectRead(dlgMain);
+		//ControllerCycleBuffer controller = ControllerCycleBuffer(dlgMain);
 		m_pMainWnd = dlgMain;
 		dlgMain->DoModal();
 

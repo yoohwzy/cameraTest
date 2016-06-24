@@ -69,20 +69,14 @@ void Worker::work()
 		return;
 	}
 
-	P_Controller->ImgProcessOverCallBack(SN, grayImg, *(P_Block), 1);
-	{
-		MyStatus = WorkerStatus::Free;
-		return;
-	}
-
 	if (status != Worker::Status::NotFound)
 	{
 		int type = 1;//产品级别  1 A级 2 B级 3 C级 4 不合格
-		if (status == Status::SizeError)
-		{
-			type = 4;
-		}
-		else
+		//if (status == Status::SizeError)//判断是否砖的尺寸不对 这个程序还没加
+		//{
+		//	type = 4;
+		//}
+		//else
 		{
 			//绘制缺陷图像
 			drawFaults(grayImg);
@@ -190,13 +184,16 @@ Worker::Status Worker::algorithmSynthesize(cv::Mat img)
 
 
 	// 边缘缺陷
-	if (detectEdge(grayImg))
+	if (detectEdge(grayImg) == -1)
 	{
 		return Status::Rejected;
 	}
 
 	//表面缺陷
-	detectInner(grayImg);
+	if (detectInner(grayImg) == -1)
+	{
+		return Status::Rejected;
+	}
 	return Status::TypeA;
 }
 //瓷砖定位，返回是否找到瓷砖
@@ -227,18 +224,6 @@ int Worker::positioning(cv::Mat grayImg)
 		//未检测到瓷砖
 		return 0;
 	}
-	//if (bl.BrokenEdgeFlag == true)
-	//{
-	//	//cv::cvtColor(img, img, CV_GRAY2BGR);
-	//	//for (size_t i = 0; i < P_Faults->BrokenEdges.size(); i++)
-	//	//{
-	//	//	cv::circle(img, P_Faults->BrokenEdges[i].position, P_Faults->BrokenEdges[i].length / 2, cv::Scalar(0, 0, 255), 10);
-	//	//}
-	//	//cv::namedWindow("1", 0);
-	//	//cv::imshow("1", img);
-	//	//cv::waitKey(0);
-	//	return _Status::_Edge_Broken;
-	//}
 	return 1;
 }
 //边缘缺陷检测
@@ -343,38 +328,6 @@ void Worker::drawFaults(cv::Mat& img)
 			cv::circle(img, P_Faults->BrokenEdges[i].position, P_Faults->BrokenEdges[i].length, cv::Scalar(0, 0, 255), 4);
 		}
 	}
-	//if (P_Faults->BrokenCorners.size() > 0)
-	//{
-	//	if (MFCConsole::IsOpened)
-	//	{
-	//		stringstream ss;
-	//		ss << workerInfo << SN << " 存在 " << P_Faults->BrokenCorners.size() << " 处崩角缺陷，洋红标出。" << endl;
-	//		MFCConsole::Output(ss.str());
-	//	}
-
-	//	for (size_t i = 0; i < P_Faults->BrokenCorners.size(); i++)
-	//	{
-	//		cv::circle(img, P_Faults->BrokenCorners[i].position, P_Faults->BrokenCorners[i].length, cv::Scalar(127, 0, 228), 5);
-	//	}
-	//}
-	//if (P_Faults->SomethingBigs.size() > 0)
-	//{
-	//	if (MFCConsole::IsOpened)
-	//	{
-	//		stringstream ss;
-	//		ss << SN << " 存在 " << P_Faults->BrokenEdges.size() << " 处崩角缺陷，洋红标出。" << endl;
-	//		MFCConsole::Output( << ss.str();
-	//	}
-
-	//	CString str;
-	//	str.Format(_T("%d 存在%d处EID缺陷，蓝色标出。\r\n"), SN, P_Faults->SomethingBigs.size());
-	//	m_Info += str;
-	//	clog += str;
-	//	for (size_t i = 0; i < P_Faults->SomethingBigs.size(); i++)
-	//	{
-	//		cv::circle(img, P_Faults->SomethingBigs[i].position, P_Faults->SomethingBigs[i].diameter, cv::Scalar(255, 0, 0), 5);
-	//	}
-	//}
 	if (P_Faults->Scratchs.size() > 0)
 	{
 		if (MFCConsole::IsOpened)

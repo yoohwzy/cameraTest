@@ -36,7 +36,7 @@ public:
 
 	//处理结束后显示处理结果
 	//结果图像
-	//产品类型，0 BL未找到砖 1A 2B 3C 4Rejcet
+	//产品类型，0 未找到砖 1A 2B 3C 4Rejcet
 	void ImgProcessOverCallBack(int SN, cv::Mat image, Block b, int type)
 	{
 		ui_lock.lock();
@@ -52,11 +52,11 @@ public:
 				{
 					if (*it == SN)//如果该SN在MainHueErrorSNs有记录，说明色调有错
 					{
-						type = 4;
-						MFCConsole::Output("因色调错误而不合格\r\n");
+						type = 4;//标记为缺陷砖
+						MFCConsole::Output("因色调错误而不合格\r\n");	
 						it = MainHueErrorSNs.erase(it);
 					}
-					else if (*it + 10 < SN)//若该SN远大于记录中的数值，则擦除这一记录
+					else if (*it + 10 < SN)//若该SN远大于记录中的数值，表示记录过期了，则擦除这一记录
 						it = MainHueErrorSNs.erase(it);
 					else
 						it++;

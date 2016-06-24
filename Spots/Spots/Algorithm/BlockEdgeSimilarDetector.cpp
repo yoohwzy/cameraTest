@@ -489,7 +489,8 @@ void BlockEdgeSimilarDetector::process(vector<cv::Mat> reduceList, vector<cv::Po
 			double diff4 = cv::compareHist(hist1, hist2, CV_COMP_BHATTACHARYYA); //越小越像
 #endif
 
-			if (diff > 18)
+			if (diff > DIFF_THRESHOLD)
+			//if (diff > 18)//弗雷歇距离建议值
 			//if (diff < DIFF_THRESHOLD)
 			{
 				pointFlag[i] = 1;
