@@ -9,6 +9,11 @@
 
 using namespace cv;
 
+#include <shlwapi.h>
+#pragma comment(lib,"Shlwapi.lib") //文件目录lib 如果没有这行，会出现link错误
+
+
+
 int MainHueScanner::Standard_H = 0;
 int MainHueScanner::Standard_S = 0;
 int MainHueScanner::Standard_V = 0;
@@ -84,6 +89,8 @@ void MainHueScanner::scanImg()
 				lastsn = sn;
 			}
 			cv::Mat img = mvcam.Grub();
+			if (MainHueScanner::SAVE_IMG)
+				imageSave(img, sn);
 			cv::namedWindow("MainHue");
 			cv::imshow("MainHue", img);
 			cv::waitKey(5);
@@ -227,3 +234,40 @@ void MainHueScanner::SetStandardHSV(string str)
 		}
 	}
 };
+
+
+
+void MainHueScanner::imageSave(cv::Mat img, int _sn)
+{
+	cv::Mat img2 = img.clone();
+	//判断文件夹是否存在
+	CString folderMonthName;
+	CString folderDayName;
+	CString imageName;
+	CTime t = CTime::GetCurrentTime();
+
+	folderMonthName = L"Images\\" + t.Format("%Y_%m");
+	folderDayName = folderMonthName + "\\" + t.Format("%d") + L"\\" + StringHelper::int2CString(_sn);
+	imageName = folderDayName + "\\" + t.Format("%Y_%m_%d__%H_%M_%S");
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	CString millsec;
+	millsec.Format(L"%d", (int)st.wMilliseconds);
+	imageName += (L"_" + millsec + L".jpg");
+
+	if (!PathIsDirectory(L"Images"))
+	{
+		CreateDirectory(L"Images", NULL);
+	}
+	if (!PathIsDirectory(folderMonthName))
+	{
+		CreateDirectory(folderMonthName, NULL);
+	}
+	if (!PathIsDirectory(folderDayName))
+	{
+		CreateDirectory(folderDayName, NULL);
+	}
+
+	stringstream ss;
+	cv::imwrite(StringHelper::CString2string(imageName), img2);
+}

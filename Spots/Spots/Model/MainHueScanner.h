@@ -57,5 +57,7 @@ private:
 		return v1.size()>v2.size();
 		//Ωµ–Ú≈≈¡– 
 	};
+	// ‰»ÎÕº∆¨ ”ÎÕº∆¨±‡∫≈
+	void imageSave(cv::Mat img, int _sn);
 };
 
