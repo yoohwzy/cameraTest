@@ -145,7 +145,6 @@
     <ClInclude Include="Model\Arm.h" />
     <ClInclude Include="Model\LogImgGenerator.h" />
     <ClInclude Include="Model\MainHueScanner.h" />
-    <ClInclude Include="Model\ModelVirtual.h" />
     <ClInclude Include="Model\Worker.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Spots.h" />

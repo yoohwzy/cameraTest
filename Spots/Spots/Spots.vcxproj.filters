@@ -123,9 +123,6 @@
     <ClInclude Include="Class\Debug\MFCConsole.h">
       <Filter>Class\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="Model\ModelVirtual.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="Model\Worker.h">
       <Filter>Model</Filter>
     </ClInclude>
